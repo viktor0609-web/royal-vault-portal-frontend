@@ -55,15 +55,18 @@ export function WelcomeSection() {
           <HandIcon className="h-12 w-12 text-royal-gray" />
           <div>
             <h1 className="text-3xl font-bold text-royal-dark-gray mb-2">WELCOME</h1>
-            <p className="text-royal-gray">
-              Join thousands of investors nationwide and access free live coaching, video training, chats, & more.
-            </p>
           </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-royal-light-gray mb-8">
+          <p className="text-royal-gray">
+            Join thousands of investors nationwide and access free live coaching, video training, chats, & more.
+          </p>
         </div>
 
         <div className="space-y-4">
           {welcomeItems.map((item, index) => (
-            <div key={index} className="flex items-center justify-between p-4 bg-white rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow">
+            <div key={index} className="w-full flex items-center justify-between p-4 bg-white rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow">
               <div className="flex items-center gap-4">
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                   item.completed 

@@ -72,18 +72,21 @@ export function CoursesSection() {
           <GraduationCapIcon className="h-12 w-12 text-royal-gray" />
           <div>
             <h1 className="text-3xl font-bold text-royal-dark-gray mb-2">COURSES</h1>
-            <p className="text-royal-gray">
-              Learn everything you need to know to optimize your asset protection and tax structure.
-            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+        <div className="bg-white p-6 rounded-lg border border-royal-light-gray mb-8">
+          <p className="text-royal-gray">
+            Learn everything you need to know to optimize your asset protection and tax structure.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-6 mb-12 justify-start">
           {courseCategories.map((category, index) => (
             <Link 
               key={index} 
               to={category.path}
-              className="text-center p-6 bg-white rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow cursor-pointer block"
+              className="w-48 text-center p-6 bg-white rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow cursor-pointer block"
             >
               <div className="flex justify-center mb-4">
                 <category.icon className="h-16 w-16 text-royal-gray" />

@@ -23,25 +23,30 @@ export function DealsSection() {
           <TagIcon className="h-12 w-12 text-royal-gray" />
           <div>
             <h1 className="text-3xl font-bold text-royal-dark-gray mb-2">DEALS</h1>
-            <p className="text-royal-gray">
-              Explore our network of asset backed businesses.
-            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-          {filterOptions.map((option, index) => (
-            <div key={index}>
-              <Select>
-                <SelectTrigger className="border-royal-light-gray">
-                  <SelectValue placeholder={option.placeholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="placeholder">Coming Soon</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
+        <div className="bg-white p-6 rounded-lg border border-royal-light-gray mb-8">
+          <p className="text-royal-gray">
+            Explore our network of asset backed businesses.
+          </p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-royal-light-gray mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            {filterOptions.map((option, index) => (
+              <div key={index}>
+                <Select>
+                  <SelectTrigger className="border-royal-light-gray">
+                    <SelectValue placeholder={option.placeholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="placeholder">Coming Soon</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div 

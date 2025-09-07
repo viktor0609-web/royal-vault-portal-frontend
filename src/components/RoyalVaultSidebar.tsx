@@ -53,29 +53,31 @@ export function RoyalVaultSidebar() {
       </div>
       
       <SidebarContent className="flex flex-col justify-between h-full">
-        <SidebarGroup className="flex-1">
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray ${
-                      isActive(item.path) 
-                        ? "bg-royal-light-gray text-primary font-medium" 
-                        : "text-royal-gray"
-                    }`}
-                  >
-                    <Link to={item.path}>
-                      <item.icon className="mr-3 h-5 w-5" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <div className="flex-1 flex items-center justify-center">
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu className="space-y-1">
+                {navigationItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild
+                      className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray ${
+                        isActive(item.path) 
+                          ? "bg-royal-light-gray text-primary font-medium" 
+                          : "text-royal-gray"
+                      }`}
+                    >
+                      <Link to={item.path}>
+                        <item.icon className="mr-3 h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </div>
 
         <SidebarGroup className="border-t border-royal-light-gray pt-4">
           <SidebarGroupContent>

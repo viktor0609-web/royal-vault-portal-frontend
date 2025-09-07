@@ -68,13 +68,16 @@ export function WebinarsSection() {
           <VideoIcon className="h-12 w-12 text-royal-gray" />
           <div>
             <h1 className="text-3xl font-bold text-royal-dark-gray mb-2">WEBINARS</h1>
-            <p className="text-royal-gray">
-              Register for upcoming live webinars or watch replays.
-            </p>
           </div>
         </div>
 
-        <div className="mb-6">
+        <div className="bg-white p-6 rounded-lg border border-royal-light-gray mb-8">
+          <p className="text-royal-gray">
+            Register for upcoming live webinars or watch replays.
+          </p>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg border border-royal-light-gray mb-6">
           <p className="text-royal-gray mb-4">Filter by:</p>
           <div className="flex gap-2">
             {filterTabs.map((tab, index) => (

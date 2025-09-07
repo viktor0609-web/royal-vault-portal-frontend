@@ -18,13 +18,10 @@ export function CourseDetailSection() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex-1 flex p-8">
       {/* Left Sidebar - Curriculum */}
-      <div className="w-80 bg-white border-r border-royal-light-gray p-6">
+      <div className="w-80 bg-white border-r border-royal-light-gray p-6 mr-8">
         <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" size="sm" className="p-1">
-            <ArrowLeftIcon className="h-4 w-4" />
-          </Button>
           <EyeOffIcon className="h-6 w-6 text-royal-gray" />
           <div>
             <h2 className="font-bold text-royal-dark-gray">Anonymity</h2>
@@ -70,7 +67,7 @@ export function CourseDetailSection() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-royal-light-gray">
+        <div className="flex items-center justify-between p-6 bg-white rounded-lg border border-royal-light-gray mb-6">
           <h1 className="text-2xl font-bold text-royal-dark-gray">Watch The Video</h1>
           <Button 
             onClick={handleMarkComplete}
@@ -81,7 +78,7 @@ export function CourseDetailSection() {
         </div>
 
         {/* Video Content */}
-        <div className="flex-1 flex items-center justify-center bg-gray-100">
+        <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96">
           <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden relative">
             <div className="absolute inset-0 flex items-center justify-center">
               <Button 

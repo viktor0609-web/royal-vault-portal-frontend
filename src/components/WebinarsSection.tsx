@@ -70,7 +70,7 @@ export function WebinarsSection() {
       if (webinar.register) {
 
       } else {
-        window.open(`http://localhost:8080/registration?title=${webinar.title}`, '_blank');
+        window.open(`https://royal-vault-nu.vercel.app/registration?title=${webinar.title}`, '_blank');
       }
     } else if (fitlerIndex == 1) {
       

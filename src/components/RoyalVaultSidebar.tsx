@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { 
-  HandIcon, 
-  MessageSquareIcon, 
-  TvIcon, 
-  GraduationCapIcon, 
+import { useAuthDialog } from "@/context/AuthDialogContext";
+import {
+  HandIcon,
+  MessageSquareIcon,
+  TvIcon,
+  GraduationCapIcon,
   TagIcon,
   HelpCircleIcon,
   LogInIcon
@@ -20,22 +21,24 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+
 const navigationItems = [
   { title: "Welcome", icon: HandIcon, path: "/" },
-  { title: "Chat", icon: MessageSquareIcon, path: "/chat" },
-  { title: "Royal TV", icon: TvIcon, path: "/royal-tv" },
+  { title: "Chat", icon: MessageSquareIcon, path: "#" },
+  { title: "Webinars", icon: TvIcon, path: "/royal-tv" },
   { title: "Courses", icon: GraduationCapIcon, path: "/courses" },
   { title: "Deals", icon: TagIcon, path: "/deals" },
 ];
 
 const bottomItems = [
-  { title: "FAQ", icon: HelpCircleIcon, path: "/faq" },
-  { title: "Log In", icon: LogInIcon, path: "/login" },
+  { title: "FAQ", icon: HelpCircleIcon, action:'faq'},
+  { title: "Log In", icon: LogInIcon, action:'login'},
 ];
 
 export function RoyalVaultSidebar() {
   const location = useLocation();
   const { setOpenMobile } = useSidebar();
+  const {openDialog} = useAuthDialog();
 
   const isActive = (path: string) => {
     if (path === "/" && location.pathname === "/") return true;
@@ -43,23 +46,26 @@ export function RoyalVaultSidebar() {
     return false;
   };
 
-  const handleLinkClick = () => {
+  const handleLinkClick = (action: string) => {
     // Close mobile sidebar when a link is clicked
+    if(action == 'login'){
+      openDialog(action);
+    } else if(action == 'faq'){
+
+    }
     setOpenMobile(false);
   };
 
   return (
-    <Sidebar className="w-64 border-r border-royal-light-gray">
+    <Sidebar className="w-48">
       {/* Desktop Header */}
-      <div className="hidden sm:flex items-center p-6 border-b border-royal-light-gray">
+      <div className="sm:flex items-center p-6 border-b border-royal-light-gray">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
-            <span className="text-white font-bold text-sm">RV</span>
-          </div>
-          <span className="font-bold text-lg text-royal-dark-gray">ROYAL VAULT</span>
+          <img src='/imgs/logo.svg' className="w-5"/>
+          <span className="font-bold text-sm text-royal-dark-gray">ROYAL VAULT</span>
         </div>
       </div>
-      
+
       <SidebarContent className="flex flex-col justify-between h-full">
         <div className="flex-1 flex items-center justify-center">
           <SidebarGroup>
@@ -67,15 +73,14 @@ export function RoyalVaultSidebar() {
               <SidebarMenu className="space-y-1">
                 {navigationItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
+                    <SidebarMenuButton
                       asChild
-                      className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${
-                        isActive(item.path) 
-                          ? "bg-royal-light-gray text-primary font-medium" 
+                      className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${isActive(item.path)
+                          ? "bg-royal-light-gray text-primary font-medium"
                           : "text-royal-gray"
-                      }`}
+                        }`}
                     >
-                      <Link to={item.path} onClick={handleLinkClick}>
+                      <Link to={item.path}>
                         <item.icon className="mr-3 h-5 w-5" />
                         <span>{item.title}</span>
                       </Link>
@@ -92,15 +97,14 @@ export function RoyalVaultSidebar() {
             <SidebarMenu className="space-y-1">
               {bottomItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
+                  <SidebarMenuButton
                     asChild
-                    className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${
-                      isActive(item.path) 
-                        ? "bg-royal-light-gray text-primary font-medium" 
+                    className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${isActive(item.action)
+                        ? "bg-royal-light-gray text-primary font-medium"
                         : "text-royal-gray"
-                    }`}
+                      }`}
                   >
-                    <Link to={item.path} onClick={handleLinkClick}>
+                    <Link to="#" onClick={() => handleLinkClick(item.action)}>
                       <item.icon className="mr-3 h-5 w-5" />
                       <span>{item.title}</span>
                     </Link>

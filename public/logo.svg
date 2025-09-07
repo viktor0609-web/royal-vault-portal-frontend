@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30px" height="32px" viewBox="0 0 30 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50 (54983) - http://www.bohemiancoding.com/sketch -->
+    <title>32</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="UI" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Logo" transform="translate(-695.000000, -120.000000)" fill="#309FDB" fill-rule="nonzero">
+            <g id="logo" transform="translate(140.000000, 120.000000)">
+                <path d="M578.75,0 L578.75,4.5 L574.25,4.5 L574.25,0 L565.75,0 L565.75,4.5 L561.25,4.5 L561.25,0 L555,0 L555,21.125 L568,32 L568,23.875 C568,22.7704305 568.895431,21.875 570,21.875 C571.104569,21.875 572,22.7704305 572,23.875 L572,32 L585,21.125 L585,0 L578.75,0 Z M561.25,23.875 L561.25,6.5 L565.75,6.5 L565.75,27.625 L561.25,23.875 Z M578.75,23.875 L574.25,27.625 L574.25,6.5 L578.75,6.5 L578.75,23.875 Z" id="32"></path>
+            </g>
+        </g>
+    </g>
+</svg>

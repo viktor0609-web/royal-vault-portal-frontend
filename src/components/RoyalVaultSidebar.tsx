@@ -17,6 +17,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const navigationItems = [
@@ -34,6 +35,7 @@ const bottomItems = [
 
 export function RoyalVaultSidebar() {
   const location = useLocation();
+  const { setOpenMobile } = useSidebar();
 
   const isActive = (path: string) => {
     if (path === "/" && location.pathname === "/") return true;
@@ -41,9 +43,15 @@ export function RoyalVaultSidebar() {
     return false;
   };
 
+  const handleLinkClick = () => {
+    // Close mobile sidebar when a link is clicked
+    setOpenMobile(false);
+  };
+
   return (
     <Sidebar className="w-64 border-r border-royal-light-gray">
-      <div className="flex items-center p-6 border-b border-royal-light-gray">
+      {/* Desktop Header */}
+      <div className="hidden sm:flex items-center p-6 border-b border-royal-light-gray">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
             <span className="text-white font-bold text-sm">RV</span>
@@ -61,13 +69,13 @@ export function RoyalVaultSidebar() {
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton 
                       asChild
-                      className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray ${
+                      className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${
                         isActive(item.path) 
                           ? "bg-royal-light-gray text-primary font-medium" 
                           : "text-royal-gray"
                       }`}
                     >
-                      <Link to={item.path}>
+                      <Link to={item.path} onClick={handleLinkClick}>
                         <item.icon className="mr-3 h-5 w-5" />
                         <span>{item.title}</span>
                       </Link>
@@ -86,13 +94,13 @@ export function RoyalVaultSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
-                    className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray ${
+                    className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${
                       isActive(item.path) 
                         ? "bg-royal-light-gray text-primary font-medium" 
                         : "text-royal-gray"
                     }`}
                   >
-                    <Link to={item.path}>
+                    <Link to={item.path} onClick={handleLinkClick}>
                       <item.icon className="mr-3 h-5 w-5" />
                       <span>{item.title}</span>
                     </Link>

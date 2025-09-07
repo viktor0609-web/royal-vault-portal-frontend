@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface CreateAccountModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+import { useAuthDialog } from "@/context/AuthDialogContext";
 
-export function CreateAccountModal({ open, onOpenChange }: CreateAccountModalProps) {
+
+export function SignUp() {
+  const { activeDialog, openDialog ,closeDialog } = useAuthDialog();
+
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -22,10 +22,11 @@ export function CreateAccountModal({ open, onOpenChange }: CreateAccountModalPro
     phone: "",
   });
 
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Creating account:", formData);
-    onOpenChange(false);
+    closeDialog();
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -33,7 +34,7 @@ export function CreateAccountModal({ open, onOpenChange }: CreateAccountModalPro
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={activeDialog === "signup"} onOpenChange={closeDialog}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center text-royal-dark-gray">
@@ -109,7 +110,7 @@ export function CreateAccountModal({ open, onOpenChange }: CreateAccountModalPro
           <div className="text-center">
             <button 
               type="button"
-              onClick={() => onOpenChange(false)}
+              onClick={() => openDialog('login')}
               className="text-primary hover:underline text-sm"
             >
               Back To Log In

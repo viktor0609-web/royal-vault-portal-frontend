@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { VideoIcon } from "lucide-react";
-import { WebinarRegistrationModal } from "./WebinarRegistrationModal";
 
 const filterTabs = [
   { label: "UPCOMING", active: true },
@@ -58,7 +57,8 @@ export function WebinarsSection() {
   const [selectedWebinar, setSelectedWebinar] = useState<typeof webinars[0] | null>(null);
 
   const handleRegister = (webinar: typeof webinars[0]) => {
-    setSelectedWebinar(webinar);
+    // Open registration in new tab
+    window.open('https://registration-link.com', '_blank');
   };
 
   return (
@@ -119,12 +119,6 @@ export function WebinarsSection() {
           ))}
         </div>
       </div>
-
-      <WebinarRegistrationModal
-        webinar={selectedWebinar}
-        open={!!selectedWebinar}
-        onOpenChange={(open) => !open && setSelectedWebinar(null)}
-      />
     </div>
   );
 }

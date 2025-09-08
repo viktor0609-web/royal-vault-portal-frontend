@@ -56,7 +56,7 @@ export function WelcomeSection() {
       <div className="flex gap-4 items-center bg-white p-6 rounded-lg border border-royal-light-gray mb-8">
         <HandIcon className="h-12 w-12 text-royal-gray" />
         <div>
-          <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">WELCO ME</h1>
+          <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">WELCOME</h1>
 
           <p className="text-royal-gray">
             Join thousands of investors nationwide and access free live coaching, video training, chats, & more.

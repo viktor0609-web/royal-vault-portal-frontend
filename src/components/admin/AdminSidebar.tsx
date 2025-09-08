@@ -23,11 +23,7 @@ import {
 
 
 const navigationItems = [
-  { title: "Leads", path: "#" },
-  { title: "Orders",  path: "#" },
-  { title: "Pages",  path: "#" },
   { title: "Webinars", path: "/admin/webinars" },
-  { title: "Split Tests", path: "#" },
   { title: "Courses", path: "/admin/courses" },
   { title: "Deals", path: "/admin/deals" },
 ];

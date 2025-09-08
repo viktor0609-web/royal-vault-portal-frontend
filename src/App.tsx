@@ -66,6 +66,7 @@ const App = () => (
               <Route path="/webinar_host" element={<VideoMeeting/>} />
               <Route path="/webinar_guest" element={<VideoMeeting/>} />
               <Route path="/webinar_admin" element={<VideoMeeting/>} />
+
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

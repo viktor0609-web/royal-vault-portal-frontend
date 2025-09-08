@@ -24,7 +24,6 @@ import {
 
 const navigationItems = [
   { title: "Welcome", icon: HandIcon, path: "/" },
-  { title: "Chat", icon: MessageSquareIcon, path: "#" },
   { title: "Webinars", icon: TvIcon, path: "/royal-tv" },
   { title: "Courses", icon: GraduationCapIcon, path: "/courses" },
   { title: "Deals", icon: TagIcon, path: "/deals" },

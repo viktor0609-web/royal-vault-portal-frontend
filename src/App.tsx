@@ -18,6 +18,11 @@ import { WebinarRegistration } from "./components/user/WebinarRegistration";
 import { RoyalVaultLayout as AdminLayout } from "./components/admin/RoyalVaultLayout";
 import { DealsSection as AdminDeals } from "./components/admin/DealsSection/DealsSection";
 import { WebinarSection as AdminWebinar } from "./components/admin/WebinarSection/WebinarSection";
+import { CoursesSection as AdminCourses } from "./components/admin/CoursesSection/CoursesSection";
+import { StatsSection as AdminStats } from "./components/admin/StatsSection";
+
+//For DailyCore
+import { VideoMeeting } from "./components/VideoMeeting/VideoMeeting"
 
 import NotFound from "./pages/NotFound";
 
@@ -54,14 +59,21 @@ const App = () => (
               {/* Admin Routes */}
               <Route path="/admin/deals" element={<AdminLayout><AdminDeals /></AdminLayout>} />
               <Route path="/admin/webinars" element={<AdminLayout><AdminWebinar /></AdminLayout>} />
+              <Route path="/admin/courses" element={<AdminLayout><AdminCourses /></AdminLayout>} />
+              <Route path="/admin/webinar_stats" element={<AdminLayout><AdminStats /></AdminLayout>} />
+
+              {/*Daily Core */}
+              <Route path="/webinar_host" element={<VideoMeeting/>} />
+              <Route path="/webinar_guest" element={<VideoMeeting/>} />
+              <Route path="/webinar_admin" element={<VideoMeeting/>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </SidebarProvider>
         </BrowserRouter>
-        <Login/>
-        <SignUp/>
-        <ResetPassword/>
+        <Login />
+        <SignUp />
+        <ResetPassword />
       </AuthDialogProvider>
     </TooltipProvider>
   </QueryClientProvider>

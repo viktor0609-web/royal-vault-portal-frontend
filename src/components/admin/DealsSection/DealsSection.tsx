@@ -50,7 +50,7 @@ export function DealsSection() {
         <div className="flex-1 p-4 flex flex-col">
             <div className="flex gap-4 items-center bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
                 <TagIcon className="h-10 w-10 text-royal-gray" />
-                <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">Deals</h1>
+                <h1 className="text-2xl font-bold text-royal-dark-gray mb-2 uppercase">Deals</h1>
             </div>
             <Table className="w-full">
                 <TableHeader>

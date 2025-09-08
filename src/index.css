@@ -45,14 +45,14 @@ All colors MUST be HSL.
     --royal-light-gray: 220 13% 91%;
     --royal-dark-gray: 224 71% 4%;
 
-      --sidebar-background: 0 0% 97%;
-      --sidebar-foreground: 220 9% 46%;
-      --sidebar-primary: 207 90% 54%;
-      --sidebar-primary-foreground: 0 0% 100%;
-      --sidebar-accent: 210 40% 96.1%;
-      --sidebar-accent-foreground: 222.2 47.4% 11.2%;
-      --sidebar-border: 220 13% 91%;
-      --sidebar-ring: 207 90% 54%;
+    --sidebar-background: 0 0% 97%;
+    --sidebar-foreground: 220 9% 46%;
+    --sidebar-primary: 207 90% 54%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 207 90% 54%;
 
     --card: 0 0% 97%;
     --card-foreground: 0 0% 100%;

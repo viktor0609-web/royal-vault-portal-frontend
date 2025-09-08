@@ -80,7 +80,7 @@ export function RoyalVaultSidebar() {
                           : "text-royal-gray"
                         }`}
                     >
-                      <Link to={item.path}>
+                      <Link to={item.path} onClick={()=> setOpenMobile(false)}>
                         <item.icon className="mr-3 h-5 w-5" />
                         <span>{item.title}</span>
                       </Link>

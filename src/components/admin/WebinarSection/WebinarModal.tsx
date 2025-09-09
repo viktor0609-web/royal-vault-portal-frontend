@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Dialog,
+  DialogTitle,
   DialogContent,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";

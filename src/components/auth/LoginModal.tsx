@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 
 export function Login() {
-  const { activeDialog, openDialog ,closeDialog } = useAuthDialog();
+  const { activeDialog, openDialog, closeDialog } = useAuthDialog();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -21,7 +21,7 @@ export function Login() {
     phone: "",
   });
 
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Creating account:", formData);
@@ -40,7 +40,7 @@ export function Login() {
             Log In
           </DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="email" className="text-royal-dark-gray font-medium">
@@ -56,7 +56,7 @@ export function Login() {
               required
             />
           </div>
-          
+
           <div>
             <Label htmlFor="firstName" className="text-royal-dark-gray font-medium">
               Password
@@ -70,16 +70,16 @@ export function Login() {
               required
             />
           </div>
-          <a  onClick={()=>openDialog('reset')} className="text-sm text-primary cursor-pointer">Reset password</a>
-          <Button 
-            type="submit" 
+          <a onClick={() => openDialog('reset')} className="text-sm text-primary cursor-pointer">Reset password</a>
+          <Button
+            type="submit"
             className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
           >
             Login
           </Button>
-          
+
           <div className="text-center">
-            <button 
+            <button
               type="button"
               onClick={() => openDialog('signup')}
               className="text-primary hover:underline text-sm"

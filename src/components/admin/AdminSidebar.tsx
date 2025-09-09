@@ -2,15 +2,6 @@ import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import {
-  HandIcon,
-  MessageSquareIcon,
-  TvIcon,
-  GraduationCapIcon,
-  TagIcon,
-  HelpCircleIcon,
-  LogInIcon
-} from "lucide-react";
-import {
   Sidebar,
   SidebarContent,
   SidebarGroup,

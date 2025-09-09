@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogHeader
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 const formField = [
   { title: 'Name', id: 'name', placeholder: '', type: 'input' },
@@ -38,6 +40,7 @@ export function ContentModal({ isOpen, closeDialog }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={closeDialog}>
+
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit} className="space-y-4">
 

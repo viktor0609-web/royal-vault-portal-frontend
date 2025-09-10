@@ -32,6 +32,7 @@ import { ResetPassword } from "./components/auth/ResetPasswordModal";
 import { AuthDialogProvider } from "./context/AuthDialogContext";
 import { SetPassword } from "./components/auth/SettingPasswordPage";
 import { ReSettingPasswordPage } from "./components/auth/ReSettingPasswordPage";
+import { AuthProvider } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -44,43 +45,46 @@ const webinarData = {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthDialogProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <SidebarProvider>
-            <Routes>
-              {/* Client Routes*/}
-              <Route path="/" element={<RoyalVaultLayout><WelcomeSection /></RoyalVaultLayout>} />
-              <Route path="/royal-tv" element={<RoyalVaultLayout><WebinarsSection /></RoyalVaultLayout>} />
-              <Route path="/courses" element={<RoyalVaultLayout><CoursesSection /></RoyalVaultLayout>} />
-              <Route path="/courses/:id" element={<RoyalVaultLayout><CourseDetailSection /></RoyalVaultLayout>} />
-              <Route path="/deals" element={<RoyalVaultLayout><DealsSection /></RoyalVaultLayout>} />
-              <Route path="/registration" element={<WebinarRegistration webinar={webinarData} />} />
+      <AuthProvider>
+        <AuthDialogProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <SidebarProvider>
+              <Routes>
+                {/* Client Routes*/}
+                <Route path="/" element={<RoyalVaultLayout><WelcomeSection /></RoyalVaultLayout>} />
+                <Route path="/royal-tv" element={<RoyalVaultLayout><WebinarsSection /></RoyalVaultLayout>} />
+                <Route path="/courses" element={<RoyalVaultLayout><CoursesSection /></RoyalVaultLayout>} />
+                <Route path="/courses/:id" element={<RoyalVaultLayout><CourseDetailSection /></RoyalVaultLayout>} />
+                <Route path="/deals" element={<RoyalVaultLayout><DealsSection /></RoyalVaultLayout>} />
+                <Route path="/registration" element={<WebinarRegistration webinar={webinarData} />} />
 
-              {/* Admin Routes */}
-              <Route path="/admin/deals" element={<AdminLayout><AdminDeals /></AdminLayout>} />
-              <Route path="/admin/webinars" element={<AdminLayout><AdminWebinar /></AdminLayout>} />
-              <Route path="/admin/courses" element={<AdminLayout><AdminCourses /></AdminLayout>} />
-              <Route path="/admin/webinar_stats" element={<AdminLayout><AdminStats /></AdminLayout>} />
+                {/* Admin Routes */}
+                <Route path="/admin/deals" element={<AdminLayout><AdminDeals /></AdminLayout>} />
+                <Route path="/admin/webinars" element={<AdminLayout><AdminWebinar /></AdminLayout>} />
+                <Route path="/admin/courses" element={<AdminLayout><AdminCourses /></AdminLayout>} />
+                <Route path="/admin/webinar_stats" element={<AdminLayout><AdminStats /></AdminLayout>} />
 
-              {/*Daily Core */}
-              <Route path="/webinar_host" element={<VideoMeeting />} />
-              <Route path="/webinar_guest" element={<VideoMeeting />} />
-              <Route path="/webinar_admin" element={<VideoMeeting />} />
+                {/*Daily Core */}
+                <Route path="/webinar_host" element={<VideoMeeting />} />
+                <Route path="/webinar_guest" element={<VideoMeeting />} />
+                <Route path="/webinar_admin" element={<VideoMeeting />} />
 
-              <Route path="/verify/:token" element={<SetPassword />} />
-              <Route path="/reset-password/:token" element={<ReSettingPasswordPage />} />
+                <Route path="/verify/:token" element={<SetPassword />} />
+                <Route path="/reset-password/:token" element={<ReSettingPasswordPage />} />
 
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </SidebarProvider>
-        </BrowserRouter>
-        <Login />
-        <SignUp />
-        <ResetPassword />
-      </AuthDialogProvider>
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </SidebarProvider>
+          </BrowserRouter>
+          <Login />
+          <SignUp />
+          <ResetPassword />
+        </AuthDialogProvider>
+      </AuthProvider>
+
     </TooltipProvider>
   </QueryClientProvider>
 );

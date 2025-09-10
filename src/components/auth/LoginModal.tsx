@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthDialog } from "@/context/AuthDialogContext";
-import { api } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 export function Login() {
   const { activeDialog, openDialog, closeDialog } = useAuthDialog();
+
+
+  const { login } = useAuth();
+
 
   const [formData, setFormData] = useState({
     email: "",
@@ -34,12 +38,9 @@ export function Login() {
     setSuccess("");
 
     try {
-      const response = await api.post("/api/auth/login", {
-        email: formData.email,
-        password: formData.password,
-      });
+      await login(formData.email, formData.password);
 
-      setSuccess(response.data.message || "Login successful!");
+      setSuccess("Login successful!");
       setErrors("");
       setFormData({ email: "", password: "" });
 
@@ -47,10 +48,6 @@ export function Login() {
       setTimeout(() => {
         closeDialog();
       }, 1000);
-
-      // Optionally: store token or redirect here
-      // localStorage.setItem("token", response.data.token);
-      // navigate("/dashboard");
     } catch (err: any) {
       if (err.response?.data?.message) {
         setErrors(err.response.data.message);
@@ -64,7 +61,10 @@ export function Login() {
 
   return (
     <Dialog
-      open={activeDialog === "login" && !window.location.href.includes("registration")}
+      open={
+        activeDialog === "login" &&
+        !window.location.href.includes("registration")
+      }
       onOpenChange={closeDialog}
     >
       <DialogContent className="sm:max-w-md">
@@ -95,7 +95,10 @@ export function Login() {
           </div>
 
           <div>
-            <Label htmlFor="password" className="text-royal-dark-gray font-medium">
+            <Label
+              htmlFor="password"
+              className="text-royal-dark-gray font-medium"
+            >
               Password
             </Label>
             <Input

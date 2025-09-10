@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import { useAuth } from "@/context/AuthContext";
@@ -44,6 +43,10 @@ export function RoyalVaultSidebar() {
   const { setOpenMobile } = useSidebar();
   const { openDialog } = useAuthDialog();
   const { user, logout } = useAuth();
+  const menuItems = [
+    ...navigationItems,
+    ...(user?.role === "admin" ? [{ title: "Admin", icon: AxeIcon, path: "/admin/webinars" }] : []),
+  ];
 
   const isActive = (path: string) => {
     if (path === "/" && location.pathname === "/") return true;
@@ -76,7 +79,7 @@ export function RoyalVaultSidebar() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu className="space-y-1">
-                {[...navigationItems, user && user.role === "admin" && { title: "Admin", icon: AxeIcon, path: "/admin/webinars" }].map((item) => (
+                {menuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild

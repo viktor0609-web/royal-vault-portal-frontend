@@ -30,6 +30,7 @@ import { Login } from "./components/auth/LoginModal";
 import { SignUp } from "./components/auth/SignUpModal";
 import { ResetPassword } from "./components/auth/ResetPasswordModal";
 import { AuthDialogProvider } from "./context/AuthDialogContext";
+import { SetPassword } from "./components/auth/SettingPasswordPage";
 
 const queryClient = new QueryClient();
 
@@ -63,9 +64,11 @@ const App = () => (
               <Route path="/admin/webinar_stats" element={<AdminLayout><AdminStats /></AdminLayout>} />
 
               {/*Daily Core */}
-              <Route path="/webinar_host" element={<VideoMeeting/>} />
-              <Route path="/webinar_guest" element={<VideoMeeting/>} />
-              <Route path="/webinar_admin" element={<VideoMeeting/>} />
+              <Route path="/webinar_host" element={<VideoMeeting />} />
+              <Route path="/webinar_guest" element={<VideoMeeting />} />
+              <Route path="/webinar_admin" element={<VideoMeeting />} />
+
+              <Route path="/verify/:token" element={<SetPassword />} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

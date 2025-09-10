@@ -30,7 +30,6 @@ const navigationItems = [
 ];
 
 const bottomItems = [
-  { title: "FAQ", icon: HelpCircleIcon, action:'faq'},
   { title: "Log In", icon: LogInIcon, action:'login'},
 ];
 

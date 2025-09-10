@@ -81,12 +81,10 @@ export function SignUp() {
       });
 
       setSuccess(response.data.message);
+      setErrors({});
+
       setFormData({ email: "", firstName: "", lastName: "", phone: "" });
 
-      setTimeout(() => {
-        closeDialog();
-        openDialog("login");
-      }, 2000);
     } catch (err: any) {
       if (err.response?.data?.message) {
         setErrors({ general: err.response.data.message });

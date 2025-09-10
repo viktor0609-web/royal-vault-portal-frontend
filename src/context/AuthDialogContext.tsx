@@ -12,7 +12,7 @@ interface AuthDialogContextValue {
 const AuthDialogContext = createContext<AuthDialogContextValue | undefined>(undefined);
 
 export function AuthDialogProvider({ children }: { children: ReactNode }) {
-  const [activeDialog, setActiveDialog] = useState<DialogType>('login');
+  const [activeDialog, setActiveDialog] = useState<DialogType>(null);
 
   const openDialog = (type: DialogType) => setActiveDialog(type);
   const closeDialog = () => setActiveDialog(null);

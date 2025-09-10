@@ -8,12 +8,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { useAuthDialog } from "@/context/AuthDialogContext";
-
+import { api } from "@/lib/api";
 
 export function SignUp() {
-  const { activeDialog, openDialog ,closeDialog } = useAuthDialog();
+  const { activeDialog, openDialog, closeDialog } = useAuthDialog();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -22,15 +21,81 @@ export function SignUp() {
     phone: "",
   });
 
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Creating account:", formData);
-    closeDialog();
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+
+  // Field-level validation
+  const validateField = (field: string, value: string) => {
+    switch (field) {
+      case "email":
+        if (!value) return "Email is required";
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(value)) return "Invalid email format";
+        break;
+      case "firstName":
+        if (!value) return "First name is required";
+        break;
+      case "lastName":
+        if (!value) return "Last name is required";
+        break;
+      case "phone":
+        if (!value) return "Phone is required";
+        const phoneRegex = /^[0-9]{10,15}$/; // 10-15 digits
+        if (!phoneRegex.test(value))
+          return "Phone must be 10-15 digits without spaces";
+        break;
+    }
+    return "";
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validate all fields before submitting
+    const newErrors: { [key: string]: string } = {};
+    Object.keys(formData).forEach((field) => {
+      const error = validateField(field, formData[field as keyof typeof formData]);
+      if (error) newErrors[field] = error;
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setLoading(true);
+    setSuccess("");
+
+    try {
+      const response = await api.post("/api/auth/register", {
+        username: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        phone: formData.phone,
+        role: "user",
+      });
+
+      setSuccess(response.data.message);
+      setFormData({ email: "", firstName: "", lastName: "", phone: "" });
+
+      setTimeout(() => {
+        closeDialog();
+        openDialog("login");
+      }, 2000);
+    } catch (err: any) {
+      if (err.response?.data?.message) {
+        setErrors({ general: err.response.data.message });
+      } else {
+        setErrors({ general: "Something went wrong. Please try again." });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,8 +106,11 @@ export function SignUp() {
             Create Account
           </DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
+          {errors.general && <p className="text-red-500 text-center">{errors.general}</p>}
+          {success && <p className="text-green-500 text-center">{success}</p>}
+
           <div>
             <Label htmlFor="email" className="text-royal-dark-gray font-medium">
               Email
@@ -56,8 +124,9 @@ export function SignUp() {
               className="mt-1"
               required
             />
+            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
-          
+
           <div>
             <Label htmlFor="firstName" className="text-royal-dark-gray font-medium">
               First Name
@@ -70,8 +139,9 @@ export function SignUp() {
               className="mt-1"
               required
             />
+            {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
           </div>
-          
+
           <div>
             <Label htmlFor="lastName" className="text-royal-dark-gray font-medium">
               Last Name
@@ -84,8 +154,9 @@ export function SignUp() {
               className="mt-1"
               required
             />
+            {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
           </div>
-          
+
           <div>
             <Label htmlFor="phone" className="text-royal-dark-gray font-medium">
               Phone
@@ -98,19 +169,21 @@ export function SignUp() {
               className="mt-1"
               required
             />
+            {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
           </div>
-          
-          <Button 
-            type="submit" 
+
+          <Button
+            type="submit"
             className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
+            disabled={loading}
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </Button>
-          
+
           <div className="text-center">
-            <button 
+            <button
               type="button"
-              onClick={() => openDialog('login')}
+              onClick={() => openDialog("login")}
               className="text-primary hover:underline text-sm"
             >
               Back To Log In

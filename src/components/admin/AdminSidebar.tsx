@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useAuthDialog } from "@/context/AuthDialogContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -23,7 +24,8 @@ const navigationItems = [
 export function AdminSidebar() {
   const location = useLocation();
   const { setOpenMobile } = useSidebar();
-  const {openDialog} = useAuthDialog();
+  const { openDialog } = useAuthDialog();
+  const { user, logout } = useAuth();
 
   const isActive = (path: string) => {
     if (path === "/" && location.pathname === "/") return true;
@@ -31,12 +33,12 @@ export function AdminSidebar() {
     return false;
   };
 
-  const handleLinkClick = (action: string) => {
+  const handleLinkClick = async (action: string) => {
     // Close mobile sidebar when a link is clicked
-    if(action == 'login'){
+    if (action == 'login') {
       openDialog(action);
-    } else if(action == 'faq'){
-
+    } else if (action == 'logout') {
+      await logout();
     }
     setOpenMobile(false);
   };
@@ -46,7 +48,7 @@ export function AdminSidebar() {
       {/* Desktop Header */}
       <div className="sm:flex items-center p-6 border-b border-royal-light-gray">
         <div className="flex items-center gap-2">
-          <img src='/imgs/logo.svg' className="w-5"/>
+          <img src='/imgs/logo.svg' className="w-5" />
           <span className="font-bold text-sm text-royal-dark-gray">ROYAL VAULT</span>
         </div>
       </div>
@@ -61,16 +63,26 @@ export function AdminSidebar() {
                     <SidebarMenuButton
                       asChild
                       className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${isActive(item.path)
-                          ? "bg-royal-light-gray text-primary font-medium"
-                          : "text-royal-gray"
+                        ? "bg-royal-light-gray text-primary font-medium"
+                        : "text-royal-gray"
                         }`}
                     >
-                      <Link to={item.path} onClick={()=> setOpenMobile(false)}>
+                      <Link to={item.path} onClick={() => setOpenMobile(false)}>
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    className="w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors text-royal-gray"
+                  >
+                    <Link to="#" onClick={() => handleLinkClick(user ? 'logout' : 'login')}>
+                      <span>{user ? 'Log Out' : 'Log In'}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
-import { api } from "@/lib/api";
+import { dealApi, optionsApi, imageApi } from "@/lib/api";
 
 
 const multiSelectFields = [
@@ -31,7 +31,14 @@ const inputFields = [
   { title: 'Image', id: 'image', placeholder: 'Image', type: 'file' },
 ];
 
-export function CreateDealModal({ isOpen, closeDialog }) {
+interface CreateDealModalProps {
+  isOpen: boolean;
+  closeDialog: () => void;
+  editingDeal?: any;
+  onDealSaved?: () => void;
+}
+
+export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved }: CreateDealModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -44,6 +51,9 @@ export function CreateDealModal({ isOpen, closeDialog }) {
     source: "",
   });
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>("");
+
   const [options, setOptions] = useState({
     categories: [],
     subCategories: [],
@@ -54,6 +64,7 @@ export function CreateDealModal({ isOpen, closeDialog }) {
   });
 
   const [loading, setLoading] = useState(false);
+  const [optionsError, setOptionsError] = useState<string | null>(null);
 
   // Fetch options when modal opens
   useEffect(() => {
@@ -62,56 +73,24 @@ export function CreateDealModal({ isOpen, closeDialog }) {
     }
   }, [isOpen]);
 
-  const fetchOptions = async () => {
-    try {
-      setLoading(true);
-      const [categoriesRes, subCategoriesRes, typesRes, strategiesRes, requirementsRes, sourcesRes] = await Promise.all([
-        api.get('/api/categories'),
-        api.get('/api/subcategories'),
-        api.get('/api/types'),
-        api.get('/api/strategies'),
-        api.get('/api/requirements'),
-        api.get('/api/sources'),
-      ]);
-
-      setOptions({
-        categories: categoriesRes.data.map((item: any) => ({ label: item.name, value: item._id })),
-        subCategories: subCategoriesRes.data.map((item: any) => ({ label: item.name, value: item._id })),
-        types: typesRes.data.map((item: any) => ({ label: item.name, value: item._id })),
-        strategies: strategiesRes.data.map((item: any) => ({ label: item.name, value: item._id })),
-        requirements: requirementsRes.data.map((item: any) => ({ label: item.name, value: item._id })),
-        sources: sourcesRes.data.map((item: any) => ({ label: item.name, value: item._id })),
+  // Populate form when editing
+  useEffect(() => {
+    if (editingDeal) {
+      setFormData({
+        name: editingDeal.name || "",
+        url: editingDeal.url || "",
+        categories: editingDeal.category?.map((cat: any) => cat._id) || [],
+        subCategories: editingDeal.subCategory?.map((sub: any) => sub._id) || [],
+        types: editingDeal.type?.map((type: any) => type._id) || [],
+        strategies: editingDeal.strategy?.map((strategy: any) => strategy._id) || [],
+        requirements: editingDeal.requirement?.map((req: any) => req._id) || [],
+        image: editingDeal.image || "",
+        source: editingDeal.source?._id || "",
       });
-    } catch (error) {
-      console.error('Error fetching options:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      // Transform formData to match backend expectations
-      const dealData = {
-        ...formData,
-        category: formData.categories,
-        subCategory: formData.subCategories,
-        type: formData.types,
-        strategy: formData.strategies,
-        requirement: formData.requirements,
-      };
-      delete dealData.categories;
-      delete dealData.subCategories;
-      delete dealData.types;
-      delete dealData.strategies;
-      delete dealData.requirements;
-
-      await api.post('/api/deals', dealData);
-      console.log("Deal created successfully:", dealData);
-      closeDialog();
-      // Reset form
+      setImagePreview(editingDeal.image || "");
+      setImageFile(null);
+    } else {
+      // Reset form for new deal
       setFormData({
         name: "",
         url: "",
@@ -123,8 +102,88 @@ export function CreateDealModal({ isOpen, closeDialog }) {
         image: "",
         source: "",
       });
+      setImagePreview("");
+      setImageFile(null);
+    }
+  }, [editingDeal, isOpen]);
+
+  const fetchOptions = async () => {
+    try {
+      setLoading(true);
+      setOptionsError(null);
+      const [categoriesRes, subCategoriesRes, typesRes, strategiesRes, requirementsRes, sourcesRes] = await Promise.all([
+        optionsApi.getCategories(),
+        optionsApi.getSubCategories(),
+        optionsApi.getTypes(),
+        optionsApi.getStrategies(),
+        optionsApi.getRequirements(),
+        optionsApi.getSources(),
+      ]);
+
+      console.log(categoriesRes.data.categories);
+
+
+      const optionsData = {
+        categories: categoriesRes.data.categories.map((item: any) => ({ label: item.name, value: item._id })),
+        subCategories: subCategoriesRes.data.subCategories.map((item: any) => ({ label: item.name, value: item._id })),
+        types: typesRes.data.types.map((item: any) => ({ label: item.name, value: item._id })),
+        strategies: strategiesRes.data.strategies.map((item: any) => ({ label: item.name, value: item._id })),
+        requirements: requirementsRes.data.requirements.map((item: any) => ({ label: item.name, value: item._id })),
+        sources: sourcesRes.data.sources.map((item: any) => ({ label: item.name, value: item._id })),
+      };
+
+      console.log(
+        optionsData
+      );
+
+
+      setOptions(optionsData);
     } catch (error) {
-      console.error('Error creating deal:', error);
+      console.error('Error fetching options:', error);
+      setOptionsError('Failed to load options. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+
+      let imageUrl = formData.image;
+
+      // Upload image if a new file is selected
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+      }
+
+      // Transform formData to match backend expectations
+      const dealData = {
+        name: formData.name,
+        url: formData.url,
+        image: imageUrl,
+        categoryIds: formData.categories,
+        subCategoryIds: formData.subCategories,
+        typeIds: formData.types,
+        strategyIds: formData.strategies,
+        requirementIds: formData.requirements,
+        sourceId: formData.source,
+        createdBy: "user_id_here", // TODO: Get from auth context
+      };
+
+      if (editingDeal) {
+        await dealApi.updateDeal(editingDeal._id, dealData);
+        console.log("Deal updated successfully:", dealData);
+      } else {
+        await dealApi.createDeal(dealData);
+        console.log("Deal created successfully:", dealData);
+      }
+
+      closeDialog();
+      onDealSaved?.(); // Refresh the deals list
+    } catch (error) {
+      console.error('Error saving deal:', error);
     } finally {
       setLoading(false);
     }
@@ -138,47 +197,103 @@ export function CreateDealModal({ isOpen, closeDialog }) {
     setFormData(prev => ({ ...prev, [field]: selectedValues }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await imageApi.uploadImage(formData);
+      return response.data.url; // Assuming the API returns { url: "..." }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={closeDialog}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Create New Deal</DialogTitle>
+          <DialogTitle>{editingDeal ? 'Edit Deal' : 'Create New Deal'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {optionsError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {optionsError}
+            </div>
+          )}
+
           {/* Input Fields */}
           {inputFields.map((item) => (
             <div key={item.id}>
               <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
                 {item.title}
               </Label>
-              <Input
-                id={item.id}
-                placeholder={item.placeholder}
-                value={formData[item.id as keyof typeof formData] as string}
-                onChange={(e) => handleInputChange(item.id, e.target.value)}
-                className="mt-1"
-                required
-                type={item.type === 'file' ? 'file' : 'text'}
-              />
+              {item.type === 'file' ? (
+                <div className="mt-1">
+                  <Input
+                    id={item.id}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="mb-2"
+                  />
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Input
+                  id={item.id}
+                  placeholder={item.placeholder}
+                  value={formData[item.id as keyof typeof formData] as string}
+                  onChange={(e) => handleInputChange(item.id, e.target.value)}
+                  className="mt-1"
+                  required
+                  type="text"
+                />
+              )}
             </div>
           ))}
 
           {/* Multi-Select Fields */}
-          {multiSelectFields.map((item) => (
-            <div key={item.id}>
-              <Label className="text-royal-dark-gray font-medium">
-                {item.title}
-              </Label>
-              <MultiSelect
-                options={options[item.id as keyof typeof options] as MultiSelectOption[]}
-                selected={formData[item.id as keyof typeof formData] as string[]}
-                onChange={(selected) => handleMultiSelectChange(item.id, selected)}
-                placeholder={item.placeholder}
-                className="mt-1"
-                disabled={loading}
-              />
-            </div>
-          ))}
+          {multiSelectFields.map((item) => {
+            // Map field IDs to options keys
+            const optionsKey = item.id === 'subCategories' ? 'subCategories' : item.id;
+            return (
+              <div key={item.id}>
+                <Label className="text-royal-dark-gray font-medium">
+                  {item.title}
+                </Label>
+                <MultiSelect
+                  options={options[optionsKey as keyof typeof options] as MultiSelectOption[] || []}
+                  selected={formData[item.id as keyof typeof formData] as string[]}
+                  onChange={(selected) => handleMultiSelectChange(item.id, selected)}
+                  placeholder={item.placeholder}
+                  className="mt-1"
+                  disabled={loading}
+                />
+              </div>
+            );
+          })}
 
           {/* Single Select Fields */}
           {singleSelectFields.map((item) => (
@@ -210,7 +325,7 @@ export function CreateDealModal({ isOpen, closeDialog }) {
             className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
             disabled={loading}
           >
-            {loading ? "Creating..." : "Create"}
+            {loading ? (editingDeal ? "Updating..." : "Creating...") : (editingDeal ? "Update" : "Create")}
           </Button>
         </form>
       </DialogContent>

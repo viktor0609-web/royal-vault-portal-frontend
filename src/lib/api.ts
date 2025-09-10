@@ -91,3 +91,55 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Deal API functions
+export const dealApi = {
+  // Get all deals
+  getAllDeals: () => api.get('/api/deals'),
+
+  // Get deal by ID
+  getDealById: (dealId: string) => api.get(`/api/deals/${dealId}`),
+
+  // Create new deal
+  createDeal: (dealData: any) => api.post('/api/deals', dealData),
+
+  // Update deal
+  updateDeal: (dealId: string, dealData: any) => api.put(`/api/deals/${dealId}`, dealData),
+
+  // Delete deal
+  deleteDeal: (dealId: string) => api.delete(`/api/deals/${dealId}`),
+
+  // Filter deals
+  filterDeals: (filters: any) => api.get('/api/deals/filter', { params: filters }),
+};
+
+// Options API functions for dropdowns
+export const optionsApi = {
+  // Get all categories
+  getCategories: () => api.get('/api/categories'),
+
+  // Get all subcategories
+  getSubCategories: () => api.get('/api/sub-categories'),
+
+  // Get all types
+  getTypes: () => api.get('/api/types'),
+
+  // Get all strategies
+  getStrategies: () => api.get('/api/strategies'),
+
+  // Get all requirements
+  getRequirements: () => api.get('/api/requirements'),
+
+  // Get all sources
+  getSources: () => api.get('/api/sources'),
+};
+
+// Image upload API
+export const imageApi = {
+  // Upload image
+  uploadImage: (formData: FormData) => api.post('/api/upload/image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
+};

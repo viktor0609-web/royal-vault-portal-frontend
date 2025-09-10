@@ -32,8 +32,8 @@ interface MultiSelectProps {
 }
 
 export function MultiSelect({
-    options,
-    selected,
+    options = [],
+    selected = [],
     onChange,
     placeholder = "Select items...",
     className,
@@ -52,6 +52,7 @@ export function MultiSelect({
             onChange([...selected, currentValue]);
         }
     };
+
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
@@ -111,29 +112,40 @@ export function MultiSelect({
                     <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full p-0" align="start">
+            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
                 <Command>
                     <CommandInput placeholder="Search..." />
-                    <CommandList>
-                        <CommandEmpty>No option found.</CommandEmpty>
+                    <CommandList className="max-h-[200px] overflow-y-auto">
+                        <CommandEmpty>
+                            {options.length === 0 ? "No options available" : "No option found."}
+                        </CommandEmpty>
                         <CommandGroup>
-                            {options.map((option) => (
-                                <CommandItem
-                                    key={option.value}
-                                    value={option.value}
-                                    onSelect={() => handleSelect(option.value)}
-                                >
-                                    <Check
-                                        className={cn(
-                                            "mr-2 h-4 w-4",
-                                            selected.includes(option.value)
-                                                ? "opacity-100"
-                                                : "opacity-0"
-                                        )}
-                                    />
-                                    {option.label}
-                                </CommandItem>
-                            ))}
+                            {options.length === 0 ? (
+                                <div className="p-2 text-sm text-muted-foreground text-center">
+                                    Loading options...
+                                </div>
+                            ) : (
+                                options.map((option) => (
+                                    <CommandItem
+                                        key={option.value}
+                                        value={option.value}
+                                        onSelect={() => {
+                                            handleSelect(option.value);
+                                        }}
+                                        className="cursor-pointer"
+                                    >
+                                        <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4",
+                                                selected.includes(option.value)
+                                                    ? "opacity-100"
+                                                    : "opacity-0"
+                                            )}
+                                        />
+                                        {option.label}
+                                    </CommandItem>
+                                ))
+                            )}
                         </CommandGroup>
                     </CommandList>
                 </Command>

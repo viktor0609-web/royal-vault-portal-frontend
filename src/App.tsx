@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 //For Client
@@ -33,6 +33,7 @@ import { AuthDialogProvider } from "./context/AuthDialogContext";
 import { SetPassword } from "./components/auth/SettingPasswordPage";
 import { ReSettingPasswordPage } from "./components/auth/ReSettingPasswordPage";
 import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,14 @@ const webinarData = {
   time: "4:00pm",
   status: "upcoming",
 };
+function AdminRoute({ children }: { children: JSX.Element }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/" replace />;
+  console.log(user);
+
+  if (user.role !== "admin") return <Navigate to="/" replace />;
+  return children;
+}
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -61,10 +70,10 @@ const App = () => (
                 <Route path="/registration" element={<WebinarRegistration webinar={webinarData} />} />
 
                 {/* Admin Routes */}
-                <Route path="/admin/deals" element={<AdminLayout><AdminDeals /></AdminLayout>} />
-                <Route path="/admin/webinars" element={<AdminLayout><AdminWebinar /></AdminLayout>} />
-                <Route path="/admin/courses" element={<AdminLayout><AdminCourses /></AdminLayout>} />
-                <Route path="/admin/webinar_stats" element={<AdminLayout><AdminStats /></AdminLayout>} />
+                <Route path="/admin/deals" element={<AdminRoute><AdminLayout><AdminDeals /></AdminLayout></AdminRoute>} />
+                <Route path="/admin/webinars" element={<AdminRoute><AdminLayout><AdminWebinar /></AdminLayout></AdminRoute>} />
+                <Route path="/admin/courses" element={<AdminRoute><AdminLayout><AdminCourses /></AdminLayout></AdminRoute>} />
+                <Route path="/admin/webinar_stats" element={<AdminRoute><AdminLayout><AdminStats /></AdminLayout></AdminRoute>} />
 
                 {/*Daily Core */}
                 <Route path="/webinar_host" element={<VideoMeeting />} />
@@ -84,7 +93,6 @@ const App = () => (
           <ResetPassword />
         </AuthDialogProvider>
       </AuthProvider>
-
     </TooltipProvider>
   </QueryClientProvider>
 );

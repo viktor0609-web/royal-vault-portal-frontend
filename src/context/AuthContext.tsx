@@ -7,6 +7,7 @@ export interface User {
     id: string;
     name: string;
     email: string;
+    role?: "user" | "admin";
     // add more fields if your backend returns them
 }
 
@@ -30,7 +31,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [user, setUser] = useState<User | null>(null);
 
     const login = async (email: string, password: string): Promise<void> => {
-        const { data } = await api.post("api/auth/login", { email, password });
+        const { data } = await api.post("/api/auth/login", { email, password });
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
         await fetchProfile();
@@ -40,7 +41,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
             const refreshToken = localStorage.getItem("refreshToken");
             if (refreshToken) {
-                await api.post("api/auth/logout", { refreshToken });
+                await api.post("/api/auth/logout", { refreshToken });
             }
         } finally {
             localStorage.removeItem("accessToken");
@@ -51,7 +52,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const fetchProfile = async (): Promise<void> => {
         try {
-            const { data } = await api.get<User>("api/auth/profile");
+            const { data } = await api.get<User>("/api/auth/profile");
             setUser(data);
         } catch {
             setUser(null);

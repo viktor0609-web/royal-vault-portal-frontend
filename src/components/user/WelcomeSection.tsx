@@ -18,12 +18,6 @@ const welcomeItems = [
     completed: false,
   },
   {
-    icon: MessageCircleIcon,
-    title: "Ask a question in the chat",
-    action: "Open Chat",
-    completed: false,
-  },
-  {
     icon: VideoIcon,
     title: "Join a live webinar",
     action: "Open Webinars",
@@ -39,14 +33,14 @@ const welcomeItems = [
 
 export function WelcomeSection() {
   const navigate = useNavigate();
-  const {openDialog} = useAuthDialog();
+  const { openDialog } = useAuthDialog();
 
   const handleAction = (action: string) => {
     if (action === "Create Account") {
       openDialog('signup');
-    } else if(action == "Open Resources"){
+    } else if (action == "Open Resources") {
       navigate('/courses');
-    } else if (action == "Open Webinars"){
+    } else if (action == "Open Webinars") {
       navigate('/royal-tv')
     }
   };
@@ -61,7 +55,7 @@ export function WelcomeSection() {
           <p className="text-royal-gray">
             Join thousands of investors nationwide and access free live coaching, video training, chats, & more.
           </p>
-        </div> 
+        </div>
       </div>
 
       <div className="space-y-4">

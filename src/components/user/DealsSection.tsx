@@ -52,6 +52,7 @@ export function DealsSection() {
   });
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [selectedFilters, setSelectedFilters] = useState({
     categories: null,
     subCategories: null,
@@ -62,11 +63,11 @@ export function DealsSection() {
   });
 
 
-  // Fetch filter options on component mount
+  // Fetch filter options only once on component mount
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
-        setLoading(true);
+        setFilterOptionsLoading(true);
 
         // Fetch all filter options in parallel
         const [
@@ -96,7 +97,7 @@ export function DealsSection() {
       } catch (error) {
         console.error('Error fetching filter options:', error);
       } finally {
-        setLoading(false);
+        setFilterOptionsLoading(false);
       }
     };
 
@@ -181,7 +182,7 @@ export function DealsSection() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All</SelectItem>
-                    {loading ? (
+                    {filterOptionsLoading ? (
                       <SelectItem value="loading" disabled>Loading...</SelectItem>
                     ) : options.length > 0 ? (
                       options.map((option) => (

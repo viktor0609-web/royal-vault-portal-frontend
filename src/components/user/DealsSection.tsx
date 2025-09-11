@@ -176,30 +176,35 @@ export function DealsSection() {
 
 
             return (
-              <div key={index}>
-                <Select
-                  value={selectedFilters[config.key as keyof typeof selectedFilters] || "all"}
-                  onValueChange={(value) => handleFilterChange(config.key, value === "all" ? null : value)}
-                >
-                  <SelectTrigger className="border-royal-light-gray">
-                    <SelectValue placeholder={config.placeholder} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {filterOptionsLoading ? (
-                      <SelectItem value="loading" disabled>Loading...</SelectItem>
-                    ) : options.length > 0 ? (
-                      options.map((option) => (
-                        <SelectItem key={option.id} value={option._id}>
-                          {option.name}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="no-options" disabled>No options available</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
+              <div>
+                <div className="text-royal-gray mb-2 font-bold"> {config.key}</div>
+                <div key={index}>
+                  <Select
+                    value={selectedFilters[config.key as keyof typeof selectedFilters] || "all"}
+                    onValueChange={(value) => handleFilterChange(config.key, value === "all" ? null : value)}
+                  >
+                    <SelectTrigger className="border-royal-light-gray">
+                      <SelectValue placeholder={config.placeholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      {filterOptionsLoading ? (
+                        <SelectItem value="loading" disabled>Loading...</SelectItem>
+                      ) : options.length > 0 ? (
+                        options.map((option) => (
+                          <SelectItem key={option.id} value={option._id}>
+                            {option.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-options" disabled>No options available</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
+
+
             );
           })}
         </div>

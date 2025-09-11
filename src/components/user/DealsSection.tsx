@@ -112,12 +112,12 @@ export function DealsSection() {
       // Prepare filter parameters for backend
       const filterParams: any = {};
 
-      if (filters.categories) filterParams.category = filters.categories;
-      if (filters.subCategories) filterParams.subCategory = filters.subCategories;
-      if (filters.types) filterParams.type = filters.types;
-      if (filters.strategies) filterParams.strategy = filters.strategies;
-      if (filters.requirements) filterParams.requirement = filters.requirements;
-      if (filters.sources) filterParams.source = filters.sources;
+      if (filters.categories) filterParams.categoryId = filters.categories;
+      if (filters.subCategories) filterParams.subCategoryId = filters.subCategories;
+      if (filters.types) filterParams.typeId = filters.types;
+      if (filters.strategies) filterParams.strategyId = filters.strategies;
+      if (filters.requirements) filterParams.requirementId = filters.requirements;
+      if (filters.sources) filterParams.sourceId = filters.sources;
 
       // Use filterDeals API if filters are applied, otherwise get all deals
       const response = Object.keys(filterParams).length > 0

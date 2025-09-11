@@ -112,12 +112,12 @@ export function DealsSection() {
       // Prepare filter parameters for backend
       const filterParams: any = {};
 
-      if (filters.categories) filterParams.categoryId = filters.categories;
-      if (filters.subCategories) filterParams.subCategoryId = filters.subCategories;
-      if (filters.types) filterParams.typeId = filters.types;
-      if (filters.strategies) filterParams.strategyId = filters.strategies;
-      if (filters.requirements) filterParams.requirementId = filters.requirements;
-      if (filters.sources) filterParams.sourceId = filters.sources;
+      if (filters.categories) filterParams.category = filters.categories;
+      if (filters.subCategories) filterParams.subCategory = filters.subCategories;
+      if (filters.types) filterParams.type = filters.types;
+      if (filters.strategies) filterParams.strategy = filters.strategies;
+      if (filters.requirements) filterParams.requirement = filters.requirements;
+      if (filters.sources) filterParams.source = filters.sources;
 
       // Use filterDeals API if filters are applied, otherwise get all deals
       const response = Object.keys(filterParams).length > 0
@@ -221,8 +221,9 @@ export function DealsSection() {
                     className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow cursor-pointer block"
                   >
                     <div className="relative h-64 w-full">
+
                       <img
-                        src={item.image}
+                        src={import.meta.env.VITE_BACKEND_URL + item.image}
                         className="w-full h-full object-cover"
                         alt={item.name}
                       />
@@ -237,7 +238,7 @@ export function DealsSection() {
                         {item.name}
                       </h3>
                       <div className="text-xs pl-3 left-0 right-0 rounded-md absolute bottom-0 m-3 bg-card uppercase">
-                        syndication
+                        {formatArrayData(item.type)}
                       </div>
                     </div>
                     <div className="text-sm text-royal-gray p-6">
@@ -249,9 +250,6 @@ export function DealsSection() {
                       </p>
                       <p className="leading-relaxed">
                         <span className="font-bold">Sub-Category: </span>{formatArrayData(item.subCategory)}
-                      </p>
-                      <p className="leading-relaxed">
-                        <span className="font-bold">Type: </span>{formatArrayData(item.type)}
                       </p>
                       <p className="leading-relaxed">
                         <span className="font-bold">Strategy: </span>{formatArrayData(item.strategy)}

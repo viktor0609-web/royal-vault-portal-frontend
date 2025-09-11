@@ -134,6 +134,36 @@ export const optionsApi = {
   getSources: () => api.get('/api/sources'),
 };
 
+// Course API functions - matching new backend structure
+export const courseApi = {
+  // Course Groups
+  getAllCourseGroups: (filters?: { type?: string; search?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.type) params.append('type', filters.type);
+    if (filters?.search) params.append('search', filters.search);
+    return api.get(`/api/courses/groups?${params.toString()}`);
+  },
+  createCourseGroup: (groupData: any) => api.post('/api/courses/groups', groupData),
+  getCourseGroupById: (groupId: string) => api.get(`/api/courses/groups/${groupId}`),
+  updateCourseGroup: (groupId: string, groupData: any) => api.put(`/api/courses/groups/${groupId}`, groupData),
+  deleteCourseGroup: (groupId: string) => api.delete(`/api/courses/groups/${groupId}`),
+
+  // Courses
+  getAllCourses: () => api.get('/api/courses/courses'),
+  createCourse: (courseData: any) => api.post('/api/courses/courses', courseData),
+  getCourseById: (courseId: string) => api.get(`/api/courses/courses/${courseId}`),
+  updateCourse: (courseId: string, courseData: any) => api.put(`/api/courses/courses/${courseId}`, courseData),
+  deleteCourse: (courseId: string) => api.delete(`/api/courses/courses/${courseId}`),
+
+  // Lectures
+  getAllLectures: () => api.get('/api/courses/lectures'),
+  createLecture: (lectureData: any) => api.post('/api/courses/lectures', lectureData),
+  getLectureById: (lectureId: string) => api.get(`/api/courses/lectures/${lectureId}`),
+  updateLecture: (lectureId: string, lectureData: any) => api.put(`/api/courses/lectures/${lectureId}`, lectureData),
+  deleteLecture: (lectureId: string) => api.delete(`/api/courses/lectures/${lectureId}`),
+  completeLecture: (lectureId: string) => api.post(`/api/courses/lectures/${lectureId}/complete`),
+};
+
 // Image upload API
 export const imageApi = {
   // Upload image

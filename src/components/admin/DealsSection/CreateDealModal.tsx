@@ -52,7 +52,6 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
 
   const [options, setOptions] = useState({
     categories: [],
@@ -87,7 +86,6 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         image: editingDeal.image || "",
         source: editingDeal.source?._id || "",
       });
-      setImagePreview(editingDeal.image || "");
       setImageFile(null);
     } else {
       // Reset form for new deal
@@ -102,7 +100,6 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         image: "",
         source: "",
       });
-      setImagePreview("");
       setImageFile(null);
     }
   }, [editingDeal, isOpen]);
@@ -201,11 +198,6 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -224,7 +216,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
 
   return (
     <Dialog open={isOpen} onOpenChange={closeDialog}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editingDeal ? 'Edit Deal' : 'Create New Deal'}</DialogTitle>
         </DialogHeader>
@@ -250,15 +242,6 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                     onChange={handleImageChange}
                     className="mb-2"
                   />
-                  {imagePreview && (
-                    <div className="mt-2">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                      />
-                    </div>
-                  )}
                 </div>
               ) : (
                 <Input

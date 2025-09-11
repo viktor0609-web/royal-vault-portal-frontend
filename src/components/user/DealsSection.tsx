@@ -112,12 +112,12 @@ export function DealsSection() {
       // Prepare filter parameters for backend
       const filterParams: any = {};
 
-      if (filters.categories) filterParams.categories = filters.categories;
-      if (filters.subCategories) filterParams.subCategories = filters.subCategories;
-      if (filters.types) filterParams.types = filters.types;
-      if (filters.strategies) filterParams.strategies = filters.strategies;
-      if (filters.requirements) filterParams.requirements = filters.requirements;
-      if (filters.sources) filterParams.sources = filters.sources;
+      if (filters.categories) filterParams.categoryId = filters.categories;
+      if (filters.subCategories) filterParams.subCategoryId = filters.subCategories;
+      if (filters.types) filterParams.typeId = filters.types;
+      if (filters.strategies) filterParams.strategyId = filters.strategies;
+      if (filters.requirements) filterParams.requirementId = filters.requirements;
+      if (filters.sources) filterParams.sourceId = filters.sources;
 
       // Use filterDeals API if filters are applied, otherwise get all deals
       const response = Object.keys(filterParams).length > 0
@@ -171,6 +171,10 @@ export function DealsSection() {
           {filterConfig.map((config, index) => {
 
             const options = filterOptions[config.key] || [];
+
+            console.log(options);
+
+
             return (
               <div key={index}>
                 <Select
@@ -186,7 +190,7 @@ export function DealsSection() {
                       <SelectItem value="loading" disabled>Loading...</SelectItem>
                     ) : options.length > 0 ? (
                       options.map((option) => (
-                        <SelectItem key={option.id} value={option.name}>
+                        <SelectItem key={option.id} value={option._id}>
                           {option.name}
                         </SelectItem>
                       ))

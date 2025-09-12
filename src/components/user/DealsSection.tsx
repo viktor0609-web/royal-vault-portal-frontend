@@ -5,6 +5,7 @@ import { Progress } from "@/components//ui/progress";
 import { TagIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { optionsApi, dealApi } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 const filterConfig = [
   { key: "categories", label: "Categories", placeholder: "Categories" },
@@ -41,6 +42,7 @@ interface Deal {
 }
 
 export function DealsSection() {
+  const { user } = useAuth();
   const [showSalesModal, setShowSalesModal] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     categories: [],
@@ -288,23 +290,25 @@ export function DealsSection() {
             </SelectContent>
           </Select> */}
         </div>
-        {/* 
-        <div className="absolute inset-0 flex items-center justify-center  bg-black/50 backdrop-blur z-20">
-          <div className="text-center text-white max-w-3xl px-4">
-            <h2 className="text-4xl font-bold mb-6 leading-tight">
-              Access high performance investments in real estate, oil & gas, machinery, and more.
-            </h2>
-            <p className="text-xl mb-8 opacity-90">
-              Discover exclusive investment opportunities from our curated network of vetted partners.
-            </p>
-            <Button
-              onClick={() => setShowSalesModal(true)}
-              className="bg-primary hover:bg-royal-blue-dark text-white px-8 py-3 text-lg font-bold"
-            >
-              TALK TO SALES
-            </Button>
+        {!user && (
+          <div className="absolute inset-0 flex items-center justify-center  bg-black/50 backdrop-blur z-20">
+            <div className="text-center text-white max-w-3xl px-4">
+              <h2 className="text-4xl font-bold mb-6 leading-tight">
+                Access high performance investments in real estate, oil & gas, machinery, and more.
+              </h2>
+              <p className="text-xl mb-8 opacity-90">
+                Discover exclusive investment opportunities from our curated network of vetted partners.
+              </p>
+              <Button
+                onClick={() => setShowSalesModal(true)}
+                className="bg-primary hover:bg-royal-blue-dark text-white px-8 py-3 text-lg font-bold"
+              >
+                TALK TO SALES
+              </Button>
+            </div>
           </div>
-        </div> */}
+        )}
+
       </div>
     </div>
   );

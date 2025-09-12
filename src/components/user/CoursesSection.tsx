@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { courseApi } from "@/lib/api";
 
+
 interface CourseGroup {
   _id: string;
   title: string;

@@ -155,7 +155,7 @@ export function DealsSection() {
 
   // Helper function to format array data for display
   const formatArrayData = (data: Array<{ _id: string; name: string }>) => {
-    return data.map(item => item.name).join(', ');
+    return data?.map(item => item.name).join(', ');
   };
 
   return (
@@ -172,17 +172,13 @@ export function DealsSection() {
 
       <div className="bg-white p-6 rounded-lg border border-royal-light-gray mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-          {filterConfig.map((config, index) => {
+          {filterConfig?.map((config, index) => {
 
             const options = filterOptions[config.key] || [];
-
-            console.log(options);
-
-
             return (
-              <div>
+              <div key={config.key}>
                 <div className="text-royal-gray mb-2 font-bold"> {config.key}</div>
-                <div key={index}>
+                <div>
                   <Select
                     value={selectedFilters[config.key as keyof typeof selectedFilters] || "all"}
                     onValueChange={(value) => handleFilterChange(config.key, value === "all" ? null : value)}
@@ -195,7 +191,7 @@ export function DealsSection() {
                       {filterOptionsLoading ? (
                         <SelectItem value="loading" disabled>Loading...</SelectItem>
                       ) : options.length > 0 ? (
-                        options.map((option) => (
+                        options?.map((option) => (
                           <SelectItem key={option.id} value={option._id}>
                             {option.name}
                           </SelectItem>
@@ -223,7 +219,7 @@ export function DealsSection() {
                   <div className="text-royal-gray">Loading deals...</div>
                 </div>
               ) : deals.length > 0 ? (
-                deals.map((item, index) => (
+                deals?.map((item, index) => (
                   <Link
                     key={index}
                     to={item.url}

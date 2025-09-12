@@ -186,20 +186,20 @@ export function DealsSection() {
                     <SelectTrigger className="border-royal-light-gray">
                       <SelectValue placeholder={config.placeholder} />
                     </SelectTrigger>
-                    <SelectContent>
+                    {/* <SelectContent>
                       <SelectItem value="all">All</SelectItem>
                       {filterOptionsLoading ? (
                         <SelectItem value="loading" disabled>Loading...</SelectItem>
                       ) : options.length > 0 ? (
-                        options?.map((option) => (
-                          <SelectItem key={option._id} value={option._id}>
+                        options?.map((option, index) => (
+                          <SelectItem key={index} value={option._id}>
                             {option.name}
                           </SelectItem>
                         ))
                       ) : (
                         <SelectItem value="no-options" disabled>No options available</SelectItem>
                       )}
-                    </SelectContent>
+                    </SelectContent> */}
                   </Select>
                 </div>
               </div>

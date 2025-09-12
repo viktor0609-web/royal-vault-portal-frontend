@@ -10,7 +10,8 @@ import {
   HelpCircleIcon,
   LogInIcon,
   LogOutIcon,
-  AxeIcon
+  AxeIcon,
+  MessageCircleQuestionIcon
 } from "lucide-react";
 import {
   Sidebar,
@@ -26,15 +27,17 @@ import {
 
 const navigationItems = [
   { title: "Welcome", icon: HandIcon, path: "/" },
-  { title: "Webinars", icon: TvIcon, path: "/royal-tv" },
+  { title: "Royal TV", icon: TvIcon, path: "/royal-tv" },
   { title: "Courses", icon: GraduationCapIcon, path: "/courses" },
   { title: "Deals", icon: TagIcon, path: "/deals" },
 ];
 
 const bottomItemsForGuest = [
+  { title: "FAQ", icon: HelpCircleIcon, action: 'login' },
   { title: "Log In", icon: LogInIcon, action: 'login' },
 ];
 const bottomItemsForUser = [
+  { title: "FAQ", icon: HelpCircleIcon, action: 'login' },
   { title: "Log Out", icon: LogOutIcon, action: 'logout' },
 ];
 

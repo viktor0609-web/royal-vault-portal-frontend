@@ -16,7 +16,6 @@ const filterConfig = [
   { key: "sources", label: "Source", placeholder: "Source" },
 ];
 
-
 interface FilterOptions {
   categories: Array<{ id: string; name: string }>;
   subCategories: Array<{ id: string; name: string }>;
@@ -66,14 +65,12 @@ export function DealsSection() {
     sources: null
   });
 
-
   // Fetch filter options only once on component mount
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
         setFilterOptionsLoading(true);
 
-        // Fetch all filter options in parallel
         const [
           categoriesResponse,
           subCategoriesResponse,
@@ -99,7 +96,7 @@ export function DealsSection() {
           sources: sourcesResponse.data.sources || []
         });
       } catch (error) {
-        console.error('Error fetching filter options:', error);
+        console.error("Error fetching filter options:", error);
       } finally {
         setFilterOptionsLoading(false);
       }
@@ -113,7 +110,6 @@ export function DealsSection() {
     try {
       setLoading(true);
 
-      // Prepare filter parameters for backend
       const filterParams: any = {};
 
       if (filters.categories) filterParams.categoryId = filters.categories;
@@ -123,15 +119,14 @@ export function DealsSection() {
       if (filters.requirements) filterParams.requirementId = filters.requirements;
       if (filters.sources) filterParams.sourceId = filters.sources;
 
-      // Use filterDeals API if filters are applied, otherwise get all deals
-      const response = Object.keys(filterParams).length > 0
-        ? await dealApi.filterDeals(filterParams)
-        : await dealApi.getAllDeals();
+      const response =
+        Object.keys(filterParams).length > 0
+          ? await dealApi.filterDeals(filterParams)
+          : await dealApi.getAllDeals();
 
       setDeals(response.data.deals || []);
     } catch (error) {
-      console.error('Error fetching deals:', error);
-      // Set empty array if API fails - all data comes from backend
+      console.error("Error fetching deals:", error);
       setDeals([]);
     } finally {
       setLoading(false);
@@ -150,12 +145,18 @@ export function DealsSection() {
       [filterType]: value
     };
     setSelectedFilters(newFilters);
-    // The useEffect will automatically trigger fetchDeals when selectedFilters changes
   };
 
-  // Helper function to format array data for display
-  const formatArrayData = (data: Array<{ _id: string; name: string }>) => {
-    return data?.map(item => item?.name).join(', ');
+  // Fixed version of formatArrayData
+  const formatArrayData = (data: any) => {
+    if (!data) return "";
+    if (Array.isArray(data)) {
+      return data.map((item: any) => item?.name).join(", ");
+    }
+    if (typeof data === "object" && data?.name) {
+      return data.name;
+    }
+    return String(data);
   };
 
   return (
@@ -172,24 +173,33 @@ export function DealsSection() {
 
       <div className="bg-white p-6 rounded-lg border border-royal-light-gray mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-          {filterConfig?.map((config, index) => {
-
+          {filterConfig?.map((config) => {
             const options = filterOptions[config.key] || [];
             return (
               <div key={config.key}>
-                <div className="text-royal-gray mb-2 font-bold"> {config.key}</div>
+                <div className="text-royal-gray mb-2 font-bold">
+                  {config.key}
+                </div>
                 <div>
                   <Select
-                    value={selectedFilters[config.key as keyof typeof selectedFilters] || "all"}
-                    onValueChange={(value) => handleFilterChange(config.key, value === "all" ? null : value)}
+                    value={
+                      selectedFilters[config.key as keyof typeof selectedFilters] ||
+                      "all"
+                    }
+                    onValueChange={(value) =>
+                      handleFilterChange(config.key, value === "all" ? null : value)
+                    }
                   >
                     <SelectTrigger className="border-royal-light-gray">
                       <SelectValue placeholder={config.placeholder} />
                     </SelectTrigger>
-                    {/* <SelectContent>
+                    {/* Uncomment when ready */}
+                    <SelectContent>
                       <SelectItem value="all">All</SelectItem>
                       {filterOptionsLoading ? (
-                        <SelectItem value="loading" disabled>Loading...</SelectItem>
+                        <SelectItem value="loading" disabled>
+                          Loading...
+                        </SelectItem>
                       ) : options.length > 0 ? (
                         options?.map((option, index) => (
                           <SelectItem key={index} value={option._id}>
@@ -197,14 +207,14 @@ export function DealsSection() {
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem value="no-options" disabled>No options available</SelectItem>
+                        <SelectItem value="no-options" disabled>
+                          No options available
+                        </SelectItem>
                       )}
-                    </SelectContent> */}
+                    </SelectContent>
                   </Select>
                 </div>
               </div>
-
-
             );
           })}
         </div>
@@ -226,17 +236,16 @@ export function DealsSection() {
                     className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow cursor-pointer block"
                   >
                     <div className="relative h-64 w-full">
-
                       <img
                         src={import.meta.env.VITE_BACKEND_URL + item.image}
                         className="w-full h-full object-cover"
                         alt={item.name}
                       />
-                      {/* Gradient overlay */}
                       <div
                         className="absolute inset-0"
                         style={{
-                          background: 'linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(0,0,0,0.8))',
+                          background:
+                            "linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(0,0,0,0.8))"
                         }}
                       />
                       <h3 className="absolute bottom-8 text-xl left-2 text-white font-bold z-10 uppercase">
@@ -248,54 +257,48 @@ export function DealsSection() {
                     </div>
                     <div className="text-sm text-royal-gray p-6">
                       <p className="leading-relaxed">
-                        <span className="font-bold">Source: </span>{item.source.name}
+                        <span className="font-bold">Source: </span>
+                        {item.source?.name}
                       </p>
                       <p className="leading-relaxed">
-                        <span className="font-bold">Category: </span>{formatArrayData(item.category)}
+                        <span className="font-bold">Category: </span>
+                        {formatArrayData(item.category)}
                       </p>
                       <p className="leading-relaxed">
-                        <span className="font-bold">Sub-Category: </span>{formatArrayData(item.subCategory)}
+                        <span className="font-bold">Sub-Category: </span>
+                        {formatArrayData(item.subCategory)}
                       </p>
                       <p className="leading-relaxed">
-                        <span className="font-bold">Strategy: </span>{formatArrayData(item.strategy)}
+                        <span className="font-bold">Strategy: </span>
+                        {formatArrayData(item.strategy)}
                       </p>
                       <p className="leading-relaxed">
-                        <span className="font-bold">Requirements: </span>{formatArrayData(item.requirement)}
+                        <span className="font-bold">Requirements: </span>
+                        {formatArrayData(item.requirement)}
                       </p>
                     </div>
-
-
                   </Link>
                 ))
               ) : (
                 <div className="col-span-full flex justify-center items-center h-32">
-                  <div className="text-royal-gray">No deals found matching your filters.</div>
+                  <div className="text-royal-gray">
+                    No deals found matching your filters.
+                  </div>
                 </div>
               )}
             </div>
           </div>
-          {/* <Progress value={30} />
-          <h4 className="font-bold text-xl mt-2 mb-2">
-            What best describes you?
-          </h4>
-          <p className="text-sm mb-4">We customize your pain based on how you earn.</p>
-          <Select>
-            <SelectTrigger className="border-royal-light-gray">
-              <SelectValue placeholder={'Choose an option'} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="placeholder">Coming Soon</SelectItem>
-            </SelectContent>
-          </Select> */}
         </div>
         {!user && (
           <div className="absolute inset-0 flex items-center justify-center  bg-black/50 backdrop-blur z-20">
             <div className="text-center text-white max-w-3xl px-4">
               <h2 className="text-4xl font-bold mb-6 leading-tight">
-                Access high performance investments in real estate, oil & gas, machinery, and more.
+                Access high performance investments in real estate, oil & gas,
+                machinery, and more.
               </h2>
               <p className="text-xl mb-8 opacity-90">
-                Discover exclusive investment opportunities from our curated network of vetted partners.
+                Discover exclusive investment opportunities from our curated
+                network of vetted partners.
               </p>
               <Button
                 onClick={() => setShowSalesModal(true)}
@@ -306,7 +309,6 @@ export function DealsSection() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

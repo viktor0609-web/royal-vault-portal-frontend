@@ -43,6 +43,8 @@ interface Deal {
 
 export function DealsSection() {
   const { user } = useAuth();
+  console.log("user", user);
+
   const [showSalesModal, setShowSalesModal] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     categories: [],

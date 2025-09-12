@@ -155,7 +155,7 @@ export function DealsSection() {
 
   // Helper function to format array data for display
   const formatArrayData = (data: Array<{ _id: string; name: string }>) => {
-    return data?.map(item => item.name).join(', ');
+    return data?.map(item => item?.name).join(', ');
   };
 
   return (
@@ -192,7 +192,7 @@ export function DealsSection() {
                         <SelectItem value="loading" disabled>Loading...</SelectItem>
                       ) : options.length > 0 ? (
                         options?.map((option) => (
-                          <SelectItem key={option.id} value={option._id}>
+                          <SelectItem key={option._id} value={option._id}>
                             {option.name}
                           </SelectItem>
                         ))

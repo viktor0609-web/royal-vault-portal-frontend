@@ -8,6 +8,9 @@ export const api = axios.create({
   },
 });
 
+console.log(import.meta.env.VITE_BACKEND_URL);
+
+
 // Flag to avoid multiple simultaneous refresh calls
 let isRefreshing = false;
 let pendingRequestsQueue: Array<(token: string | null) => void> = [];

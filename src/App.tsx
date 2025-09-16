@@ -19,6 +19,8 @@ import { RoyalVaultLayout as AdminLayout } from "./components/admin/RoyalVaultLa
 import { DealsSection as AdminDeals } from "./components/admin/DealsSection/DealsSection";
 import { WebinarSection as AdminWebinar } from "./components/admin/WebinarSection/WebinarSection";
 import { CoursesSection as AdminCourses } from "./components/admin/CoursesSection/CoursesSection";
+import { CourseGroupDetail } from "./components/admin/CoursesSection/CourseGroupDetail";
+import { CourseDetail } from "./components/admin/CoursesSection/CourseDetail";
 import { StatsSection as AdminStats } from "./components/admin/StatsSection";
 
 //For DailyCore
@@ -73,6 +75,8 @@ const App = () => (
                 <Route path="/admin/deals" element={<AdminRoute><AdminLayout><AdminDeals /></AdminLayout></AdminRoute>} />
                 <Route path="/admin/webinars" element={<AdminRoute><AdminLayout><AdminWebinar /></AdminLayout></AdminRoute>} />
                 <Route path="/admin/courses" element={<AdminRoute><AdminLayout><AdminCourses /></AdminLayout></AdminRoute>} />
+                <Route path="/admin/courses/group/:id" element={<AdminRoute><AdminLayout><CourseGroupDetail /></AdminLayout></AdminRoute>} />
+                <Route path="/admin/courses/group/:groupId/course/:courseId" element={<AdminRoute><AdminLayout><CourseDetail /></AdminLayout></AdminRoute>} />
                 <Route path="/admin/webinar_stats" element={<AdminRoute><AdminLayout><AdminStats /></AdminLayout></AdminRoute>} />
 
                 {/*Daily Core */}

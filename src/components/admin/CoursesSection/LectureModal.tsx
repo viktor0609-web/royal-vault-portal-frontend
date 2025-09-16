@@ -8,52 +8,51 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-// import { courseApi } from "@/lib/api";
 
-interface CourseGroup {
+interface Lecture {
     _id: string;
     title: string;
     description: string;
-    icon: string;
-    createdBy: {
-        _id: string;
-        name: string;
-        email: string;
-    };
-    courses: any[];
+    duration: string;
+    videoUrl?: string;
+    order: number;
 }
 
-interface GroupModalProps {
+interface LectureModalProps {
     isOpen: boolean;
     closeDialog: () => void;
-    editingGroup?: CourseGroup | null;
-    onGroupSaved: (groupData?: CourseGroup, isUpdate?: boolean) => void;
+    editingLecture?: Lecture | null;
+    onLectureSaved: (lectureData?: Lecture, isUpdate?: boolean) => void;
+    courseId: string;
 }
 
-export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: GroupModalProps) {
+export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSaved, courseId }: LectureModalProps) {
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        icon: ""
+        duration: "",
+        videoUrl: ""
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (editingGroup) {
+        if (editingLecture) {
             setFormData({
-                title: editingGroup.title || "",
-                description: editingGroup.description || "",
-                icon: editingGroup.icon || ""
+                title: editingLecture.title || "",
+                description: editingLecture.description || "",
+                duration: editingLecture.duration || "",
+                videoUrl: editingLecture.videoUrl || ""
             });
         } else {
             setFormData({
                 title: "",
                 description: "",
-                icon: ""
+                duration: "",
+                videoUrl: ""
             });
         }
-    }, [editingGroup, isOpen]);
+    }, [editingLecture, isOpen]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -65,39 +64,35 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
             await new Promise(resolve => setTimeout(resolve, 1000));
 
             let response;
-            if (editingGroup) {
+            if (editingLecture) {
                 // Mock update response
                 response = {
                     data: {
-                        _id: editingGroup._id,
+                        _id: editingLecture._id,
                         title: formData.title,
                         description: formData.description,
-                        icon: formData.icon,
-                        createdBy: editingGroup.createdBy,
-                        courses: editingGroup.courses
+                        duration: formData.duration,
+                        videoUrl: formData.videoUrl || undefined,
+                        order: editingLecture.order
                     }
                 };
             } else {
                 // Mock create response
                 response = {
                     data: {
-                        _id: `group-${Date.now()}`,
+                        _id: `lecture-${Date.now()}`,
                         title: formData.title,
                         description: formData.description,
-                        icon: formData.icon,
-                        createdBy: {
-                            _id: "admin",
-                            name: "Admin",
-                            email: "admin@royalvault.com"
-                        },
-                        courses: []
+                        duration: formData.duration,
+                        videoUrl: formData.videoUrl || undefined,
+                        order: 1 // This would be calculated based on existing lectures
                     }
                 };
             }
-            onGroupSaved(response.data, !!editingGroup);
+            onLectureSaved(response.data, !!editingLecture);
             closeDialog();
         } catch (err: any) {
-            setError("Failed to save course group");
+            setError("Failed to save lecture");
         } finally {
             setLoading(false);
         }
@@ -111,7 +106,7 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
         <Dialog open={isOpen} onOpenChange={closeDialog}>
             <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
                 <DialogTitle className="text-xl font-semibold">
-                    {editingGroup ? "Edit Course Group" : "Create Course Group"}
+                    {editingLecture ? "Edit Lecture" : "Create Lecture"}
                 </DialogTitle>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
@@ -142,16 +137,30 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
                     </div>
 
                     <div>
-                        <Label htmlFor="icon" className="text-royal-dark-gray font-medium">
-                            Icon (Iconify class)
+                        <Label htmlFor="duration" className="text-royal-dark-gray font-medium">
+                            Duration
                         </Label>
                         <Input
-                            id="icon"
-                            value={formData.icon}
-                            onChange={(e) => handleInputChange("icon", e.target.value)}
+                            id="duration"
+                            value={formData.duration}
+                            onChange={(e) => handleInputChange("duration", e.target.value)}
                             className="mt-1"
-                            placeholder="e.g., material-symbols:school"
+                            placeholder="e.g., 15 minutes, 1 hour 30 minutes"
                             required
+                        />
+                    </div>
+
+                    <div>
+                        <Label htmlFor="videoUrl" className="text-royal-dark-gray font-medium">
+                            Video URL (Optional)
+                        </Label>
+                        <Input
+                            id="videoUrl"
+                            value={formData.videoUrl}
+                            onChange={(e) => handleInputChange("videoUrl", e.target.value)}
+                            className="mt-1"
+                            placeholder="https://example.com/video"
+                            type="url"
                         />
                     </div>
 
@@ -164,7 +173,7 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
                         className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
                         disabled={loading}
                     >
-                        {loading ? "Saving..." : editingGroup ? "Update" : "Create"}
+                        {loading ? "Saving..." : editingLecture ? "Update" : "Create"}
                     </Button>
                 </form>
             </DialogContent>

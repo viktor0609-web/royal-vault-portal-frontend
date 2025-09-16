@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-// import { courseApi } from "@/lib/api";
+import { courseApi } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface CourseGroup {
     _id: string;
@@ -38,6 +39,7 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
         if (editingGroup) {
@@ -61,43 +63,30 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
         setError(null);
 
         try {
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
             let response;
             if (editingGroup) {
-                // Mock update response
-                response = {
-                    data: {
-                        _id: editingGroup._id,
-                        title: formData.title,
-                        description: formData.description,
-                        icon: formData.icon,
-                        createdBy: editingGroup.createdBy,
-                        courses: editingGroup.courses
-                    }
-                };
+                response = await courseApi.updateCourseGroup(editingGroup._id, formData);
+                toast({
+                    title: "Success",
+                    description: "Course group updated successfully",
+                });
             } else {
-                // Mock create response
-                response = {
-                    data: {
-                        _id: `group-${Date.now()}`,
-                        title: formData.title,
-                        description: formData.description,
-                        icon: formData.icon,
-                        createdBy: {
-                            _id: "admin",
-                            name: "Admin",
-                            email: "admin@royalvault.com"
-                        },
-                        courses: []
-                    }
-                };
+                response = await courseApi.createCourseGroup(formData);
+                toast({
+                    title: "Success",
+                    description: "Course group created successfully",
+                });
             }
             onGroupSaved(response.data, !!editingGroup);
             closeDialog();
         } catch (err: any) {
-            setError("Failed to save course group");
+            const errorMessage = err.response?.data?.message || "Failed to save course group";
+            setError(errorMessage);
+            toast({
+                title: "Error",
+                description: errorMessage,
+                variant: "destructive",
+            });
         } finally {
             setLoading(false);
         }

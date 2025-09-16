@@ -7,14 +7,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/ui/RichTextEditor";
+import { courseApi } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface Lecture {
     _id: string;
     title: string;
     description: string;
-    duration: string;
-    videoUrl?: string;
+    videoUrl: string;
+    pdfUrl?: string;
     order: number;
 }
 
@@ -30,26 +32,27 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        duration: "",
-        videoUrl: ""
+        videoUrl: "",
+        pdfUrl: ""
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
         if (editingLecture) {
             setFormData({
                 title: editingLecture.title || "",
                 description: editingLecture.description || "",
-                duration: editingLecture.duration || "",
-                videoUrl: editingLecture.videoUrl || ""
+                videoUrl: editingLecture.videoUrl || "",
+                pdfUrl: editingLecture.pdfUrl || ""
             });
         } else {
             setFormData({
                 title: "",
                 description: "",
-                duration: "",
-                videoUrl: ""
+                videoUrl: "",
+                pdfUrl: ""
             });
         }
     }, [editingLecture, isOpen]);
@@ -60,39 +63,33 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         setError(null);
 
         try {
-            // Simulate API call delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
             let response;
             if (editingLecture) {
-                // Mock update response
-                response = {
-                    data: {
-                        _id: editingLecture._id,
-                        title: formData.title,
-                        description: formData.description,
-                        duration: formData.duration,
-                        videoUrl: formData.videoUrl || undefined,
-                        order: editingLecture.order
-                    }
-                };
+                response = await courseApi.updateLecture(editingLecture._id, formData);
+                toast({
+                    title: "Success",
+                    description: "Lecture updated successfully",
+                });
             } else {
-                // Mock create response
-                response = {
-                    data: {
-                        _id: `lecture-${Date.now()}`,
-                        title: formData.title,
-                        description: formData.description,
-                        duration: formData.duration,
-                        videoUrl: formData.videoUrl || undefined,
-                        order: 1 // This would be calculated based on existing lectures
-                    }
-                };
+                response = await courseApi.createLecture({
+                    ...formData,
+                    courseId: courseId
+                });
+                toast({
+                    title: "Success",
+                    description: "Lecture created successfully",
+                });
             }
             onLectureSaved(response.data, !!editingLecture);
             closeDialog();
         } catch (err: any) {
-            setError("Failed to save lecture");
+            const errorMessage = err.response?.data?.message || "Failed to save lecture";
+            setError(errorMessage);
+            toast({
+                title: "Error",
+                description: errorMessage,
+                variant: "destructive",
+            });
         } finally {
             setLoading(false);
         }
@@ -104,62 +101,67 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
 
     return (
         <Dialog open={isOpen} onOpenChange={closeDialog}>
-            <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogTitle className="text-xl font-semibold">
                     {editingLecture ? "Edit Lecture" : "Create Lecture"}
                 </DialogTitle>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Title Field */}
                     <div>
-                        <Label htmlFor="title" className="text-royal-dark-gray font-medium">
+                        <Label htmlFor="title" className="text-royal-dark-gray font-medium text-sm">
                             Title
                         </Label>
                         <Input
                             id="title"
                             value={formData.title}
                             onChange={(e) => handleInputChange("title", e.target.value)}
-                            className="mt-1"
+                            className="mt-1 rounded-lg"
+                            placeholder="Enter lecture title"
                             required
                         />
                     </div>
 
+                    {/* Description Field */}
                     <div>
-                        <Label htmlFor="description" className="text-royal-dark-gray font-medium">
+                        <Label htmlFor="description" className="text-royal-dark-gray font-medium text-sm">
                             Description
                         </Label>
-                        <Textarea
-                            id="description"
-                            value={formData.description}
-                            onChange={(e) => handleInputChange("description", e.target.value)}
-                            className="mt-1"
-                            rows={3}
-                            required
-                        />
+                        <div className="mt-1">
+                            <RichTextEditor
+                                value={formData.description}
+                                onChange={(value) => handleInputChange("description", value)}
+                                placeholder="Enter lecture description..."
+                            />
+                        </div>
                     </div>
 
+                    {/* Video URL Field */}
                     <div>
-                        <Label htmlFor="duration" className="text-royal-dark-gray font-medium">
-                            Duration
-                        </Label>
-                        <Input
-                            id="duration"
-                            value={formData.duration}
-                            onChange={(e) => handleInputChange("duration", e.target.value)}
-                            className="mt-1"
-                            placeholder="e.g., 15 minutes, 1 hour 30 minutes"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="videoUrl" className="text-royal-dark-gray font-medium">
-                            Video URL (Optional)
+                        <Label htmlFor="videoUrl" className="text-royal-dark-gray font-medium text-sm">
+                            Video URL
                         </Label>
                         <Input
                             id="videoUrl"
                             value={formData.videoUrl}
                             onChange={(e) => handleInputChange("videoUrl", e.target.value)}
-                            className="mt-1"
+                            className="mt-1 rounded-lg"
                             placeholder="https://example.com/video"
+                            type="url"
+                            required
+                        />
+                    </div>
+
+                    {/* PDF URL Field */}
+                    <div>
+                        <Label htmlFor="pdfUrl" className="text-royal-dark-gray font-medium text-sm">
+                            PDF URL (Optional)
+                        </Label>
+                        <Input
+                            id="pdfUrl"
+                            value={formData.pdfUrl}
+                            onChange={(e) => handleInputChange("pdfUrl", e.target.value)}
+                            className="mt-1 rounded-lg"
+                            placeholder="https://example.com/document.pdf"
                             type="url"
                         />
                     </div>
@@ -168,13 +170,16 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                         <div className="text-red-500 text-sm">{error}</div>
                     )}
 
-                    <Button
-                        type="submit"
-                        className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
-                        disabled={loading}
-                    >
-                        {loading ? "Saving..." : editingLecture ? "Update" : "Create"}
-                    </Button>
+                    {/* Create Button */}
+                    <div className="flex justify-start">
+                        <Button
+                            type="submit"
+                            className="bg-royal-blue hover:bg-royal-blue/90 text-white px-6 py-2 rounded-lg font-medium"
+                            disabled={loading}
+                        >
+                            {loading ? "Saving..." : editingLecture ? "Update" : "Create"}
+                        </Button>
+                    </div>
                 </form>
             </DialogContent>
         </Dialog>

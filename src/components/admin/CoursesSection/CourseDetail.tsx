@@ -14,13 +14,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LectureModal } from "./LectureModal";
+import { courseApi } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 interface Lecture {
     _id: string;
-    title: string;
-    description: string;
-    duration: string;
-    videoUrl?: string;
+    name: string;
+    content: string;
+    url: string;
+    videoFile?: File | string;
     order: number;
 }
 
@@ -28,8 +30,6 @@ interface Course {
     _id: string;
     title: string;
     description: string;
-    duration: string;
-    level: string;
     lectures: Lecture[];
 }
 
@@ -37,34 +37,30 @@ interface Course {
 const mockLectures: Lecture[] = [
     {
         _id: "lecture-1",
-        title: "Introduction to Digital Privacy",
-        description: "Understanding the importance of digital privacy and why it matters in today's world.",
-        duration: "15 minutes",
-        videoUrl: "https://example.com/video1",
+        name: "Introduction to Digital Privacy",
+        content: "Understanding the importance of digital privacy and why it matters in today's world. This comprehensive guide covers the fundamentals of protecting your personal information online.",
+        url: "https://example.com/lecture1",
         order: 1
     },
     {
         _id: "lecture-2",
-        title: "VPN and Proxy Services",
-        description: "Learn how to use VPNs and proxies effectively to protect your online identity.",
-        duration: "25 minutes",
-        videoUrl: "https://example.com/video2",
+        name: "VPN and Proxy Services",
+        content: "Learn how to use VPNs and proxies effectively to protect your online identity. We'll cover different types of VPNs, how to choose the right one, and best practices for maximum security.",
+        url: "https://example.com/lecture2",
         order: 2
     },
     {
         _id: "lecture-3",
-        title: "Browser Security",
-        description: "Securing your web browser for maximum privacy and protection against tracking.",
-        duration: "20 minutes",
-        videoUrl: "https://example.com/video3",
+        name: "Browser Security",
+        content: "Securing your web browser for maximum privacy and protection against tracking. This includes configuring privacy settings, using secure extensions, and understanding browser fingerprinting.",
+        url: "https://example.com/lecture3",
         order: 3
     },
     {
         _id: "lecture-4",
-        title: "Email Privacy",
-        description: "Protecting your email communications and using secure email services.",
-        duration: "18 minutes",
-        videoUrl: "https://example.com/video4",
+        name: "Email Privacy",
+        content: "Protecting your email communications and using secure email services. Learn about encrypted email, secure email providers, and how to maintain privacy in your communications.",
+        url: "https://example.com/lecture4",
         order: 4
     }
 ];
@@ -72,28 +68,34 @@ const mockLectures: Lecture[] = [
 export function CourseDetail() {
     const { groupId, courseId } = useParams<{ groupId: string; courseId: string }>();
     const navigate = useNavigate();
+    const { toast } = useToast();
     const [lectures, setLectures] = useState<Lecture[]>([]);
     const [course, setCourse] = useState<Course | null>(null);
     const [loading, setLoading] = useState(true);
     const [isLectureModalOpen, setIsLectureModalOpen] = useState(false);
     const [editingLecture, setEditingLecture] = useState<Lecture | null>(null);
 
-    useEffect(() => {
-        // Simulate loading delay
-        const timer = setTimeout(() => {
-            setLectures(mockLectures);
-            setCourse({
-                _id: courseId || "",
-                title: "Digital Privacy Fundamentals",
-                description: "Learn the basics of protecting your digital identity and maintaining anonymity online.",
-                duration: "2 hours",
-                level: "Beginner",
-                lectures: mockLectures
-            });
-            setLoading(false);
-        }, 500);
+    const fetchCourse = async () => {
+        if (!courseId) return;
 
-        return () => clearTimeout(timer);
+        try {
+            setLoading(true);
+            const response = await courseApi.getCourseById(courseId);
+            setCourse(response.data);
+            setLectures(response.data.lectures || []);
+        } catch (err: any) {
+            toast({
+                title: "Error",
+                description: err.response?.data?.message || 'Failed to fetch course',
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCourse();
     }, [courseId, groupId]);
 
     const handleAddLecture = () => {
@@ -111,7 +113,7 @@ export function CourseDetail() {
         setEditingLecture(null);
     };
 
-    const handleLectureSaved = (lectureData?: Lecture, isUpdate?: boolean) => {
+    const handleLectureSaved = async (lectureData?: Lecture, isUpdate?: boolean) => {
         if (lectureData) {
             if (isUpdate) {
                 setLectures(prev =>
@@ -121,10 +123,25 @@ export function CourseDetail() {
                 setLectures(prev => [...prev, lectureData]);
             }
         }
+        fetchCourse(); // Refresh the course data
     };
 
-    const handleDeleteLecture = (lectureId: string) => {
-        setLectures(prev => prev.filter(lecture => lecture._id !== lectureId));
+    const handleDeleteLecture = async (lectureId: string) => {
+        try {
+            await courseApi.deleteLecture(lectureId);
+            setLectures(prev => prev.filter(lecture => lecture._id !== lectureId));
+            toast({
+                title: "Lecture Deleted",
+                description: "Lecture has been deleted successfully.",
+                variant: "destructive",
+            });
+        } catch (err: any) {
+            toast({
+                title: "Error",
+                description: err.response?.data?.message || 'Failed to delete lecture',
+                variant: "destructive",
+            });
+        }
     };
 
     const handleReorderLectures = (fromIndex: number, toIndex: number) => {
@@ -147,11 +164,11 @@ export function CourseDetail() {
                 <div className="flex items-center gap-4 mb-6">
                     <Button
                         variant="outline"
+                        size="icon"
                         onClick={() => navigate(`/admin/courses/group/${groupId}`)}
-                        className="flex items-center gap-2"
+                        className="hover:bg-royal-blue/10 hover:border-royal-blue/20"
                     >
                         <ArrowLeftIcon className="h-4 w-4" />
-                        Back to Course Group
                     </Button>
                 </div>
                 <div className="text-center py-8">Loading lectures...</div>
@@ -165,11 +182,11 @@ export function CourseDetail() {
                 <div className="flex items-center gap-4">
                     <Button
                         variant="outline"
+                        size="icon"
                         onClick={() => navigate(`/admin/courses/group/${groupId}`)}
-                        className="flex items-center gap-2"
+                        className="hover:bg-royal-blue/10 hover:border-royal-blue/20"
                     >
                         <ArrowLeftIcon className="h-4 w-4" />
-                        Back to Course Group
                     </Button>
                     <div>
                         <h1 className="text-2xl font-bold text-royal-dark-gray">{course?.title}</h1>
@@ -188,16 +205,7 @@ export function CourseDetail() {
             <div className="mb-6">
                 <Card>
                     <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg">Course Information</CardTitle>
-                            <div className="flex gap-2">
-                                <Badge variant="outline" className="flex items-center gap-1">
-                                    <ClockIcon className="h-3 w-3" />
-                                    {course?.duration}
-                                </Badge>
-                                <Badge variant="outline">{course?.level}</Badge>
-                            </div>
-                        </div>
+                        <CardTitle className="text-lg">Course Information</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-royal-gray">{course?.description}</p>
@@ -235,31 +243,40 @@ export function CourseDetail() {
                                                 <div className="flex items-start justify-between">
                                                     <div>
                                                         <h3 className="font-semibold text-royal-dark-gray mb-1">
-                                                            {lecture.title}
+                                                            {lecture.name}
                                                         </h3>
-                                                        <p className="text-sm text-royal-gray mb-2">
-                                                            {lecture.description}
+                                                        <p className="text-sm text-royal-gray mb-2 line-clamp-2">
+                                                            {lecture.content}
                                                         </p>
                                                         <div className="flex items-center gap-4 text-xs text-royal-gray">
-                                                            <div className="flex items-center gap-1">
-                                                                <ClockIcon className="h-3 w-3" />
-                                                                {lecture.duration}
-                                                            </div>
-                                                            {lecture.videoUrl && (
+                                                            {lecture.url && (
                                                                 <div className="flex items-center gap-1">
                                                                     <PlayIcon className="h-3 w-3" />
-                                                                    Video Available
+                                                                    <a
+                                                                        href={lecture.url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="text-blue-600 hover:text-blue-800"
+                                                                    >
+                                                                        View Content
+                                                                    </a>
+                                                                </div>
+                                                            )}
+                                                            {lecture.videoFile && (
+                                                                <div className="flex items-center gap-1">
+                                                                    <PlayIcon className="h-3 w-3" />
+                                                                    Video File Available
                                                                 </div>
                                                             )}
                                                         </div>
                                                     </div>
 
                                                     <div className="flex gap-1">
-                                                        {lecture.videoUrl && (
+                                                        {lecture.url && (
                                                             <Button
                                                                 variant="ghost"
                                                                 size="sm"
-                                                                onClick={() => window.open(lecture.videoUrl, '_blank')}
+                                                                onClick={() => window.open(lecture.url, '_blank')}
                                                                 className="text-blue-600 hover:text-blue-800"
                                                             >
                                                                 <EyeIcon className="h-4 w-4" />

@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { courseApi } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // import { courseApi } from "@/lib/api";
 
@@ -28,8 +30,8 @@ interface Course {
   _id: string;
   title: string;
   description: string;
-  duration: string;
-  level: string;
+  url: string;
+  courseGroup: string;
   lectures: any[];
 }
 
@@ -38,35 +40,37 @@ interface CourseModalProps {
   closeDialog: () => void;
   editingCourse?: Course | null;
   onCourseSaved: (courseData?: Course, isUpdate?: boolean) => void;
+  courseGroupId?: string;
 }
 
-export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved }: CourseModalProps) {
+export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved, courseGroupId }: CourseModalProps) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    duration: "",
-    level: ""
+    url: "",
+    courseGroup: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (editingCourse) {
       setFormData({
         title: editingCourse.title || "",
         description: editingCourse.description || "",
-        duration: editingCourse.duration || "",
-        level: editingCourse.level || ""
+        url: editingCourse.url || "",
+        courseGroup: editingCourse.courseGroup || ""
       });
     } else {
       setFormData({
         title: "",
         description: "",
-        duration: "",
-        level: ""
+        url: "",
+        courseGroup: courseGroupId || ""
       });
     }
-  }, [editingCourse, isOpen]);
+  }, [editingCourse, isOpen, courseGroupId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,39 +78,30 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved 
     setError(null);
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
       let response;
       if (editingCourse) {
-        // Mock update response
-        response = {
-          data: {
-            _id: editingCourse._id,
-            title: formData.title,
-            description: formData.description,
-            duration: formData.duration,
-            level: formData.level,
-            lectures: editingCourse.lectures
-          }
-        };
+        response = await courseApi.updateCourse(editingCourse._id, formData);
+        toast({
+          title: "Success",
+          description: "Course updated successfully",
+        });
       } else {
-        // Mock create response
-        response = {
-          data: {
-            _id: `course-${Date.now()}`,
-            title: formData.title,
-            description: formData.description,
-            duration: formData.duration,
-            level: formData.level,
-            lectures: []
-          }
-        };
+        response = await courseApi.createCourse(formData);
+        toast({
+          title: "Success",
+          description: "Course created successfully",
+        });
       }
       onCourseSaved(response.data, !!editingCourse);
       closeDialog();
     } catch (err: any) {
-      setError("Failed to save course");
+      const errorMessage = err.response?.data?.message || "Failed to save course";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -151,34 +146,31 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved 
           </div>
 
           <div>
-            <Label htmlFor="duration" className="text-royal-dark-gray font-medium">
-              Duration
+            <Label htmlFor="url" className="text-royal-dark-gray font-medium">
+              URL
             </Label>
             <Input
-              id="duration"
-              value={formData.duration}
-              onChange={(e) => handleInputChange("duration", e.target.value)}
+              id="url"
+              value={formData.url}
+              onChange={(e) => handleInputChange("url", e.target.value)}
               className="mt-1"
-              placeholder="e.g., 2 hours, 1 hour 30 minutes"
+              placeholder="https://example.com/course"
               required
             />
           </div>
 
           <div>
-            <Label htmlFor="level" className="text-royal-dark-gray font-medium">
-              Level
+            <Label htmlFor="courseGroup" className="text-royal-dark-gray font-medium">
+              Course Group ID
             </Label>
-            <Select value={formData.level} onValueChange={(value) => handleInputChange("level", value)}>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="Select course level" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Beginner">Beginner</SelectItem>
-                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                <SelectItem value="Advanced">Advanced</SelectItem>
-                <SelectItem value="All Levels">All Levels</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input
+              id="courseGroup"
+              value={formData.courseGroup}
+              onChange={(e) => handleInputChange("courseGroup", e.target.value)}
+              className="mt-1"
+              placeholder="Course group ID"
+              required
+            />
           </div>
 
           {error && (

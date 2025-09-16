@@ -30,22 +30,21 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { CourseModal } from "./CourseModal";
 import { useToast } from "@/hooks/use-toast";
+import { courseApi } from "@/lib/api";
 
 interface Course {
     _id: string;
     title: string;
     description: string;
-    duration: string;
-    level: string;
     lectures: Lecture[];
 }
 
 interface Lecture {
     _id: string;
-    title: string;
-    description: string;
-    duration: string;
-    videoUrl?: string;
+    name: string;
+    content: string;
+    url: string;
+    videoFile?: File | string;
     order: number;
 }
 
@@ -68,31 +67,26 @@ const mockCourses: Course[] = [
         _id: "course-1",
         title: "Digital Privacy Fundamentals",
         description: "Learn the basics of protecting your digital identity and maintaining anonymity online.",
-        duration: "2 hours",
-        level: "Beginner",
         lectures: [
             {
                 _id: "lecture-1",
-                title: "Introduction to Digital Privacy",
-                description: "Understanding the importance of digital privacy",
-                duration: "15 minutes",
-                videoUrl: "https://example.com/video1",
+                name: "Introduction to Digital Privacy",
+                content: "Understanding the importance of digital privacy and why it matters in today's world.",
+                url: "https://example.com/lecture1",
                 order: 1
             },
             {
                 _id: "lecture-2",
-                title: "VPN and Proxy Services",
-                description: "How to use VPNs and proxies effectively",
-                duration: "25 minutes",
-                videoUrl: "https://example.com/video2",
+                name: "VPN and Proxy Services",
+                content: "How to use VPNs and proxies effectively to protect your online identity.",
+                url: "https://example.com/lecture2",
                 order: 2
             },
             {
                 _id: "lecture-3",
-                title: "Browser Security",
-                description: "Securing your web browser for maximum privacy",
-                duration: "20 minutes",
-                videoUrl: "https://example.com/video3",
+                name: "Browser Security",
+                content: "Securing your web browser for maximum privacy and protection against tracking.",
+                url: "https://example.com/lecture3",
                 order: 3
             }
         ]
@@ -101,23 +95,19 @@ const mockCourses: Course[] = [
         _id: "course-2",
         title: "Advanced Anonymity Techniques",
         description: "Master advanced methods for complete anonymity and privacy protection.",
-        duration: "4 hours",
-        level: "Advanced",
         lectures: [
             {
                 _id: "lecture-4",
-                title: "Tor Network Deep Dive",
-                description: "Understanding and using the Tor network effectively",
-                duration: "30 minutes",
-                videoUrl: "https://example.com/video4",
+                name: "Tor Network Deep Dive",
+                content: "Understanding and using the Tor network effectively for maximum anonymity.",
+                url: "https://example.com/lecture4",
                 order: 1
             },
             {
                 _id: "lecture-5",
-                title: "Cryptocurrency Privacy",
-                description: "Using cryptocurrencies while maintaining privacy",
-                duration: "35 minutes",
-                videoUrl: "https://example.com/video5",
+                name: "Cryptocurrency Privacy",
+                content: "Using cryptocurrencies while maintaining privacy and avoiding tracking.",
+                url: "https://example.com/lecture5",
                 order: 2
             }
         ]
@@ -126,23 +116,19 @@ const mockCourses: Course[] = [
         _id: "course-3",
         title: "Asset Protection Strategies",
         description: "Comprehensive guide to protecting your assets through legal structures.",
-        duration: "3 hours",
-        level: "Intermediate",
         lectures: [
             {
                 _id: "lecture-6",
-                title: "Trust Structures",
-                description: "Understanding different types of trusts",
-                duration: "45 minutes",
-                videoUrl: "https://example.com/video6",
+                name: "Trust Structures",
+                content: "Understanding different types of trusts and how to use them for asset protection.",
+                url: "https://example.com/lecture6",
                 order: 1
             },
             {
                 _id: "lecture-7",
-                title: "Offshore Entities",
-                description: "Setting up offshore business entities",
-                duration: "50 minutes",
-                videoUrl: "https://example.com/video7",
+                name: "Offshore Entities",
+                content: "Setting up offshore business entities for maximum asset protection and privacy.",
+                url: "https://example.com/lecture7",
                 order: 2
             }
         ]
@@ -151,15 +137,12 @@ const mockCourses: Course[] = [
         _id: "course-4",
         title: "Tax Optimization Mastery",
         description: "Advanced tax strategies for high-net-worth individuals.",
-        duration: "5 hours",
-        level: "Advanced",
         lectures: [
             {
                 _id: "lecture-8",
-                title: "Tax Havens and Structures",
-                description: "Understanding international tax planning",
-                duration: "60 minutes",
-                videoUrl: "https://example.com/video8",
+                name: "Tax Havens and Structures",
+                content: "Understanding international tax planning and legal structures for tax optimization.",
+                url: "https://example.com/lecture8",
                 order: 1
             }
         ]
@@ -168,23 +151,19 @@ const mockCourses: Course[] = [
         _id: "course-5",
         title: "Estate Planning Essentials",
         description: "Planning for wealth transfer and generational wealth.",
-        duration: "2.5 hours",
-        level: "Intermediate",
         lectures: [
             {
                 _id: "lecture-9",
-                title: "Will and Trust Planning",
-                description: "Creating effective estate plans",
-                duration: "40 minutes",
-                videoUrl: "https://example.com/video9",
+                name: "Will and Trust Planning",
+                content: "Creating effective estate plans that protect and transfer wealth efficiently.",
+                url: "https://example.com/lecture9",
                 order: 1
             },
             {
                 _id: "lecture-10",
-                title: "Generational Wealth Transfer",
-                description: "Strategies for multi-generational wealth",
-                duration: "35 minutes",
-                videoUrl: "https://example.com/video10",
+                name: "Generational Wealth Transfer",
+                content: "Strategies for multi-generational wealth preservation and transfer.",
+                url: "https://example.com/lecture10",
                 order: 2
             }
         ]
@@ -204,21 +183,32 @@ export function CourseGroupDetail() {
 
     // Smart features state
     const [searchQuery, setSearchQuery] = useState("");
-    const [sortBy, setSortBy] = useState<"title" | "duration" | "level" | "lectures">("title");
+    const [sortBy, setSortBy] = useState<"title" | "lectures">("title");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-    const [filterLevel, setFilterLevel] = useState<string>("all");
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
     const [showFilters, setShowFilters] = useState(false);
 
-    useEffect(() => {
-        // Simulate loading delay
-        const timer = setTimeout(() => {
-            setCourses(mockCourses);
-            setLoading(false);
-        }, 500);
+    const fetchCourses = async () => {
+        if (!id) return;
 
-        return () => clearTimeout(timer);
+        try {
+            setLoading(true);
+            const response = await courseApi.getCourseGroupById(id);
+            setCourses(response.data.courses || []);
+        } catch (err: any) {
+            toast({
+                title: "Error",
+                description: err.response?.data?.message || 'Failed to fetch courses',
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCourses();
     }, [id]);
 
     // Smart filtering and sorting
@@ -226,8 +216,7 @@ export function CourseGroupDetail() {
         let filtered = courses.filter(course => {
             const matchesSearch = course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 course.description.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesLevel = filterLevel === "all" || course.level === filterLevel;
-            return matchesSearch && matchesLevel;
+            return matchesSearch;
         });
 
         filtered.sort((a, b) => {
@@ -235,21 +224,6 @@ export function CourseGroupDetail() {
             switch (sortBy) {
                 case "title":
                     comparison = a.title.localeCompare(b.title);
-                    break;
-                case "duration":
-                    // Convert duration to minutes for comparison
-                    const getMinutes = (duration: string) => {
-                        const match = duration.match(/(\d+)\s*(hour|minute)/i);
-                        if (!match) return 0;
-                        const value = parseInt(match[1]);
-                        return match[2].toLowerCase().includes('hour') ? value * 60 : value;
-                    };
-                    comparison = getMinutes(a.duration) - getMinutes(b.duration);
-                    break;
-                case "level":
-                    const levelOrder = { "Beginner": 1, "Intermediate": 2, "Advanced": 3, "All Levels": 4 };
-                    comparison = (levelOrder[a.level as keyof typeof levelOrder] || 0) -
-                        (levelOrder[b.level as keyof typeof levelOrder] || 0);
                     break;
                 case "lectures":
                     comparison = a.lectures.length - b.lectures.length;
@@ -259,25 +233,15 @@ export function CourseGroupDetail() {
         });
 
         return filtered;
-    }, [courses, searchQuery, sortBy, sortOrder, filterLevel]);
+    }, [courses, searchQuery, sortBy, sortOrder]);
 
     // Smart analytics
     const analytics = useMemo(() => {
         const totalLectures = courses.reduce((sum, course) => sum + course.lectures.length, 0);
-        const totalDuration = courses.reduce((sum, course) => {
-            const match = course.duration.match(/(\d+)\s*hour/i);
-            return sum + (match ? parseInt(match[1]) : 0);
-        }, 0);
-        const levelDistribution = courses.reduce((acc, course) => {
-            acc[course.level] = (acc[course.level] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
 
         return {
             totalCourses: courses.length,
             totalLectures,
-            totalDuration,
-            levelDistribution,
             averageLecturesPerCourse: courses.length > 0 ? (totalLectures / courses.length).toFixed(1) : 0
         };
     }, [courses]);
@@ -316,16 +280,27 @@ export function CourseGroupDetail() {
                 });
             }
         }
-    }, [toast]);
+        fetchCourses(); // Refresh the course list
+    }, [toast, fetchCourses]);
 
-    const handleDeleteCourse = useCallback((courseId: string) => {
+    const handleDeleteCourse = useCallback(async (courseId: string) => {
         const course = courses.find(c => c._id === courseId);
-        setCourses(prev => prev.filter(course => course._id !== courseId));
-        toast({
-            title: "Course Deleted",
-            description: course ? `${course.title} has been deleted.` : "Course deleted successfully.",
-            variant: "destructive",
-        });
+
+        try {
+            await courseApi.deleteCourse(courseId);
+            setCourses(prev => prev.filter(course => course._id !== courseId));
+            toast({
+                title: "Course Deleted",
+                description: course ? `${course.title} has been deleted.` : "Course deleted successfully.",
+                variant: "destructive",
+            });
+        } catch (err: any) {
+            toast({
+                title: "Error",
+                description: err.response?.data?.message || 'Failed to delete course',
+                variant: "destructive",
+            });
+        }
     }, [courses, toast]);
 
     const handleBulkDelete = useCallback(() => {
@@ -364,8 +339,6 @@ export function CourseGroupDetail() {
         const data = filteredAndSortedCourses.map(course => ({
             title: course.title,
             description: course.description,
-            duration: course.duration,
-            level: course.level,
             lectures: course.lectures.length
         }));
 
@@ -391,11 +364,11 @@ export function CourseGroupDetail() {
                 <div className="flex items-center gap-4 mb-6">
                     <Button
                         variant="outline"
+                        size="icon"
                         onClick={() => navigate("/admin/courses")}
-                        className="flex items-center gap-2"
+                        className="hover:bg-royal-blue/10 hover:border-royal-blue/20"
                     >
                         <ArrowLeftIcon className="h-4 w-4" />
-                        Back to Courses
                     </Button>
                 </div>
                 <div className="text-center py-8">Loading courses...</div>
@@ -411,11 +384,11 @@ export function CourseGroupDetail() {
                     <div className="flex items-center gap-4">
                         <Button
                             variant="outline"
+                            size="icon"
                             onClick={() => navigate("/admin/courses")}
-                            className="flex items-center gap-2"
+                            className="hover:bg-royal-blue/10 hover:border-royal-blue/20"
                         >
                             <ArrowLeftIcon className="h-4 w-4" />
-                            Back to Courses
                         </Button>
                         <div>
                             <h1 className="text-2xl font-bold text-royal-dark-gray">Course Group: {id}</h1>
@@ -423,14 +396,6 @@ export function CourseGroupDetail() {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            onClick={handleExportCourses}
-                            className="flex items-center gap-2"
-                        >
-                            <DownloadIcon className="h-4 w-4" />
-                            Export
-                        </Button>
                         <Button
                             onClick={handleAddCourse}
                             className="flex items-center gap-2 bg-royal-blue hover:bg-royal-blue/90"
@@ -442,7 +407,7 @@ export function CourseGroupDetail() {
                 </div>
 
                 {/* Analytics Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <Card>
                         <CardContent className="p-4">
                             <div className="flex items-center gap-2">
@@ -461,17 +426,6 @@ export function CourseGroupDetail() {
                                 <div>
                                     <p className="text-sm text-royal-gray">Total Lectures</p>
                                     <p className="text-2xl font-bold text-royal-dark-gray">{analytics.totalLectures}</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="p-4">
-                            <div className="flex items-center gap-2">
-                                <TrendingUpIcon className="h-5 w-5 text-orange-600" />
-                                <div>
-                                    <p className="text-sm text-royal-gray">Total Duration</p>
-                                    <p className="text-2xl font-bold text-royal-dark-gray">{analytics.totalDuration}h</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -509,8 +463,6 @@ export function CourseGroupDetail() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="title">Title</SelectItem>
-                                <SelectItem value="duration">Duration</SelectItem>
-                                <SelectItem value="level">Level</SelectItem>
                                 <SelectItem value="lectures">Lectures</SelectItem>
                             </SelectContent>
                         </Select>
@@ -552,18 +504,6 @@ export function CourseGroupDetail() {
                 {/* Advanced Filters */}
                 {showFilters && (
                     <div className="flex flex-wrap gap-4 p-4 bg-gray-50 rounded-lg">
-                        <Select value={filterLevel} onValueChange={setFilterLevel}>
-                            <SelectTrigger className="w-40">
-                                <SelectValue placeholder="Filter by level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Levels</SelectItem>
-                                <SelectItem value="Beginner">Beginner</SelectItem>
-                                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                                <SelectItem value="Advanced">Advanced</SelectItem>
-                                <SelectItem value="All Levels">All Levels</SelectItem>
-                            </SelectContent>
-                        </Select>
                         {selectedCourses.length > 0 && (
                             <div className="flex items-center gap-2">
                                 <span className="text-sm text-royal-gray">{selectedCourses.length} selected</span>
@@ -658,22 +598,11 @@ export function CourseGroupDetail() {
                                     </p>
                                     <div className="flex items-center gap-4 text-xs text-royal-gray mb-3">
                                         <div className="flex items-center gap-1">
-                                            <ClockIcon className="h-3 w-3" />
-                                            {course.duration}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <UserIcon className="h-3 w-3" />
-                                            {course.level}
-                                        </div>
-                                        <div className="flex items-center gap-1">
                                             <PlayIcon className="h-3 w-3" />
                                             {course.lectures.length} lectures
                                         </div>
                                     </div>
                                     <div className="flex flex-wrap gap-1">
-                                        <Badge variant="outline" className="text-xs">
-                                            {course.level}
-                                        </Badge>
                                         <Badge variant="secondary" className="text-xs">
                                             {course.lectures.length} lectures
                                         </Badge>
@@ -702,14 +631,6 @@ export function CourseGroupDetail() {
                                                         {course.description}
                                                     </p>
                                                     <div className="flex items-center gap-4 text-xs text-royal-gray">
-                                                        <div className="flex items-center gap-1">
-                                                            <ClockIcon className="h-3 w-3" />
-                                                            {course.duration}
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <UserIcon className="h-3 w-3" />
-                                                            {course.level}
-                                                        </div>
                                                         <div className="flex items-center gap-1">
                                                             <PlayIcon className="h-3 w-3" />
                                                             {course.lectures.length} lectures
@@ -765,7 +686,6 @@ export function CourseGroupDetail() {
                         variant="outline"
                         onClick={() => {
                             setSearchQuery("");
-                            setFilterLevel("all");
                         }}
                     >
                         Clear Filters
@@ -787,8 +707,9 @@ export function CourseGroupDetail() {
             <CourseModal
                 isOpen={isCourseModalOpen}
                 closeDialog={handleCloseModal}
-                editingCourse={editingCourse}
+                editingCourse={editingCourse as any}
                 onCourseSaved={handleCourseSaved}
+                courseGroupId={id}
             />
         </div>
     );

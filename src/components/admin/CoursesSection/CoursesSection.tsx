@@ -11,6 +11,8 @@ import {
   PlusIcon
 } from "lucide-react";
 import { GroupModal } from "./GroupModal";
+import { courseApi } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 
 interface CourseGroup {
@@ -310,6 +312,7 @@ export function CoursesSection() {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<CourseGroup | null>(null);
+  const { toast } = useToast();
 
   const handleAddCourseGroup = () => {
     setEditingGroup(null);
@@ -333,14 +336,26 @@ export function CoursesSection() {
     }
   };
 
-  useEffect(() => {
-    // Simulate loading delay for better UX
-    const timer = setTimeout(() => {
-      setCourseGroups(mockCourseGroups);
+  const fetchCourseGroups = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await courseApi.getAllCourseGroups();
+      setCourseGroups(response.data);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch course groups');
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || 'Failed to fetch course groups',
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-    }, 500);
+    }
+  };
 
-    return () => clearTimeout(timer);
+  useEffect(() => {
+    fetchCourseGroups();
   }, []);
 
   // Use mock course groups and map them to display categories

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   EyeOffIcon,
   NetworkIcon,
@@ -7,7 +8,9 @@ import {
   KeyIcon,
   TruckIcon,
   GraduationCapIcon,
-  ClockIcon
+  ClockIcon,
+  ArrowLeftIcon,
+  HomeIcon
 } from "lucide-react";
 
 
@@ -242,6 +245,9 @@ export function CoursesSection() {
   const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showBackButton, setShowBackButton] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Simulate loading delay for better UX
@@ -252,6 +258,22 @@ export function CoursesSection() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Check if user came from another page (not direct navigation)
+  useEffect(() => {
+    const hasHistory = window.history.length > 1;
+    const cameFromDetail = location.state?.fromDetail || false;
+    setShowBackButton(hasHistory || cameFromDetail);
+  }, [location.state]);
+
+  const handleBackClick = () => {
+    // Check if there's a previous page in history
+    if (window.history.length > 1) {
+      navigate(-1); // Go back to previous page
+    } else {
+      navigate('/'); // Fallback to home page
+    }
+  };
 
   // Use mock course groups and map them to display categories
   const displayCategories = courseGroups.length > 0
@@ -265,7 +287,22 @@ export function CoursesSection() {
 
   if (loading) {
     return (
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 animate-in fade-in duration-300">
+        {/* Smart Back Button */}
+        {showBackButton && (
+          <div className="mb-4">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleBackClick}
+              className="flex items-center gap-3 px-6 py-3 bg-white hover:bg-royal-blue/5 hover:border-royal-blue/20 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md"
+            >
+              <ArrowLeftIcon className="h-5 w-5 text-royal-gray" />
+              <span className="text-royal-dark-gray font-medium">Back</span>
+            </Button>
+          </div>
+        )}
+
         <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
           <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
           <div>
@@ -282,7 +319,22 @@ export function CoursesSection() {
 
   if (error) {
     return (
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 animate-in fade-in duration-300">
+        {/* Smart Back Button */}
+        {showBackButton && (
+          <div className="mb-4">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleBackClick}
+              className="flex items-center gap-3 px-6 py-3 bg-white hover:bg-royal-blue/5 hover:border-royal-blue/20 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md"
+            >
+              <ArrowLeftIcon className="h-5 w-5 text-royal-gray" />
+              <span className="text-royal-dark-gray font-medium">Back</span>
+            </Button>
+          </div>
+        )}
+
         <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
           <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
           <div>
@@ -299,6 +351,21 @@ export function CoursesSection() {
 
   return (
     <div className="flex-1 p-4 animate-in fade-in duration-300">
+      {/* Smart Back Button */}
+      {showBackButton && (
+        <div className="mb-4">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={handleBackClick}
+            className="flex items-center gap-3 px-6 py-3 bg-white hover:bg-royal-blue/5 hover:border-royal-blue/20 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md"
+          >
+            <ArrowLeftIcon className="h-5 w-5 text-royal-gray" />
+            <span className="text-royal-dark-gray font-medium">Back</span>
+          </Button>
+        </div>
+      )}
+
       <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
         <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
         <div>

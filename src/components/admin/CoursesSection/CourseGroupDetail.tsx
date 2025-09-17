@@ -387,6 +387,7 @@ export function CourseGroupDetail() {
                             size="icon"
                             onClick={() => navigate("/admin/courses")}
                             className="hover:bg-royal-blue/10 hover:border-royal-blue/20"
+
                         >
                             <ArrowLeftIcon className="h-4 w-4" />
                         </Button>

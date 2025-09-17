@@ -65,11 +65,11 @@ export function WelcomeSection() {
   };
 
   return (
-    <div className="flex-1 p-4 animate-in fade-in duration-300">
-      <div className="flex gap-3 sm:gap-4 items-center bg-white p-4 sm:p-6 rounded-lg border border-royal-light-gray mb-6 sm:mb-8">
+    <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-300">
+      <div className="flex gap-2 sm:gap-4 items-center bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-8">
         <HandIcon className="hidden sm:block h-12 w-12 text-royal-gray" />
         <div>
-          <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">WELCOME</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">WELCOME</h1>
 
           <p className="text-royal-gray">
             Join thousands of investors nationwide and access free live coaching, video training, chats, & more.
@@ -77,32 +77,32 @@ export function WelcomeSection() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2 sm:space-y-4">
         {welcomeItems.map((item, index) => (
           <div
             key={index}
-            className="w-full flex items-center justify-between p-3 sm:p-4 bg-white rounded-lg border border-royal-light-gray 
-                     hover:shadow-lg hover:scale-[1.02] hover:border-royal-blue/20 
-                     transition-all duration-300 ease-in-out cursor-pointer group"
+            className="w-full flex items-center justify-between p-2 sm:p-4 bg-white rounded-lg border border-royal-light-gray 
+                     hover:shadow-md hover:scale-[1.01] hover:border-royal-blue/10 
+                     transition-all duration-200 ease-in-out cursor-pointer group"
             onClick={() => handleAction(item.action, index)}
           >
-            <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <div
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 group-hover:scale-110 flex-shrink-0 cursor-pointer ${completedItems[index]
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 group-hover:scale-105 flex-shrink-0 cursor-pointer ${completedItems[index]
                   ? "bg-primary border-primary group-hover:bg-royal-blue-dark group-hover:border-royal-blue-dark"
-                  : "border-royal-light-gray group-hover:border-royal-blue/50"
+                  : "border-royal-light-gray group-hover:border-royal-blue/30"
                   }`}
                 onClick={(e) => handleCheckboxClick(index, e)}
               >
-                {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-300 group-hover:scale-110" />}
+                {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-200 group-hover:scale-105" />}
               </div>
-              <span className="text-royal-dark-gray font-medium transition-colors duration-300 group-hover:text-royal-blue">{item.title}</span>
+              <span className="text-royal-dark-gray font-medium transition-colors duration-200 group-hover:text-royal-blue">{item.title}</span>
             </div>
             {/* Desktop Button */}
             <Button
               onClick={() => handleAction(item.action, index)}
-              className="hidden sm:flex bg-primary hover:bg-royal-blue-dark text-white px-6 transition-all duration-300 
-                       group-hover:scale-105 group-hover:shadow-md"
+              className="hidden sm:flex bg-primary hover:bg-royal-blue-dark text-white px-6 transition-all duration-200 
+                       group-hover:scale-102 group-hover:shadow-sm"
             >
               {item.action}
             </Button>
@@ -110,8 +110,8 @@ export function WelcomeSection() {
             {/* Mobile Arrow Button */}
             <Button
               onClick={() => handleAction(item.action, index)}
-              className="sm:hidden bg-primary hover:bg-royal-blue-dark text-white p-2 rounded-full transition-all duration-300 
-                       group-hover:scale-105 group-hover:shadow-md"
+              className="sm:hidden bg-primary hover:bg-royal-blue-dark text-white p-2 rounded-full transition-all duration-200 
+                       group-hover:scale-102 group-hover:shadow-sm"
             >
               <ArrowRightIcon className="h-4 w-4" />
             </Button>

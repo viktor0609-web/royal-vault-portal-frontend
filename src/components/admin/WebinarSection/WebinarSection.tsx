@@ -66,7 +66,7 @@ export function WebinarSection() {
     return (
         <div className="flex-1 p-4 flex flex-col">
             <div className="flex gap-4 items-center bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-                <VideoIcon className="h-10 w-10 text-royal-gray" />
+                <VideoIcon className="h-10 w-10 text-royal-gray hidden min-[700px]:block" />
                 <h1 className="text-2xl font-bold text-royal-dark-gray mb-2 uppercase">Webinars</h1>
             </div>
             <Table className="w-full">
@@ -110,7 +110,7 @@ export function WebinarSection() {
                 </TableBody>
             </Table>
             <WebinarModal isOpen={open} closeDialog={closeModal} />
-            <RecsModal isOpen={recsOpen} closeDialog={closeModal}/>
+            <RecsModal isOpen={recsOpen} closeDialog={closeModal} />
         </div>
     );
 }

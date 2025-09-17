@@ -73,7 +73,7 @@ export function WebinarsSection() {
         window.open(`https://royal-vault-nu.vercel.app/registration?title=${webinar.title}`, '_blank');
       }
     } else if (fitlerIndex == 1) {
-      
+
     } else {
 
     }
@@ -85,7 +85,7 @@ export function WebinarsSection() {
   return (
     <div className="flex-1 p-4">
       <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-1">
-        <VideoIcon className="h-12 w-12 text-royal-gray" />
+        <VideoIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
         <div>
           <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">WEBINARS</h1>
           <p className="text-royal-gray">

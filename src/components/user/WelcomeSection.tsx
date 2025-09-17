@@ -65,7 +65,7 @@ export function WelcomeSection() {
   };
 
   return (
-    <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-300">
+    <div className="flex-1 p-2 sm:p-2 animate-in fade-in duration-300">
       <div className="flex gap-2 sm:gap-4 items-center bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-8">
         <HandIcon className="hidden sm:block h-12 w-12 text-royal-gray" />
         <div>

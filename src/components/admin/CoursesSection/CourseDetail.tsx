@@ -232,7 +232,7 @@ export function CourseDetail() {
                             .sort((a, b) => a.order - b.order)
                             .map((lecture, index) => (
                                 <Card key={lecture._id} className="hover:shadow-md transition-shadow">
-                                    <CardContent className="p-4">
+                                    <CardContent className="p-2">
                                         <div className="flex items-center gap-4">
                                             <div className="flex items-center gap-2 text-royal-gray">
                                                 <GripVerticalIcon className="h-4 w-4 cursor-move" />

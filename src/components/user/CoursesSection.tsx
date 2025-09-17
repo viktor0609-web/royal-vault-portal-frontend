@@ -306,7 +306,7 @@ export function CoursesSection() {
   }
 
   return (
-    <div className="flex-1 p-4 animate-in fade-in duration-300">
+    <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-300">
       <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
         <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
         <div>

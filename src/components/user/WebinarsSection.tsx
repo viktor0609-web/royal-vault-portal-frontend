@@ -84,8 +84,8 @@ export function WebinarsSection() {
   }
 
   return (
-    <div className="flex-1 p-3 min-[700px]:p-4 animate-in fade-in duration-300">
-      <div className="flex items-center gap-3 min-[700px]:gap-4 bg-white p-4 min-[700px]:p-6 rounded-lg border border-royal-light-gray mb-1">
+    <div className="flex-1 p-2 min-[700px]:p-4 animate-in fade-in duration-300">
+      <div className="flex items-center gap-2 min-[700px]:gap-4 bg-white p-3 min-[700px]:p-6 rounded-lg border border-royal-light-gray mb-1">
         <VideoIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
         <div>
           <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">WEBINARS</h1>
@@ -95,7 +95,7 @@ export function WebinarsSection() {
         </div>
       </div>
 
-      <div className="flex flex-col min-[700px]:flex-row gap-3 items-center min-[700px]:items-center bg-white p-4 min-[700px]:p-6 rounded-lg border border-royal-light-gray mb-2">
+      <div className="flex flex-col min-[700px]:flex-row gap-2 min-[700px]:gap-3 items-center min-[700px]:items-center bg-white p-3 min-[700px]:p-6 rounded-lg border border-royal-light-gray mb-2">
         <p className="text-royal-gray hidden min-[700px]:block">Filter by:</p>
         <div className="flex gap-1 min-[700px]:gap-2 justify-center w-full min-[700px]:w-auto">
           {filterTabs.map((tab, index) => (
@@ -119,7 +119,7 @@ export function WebinarsSection() {
         {webinars[filterTabs[fitlerIndex].label].map((webinar, index) => (
           <div
             key={index}
-            className="flex items-center justify-between p-4 min-[700px]:p-6 bg-sidebar rounded-lg border border-royal-light-gray hover:shadow-lg hover:scale-[1.02] hover:border-royal-blue/20 transition-all duration-300 ease-in-out cursor-pointer group animate-in slide-in-from-bottom duration-500"
+            className="flex items-center justify-between p-3 min-[700px]:p-6 bg-sidebar rounded-lg border border-royal-light-gray hover:shadow-lg hover:scale-[1.02] hover:border-royal-blue/20 transition-all duration-300 ease-in-out cursor-pointer group animate-in slide-in-from-bottom duration-500"
             style={{ animationDelay: `${200 + index * 100}ms` }}
             onClick={() => handleRegister(webinar)}
           >
@@ -127,7 +127,7 @@ export function WebinarsSection() {
               <h3 className="text-lg font-semibold text-royal-dark-gray mb-2 group-hover:text-royal-blue transition-colors duration-300">
                 {webinar.title}
               </h3>
-              <div className="flex items-center gap-4 text-sm text-royal-gray">
+              <div className="flex items-center gap-2 min-[700px]:gap-4 text-sm text-royal-gray">
                 <span className="group-hover:text-royal-dark-gray transition-colors duration-300">{webinar.date} @ {webinar.time}</span>
                 <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium group-hover:bg-primary/20 group-hover:scale-105 transition-all duration-300">
                   {webinar.status}

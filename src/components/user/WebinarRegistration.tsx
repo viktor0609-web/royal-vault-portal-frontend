@@ -76,7 +76,7 @@ export function WebinarRegistration({ webinar }: WebinarRegistrationProps) {
             <form onSubmit={handleSubmit}>
               {registerStatus ?
                 <div className="flex gap-4 items-center">
-                  <CheckIcon className="text-green-500 w-20" />
+                  <CheckIcon className="text-green-500 w-20 hidden min-[700px]:block" />
                   <h2 className="text-2xl font-bold text-black uppercase text-center">Your sit is scheduled</h2>
                 </div> :
                 <>
@@ -131,7 +131,7 @@ export function WebinarRegistration({ webinar }: WebinarRegistrationProps) {
         {/* Footer Info */}
         <div className="pt-6">
           <div className="flex flex-col items-center gap-4 mb-4">
-            <img src='/imgs/logo.svg'  className="w-7 filter invert brightness-0" />
+            <img src='/imgs/logo.svg' className="w-7 filter invert brightness-0" />
             <div>
               <div className="font-bold text-white">ROYAL LEGAL</div>
               <div className="font-bold text-white">SOLUTIONS</div>

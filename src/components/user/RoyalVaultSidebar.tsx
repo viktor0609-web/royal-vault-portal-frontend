@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -12,7 +12,8 @@ import {
   LogOutIcon,
   AxeIcon,
   MessageCircleQuestionIcon,
-  UserIcon
+  UserIcon,
+  ArrowLeftIcon
 } from "lucide-react";
 import {
   Sidebar,
@@ -45,12 +46,15 @@ const bottomItemsForUser = [
 
 export function RoyalVaultSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { setOpenMobile } = useSidebar();
   const { openDialog } = useAuthDialog();
   const { user, logout } = useAuth();
+
+  const isAdminView = location.pathname.startsWith('/admin');
+
   const menuItems = [
     ...navigationItems,
-    ...(user?.role === "admin" ? [{ title: "Admin", icon: AxeIcon, path: "/admin/webinars" }] : []),
   ];
 
   const isActive = (path: string) => {
@@ -69,6 +73,15 @@ export function RoyalVaultSidebar() {
     setOpenMobile(false);
   };
 
+  const handleToggleView = () => {
+    if (isAdminView) {
+      navigate('/');
+    } else {
+      navigate('/admin/webinars');
+    }
+    setOpenMobile(false);
+  };
+
   return (
     <Sidebar className="w-48">
       {/* Desktop Header */}
@@ -80,6 +93,25 @@ export function RoyalVaultSidebar() {
       </div>
 
       <SidebarContent className="flex flex-col justify-between h-full">
+        {/* Toggle Button for Admin/User View - Only for logged-in admins */}
+        {user && user.role === "admin" && (
+          <SidebarGroup className="border-b border-royal-light-gray pb-4 mb-4">
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={handleToggleView}
+                    className="w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors bg-royal-blue text-white hover:bg-royal-blue-dark"
+                  >
+                    <ArrowLeftIcon className="mr-3 h-5 w-5" />
+                    <span>{isAdminView ? "Back to User View" : "Switch to Admin"}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         <div className="flex-1 flex items-center justify-center">
           <SidebarGroup>
             <SidebarGroupContent>

@@ -60,99 +60,91 @@ export function WebinarRegistration({ webinar }: WebinarRegistrationProps) {
   if (!webinar) return <div className="p-8 text-center">No webinar selected.</div>;
 
   return (
-    <div className="flex flex-col w-full">
-      {/* Hero / Header Section */}
-      <div
-        className="flex flex-col items-center justify-center h-[50dvh] min-h-[500px] bg-cover"
-        style={{
-          backgroundImage: "url('/imgs/registration_back.png')",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/80" />  {/* 50% opacity black overlay */}
-        <div className="flex flex-col items-center z-10 text-center text-white">
-          <h1 className="text-4xl font-bold mb-4">{title}</h1>
-          <div className="bg-white backdrop-blur-sm rounded-lg w-[500px] p-6 mx-4 mb-3">
-            {registerStatus ? '' : <h2 className="text-2xl font-bold mb-4 text-black">REGISTER FOR THE WEBINAR</h2>}
-            <form onSubmit={handleSubmit}>
-              {registerStatus ?
-                <div className="flex gap-4 items-center">
-                  <CheckIcon className="text-green-500 w-20 hidden min-[700px]:block" />
-                  <h2 className="text-2xl font-bold text-black uppercase text-center">Your sit is scheduled</h2>
-                </div> :
-                <>
-                  <Input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="mt-4 mb-4 bg-white/90 text-black placeholder:text-gray-600"
-                    required
-                  />
-                  <Button
-                    type="submit"
-                    className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
-                    onClick={() => setRegisterStatus(true)}
-                  >
-                    Yes! I Want To Reserve My Seat Now
-                  </Button>
-                </>}
+    <div className="flex flex-col w-full min-h-screen">
+      {/* Top Section - Dark Gray Background */}
+      <div className="bg-gray-800 text-center py-8 px-4">
+        <p className="text-gray-300 text-sm mb-2">Wealth Brief & Investor Roundtable</p>
+        <h1 className="text-2xl md:text-4xl font-bold text-white leading-tight">
+          From Chaos to Cash Flow: Why Storage Is the Smartest Play of the Decade
+        </h1>
+      </div>
 
-
-            </form>
-          </div>
-
-          <div className="text-3xl font-bold text-yellow-100 mb-6">
-            {webinar.date}, {webinar.time}
-          </div>
-
-          <div className="flex justify-center gap-8 mb-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-white">{countdown.days}</div>
-              <div className="text-sm text-white">Days</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold  text-white">{countdown.hours}</div>
-              <div className="text-sm text-white">Hours</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold  text-white">{countdown.minutes}</div>
-              <div className="text-sm text-white">Minutes</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-white">{countdown.seconds}</div>
-              <div className="text-sm text-white">Seconds</div>
-            </div>
-          </div>
+      {/* Registration Form Section - White Card */}
+      <div className="bg-gray-800 flex justify-center py-8 px-4">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <h2 className="text-xl font-bold text-black text-center mb-6">REGISTER FOR THE WEBINAR</h2>
+          <form onSubmit={handleSubmit}>
+            {registerStatus ? (
+              <div className="flex gap-4 items-center justify-center">
+                <CheckIcon className="text-green-500 w-8 h-8" />
+                <h2 className="text-xl font-bold text-black uppercase text-center">Your seat is scheduled</h2>
+              </div>
+            ) : (
+              <>
+                <Input
+                  type="email"
+                  placeholder="liz@royallegalsolutions.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full mb-4 bg-blue-50 border-blue-200 text-black placeholder:text-gray-600 rounded-lg"
+                  required
+                />
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg font-bold rounded-lg"
+                  onClick={() => setRegisterStatus(true)}
+                >
+                  Yes! I Want To Reserve My Seat Now
+                </Button>
+              </>
+            )}
+          </form>
         </div>
       </div>
-      {/* Countdown & Info Section */}
-      <div className="p-8 text-center flex-1 bg-gray-800 z-10">
 
-        {/* Footer Info */}
-        <div className="pt-6">
-          <div className="flex flex-col items-center gap-4 mb-4">
-            <img src='/imgs/logo.svg' className="w-7 filter invert brightness-0" />
-            <div>
-              <div className="font-bold text-white">ROYAL LEGAL</div>
-              <div className="font-bold text-white">SOLUTIONS</div>
-            </div>
+      {/* Event Details & Countdown Section - Golden Gradient */}
+      <div className="bg-gradient-to-br from-yellow-400 via-orange-500 to-yellow-600 text-center py-8 px-4">
+        <div className="text-2xl md:text-3xl font-bold text-yellow-100 mb-6">
+          Friday September 19th, 2:00am
+        </div>
+
+        <div className="flex justify-center gap-4 md:gap-8 mb-4">
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-white">{countdown.days}</div>
+            <div className="text-sm text-white">Days</div>
           </div>
-
-          <p className="text-xs text-white mb-2">
-            Copyright © 2023 Royal Legal Solutions. All rights reserved.
-          </p>
-
-          <div className="flex justify-center gap-4 text-base text-white mt-4">
-            <a href="#" className="hover:underline">Disclaimer</a>
-            <a href="#" className="hover:underline">Privacy</a>
-            <a href="#" className="hover:underline">Terms</a>
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-white">{countdown.hours}</div>
+            <div className="text-sm text-white">Hours</div>
           </div>
+          <div className="text-center">
+            <div className="text-3xl md:text-4xl font-bold text-white">{countdown.minutes}</div>
+            <div className="text-sm text-white">Minutes</div>
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="text-3xl md:text-4xl font-bold text-white">{countdown.seconds}</div>
+          <div className="text-sm text-white">Seconds</div>
+        </div>
+      </div>
 
-          <p className="text-xs text-white mt-4 leading-relaxed max-w-5xl mx-auto">
-            This website is operated and maintained by Royal Legal Solutions. Use of the website is governed by its Terms of Service and Privacy Policy.<br /><br />
-            Royal Legal Solutions is a tax and law firm with licensed CPAs, attorneys and paralegals. We do not offer investment opportunities, provide a "get rich quick" scheme, or deal in gray or black hat tax savings tactics. We provide educational information about how tax, legal, and investing work together so that individuals can better evaluate the state of their financial situation and the quality of their providers.<br /><br />
-            The information contained in this site is provided for informational purposes only, and should not be construed as legal advice on any subject matter. You should not act on the basis of any content included in this site without seeking professional advice. We disclaim all liability for actions you take or fail to take based on any content on this site. The operation of this site does not create an attorney-client relationship between you and Royal Legal Solutions.
-          </p>
+      {/* Footer Section - Dark Gray Background */}
+      <div className="bg-gray-800 text-center py-8 px-4">
+        <div className="flex flex-col items-center gap-4 mb-4">
+          <img src='/imgs/logo.svg' className="w-8 filter invert brightness-0" />
+          <div>
+            <div className="font-bold text-white text-sm">ROYAL LEGAL SOLUTIONS</div>
+          </div>
+        </div>
+
+        <p className="text-xs text-white mb-4">
+          Copyright © 2025 Royal Legal Solutions. All rights reserved.
+        </p>
+
+        <div className="flex justify-center gap-4 text-sm text-white">
+          <a href="#" className="hover:underline">Disclaimer</a>
+          <a href="#" className="hover:underline">Privacy</a>
+          <a href="#" className="hover:underline">Terms</a>
         </div>
       </div>
     </div>

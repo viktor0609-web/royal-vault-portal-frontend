@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import { useAuth } from "@/context/AuthContext";
+import { ArrowLeftIcon } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -23,6 +24,7 @@ const navigationItems = [
 
 export function AdminSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { setOpenMobile } = useSidebar();
   const { openDialog } = useAuthDialog();
   const { user, logout } = useAuth();
@@ -43,6 +45,11 @@ export function AdminSidebar() {
     setOpenMobile(false);
   };
 
+  const handleToggleToUser = () => {
+    navigate('/');
+    setOpenMobile(false);
+  };
+
   return (
     <Sidebar className="w-48">
       {/* Desktop Header */}
@@ -54,6 +61,25 @@ export function AdminSidebar() {
       </div>
 
       <SidebarContent className="flex flex-col justify-between h-full">
+        {/* Toggle Button to User View - Only for logged-in admins */}
+        {user && user.role === "admin" && (
+          <SidebarGroup className="border-b border-royal-light-gray pb-4 mb-4">
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={handleToggleToUser}
+                    className="w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors bg-royal-blue text-white hover:bg-royal-blue-dark"
+                  >
+                    <ArrowLeftIcon className="mr-3 h-5 w-5" />
+                    <span>Back to User View</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         <div className="flex-1 flex items-center justify-center">
           <SidebarGroup>
             <SidebarGroupContent>

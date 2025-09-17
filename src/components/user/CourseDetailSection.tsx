@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, EyeOffIcon, PlayIcon, CheckCircleIcon, MoveLeftIcon, PauseIcon, Volume2Icon, VolumeXIcon, MaximizeIcon, RotateCcwIcon, SkipBackIcon, SkipForwardIcon } from "lucide-react";
+import { ArrowLeftIcon, EyeOffIcon, PlayIcon, CheckCircleIcon, MoveLeftIcon, PauseIcon, Volume2Icon, VolumeXIcon, MaximizeIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const curriculumItems = [
@@ -47,6 +47,7 @@ export function CourseDetailSection() {
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showControls, setShowControls] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showFullTitle, setShowFullTitle] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
 
@@ -82,16 +83,31 @@ export function CourseDetailSection() {
   };
 
   // Video player functions
-  const handleVideoClick = () => {
-    if (isVideoPlaying) {
-      videoRef.current?.pause();
-    } else {
-      videoRef.current?.play();
+  const handleVideoClick = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
     }
-    setIsVideoPlaying(!isVideoPlaying);
+    console.log('Video clicked, current state:', isVideoPlaying, 'Fullscreen:', isFullscreen);
+    if (videoRef.current) {
+      if (isVideoPlaying) {
+        console.log('Pausing video');
+        videoRef.current.pause();
+      } else {
+        console.log('Playing video');
+        videoRef.current.play().catch(error => {
+          console.error('Error playing video:', error);
+        });
+      }
+    } else {
+      console.log('Video ref not available');
+    }
   };
 
-  const handlePlayPause = () => {
+  const handlePlayPause = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     if (videoRef.current) {
       if (isVideoPlaying) {
         videoRef.current.pause();
@@ -117,7 +133,10 @@ export function CourseDetailSection() {
     }
   };
 
-  const handleMute = () => {
+  const handleMute = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     if (videoRef.current) {
       if (isMuted) {
         videoRef.current.volume = volume;
@@ -136,25 +155,35 @@ export function CourseDetailSection() {
     }
   };
 
-  const handleSkipBack = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
-    }
-  };
 
-  const handleSkipForward = () => {
-    if (videoRef.current) {
-      videoRef.current.currentTime = Math.min(duration, videoRef.current.currentTime + 10);
+  const handleFullscreen = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
     }
-  };
-
-  const handleFullscreen = () => {
     if (videoRef.current) {
       if (!document.fullscreenElement) {
-        videoRef.current.requestFullscreen();
+        // Mobile-friendly fullscreen
+        if (videoRef.current.requestFullscreen) {
+          videoRef.current.requestFullscreen();
+        } else if ((videoRef.current as any).webkitRequestFullscreen) {
+          (videoRef.current as any).webkitRequestFullscreen();
+        } else if ((videoRef.current as any).mozRequestFullScreen) {
+          (videoRef.current as any).mozRequestFullScreen();
+        } else if ((videoRef.current as any).msRequestFullscreen) {
+          (videoRef.current as any).msRequestFullscreen();
+        }
         setIsFullscreen(true);
       } else {
-        document.exitFullscreen();
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          (document as any).webkitExitFullscreen();
+        } else if ((document as any).mozCancelFullScreen) {
+          (document as any).mozCancelFullScreen();
+        } else if ((document as any).msExitFullscreen) {
+          (document as any).msExitFullscreen();
+        }
         setIsFullscreen(false);
       }
     }
@@ -163,8 +192,58 @@ export function CourseDetailSection() {
   const handleVideoDoubleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Double click detected on video');
+    console.log('Double click detected on video area');
     handleFullscreen();
+  };
+
+  // Fullscreen-specific click handler
+  const handleFullscreenVideoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Fullscreen video clicked, current state:', isVideoPlaying);
+    if (videoRef.current) {
+      if (isVideoPlaying) {
+        console.log('Pausing video in fullscreen');
+        videoRef.current.pause();
+      } else {
+        console.log('Playing video in fullscreen');
+        videoRef.current.play().catch(error => {
+          console.error('Error playing video in fullscreen:', error);
+        });
+      }
+    }
+  };
+
+  // Mobile-friendly fullscreen handler
+  const handleMobileFullscreen = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    if (videoRef.current) {
+      // For mobile, we'll use a different approach
+      const video = videoRef.current;
+
+      // Try to enter fullscreen
+      if (video.requestFullscreen) {
+        video.requestFullscreen();
+      } else if ((video as any).webkitRequestFullscreen) {
+        (video as any).webkitRequestFullscreen();
+      } else if ((video as any).mozRequestFullScreen) {
+        (video as any).mozRequestFullScreen();
+      } else if ((video as any).msRequestFullscreen) {
+        (video as any).msRequestFullscreen();
+      } else {
+        // Fallback: make video larger on mobile
+        video.style.position = 'fixed';
+        video.style.top = '0';
+        video.style.left = '0';
+        video.style.width = '100vw';
+        video.style.height = '100vh';
+        video.style.zIndex = '9999';
+        video.style.backgroundColor = 'black';
+        setIsFullscreen(true);
+      }
+    }
   };
 
   const formatTime = (time: number) => {
@@ -173,6 +252,7 @@ export function CourseDetailSection() {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
+
   // Video event handlers
   useEffect(() => {
     const video = videoRef.current;
@@ -180,8 +260,14 @@ export function CourseDetailSection() {
 
     const handleTimeUpdate = () => setCurrentTime(video.currentTime);
     const handleDurationChange = () => setDuration(video.duration);
-    const handlePlay = () => setIsVideoPlaying(true);
-    const handlePause = () => setIsVideoPlaying(false);
+    const handlePlay = () => {
+      console.log('Video play event triggered');
+      setIsVideoPlaying(true);
+    };
+    const handlePause = () => {
+      console.log('Video pause event triggered');
+      setIsVideoPlaying(false);
+    };
     const handleEnded = () => {
       setIsVideoPlaying(false);
       // Auto-mark as complete when video ends
@@ -189,12 +275,18 @@ export function CourseDetailSection() {
         prev.map((completed, i) => i === currentItem ? true : completed)
       );
     };
+    const handleFullscreenChange = () => {
+      const isFullscreen = !!document.fullscreenElement;
+      console.log('Fullscreen change:', isFullscreen);
+      setIsFullscreen(isFullscreen);
+    };
 
     video.addEventListener('timeupdate', handleTimeUpdate);
     video.addEventListener('durationchange', handleDurationChange);
     video.addEventListener('play', handlePlay);
     video.addEventListener('pause', handlePause);
     video.addEventListener('ended', handleEnded);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
       video.removeEventListener('timeupdate', handleTimeUpdate);
@@ -202,6 +294,7 @@ export function CourseDetailSection() {
       video.removeEventListener('play', handlePlay);
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('ended', handleEnded);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, [currentItem]);
 
@@ -243,8 +336,8 @@ export function CourseDetailSection() {
           showMobileContent ? (
             /* Mobile Content View */
             <div className="flex-1 flex flex-col w-full">
-              {/* Back Button - Integrated */}
-              <div className="mb-4 flex justify-end">
+              {/* Back Button and Mobile Fullscreen - Integrated */}
+              <div className="mb-4 flex justify-between items-center">
                 <div
                   className="inline-flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue cursor-pointer transition-all duration-300 hover:bg-royal-blue/5 rounded-lg"
                   onClick={handleBackToList}
@@ -252,22 +345,31 @@ export function CourseDetailSection() {
                   <ArrowLeftIcon className="h-4 w-4" />
                   <span className="text-sm font-medium">Back to List</span>
                 </div>
+
+                {/* Mobile Fullscreen Button */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-blue/5 border-royal-light-gray hover:border-royal-blue/20 transition-all duration-300"
+                  onClick={(e) => handleMobileFullscreen(e)}
+                >
+                  <MaximizeIcon className="h-4 w-4" />
+                  <span className="text-sm font-medium">Fullscreen</span>
+                </Button>
               </div>
 
               {/* Content Area */}
               <div className="flex-1 flex flex-col">
                 {/* Header */}
-                <div className="w-full flex items-center justify-between p-3 sm:p-4 bg-white rounded-lg border border-royal-light-gray mb-6 
-                             hover:shadow-lg hover:scale-[1.02] hover:border-royal-blue/20 
-                             transition-all duration-300 ease-in-out group">
-                  <h1 className="text-2xl font-bold text-royal-dark-gray group-hover:text-royal-blue transition-colors duration-300">
+                <div className="w-full flex items-center justify-between p-3 sm:p-4 bg-white rounded-lg border border-royal-light-gray mb-6">
+                  <h1 className="text-2xl font-bold text-royal-dark-gray line-clamp-1">
                     {curriculumItems[currentItem].title}
                   </h1>
                   {/* Completion Status Checkbox */}
                   <div
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 cursor-pointer hover:scale-110 flex-shrink-0 ${completedItems[currentItem]
-                      ? "bg-primary border-primary hover:bg-royal-blue-dark hover:border-royal-blue-dark"
-                      : "border-royal-light-gray hover:border-royal-blue/50"
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 cursor-pointer flex-shrink-0 ${completedItems[currentItem]
+                      ? "bg-primary border-primary"
+                      : "border-royal-light-gray"
                       }`}
                     onClick={(e) => handleCheckboxClick(currentItem, e)}
                   >
@@ -278,22 +380,24 @@ export function CourseDetailSection() {
                 {/* Video Content */}
                 <div
                   className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 
-                             hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out group"
+                             group cursor-pointer"
                   onMouseEnter={() => setShowControls(true)}
                   onMouseLeave={() => setShowControls(false)}
+                  onClick={handleVideoClick}
+                  onDoubleClick={handleVideoDoubleClick}
                 >
                   <div
-                    className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden relative 
-                                group-hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden relative"
+                    title="Click to play/pause, double-click for fullscreen"
+                    onClick={handleVideoClick}
                     onDoubleClick={handleVideoDoubleClick}
-                    title="Double-click for fullscreen"
                   >
                     {/* Video Element */}
                     <video
                       ref={videoRef}
                       src={curriculumItems[currentItem].videoUrl}
-                      className="w-full h-full object-cover"
-                      onClick={handleVideoClick}
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={(e) => isFullscreen ? handleFullscreenVideoClick(e) : handleVideoClick(e)}
                       onDoubleClick={handleVideoDoubleClick}
                     />
 
@@ -305,7 +409,7 @@ export function CourseDetailSection() {
                           <Button
                             size="lg"
                             className="bg-black/70 hover:bg-black/80 text-white rounded-full p-6 
-                                     group-hover:scale-110 transition-all duration-300"
+ transition-all duration-300"
                             onClick={handlePlayPause}
                           >
                             <PlayIcon className="h-12 w-12 ml-1" />
@@ -318,6 +422,7 @@ export function CourseDetailSection() {
                         {/* Progress Bar */}
                         <div className="mb-4">
                           <div className="w-full bg-white/30 rounded-full h-1 cursor-pointer" onClick={(e) => {
+                            e.stopPropagation();
                             const rect = e.currentTarget.getBoundingClientRect();
                             const clickX = e.clientX - rect.left;
                             const newTime = (clickX / rect.width) * duration;
@@ -330,84 +435,95 @@ export function CourseDetailSection() {
                           </div>
                         </div>
 
-                        {/* Control Buttons */}
-                        <div className="flex items-center justify-between text-white">
-                          <div className="flex items-center gap-3">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-white hover:bg-white/20 p-2"
-                              onClick={handlePlayPause}
-                            >
-                              {isVideoPlaying ? <PauseIcon className="h-5 w-5" /> : <PlayIcon className="h-5 w-5" />}
-                            </Button>
+                        {/* Control Buttons - Mobile Optimized */}
+                        <div className="flex flex-col gap-3 text-white">
+                          {/* Top Row - Main Controls */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-white hover:bg-white/20 p-3 rounded-lg"
+                                onClick={(e) => handlePlayPause(e)}
+                              >
+                                {isVideoPlaying ? <PauseIcon className="h-6 w-6" /> : <PlayIcon className="h-6 w-6" />}
+                              </Button>
+                            </div>
 
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-white hover:bg-white/20 p-2"
-                              onClick={handleSkipBack}
-                            >
-                              <SkipBackIcon className="h-5 w-5" />
-                            </Button>
+                            {/* Video Title - Full title in control bar */}
+                            <div className="flex-1 flex justify-center px-4">
+                              <div className="text-center">
+                                <span className="text-xs text-white/70 line-clamp-2 max-w-xs">
+                                  {curriculumItems[currentItem].title}
+                                </span>
+                              </div>
+                            </div>
 
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-white hover:bg-white/20 p-2"
-                              onClick={handleSkipForward}
-                            >
-                              <SkipForwardIcon className="h-5 w-5" />
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium bg-black/30 px-2 py-1 rounded">
+                                {formatTime(currentTime)} / {curriculumItems[currentItem].duration}
+                              </span>
 
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-white hover:bg-white/20 p-2"
-                              onClick={handleMute}
-                            >
-                              {isMuted ? <VolumeXIcon className="h-5 w-5" /> : <Volume2Icon className="h-5 w-5" />}
-                            </Button>
-
-                            <div className="w-20">
-                              <input
-                                type="range"
-                                min="0"
-                                max="1"
-                                step="0.1"
-                                value={isMuted ? 0 : volume}
-                                onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                                className="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer"
-                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-white hover:bg-white/20 p-3 rounded-lg"
+                                onClick={(e) => window.innerWidth < 1024 ? handleMobileFullscreen(e) : handleFullscreen(e)}
+                                title="Fullscreen"
+                              >
+                                <MaximizeIcon className="h-5 w-5" />
+                              </Button>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm">
-                              {formatTime(currentTime)} / {curriculumItems[currentItem].duration}
-                            </span>
+                          {/* Bottom Row - Volume and Speed Controls */}
+                          <div className="flex items-center justify-between gap-4">
+                            {/* Volume Controls */}
+                            <div className="flex items-center gap-2 flex-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-white hover:bg-white/20 p-2 rounded-lg"
+                                onClick={(e) => handleMute(e)}
+                                title={isMuted ? "Unmute" : "Mute"}
+                              >
+                                {isMuted ? <VolumeXIcon className="h-5 w-5" /> : <Volume2Icon className="h-5 w-5" />}
+                              </Button>
 
-                            <select
-                              value={playbackRate}
-                              onChange={(e) => handlePlaybackRateChange(parseFloat(e.target.value))}
-                              className="bg-black/50 text-white text-sm rounded px-2 py-1"
-                            >
-                              <option value={0.5}>0.5x</option>
-                              <option value={0.75}>0.75x</option>
-                              <option value={1}>1x</option>
-                              <option value={1.25}>1.25x</option>
-                              <option value={1.5}>1.5x</option>
-                              <option value={2}>2x</option>
-                            </select>
+                              <div className="flex-1 max-w-24">
+                                <input
+                                  type="range"
+                                  min="0"
+                                  max="1"
+                                  step="0.1"
+                                  value={isMuted ? 0 : volume}
+                                  onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="w-full h-2 bg-white/30 rounded-lg appearance-none cursor-pointer slider"
+                                  style={{
+                                    background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.3) ${(isMuted ? 0 : volume) * 100}%, rgba(255,255,255,0.3) 100%)`
+                                  }}
+                                />
+                              </div>
+                            </div>
 
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-white hover:bg-white/20 p-2"
-                              onClick={handleFullscreen}
-                            >
-                              <MaximizeIcon className="h-5 w-5" />
-                            </Button>
+                            {/* Playback Speed */}
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-white/70">Speed:</span>
+                              <select
+                                value={playbackRate}
+                                onChange={(e) => handlePlaybackRateChange(parseFloat(e.target.value))}
+                                onClick={(e) => e.stopPropagation()}
+                                className="bg-black/50 text-white text-sm rounded px-2 py-1 border border-white/20 focus:border-white/40 focus:outline-none"
+                              >
+                                <option value={0.5}>0.5x</option>
+                                <option value={0.75}>0.75x</option>
+                                <option value={1}>1x</option>
+                                <option value={1.25}>1.25x</option>
+                                <option value={1.5}>1.5x</option>
+                                <option value={2}>2x</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -420,28 +536,39 @@ export function CourseDetailSection() {
             /* Mobile List View */
             <div className="w-full bg-white p-6">
               <div className="mb-6">
-                <h3 className="font-semibold text-royal-dark-gray mb-4">Land Trusts</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-semibold text-royal-dark-gray">Land Trusts</h3>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-blue/5 border-royal-light-gray hover:border-royal-blue/20 transition-all duration-300"
+                    onClick={(e) => handleMobileFullscreen(e)}
+                  >
+                    <MaximizeIcon className="h-4 w-4" />
+                    <span className="text-sm font-medium">Fullscreen</span>
+                  </Button>
+                </div>
                 <div className="space-y-4">
                   {curriculumItems.map((item, index) => (
                     <div
                       key={index}
                       className={`w-full flex items-center p-3 sm:p-4 rounded-lg border transition-all duration-300 ease-in-out cursor-pointer group ${index === currentItem
                         ? "bg-primary/5 border-primary shadow-lg scale-[1.02] ring-2 ring-primary/30"
-                        : "bg-white border-royal-light-gray hover:shadow-lg hover:scale-[1.02] hover:border-royal-blue/20"
+                        : "bg-white border-royal-light-gray"
                         }`}
                       onClick={() => handleItemClick(index)}
                     >
                       <div className="flex items-center gap-3 sm:gap-4">
                         <div
-                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 group-hover:scale-110 flex-shrink-0 cursor-pointer ${completedItems[index]
-                            ? "bg-primary border-primary group-hover:bg-royal-blue-dark group-hover:border-royal-blue-dark"
-                            : "border-royal-light-gray group-hover:border-royal-blue/50"
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300  flex-shrink-0 cursor-pointer ${completedItems[index]
+                            ? "bg-primary border-primary "
+                            : "border-royal-light-gray "
                             }`}
                           onClick={(e) => handleCheckboxClick(index, e)}
                         >
-                          {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-300 group-hover:scale-110" />}
+                          {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-300 " />}
                         </div>
-                        <span className={`font-medium transition-colors duration-300 group-hover:text-royal-blue ${index === currentItem
+                        <span className={`font-medium transition-colors duration-300  ${index === currentItem
                           ? "text-primary font-semibold"
                           : "text-royal-dark-gray"
                           }`}>
@@ -468,22 +595,22 @@ export function CourseDetailSection() {
                       key={index}
                       className={`w-full flex items-center p-3 sm:p-4 rounded-lg border transition-all duration-300 ease-in-out cursor-pointer group ${index === currentItem
                         ? "bg-primary/5 border-primary shadow-lg scale-[1.02] ring-2 ring-primary/30 min-[1024px]:bg-primary/10 min-[1024px]:shadow-xl min-[1024px]:scale-[1.03] min-[1024px]:ring-4 min-[1024px]:ring-primary/40"
-                        : "bg-white border-royal-light-gray hover:shadow-lg hover:scale-[1.02] hover:border-royal-blue/20"
+                        : "bg-white border-royal-light-gray"
                         }`}
                       onClick={() => handleItemClick(index)}
                     >
                       <div className="flex items-center gap-3 sm:gap-4">
                         <div
-                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 group-hover:scale-110 flex-shrink-0 cursor-pointer ${completedItems[index]
-                            ? "bg-primary border-primary group-hover:bg-royal-blue-dark group-hover:border-royal-blue-dark"
-                            : "border-royal-light-gray group-hover:border-royal-blue/50"
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300  flex-shrink-0 cursor-pointer ${completedItems[index]
+                            ? "bg-primary border-primary "
+                            : "border-royal-light-gray "
                             }`}
                           onClick={(e) => handleCheckboxClick(index, e)}
                         >
-                          {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-300 group-hover:scale-110" />}
+                          {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-300 " />}
                         </div>
-                        <span className={`font-medium transition-colors duration-300 group-hover:text-royal-blue ${index === currentItem
-                          ? "text-primary font-semibold min-[1024px]:text-primary min-[1024px]:font-bold min-[1024px]:text-lg"
+                        <span className={`font-medium transition-colors duration-300  ${index === currentItem
+                          ? "text-primary font-semibold"
                           : "text-royal-dark-gray"
                           }`}>
                           {item.title}
@@ -498,17 +625,15 @@ export function CourseDetailSection() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col">
               {/* Header */}
-              <div className="w-full flex items-center justify-between p-3 sm:p-4 bg-white rounded-lg border border-royal-light-gray mb-6 
-                       hover:shadow-lg hover:scale-[1.02] hover:border-royal-blue/20 
-                       transition-all duration-300 ease-in-out group">
-                <h1 className="text-2xl font-bold text-royal-dark-gray group-hover:text-royal-blue transition-colors duration-300">
+              <div className="w-full flex items-center justify-between p-3 sm:p-4 bg-white rounded-lg border border-royal-light-gray mb-6">
+                <h1 className="text-2xl font-bold text-royal-dark-gray line-clamp-1">
                   {curriculumItems[currentItem].title}
                 </h1>
                 {/* Completion Status Checkbox */}
                 <div
-                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 cursor-pointer hover:scale-110 flex-shrink-0 ${completedItems[currentItem]
-                    ? "bg-primary border-primary hover:bg-royal-blue-dark hover:border-royal-blue-dark"
-                    : "border-royal-light-gray hover:border-royal-blue/50"
+                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 cursor-pointer flex-shrink-0 ${completedItems[currentItem]
+                    ? "bg-primary border-primary"
+                    : "border-royal-light-gray"
                     }`}
                   onClick={(e) => handleCheckboxClick(currentItem, e)}
                 >
@@ -519,22 +644,24 @@ export function CourseDetailSection() {
               {/* Video Content */}
               <div
                 className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 
-                     hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-in-out group"
+                     group cursor-pointer"
                 onMouseEnter={() => setShowControls(true)}
                 onMouseLeave={() => setShowControls(false)}
+                onClick={handleVideoClick}
+                onDoubleClick={handleVideoDoubleClick}
               >
                 <div
-                  className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden relative 
-                      group-hover:shadow-xl transition-all duration-300 cursor-pointer"
+                  className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden relative"
+                  title="Click to play/pause, double-click for fullscreen"
+                  onClick={handleVideoClick}
                   onDoubleClick={handleVideoDoubleClick}
-                  title="Double-click for fullscreen"
                 >
                   {/* Video Element */}
                   <video
                     ref={videoRef}
                     src={curriculumItems[currentItem].videoUrl}
-                    className="w-full h-full object-cover"
-                    onClick={handleVideoClick}
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={(e) => isFullscreen ? handleFullscreenVideoClick(e) : handleVideoClick(e)}
                     onDoubleClick={handleVideoDoubleClick}
                   />
 
@@ -546,7 +673,7 @@ export function CourseDetailSection() {
                         <Button
                           size="lg"
                           className="bg-black/70 hover:bg-black/80 text-white rounded-full p-6 
-                               group-hover:scale-110 transition-all duration-300"
+ transition-all duration-300"
                           onClick={handlePlayPause}
                         >
                           <PlayIcon className="h-12 w-12 ml-1" />
@@ -559,6 +686,7 @@ export function CourseDetailSection() {
                       {/* Progress Bar */}
                       <div className="mb-4">
                         <div className="w-full bg-white/30 rounded-full h-1 cursor-pointer" onClick={(e) => {
+                          e.stopPropagation();
                           const rect = e.currentTarget.getBoundingClientRect();
                           const clickX = e.clientX - rect.left;
                           const newTime = (clickX / rect.width) * duration;
@@ -571,14 +699,14 @@ export function CourseDetailSection() {
                         </div>
                       </div>
 
-                      {/* Control Buttons */}
+                      {/* Control Buttons - Desktop */}
                       <div className="flex items-center justify-between text-white">
                         <div className="flex items-center gap-3">
                           <Button
                             size="sm"
                             variant="ghost"
                             className="text-white hover:bg-white/20 p-2"
-                            onClick={handlePlayPause}
+                            onClick={(e) => handlePlayPause(e)}
                           >
                             {isVideoPlaying ? <PauseIcon className="h-5 w-5" /> : <PlayIcon className="h-5 w-5" />}
                           </Button>
@@ -587,25 +715,7 @@ export function CourseDetailSection() {
                             size="sm"
                             variant="ghost"
                             className="text-white hover:bg-white/20 p-2"
-                            onClick={handleSkipBack}
-                          >
-                            <SkipBackIcon className="h-5 w-5" />
-                          </Button>
-
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-white hover:bg-white/20 p-2"
-                            onClick={handleSkipForward}
-                          >
-                            <SkipForwardIcon className="h-5 w-5" />
-                          </Button>
-
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-white hover:bg-white/20 p-2"
-                            onClick={handleMute}
+                            onClick={(e) => handleMute(e)}
                           >
                             {isMuted ? <VolumeXIcon className="h-5 w-5" /> : <Volume2Icon className="h-5 w-5" />}
                           </Button>
@@ -618,8 +728,18 @@ export function CourseDetailSection() {
                               step="0.1"
                               value={isMuted ? 0 : volume}
                               onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                              onClick={(e) => e.stopPropagation()}
                               className="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer"
                             />
+                          </div>
+                        </div>
+
+                        {/* Video Title - Full title in control bar */}
+                        <div className="flex-1 flex justify-center px-4">
+                          <div className="text-center">
+                            <span className="text-xs text-white/70 line-clamp-2 max-w-md">
+                              {curriculumItems[currentItem].title}
+                            </span>
                           </div>
                         </div>
 
@@ -631,6 +751,7 @@ export function CourseDetailSection() {
                           <select
                             value={playbackRate}
                             onChange={(e) => handlePlaybackRateChange(parseFloat(e.target.value))}
+                            onClick={(e) => e.stopPropagation()}
                             className="bg-black/50 text-white text-sm rounded px-2 py-1"
                           >
                             <option value={0.5}>0.5x</option>
@@ -645,7 +766,7 @@ export function CourseDetailSection() {
                             size="sm"
                             variant="ghost"
                             className="text-white hover:bg-white/20 p-2"
-                            onClick={handleFullscreen}
+                            onClick={(e) => window.innerWidth < 1024 ? handleMobileFullscreen(e) : handleFullscreen(e)}
                           >
                             <MaximizeIcon className="h-5 w-5" />
                           </Button>

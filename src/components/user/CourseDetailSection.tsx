@@ -524,7 +524,7 @@ export function CourseDetailSection() {
             </div>
           ) : (
             /* Mobile List View */
-            <div className="w-full bg-white p-6">
+            <div className="w-full bg-white p-1">
               {/* Back Button */}
               <div className="mb-4">
                 <div

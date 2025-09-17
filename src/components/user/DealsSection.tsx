@@ -171,7 +171,7 @@ export function DealsSection() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-royal-light-gray mb-8">
+      <div className="bg-white p-3 rounded-lg border border-royal-light-gray mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {filterConfig?.map((config) => {
             const options = filterOptions[config.key] || [];

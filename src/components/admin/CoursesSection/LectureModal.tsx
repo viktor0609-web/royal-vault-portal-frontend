@@ -35,6 +35,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         videoUrl: "",
         pdfUrl: ""
     });
+    const [videoFile, setVideoFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
@@ -47,6 +48,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 videoUrl: editingLecture.videoUrl || "",
                 pdfUrl: editingLecture.pdfUrl || ""
             });
+            setVideoFile(null);
         } else {
             setFormData({
                 title: "",
@@ -54,6 +56,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 videoUrl: "",
                 pdfUrl: ""
             });
+            setVideoFile(null);
         }
     }, [editingLecture, isOpen]);
 
@@ -64,15 +67,34 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
 
         try {
             let response;
+            let lectureData = { ...formData };
+
+            // Handle video file upload if present
+            if (videoFile) {
+                const formData = new FormData();
+                formData.append('image', videoFile);
+
+                try {
+                    const uploadResponse = await courseApi.uploadImage(formData);
+                    lectureData.videoUrl = uploadResponse.data.url;
+                } catch (uploadErr: any) {
+                    toast({
+                        title: "Upload Error",
+                        description: "Failed to upload video file. Using URL instead.",
+                        variant: "destructive",
+                    });
+                }
+            }
+
             if (editingLecture) {
-                response = await courseApi.updateLecture(editingLecture._id, formData);
+                response = await courseApi.updateLecture(editingLecture._id, lectureData);
                 toast({
                     title: "Success",
                     description: "Lecture updated successfully",
                 });
             } else {
                 response = await courseApi.createLecture({
-                    ...formData,
+                    ...lectureData,
                     courseId: courseId
                 });
                 toast({
@@ -97,6 +119,15 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setVideoFile(file);
+        // Clear videoUrl when file is selected
+        if (file) {
+            setFormData(prev => ({ ...prev, videoUrl: "" }));
+        }
     };
 
     return (
@@ -135,20 +166,75 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                         </div>
                     </div>
 
-                    {/* Video URL Field */}
+                    {/* Video Field - File Upload or URL */}
                     <div>
-                        <Label htmlFor="videoUrl" className="text-royal-dark-gray font-medium text-sm">
-                            Video URL
+                        <Label className="text-royal-dark-gray font-medium text-sm">
+                            Video Content
                         </Label>
-                        <Input
-                            id="videoUrl"
-                            value={formData.videoUrl}
-                            onChange={(e) => handleInputChange("videoUrl", e.target.value)}
-                            className="mt-1 rounded-lg"
-                            placeholder="https://example.com/video"
-                            type="url"
-                            required
-                        />
+                        <div className="mt-1 space-y-3">
+                            {/* File Upload Option */}
+                            <div>
+                                <Label htmlFor="videoFile" className="text-royal-dark-gray font-medium text-xs">
+                                    Upload Video File
+                                </Label>
+                                <div className="mt-1">
+                                    <Input
+                                        id="videoFile"
+                                        type="file"
+                                        accept="video/*"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => document.getElementById('videoFile')?.click()}
+                                        className="w-full justify-center"
+                                    >
+                                        Choose Video File
+                                    </Button>
+                                </div>
+                                {videoFile && (
+                                    <div className="flex items-center justify-between mt-2">
+                                        <p className="text-sm text-royal-gray">
+                                            Selected: {videoFile.name} ({(videoFile.size / 1024 / 1024).toFixed(2)} MB)
+                                        </p>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setVideoFile(null)}
+                                            className="text-xs"
+                                        >
+                                            Clear
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* OR Divider */}
+                            <div className="flex items-center">
+                                <div className="flex-1 border-t border-gray-300"></div>
+                                <span className="px-3 text-sm text-gray-500">OR</span>
+                                <div className="flex-1 border-t border-gray-300"></div>
+                            </div>
+
+                            {/* URL Option */}
+                            <div>
+                                <Label htmlFor="videoUrl" className="text-royal-dark-gray font-medium text-xs">
+                                    Video URL
+                                </Label>
+                                <Input
+                                    id="videoUrl"
+                                    value={formData.videoUrl}
+                                    onChange={(e) => handleInputChange("videoUrl", e.target.value)}
+                                    className="mt-1 rounded-lg"
+                                    placeholder="https://example.com/video"
+                                    type="url"
+                                    disabled={!!videoFile}
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     {/* PDF URL Field */}

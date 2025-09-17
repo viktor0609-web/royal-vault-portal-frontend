@@ -93,7 +93,7 @@ export function CourseDetailSection() {
   }, [currentItem]);
 
   return (
-    <div className="p-2 sm:p-4 animate-in fade-in duration-300">
+    <div className="p-2 sm:p-4 animate-in fade-in duration-100">
       {/* Header - Desktop only */}
       <div className="hidden min-[1024px]:flex items-center gap-4 mb-6">
         <div className="w-full flex items-center justify-between bg-white p-6 rounded-lg border border-royal-light-gray">
@@ -107,11 +107,11 @@ export function CourseDetailSection() {
             </div>
           </div>
           <div
-            className="cursor-pointer p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-300 hover:scale-105"
+            className="cursor-pointer p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-75 hover:scale-102"
             onClick={() => navigate('/courses', { state: { fromDetail: true } })}
             title="Back to Courses"
           >
-            <ArrowLeftIcon className="h-6 w-6 text-royal-gray hover:text-royal-blue transition-colors duration-300" />
+            <ArrowLeftIcon className="h-6 w-6 text-royal-gray hover:text-royal-blue transition-colors duration-75" />
           </div>
         </div>
       </div>
@@ -124,7 +124,7 @@ export function CourseDetailSection() {
               {/* Back Button and Mobile Fullscreen - Integrated */}
               <div className="mb-4 flex justify-between items-center">
                 <div
-                  className="inline-flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue cursor-pointer transition-all duration-300 hover:bg-royal-blue/5 rounded-lg"
+                  className="inline-flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue cursor-pointer transition-all duration-75 hover:bg-royal-blue/5 rounded-lg"
                   onClick={handleBackToList}
                 >
                   <ArrowLeftIcon className="h-4 w-4" />
@@ -142,13 +142,13 @@ export function CourseDetailSection() {
                   </h1>
                   {/* Completion Status Checkbox */}
                   <div
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 cursor-pointer flex-shrink-0 ${completedItems[currentItem]
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 cursor-pointer flex-shrink-0 ${completedItems[currentItem]
                       ? "bg-primary border-primary"
                       : "border-royal-light-gray"
                       }`}
                     onClick={(e) => handleCheckboxClick(currentItem, e)}
                   >
-                    {completedItems[currentItem] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-300" />}
+                    {completedItems[currentItem] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75" />}
                   </div>
                 </div>
 
@@ -174,7 +174,7 @@ export function CourseDetailSection() {
               {/* Back Button */}
               <div className="mb-4">
                 <div
-                  className="inline-flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue cursor-pointer transition-all duration-300 hover:bg-royal-blue/5 rounded-lg"
+                  className="inline-flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue cursor-pointer transition-all duration-75 hover:bg-royal-blue/5 rounded-lg"
                   onClick={() => navigate('/courses', { state: { fromDetail: true } })}
                 >
                   <ArrowLeftIcon className="h-4 w-4" />
@@ -190,23 +190,23 @@ export function CourseDetailSection() {
                   {curriculumItems.map((item, index) => (
                     <div
                       key={index}
-                      className={`w-full flex items-center p-2 sm:p-4 rounded-lg border transition-all duration-300 ease-in-out cursor-pointer group ${index === currentItem
-                        ? "bg-primary/5 border-primary shadow-lg scale-[1.02] ring-2 ring-primary/30"
+                      className={`w-full flex items-center p-2 sm:p-4 rounded-lg border transition-all duration-75 ease-in-out cursor-pointer group ${index === currentItem
+                        ? "bg-primary/5 border-primary shadow-lg scale-[1.01] ring-2 ring-primary/30"
                         : "bg-white border-royal-light-gray"
                         }`}
                       onClick={() => handleItemClick(index)}
                     >
                       <div className="flex items-center gap-3 sm:gap-4">
                         <div
-                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300  flex-shrink-0 cursor-pointer ${completedItems[index]
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75  flex-shrink-0 cursor-pointer ${completedItems[index]
                             ? "bg-primary border-primary "
                             : "border-royal-light-gray "
                             }`}
                           onClick={(e) => handleCheckboxClick(index, e)}
                         >
-                          {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-300 " />}
+                          {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 " />}
                         </div>
-                        <span className={`font-medium transition-colors duration-300  ${index === currentItem
+                        <span className={`font-medium transition-colors duration-75  ${index === currentItem
                           ? "text-primary font-semibold"
                           : "text-royal-dark-gray"
                           }`}>
@@ -231,23 +231,23 @@ export function CourseDetailSection() {
                   {curriculumItems.map((item, index) => (
                     <div
                       key={index}
-                      className={`w-full flex items-center p-2 sm:p-4 rounded-lg border transition-all duration-300 ease-in-out cursor-pointer group ${index === currentItem
-                        ? "bg-primary/5 border-primary shadow-lg scale-[1.02] ring-2 ring-primary/30 min-[1024px]:bg-primary/10 min-[1024px]:shadow-xl min-[1024px]:scale-[1.03] min-[1024px]:ring-4 min-[1024px]:ring-primary/40"
+                      className={`w-full flex items-center p-2 sm:p-4 rounded-lg border transition-all duration-75 ease-in-out cursor-pointer group ${index === currentItem
+                        ? "bg-primary/5 border-primary shadow-lg scale-[1.01] ring-2 ring-primary/30 min-[1024px]:bg-primary/10 min-[1024px]:shadow-xl min-[1024px]:scale-[1.015] min-[1024px]:ring-4 min-[1024px]:ring-primary/40"
                         : "bg-white border-royal-light-gray"
                         }`}
                       onClick={() => handleItemClick(index)}
                     >
                       <div className="flex items-center gap-3 sm:gap-4">
                         <div
-                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300  flex-shrink-0 cursor-pointer ${completedItems[index]
+                          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75  flex-shrink-0 cursor-pointer ${completedItems[index]
                             ? "bg-primary border-primary "
                             : "border-royal-light-gray "
                             }`}
                           onClick={(e) => handleCheckboxClick(index, e)}
                         >
-                          {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-300 " />}
+                          {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 " />}
                         </div>
-                        <span className={`font-medium transition-colors duration-300  ${index === currentItem
+                        <span className={`font-medium transition-colors duration-75  ${index === currentItem
                           ? "text-primary font-semibold"
                           : "text-royal-dark-gray"
                           }`}>
@@ -269,13 +269,13 @@ export function CourseDetailSection() {
                 </h1>
                 {/* Completion Status Checkbox */}
                 <div
-                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 cursor-pointer flex-shrink-0 ${completedItems[currentItem]
+                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 cursor-pointer flex-shrink-0 ${completedItems[currentItem]
                     ? "bg-primary border-primary"
                     : "border-royal-light-gray"
                     }`}
                   onClick={(e) => handleCheckboxClick(currentItem, e)}
                 >
-                  {completedItems[currentItem] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-300" />}
+                  {completedItems[currentItem] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75" />}
                 </div>
               </div>
 

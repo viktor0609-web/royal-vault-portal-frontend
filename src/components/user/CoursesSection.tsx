@@ -273,7 +273,7 @@ export function CoursesSection() {
 
   if (loading) {
     return (
-      <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-300">
+      <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
         <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
           <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
           <div>
@@ -290,7 +290,7 @@ export function CoursesSection() {
 
   if (error) {
     return (
-      <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-300">
+      <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
         <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
           <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
           <div>
@@ -322,7 +322,7 @@ export function CoursesSection() {
           <Link
             key={category.id}
             to={`/courses/${category.id}`}
-            className="text-center p-3 sm:p-6 bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow cursor-pointer block"
+            className="text-center p-3 sm:p-6 bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
           >
             <div className="flex justify-center mb-4">
               <category.icon className="h-16 w-16 text-royal-gray" />

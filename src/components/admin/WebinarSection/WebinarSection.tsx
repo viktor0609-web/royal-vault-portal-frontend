@@ -64,7 +64,7 @@ export function WebinarSection() {
     };
 
     return (
-        <div className="flex-1 p-4 flex flex-col animate-in fade-in duration-300">
+        <div className="flex-1 p-4 flex flex-col animate-in fade-in duration-100">
             <div className="flex gap-4 items-center bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
                 <VideoIcon className="h-10 w-10 text-royal-gray hidden min-[700px]:block" />
                 <h1 className="text-2xl font-bold text-royal-dark-gray mb-2 uppercase">Webinars</h1>

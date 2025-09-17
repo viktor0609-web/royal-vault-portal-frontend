@@ -291,7 +291,7 @@ export function DealsSection() {
                   <Link
                     key={index}
                     to={item.url}
-                    className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow cursor-pointer block"
+                    className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
                   >
                     <div className="relative h-64 w-full">
                       <img

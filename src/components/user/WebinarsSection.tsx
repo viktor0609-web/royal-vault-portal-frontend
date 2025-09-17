@@ -117,14 +117,19 @@ export function WebinarsSection() {
 
       <div className="space-y-2">
         {webinars[filterTabs[fitlerIndex].label].map((webinar, index) => (
-          <div key={index} className="flex items-center justify-between p-4 min-[700px]:p-6 bg-sidebar rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow">
-            <div>
-              <h3 className="text-lg font-semibold text-royal-dark-gray mb-2">
+          <div
+            key={index}
+            className="flex items-center justify-between p-4 min-[700px]:p-6 bg-sidebar rounded-lg border border-royal-light-gray hover:shadow-lg hover:scale-[1.02] hover:border-royal-blue/20 transition-all duration-300 ease-in-out cursor-pointer group animate-in slide-in-from-bottom duration-500"
+            style={{ animationDelay: `${200 + index * 100}ms` }}
+            onClick={() => handleRegister(webinar)}
+          >
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-royal-dark-gray mb-2 group-hover:text-royal-blue transition-colors duration-300">
                 {webinar.title}
               </h3>
               <div className="flex items-center gap-4 text-sm text-royal-gray">
-                <span>{webinar.date} @ {webinar.time}</span>
-                <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium">
+                <span className="group-hover:text-royal-dark-gray transition-colors duration-300">{webinar.date} @ {webinar.time}</span>
+                <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-medium group-hover:bg-primary/20 group-hover:scale-105 transition-all duration-300">
                   {webinar.status}
                 </span>
               </div>
@@ -133,8 +138,11 @@ export function WebinarsSection() {
               <>
                 {/* Desktop Button */}
                 <Button
-                  onClick={() => handleRegister(webinar)}
-                  className="hidden min-[700px]:flex bg-primary hover:bg-royal-blue-dark text-white px-8"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRegister(webinar);
+                  }}
+                  className="hidden min-[700px]:flex bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-105 group-hover:shadow-md transition-all duration-300"
                 >
                   {fitlerIndex == 0 ? (webinar.register ? 'Join' : 'Register') : 'Re-watch'}
                 </Button>
@@ -144,8 +152,11 @@ export function WebinarsSection() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        onClick={() => handleRegister(webinar)}
-                        className="min-[700px]:hidden bg-primary hover:bg-royal-blue-dark text-white p-2 rounded-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRegister(webinar);
+                        }}
+                        className="min-[700px]:hidden bg-primary hover:bg-royal-blue-dark text-white p-2 rounded-full group-hover:scale-110 group-hover:shadow-md transition-all duration-300"
                       >
                         {fitlerIndex === 0 ? (
                           webinar.register ? <PlayIcon className="h-4 w-4" /> : <CheckCircleIcon className="h-4 w-4" />

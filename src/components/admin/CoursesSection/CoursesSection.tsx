@@ -386,7 +386,7 @@ export function CoursesSection() {
             className="flex items-center gap-2 px-4 py-2 bg-royal-blue text-white rounded-lg hover:bg-royal-blue/90 transition-colors font-medium"
           >
             <PlusIcon className="h-4 w-4" />
-            Add Course Group
+            Add
           </button>
         </div>
         <div className="text-center py-8">Loading courses...</div>
@@ -412,7 +412,7 @@ export function CoursesSection() {
             className="flex items-center gap-2 px-4 py-2 bg-royal-blue text-white rounded-lg hover:bg-royal-blue/90 transition-colors font-medium"
           >
             <PlusIcon className="h-4 w-4" />
-            Add Course Group
+            Add
           </button>
         </div>
         <div className="text-center py-8 text-red-500">{error}</div>
@@ -437,7 +437,7 @@ export function CoursesSection() {
           className="flex items-center gap-2 px-4 py-2 bg-royal-blue text-white rounded-lg hover:bg-royal-blue/90 transition-colors font-medium"
         >
           <PlusIcon className="h-4 w-4" />
-          Add Course Group
+          Add
         </button>
       </div>
 

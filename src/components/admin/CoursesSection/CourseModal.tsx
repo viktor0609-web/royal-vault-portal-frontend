@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// import { courseApi } from "@/lib/api";
 
 interface CourseGroup {
   _id: string;
@@ -30,7 +29,6 @@ interface Course {
   _id: string;
   title: string;
   description: string;
-  url: string;
   courseGroup: string;
   lectures: any[];
 }
@@ -47,8 +45,6 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    url: "",
-    courseGroup: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,15 +55,11 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
       setFormData({
         title: editingCourse.title || "",
         description: editingCourse.description || "",
-        url: editingCourse.url || "",
-        courseGroup: editingCourse.courseGroup || ""
       });
     } else {
       setFormData({
         title: "",
         description: "",
-        url: "",
-        courseGroup: courseGroupId || ""
       });
     }
   }, [editingCourse, isOpen, courseGroupId]);
@@ -86,7 +78,7 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
           description: "Course updated successfully",
         });
       } else {
-        response = await courseApi.createCourse(formData);
+        response = await courseApi.createCourse(formData, courseGroupId || "");
         toast({
           title: "Success",
           description: "Course created successfully",
@@ -141,34 +133,6 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
               onChange={(e) => handleInputChange("description", e.target.value)}
               className="mt-1"
               rows={3}
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="url" className="text-royal-dark-gray font-medium">
-              URL
-            </Label>
-            <Input
-              id="url"
-              value={formData.url}
-              onChange={(e) => handleInputChange("url", e.target.value)}
-              className="mt-1"
-              placeholder="https://example.com/course"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="courseGroup" className="text-royal-dark-gray font-medium">
-              Course Group ID
-            </Label>
-            <Input
-              id="courseGroup"
-              value={formData.courseGroup}
-              onChange={(e) => handleInputChange("courseGroup", e.target.value)}
-              className="mt-1"
-              placeholder="Course group ID"
               required
             />
           </div>

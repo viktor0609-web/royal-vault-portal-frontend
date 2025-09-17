@@ -152,7 +152,10 @@ export const courseApi = {
 
   // Courses
   getAllCourses: () => api.get('/api/courses/courses'),
-  createCourse: (courseData: any) => api.post('/api/courses/courses', courseData),
+  createCourse: (courseData: any, courseGroupId: string) => {
+    const data = courseData;
+    return api.post(`/api/courses/courses/${courseGroupId}`, data);
+  },
   getCourseById: (courseId: string) => api.get(`/api/courses/courses/${courseId}`),
   updateCourse: (courseId: string, courseData: any) => api.put(`/api/courses/courses/${courseId}`, courseData),
   deleteCourse: (courseId: string) => api.delete(`/api/courses/courses/${courseId}`),
@@ -164,6 +167,13 @@ export const courseApi = {
   updateLecture: (lectureId: string, lectureData: any) => api.put(`/api/courses/lectures/${lectureId}`, lectureData),
   deleteLecture: (lectureId: string) => api.delete(`/api/courses/lectures/${lectureId}`),
   completeLecture: (lectureId: string) => api.post(`/api/courses/lectures/${lectureId}/complete`),
+
+  // Image upload
+  uploadImage: (formData: FormData) => api.post('/api/upload/image', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
 };
 
 // Image upload API

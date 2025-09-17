@@ -15,9 +15,9 @@ import {
 
 
 const navigationItems = [
-  { title: "Webinars", path: "/admin/webinars" },
-  { title: "Courses", path: "/admin/courses" },
-  { title: "Deals", path: "/admin/deals" },
+  { title: "Webinars", path: "/admin/webinars", icon: null },
+  { title: "Courses", path: "/admin/courses", icon: null },
+  { title: "Deals", path: "/admin/deals", icon: null },
 ];
 
 
@@ -68,6 +68,7 @@ export function AdminSidebar() {
                         }`}
                     >
                       <Link to={item.path} onClick={() => setOpenMobile(false)}>
+                        {item.icon && <item.icon className="mr-3 h-5 w-5" />}
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>

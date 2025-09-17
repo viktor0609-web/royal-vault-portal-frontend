@@ -160,7 +160,7 @@ export function DealsSection() {
   };
 
   return (
-    <div className="flex-1 p-4">
+    <div className="flex-1 p-2">
       <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
         <TagIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
         <div>
@@ -172,12 +172,12 @@ export function DealsSection() {
       </div>
 
       <div className="bg-white p-3 rounded-lg border border-royal-light-gray mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-1 sm:gap-4">
           {filterConfig?.map((config) => {
             const options = filterOptions[config.key] || [];
             return (
               <div key={config.key}>
-                <div className="text-royal-gray mb-2 font-bold">
+                <div className="text-royal-gray mb-1 font-bold">
                   {config.key}
                 </div>
                 <div>

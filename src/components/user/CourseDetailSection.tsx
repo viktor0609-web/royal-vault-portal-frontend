@@ -218,22 +218,22 @@ export function CourseDetailSection() {
     <div className="p-4 animate-in fade-in duration-300">
       {/* Header - Desktop only */}
       <div className="hidden min-[1024px]:flex items-center gap-4 mb-6">
-        <Button
-          variant="outline"
-          size="lg"
-          onClick={() => navigate('/courses', { state: { fromDetail: true } })}
-          className="flex items-center gap-3 px-6 py-3 bg-white hover:bg-royal-blue/5 hover:border-royal-blue/20 transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md"
-        >
-          <ArrowLeftIcon className="h-5 w-5 text-royal-gray" />
-          <span className="text-royal-dark-gray font-medium">Back to Courses</span>
-        </Button>
-        <div className="w-full flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray">
-          <EyeOffIcon className="h-6 w-6 text-royal-gray" />
-          <div>
-            <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">Anonymity</h1>
-            <p className="text-royal-gray">
-              Make yourself invisible and prevent lawsuits before they begin.
-            </p>
+        <div className="w-full flex items-center justify-between bg-white p-6 rounded-lg border border-royal-light-gray">
+          <div className="flex items-center gap-4">
+            <EyeOffIcon className="h-6 w-6 text-royal-gray" />
+            <div>
+              <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">Anonymity</h1>
+              <p className="text-royal-gray">
+                Make yourself invisible and prevent lawsuits before they begin.
+              </p>
+            </div>
+          </div>
+          <div
+            className="cursor-pointer p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-300 hover:scale-105"
+            onClick={() => navigate('/courses', { state: { fromDetail: true } })}
+            title="Back to Courses"
+          >
+            <ArrowLeftIcon className="h-6 w-6 text-royal-gray hover:text-royal-blue transition-colors duration-300" />
           </div>
         </div>
       </div>
@@ -243,15 +243,15 @@ export function CourseDetailSection() {
           showMobileContent ? (
             /* Mobile Content View */
             <div className="flex-1 flex flex-col w-full">
-              {/* Back Button */}
-              <div className="mb-6">
-                <Button
+              {/* Back Button - Integrated */}
+              <div className="mb-4 flex justify-end">
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue cursor-pointer transition-all duration-300 hover:bg-royal-blue/5 rounded-lg"
                   onClick={handleBackToList}
-                  className="flex items-center gap-2 px-4 py-3 bg-white hover:bg-royal-blue/5 border border-royal-light-gray hover:border-royal-blue/20 text-royal-dark-gray hover:text-royal-blue transition-all duration-300 hover:scale-105 shadow-sm hover:shadow-md"
                 >
                   <ArrowLeftIcon className="h-4 w-4" />
-                  <span className="font-medium">Back to List</span>
-                </Button>
+                  <span className="text-sm font-medium">Back to List</span>
+                </div>
               </div>
 
               {/* Content Area */}

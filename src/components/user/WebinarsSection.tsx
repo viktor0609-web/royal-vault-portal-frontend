@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { VideoIcon } from "lucide-react";
+import { VideoIcon, ArrowRightIcon } from "lucide-react";
 
 const filterTabs = [
   { label: "UPCOMING" },
@@ -83,8 +83,8 @@ export function WebinarsSection() {
   }
 
   return (
-    <div className="flex-1 p-4">
-      <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-1">
+    <div className="flex-1 p-3 min-[700px]:p-4 animate-in fade-in duration-300">
+      <div className="flex items-center gap-3 min-[700px]:gap-4 bg-white p-4 min-[700px]:p-6 rounded-lg border border-royal-light-gray mb-1">
         <VideoIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
         <div>
           <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">WEBINARS</h1>
@@ -94,17 +94,18 @@ export function WebinarsSection() {
         </div>
       </div>
 
-      <div className="flex gap-3 items-center bg-white p-6 rounded-lg border border-royal-light-gray mb-2">
-        <p className="text-royal-gray">Filter by:</p>
-        <div className="flex gap-2">
+      <div className="flex gap-3 items-center bg-white p-4 min-[700px]:p-6 rounded-lg border border-royal-light-gray mb-2">
+        <p className="text-royal-gray hidden min-[700px]:block">Filter by:</p>
+        <div className="flex gap-1 min-[700px]:gap-2 justify-center min-[700px]:justify-start">
           {filterTabs.map((tab, index) => (
             <Button
               key={index}
               variant={index == fitlerIndex ? "default" : "outline"}
-              className={index == fitlerIndex
+              size="sm"
+              className={`text-xs min-[700px]:text-sm px-2 min-[700px]:px-4 py-1 min-[700px]:py-2 ${index == fitlerIndex
                 ? "bg-primary hover:bg-royal-blue-dark text-white"
                 : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
-              }
+                }`}
               onClick={() => changeFilter(index)}
             >
               {tab.label}
@@ -115,7 +116,7 @@ export function WebinarsSection() {
 
       <div className="space-y-2">
         {webinars[filterTabs[fitlerIndex].label].map((webinar, index) => (
-          <div key={index} className="flex items-center justify-between p-6 bg-sidebar rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow">
+          <div key={index} className="flex items-center justify-between p-4 min-[700px]:p-6 bg-sidebar rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow">
             <div>
               <h3 className="text-lg font-semibold text-royal-dark-gray mb-2">
                 {webinar.title}
@@ -128,12 +129,23 @@ export function WebinarsSection() {
               </div>
             </div>
             {webinar.watched ? '' :
-              <Button
-                onClick={() => handleRegister(webinar)}
-                className="bg-primary hover:bg-royal-blue-dark text-white px-8"
-              >
-                {fitlerIndex == 0 ? (webinar.register ? 'Join' : 'Register') : 'Re-watch'}
-              </Button>}
+              <>
+                {/* Desktop Button */}
+                <Button
+                  onClick={() => handleRegister(webinar)}
+                  className="hidden min-[700px]:flex bg-primary hover:bg-royal-blue-dark text-white px-8"
+                >
+                  {fitlerIndex == 0 ? (webinar.register ? 'Join' : 'Register') : 'Re-watch'}
+                </Button>
+
+                {/* Mobile Arrow Button */}
+                <Button
+                  onClick={() => handleRegister(webinar)}
+                  className="min-[700px]:hidden bg-primary hover:bg-royal-blue-dark text-white p-2 rounded-full"
+                >
+                  <ArrowRightIcon className="h-4 w-4" />
+                </Button>
+              </>}
 
           </div>
         ))}

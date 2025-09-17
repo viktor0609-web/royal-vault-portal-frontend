@@ -267,7 +267,7 @@ export function CoursesSection() {
     return (
       <div className="flex-1 p-4">
         <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-          <GraduationCapIcon className="h-12 w-12 text-royal-gray" />
+          <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
           <div>
             <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">COURSES</h1>
             <p className="text-royal-gray">
@@ -284,7 +284,7 @@ export function CoursesSection() {
     return (
       <div className="flex-1 p-4">
         <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-          <GraduationCapIcon className="h-12 w-12 text-royal-gray" />
+          <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
           <div>
             <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">COURSES</h1>
             <p className="text-royal-gray">
@@ -298,9 +298,9 @@ export function CoursesSection() {
   }
 
   return (
-    <div className="flex-1 p-4">
+    <div className="flex-1 p-4 animate-in fade-in duration-300">
       <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-        <GraduationCapIcon className="h-12 w-12 text-royal-gray" />
+        <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
         <div>
           <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">COURSES</h1>
           <p className="text-royal-gray">

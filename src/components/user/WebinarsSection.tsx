@@ -94,9 +94,9 @@ export function WebinarsSection() {
         </div>
       </div>
 
-      <div className="flex gap-3 items-center bg-white p-4 min-[700px]:p-6 rounded-lg border border-royal-light-gray mb-2">
+      <div className="flex flex-col min-[700px]:flex-row gap-3 items-center min-[700px]:items-center bg-white p-4 min-[700px]:p-6 rounded-lg border border-royal-light-gray mb-2">
         <p className="text-royal-gray hidden min-[700px]:block">Filter by:</p>
-        <div className="flex gap-1 min-[700px]:gap-2 justify-center min-[700px]:justify-start">
+        <div className="flex gap-1 min-[700px]:gap-2 justify-center w-full min-[700px]:w-auto">
           {filterTabs.map((tab, index) => (
             <Button
               key={index}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { CheckCircleIcon, FileTextIcon, MessageCircleIcon, VideoIcon, PlayIcon, ArrowRightIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CheckCircleIcon, FileTextIcon, MessageCircleIcon, VideoIcon, PlayIcon, ArrowRightIcon, XIcon } from "lucide-react";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 
 const welcomeItems = [
@@ -27,6 +28,9 @@ const welcomeItems = [
   },
 ];
 
+// Video URL - same as used in CourseDetailSection
+const OVERVIEW_VIDEO_URL = "https://www.w3schools.com/html/mov_bbb.mp4";
+
 export function WelcomeSection() {
   const navigate = useNavigate();
   const { openDialog } = useAuthDialog();
@@ -36,6 +40,9 @@ export function WelcomeSection() {
     const saved = localStorage.getItem('welcomeCompletedItems');
     return saved ? JSON.parse(saved) : [true, false, false, false];
   });
+
+  // Video modal state
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   // Save to localStorage whenever completedItems changes
   useEffect(() => {
@@ -54,6 +61,8 @@ export function WelcomeSection() {
       navigate('/courses');
     } else if (action == "Open Webinars") {
       navigate('/royal-tv')
+    } else if (action == "Open Video") {
+      setShowVideoModal(true);
     }
   };
 
@@ -118,6 +127,29 @@ export function WelcomeSection() {
           </div>
         ))}
       </div>
+
+      {/* Video Modal */}
+      <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <VideoIcon className="h-5 w-5" />
+              Overview Video
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <div className="aspect-video bg-black rounded-lg overflow-hidden">
+              <video
+                src={OVERVIEW_VIDEO_URL}
+                className="w-full h-full object-cover"
+                controls
+                preload="metadata"
+                autoPlay={false}
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

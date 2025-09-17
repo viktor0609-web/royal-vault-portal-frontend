@@ -156,7 +156,8 @@ export function WebinarsSection() {
                           e.stopPropagation();
                           handleRegister(webinar);
                         }}
-                        className="min-[700px]:hidden bg-primary hover:bg-royal-blue-dark text-white p-2 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75"
+                        className="min-[700px]:hidden bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center !rounded-full"
+                        style={{ aspectRatio: '1/1' }}
                       >
                         {fitlerIndex === 0 ? (
                           webinar.register ? <PlayIcon className="h-4 w-4" /> : <CheckCircleIcon className="h-4 w-4" />

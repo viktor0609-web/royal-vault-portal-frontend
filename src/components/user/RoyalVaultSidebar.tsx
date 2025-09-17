@@ -11,7 +11,8 @@ import {
   LogInIcon,
   LogOutIcon,
   AxeIcon,
-  MessageCircleQuestionIcon
+  MessageCircleQuestionIcon,
+  UserIcon
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,11 +34,12 @@ const navigationItems = [
 ];
 
 const bottomItemsForGuest = [
-  { title: "FAQ", icon: HelpCircleIcon, action: 'login' },
+  { title: "FAQ", icon: HelpCircleIcon, action: null },
   { title: "Log In", icon: LogInIcon, action: 'login' },
 ];
 const bottomItemsForUser = [
-  { title: "FAQ", icon: HelpCircleIcon, action: 'login' },
+  { title: "FAQ", icon: HelpCircleIcon, action: null },
+  { title: "Profile", icon: UserIcon, path: "/profile" },
   { title: "Log Out", icon: LogOutIcon, action: 'logout' },
 ];
 
@@ -110,15 +112,27 @@ export function RoyalVaultSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${isActive(item.action)
+                    className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${isActive(item.path || item.action)
                       ? "bg-royal-light-gray text-primary font-medium"
                       : "text-royal-gray"
                       }`}
                   >
-                    <Link to="#" onClick={() => handleLinkClick(item.action)}>
-                      <item.icon className="mr-3 h-5 w-5" />
-                      <span>{item.title}</span>
-                    </Link>
+                    {item.path ? (
+                      <Link to={item.path} onClick={() => setOpenMobile(false)}>
+                        <item.icon className="mr-3 h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    ) : item.action ? (
+                      <Link to="#" onClick={() => handleLinkClick(item.action)}>
+                        <item.icon className="mr-3 h-5 w-5" />
+                        <span>{item.title}</span>
+                      </Link>
+                    ) : (
+                      <div className="flex items-center cursor-default opacity-60">
+                        <item.icon className="mr-3 h-5 w-5" />
+                        <span>{item.title}</span>
+                      </div>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

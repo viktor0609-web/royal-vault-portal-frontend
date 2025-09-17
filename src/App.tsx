@@ -12,6 +12,7 @@ import { WebinarsSection } from "./components/user/WebinarsSection";
 import { CoursesSection } from "./components/user/CoursesSection";
 import { DealsSection } from "./components/user/DealsSection";
 import { CourseDetailSection } from "./components/user/CourseDetailSection";
+import { ProfileSection } from "./components/user/ProfileSection";
 import { WebinarRegistration } from "./components/user/WebinarRegistration";
 
 //For Admin
@@ -53,6 +54,14 @@ function AdminRoute({ children }: { children: JSX.Element }) {
   if (user.role !== "admin") return <Navigate to="/" replace />;
   return children;
 }
+
+function UserRoute({ children }: { children: JSX.Element }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/" replace />;
+
+  // Allow both regular users and admins to access Profile page
+  return children;
+}
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -69,6 +78,7 @@ const App = () => (
                 <Route path="/courses" element={<RoyalVaultLayout><CoursesSection /></RoyalVaultLayout>} />
                 <Route path="/courses/:id" element={<RoyalVaultLayout><CourseDetailSection /></RoyalVaultLayout>} />
                 <Route path="/deals" element={<RoyalVaultLayout><DealsSection /></RoyalVaultLayout>} />
+                <Route path="/profile" element={<UserRoute><RoyalVaultLayout><ProfileSection /></RoyalVaultLayout></UserRoute>} />
                 <Route path="/registration" element={<WebinarRegistration webinar={webinarData} />} />
 
                 {/* Admin Routes */}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { VideoIcon, ArrowRightIcon } from "lucide-react";
+import { VideoIcon, ArrowRightIcon, PlayIcon, EyeIcon, CheckCircleIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const filterTabs = [
   { label: "UPCOMING" },
@@ -138,13 +139,34 @@ export function WebinarsSection() {
                   {fitlerIndex == 0 ? (webinar.register ? 'Join' : 'Register') : 'Re-watch'}
                 </Button>
 
-                {/* Mobile Arrow Button */}
-                <Button
-                  onClick={() => handleRegister(webinar)}
-                  className="min-[700px]:hidden bg-primary hover:bg-royal-blue-dark text-white p-2 rounded-full"
-                >
-                  <ArrowRightIcon className="h-4 w-4" />
-                </Button>
+                {/* Mobile Action Button */}
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={() => handleRegister(webinar)}
+                        className="min-[700px]:hidden bg-primary hover:bg-royal-blue-dark text-white p-2 rounded-full"
+                      >
+                        {fitlerIndex === 0 ? (
+                          webinar.register ? <PlayIcon className="h-4 w-4" /> : <CheckCircleIcon className="h-4 w-4" />
+                        ) : fitlerIndex === 1 ? (
+                          <PlayIcon className="h-4 w-4" />
+                        ) : (
+                          <EyeIcon className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
+                      {fitlerIndex === 0 ? (
+                        webinar.register ? 'Join Live Webinar' : 'Register for Webinar'
+                      ) : fitlerIndex === 1 ? (
+                        'Watch Replay'
+                      ) : (
+                        'View Details'
+                      )}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </>}
 
           </div>

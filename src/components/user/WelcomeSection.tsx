@@ -105,7 +105,7 @@ export function WelcomeSection() {
               >
                 {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 group-hover:scale-102" />}
               </div>
-              <span className="text-royal-dark-gray font-medium transition-colors duration-75 group-hover:text-royal-blue">{item.title}</span>
+              <span className="text-royal-dark-gray font-normal transition-colors duration-75 group-hover:text-royal-blue">{item.title}</span>
             </div>
             {/* Desktop Button */}
             <Button

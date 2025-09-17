@@ -19,7 +19,10 @@ export function ProfileSection() {
         lastName: "Doe",
         email: "john.doe@example.com",
         phone: "+1 (555) 123-4567",
-        address: "123 Main Street, City, State 12345",
+        address: "123 Main Street",
+        city: "New York",
+        state: "NY",
+        zip: "10001",
         dateOfBirth: "1990-01-01",
         company: "Royal Vault Investments",
         jobTitle: "Investor"
@@ -97,7 +100,10 @@ export function ProfileSection() {
             lastName: "Doe",
             email: "john.doe@example.com",
             phone: "+1 (555) 123-4567",
-            address: "123 Main Street, City, State 12345",
+            address: "123 Main Street",
+            city: "New York",
+            state: "NY",
+            zip: "10001",
             dateOfBirth: "1990-01-01",
             company: "Royal Vault Investments",
             jobTitle: "Investor"
@@ -159,15 +165,19 @@ export function ProfileSection() {
                 </div>
             </div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs value="personal" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-3 min-[700px]:mb-6">
                     <TabsTrigger value="personal" className="flex items-center gap-1 min-[700px]:gap-2 py-2 min-[700px]:py-3">
                         <UserIcon className="h-4 w-4" />
                         <span className="hidden min-[700px]:inline">Personal Information</span>
                     </TabsTrigger>
-                    <TabsTrigger value="meetings" className="flex items-center gap-1 min-[700px]:gap-2 py-2 min-[700px]:py-3">
+                    <TabsTrigger
+                        value="meetings"
+                        disabled
+                        className="flex items-center gap-1 min-[700px]:gap-2 py-2 min-[700px]:py-3 opacity-50 cursor-not-allowed"
+                    >
                         <VideoIcon className="h-4 w-4" />
-                        <span className="hidden min-[700px]:inline">Meeting History</span>
+                        <span className="hidden min-[700px]:inline">Meetings</span>
                     </TabsTrigger>
                 </TabsList>
 
@@ -183,7 +193,7 @@ export function ProfileSection() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2 px-3 min-[700px]:px-6">
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
                                     <div className="space-y-1">
                                         <Label htmlFor="firstName" className="text-black text-xs">First Name</Label>
                                         <Input
@@ -205,32 +215,34 @@ export function ProfileSection() {
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="email" className="text-black text-xs">Email</Label>
-                                    <div className="relative">
-                                        <MailIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-royal-gray" />
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            value={userData.email}
-                                            onChange={(e) => handleInputChange('email', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="pl-7 transition-all duration-75 text-black text-sm h-8"
-                                        />
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="email" className="text-black text-xs">Email</Label>
+                                        <div className="relative">
+                                            <MailIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-royal-gray" />
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                value={userData.email}
+                                                onChange={(e) => handleInputChange('email', e.target.value)}
+                                                disabled={!isEditing}
+                                                className="pl-7 transition-all duration-75 text-black text-sm h-8"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="phone" className="text-black text-xs">Phone</Label>
-                                    <div className="relative">
-                                        <PhoneIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-royal-gray" />
-                                        <Input
-                                            id="phone"
-                                            type="tel"
-                                            value={userData.phone}
-                                            onChange={(e) => handleInputChange('phone', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="pl-7 transition-all duration-75 text-black text-sm h-8"
-                                        />
+                                    <div className="space-y-1">
+                                        <Label htmlFor="phone" className="text-black text-xs">Phone</Label>
+                                        <div className="relative">
+                                            <PhoneIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-royal-gray" />
+                                            <Input
+                                                id="phone"
+                                                type="tel"
+                                                value={userData.phone}
+                                                onChange={(e) => handleInputChange('phone', e.target.value)}
+                                                disabled={!isEditing}
+                                                className="pl-7 transition-all duration-75 text-black text-sm h-8"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </CardContent>
@@ -245,52 +257,92 @@ export function ProfileSection() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2 px-3 min-[700px]:px-6">
-                                <div className="space-y-1">
-                                    <Label htmlFor="company" className="text-black text-xs">Company</Label>
-                                    <Input
-                                        id="company"
-                                        value={userData.company}
-                                        onChange={(e) => handleInputChange('company', e.target.value)}
-                                        disabled={!isEditing}
-                                        className="transition-all duration-75 text-black text-sm h-8"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="jobTitle" className="text-black text-xs">Job Title</Label>
-                                    <Input
-                                        id="jobTitle"
-                                        value={userData.jobTitle}
-                                        onChange={(e) => handleInputChange('jobTitle', e.target.value)}
-                                        disabled={!isEditing}
-                                        className="transition-all duration-75 text-black text-sm h-8"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="dateOfBirth" className="text-black text-xs">Date of Birth</Label>
-                                    <div className="relative">
-                                        <CalendarIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-royal-gray" />
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="company" className="text-black text-xs">Company</Label>
                                         <Input
-                                            id="dateOfBirth"
-                                            type="date"
-                                            value={userData.dateOfBirth}
-                                            onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                                            id="company"
+                                            value={userData.company}
+                                            onChange={(e) => handleInputChange('company', e.target.value)}
                                             disabled={!isEditing}
-                                            className="pl-7 transition-all duration-75 text-black text-sm h-8"
+                                            className="transition-all duration-75 text-black text-sm h-8"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="jobTitle" className="text-black text-xs">Job Title</Label>
+                                        <Input
+                                            id="jobTitle"
+                                            value={userData.jobTitle}
+                                            onChange={(e) => handleInputChange('jobTitle', e.target.value)}
+                                            disabled={!isEditing}
+                                            className="transition-all duration-75 text-black text-sm h-8"
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="address" className="text-black text-xs">Address</Label>
-                                    <div className="relative">
-                                        <MapPinIcon className="absolute left-2 top-2 h-3 w-3 text-royal-gray" />
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="dateOfBirth" className="text-black text-xs">Date of Birth</Label>
+                                        <div className="relative">
+                                            <CalendarIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-royal-gray" />
+                                            <Input
+                                                id="dateOfBirth"
+                                                type="date"
+                                                value={userData.dateOfBirth}
+                                                onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                                                disabled={!isEditing}
+                                                className="pl-7 transition-all duration-75 text-black text-sm h-8"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="address" className="text-black text-xs">Address</Label>
+                                        <div className="relative">
+                                            <MapPinIcon className="absolute left-2 top-2 h-3 w-3 text-royal-gray" />
+                                            <Input
+                                                id="address"
+                                                placeholder="123 Main Street"
+                                                value={userData.address}
+                                                onChange={(e) => handleInputChange('address', e.target.value)}
+                                                disabled={!isEditing}
+                                                className="pl-7 transition-all duration-75 text-black text-sm h-8"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="city" className="text-black text-xs">City</Label>
                                         <Input
-                                            id="address"
-                                            value={userData.address}
-                                            onChange={(e) => handleInputChange('address', e.target.value)}
+                                            id="city"
+                                            value={userData.city}
+                                            onChange={(e) => handleInputChange('city', e.target.value)}
                                             disabled={!isEditing}
-                                            className="pl-7 transition-all duration-75 text-black text-sm h-8"
+                                            className="transition-all duration-75 text-black text-sm h-8"
                                         />
                                     </div>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="state" className="text-black text-xs">State</Label>
+                                        <Input
+                                            id="state"
+                                            value={userData.state}
+                                            onChange={(e) => handleInputChange('state', e.target.value)}
+                                            disabled={!isEditing}
+                                            className="transition-all duration-75 text-black text-sm h-8"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="zip" className="text-black text-xs">ZIP Code</Label>
+                                        <Input
+                                            id="zip"
+                                            value={userData.zip}
+                                            onChange={(e) => handleInputChange('zip', e.target.value)}
+                                            disabled={!isEditing}
+                                            className="transition-all duration-75 text-black text-sm h-8"
+                                        />
+                                    </div>
+                                    <div></div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -330,63 +382,103 @@ export function ProfileSection() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="email" className="text-black">Email Address</Label>
-                                    <div className="relative">
-                                        <MailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email" className="text-black">Email Address</Label>
+                                        <div className="relative">
+                                            <MailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                value={userData.email}
+                                                onChange={(e) => handleInputChange('email', e.target.value)}
+                                                disabled={!isEditing}
+                                                className="pl-10 transition-all duration-75 text-black"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="phone" className="text-black">Phone Number</Label>
+                                        <div className="relative">
+                                            <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
+                                            <Input
+                                                id="phone"
+                                                type="tel"
+                                                value={userData.phone}
+                                                onChange={(e) => handleInputChange('phone', e.target.value)}
+                                                disabled={!isEditing}
+                                                className="pl-10 transition-all duration-75 text-black"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="address" className="text-black">Address</Label>
+                                        <div className="relative">
+                                            <MapPinIcon className="absolute left-3 top-3 h-4 w-4 text-royal-gray" />
+                                            <Input
+                                                id="address"
+                                                placeholder="123 Main Street"
+                                                value={userData.address}
+                                                onChange={(e) => handleInputChange('address', e.target.value)}
+                                                disabled={!isEditing}
+                                                className="pl-10 transition-all duration-75 text-black"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="city" className="text-black">City</Label>
                                         <Input
-                                            id="email"
-                                            type="email"
-                                            value={userData.email}
-                                            onChange={(e) => handleInputChange('email', e.target.value)}
+                                            id="city"
+                                            value={userData.city}
+                                            onChange={(e) => handleInputChange('city', e.target.value)}
                                             disabled={!isEditing}
-                                            className="pl-10 transition-all duration-75 text-black"
+                                            className="transition-all duration-75 text-black"
                                         />
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="phone" className="text-black">Phone Number</Label>
-                                    <div className="relative">
-                                        <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="state" className="text-black">State</Label>
                                         <Input
-                                            id="phone"
-                                            type="tel"
-                                            value={userData.phone}
-                                            onChange={(e) => handleInputChange('phone', e.target.value)}
+                                            id="state"
+                                            value={userData.state}
+                                            onChange={(e) => handleInputChange('state', e.target.value)}
                                             disabled={!isEditing}
-                                            className="pl-10 transition-all duration-75 text-black"
+                                            className="transition-all duration-75 text-black"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="zip" className="text-black">ZIP Code</Label>
+                                        <Input
+                                            id="zip"
+                                            value={userData.zip}
+                                            onChange={(e) => handleInputChange('zip', e.target.value)}
+                                            disabled={!isEditing}
+                                            className="transition-all duration-75 text-black"
                                         />
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="address" className="text-black">Address</Label>
-                                    <div className="relative">
-                                        <MapPinIcon className="absolute left-3 top-3 h-4 w-4 text-royal-gray" />
-                                        <Input
-                                            id="address"
-                                            value={userData.address}
-                                            onChange={(e) => handleInputChange('address', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="pl-10 transition-all duration-75 text-black"
-                                        />
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="dateOfBirth" className="text-black">Date of Birth</Label>
+                                        <div className="relative">
+                                            <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
+                                            <Input
+                                                id="dateOfBirth"
+                                                type="date"
+                                                value={userData.dateOfBirth}
+                                                onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                                                disabled={!isEditing}
+                                                className="pl-10 transition-all duration-75 text-black"
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="dateOfBirth" className="text-black">Date of Birth</Label>
-                                    <div className="relative">
-                                        <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
-                                        <Input
-                                            id="dateOfBirth"
-                                            type="date"
-                                            value={userData.dateOfBirth}
-                                            onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="pl-10 transition-all duration-75 text-black"
-                                        />
-                                    </div>
+                                    <div></div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -400,25 +492,27 @@ export function ProfileSection() {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="company" className="text-black">Company</Label>
-                                    <Input
-                                        id="company"
-                                        value={userData.company}
-                                        onChange={(e) => handleInputChange('company', e.target.value)}
-                                        disabled={!isEditing}
-                                        className="transition-all duration-75 text-black"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="jobTitle" className="text-black">Job Title</Label>
-                                    <Input
-                                        id="jobTitle"
-                                        value={userData.jobTitle}
-                                        onChange={(e) => handleInputChange('jobTitle', e.target.value)}
-                                        disabled={!isEditing}
-                                        className="transition-all duration-75 text-black"
-                                    />
+                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="company" className="text-black">Company</Label>
+                                        <Input
+                                            id="company"
+                                            value={userData.company}
+                                            onChange={(e) => handleInputChange('company', e.target.value)}
+                                            disabled={!isEditing}
+                                            className="transition-all duration-75 text-black"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="jobTitle" className="text-black">Job Title</Label>
+                                        <Input
+                                            id="jobTitle"
+                                            value={userData.jobTitle}
+                                            onChange={(e) => handleInputChange('jobTitle', e.target.value)}
+                                            disabled={!isEditing}
+                                            className="transition-all duration-75 text-black"
+                                        />
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -564,41 +658,15 @@ export function ProfileSection() {
                 </TabsContent>
 
                 <TabsContent value="meetings" className="space-y-2 min-[700px]:space-y-6">
-                    {/* Meeting Logs Card */}
-                    <Card className="hover:shadow-sm transition-shadow duration-75">
-                        <CardHeader className="pb-2 px-3 min-[700px]:px-6">
-                            <CardTitle className="flex items-center gap-2 text-black text-sm min-[700px]:text-lg">
-                                <VideoIcon className="h-3 w-3 min-[700px]:h-5 min-[700px]:w-5 text-royal-blue" />
-                                Meeting History
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="px-3 min-[700px]:px-6">
-                            <div className="space-y-2">
-                                <div className="bg-gray-100 p-2 min-[700px]:p-4 rounded-lg">
-                                    {meetingLogs.map((meeting) => (
-                                        <div
-                                            key={meeting.id}
-                                            className="p-3 bg-white rounded-lg border border-gray-200 hover:shadow-sm transition-all duration-75 mb-2 last:mb-0"
-                                        >
-                                            <div className="flex justify-between items-center mb-2">
-                                                <h4 className="text-black font-bold text-base">{meeting.title}</h4>
-                                                <span className="text-black text-sm">{meeting.date} {meeting.time}</span>
-                                            </div>
-                                            <a
-                                                href={meeting.link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-gray-500 text-sm underline hover:text-gray-700 transition-colors duration-75 break-all"
-                                            >
-                                                {meeting.link}
-                                            </a>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <div className="text-center py-8">
+                        <VideoIcon className="h-12 w-12 text-royal-gray mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-black mb-2">Meetings Tab Disabled</h3>
+                        <p className="text-royal-gray text-sm">
+                            This feature is currently unavailable.
+                        </p>
+                    </div>
                 </TabsContent>
+
             </Tabs>
         </div>
     );

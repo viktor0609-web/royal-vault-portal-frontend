@@ -119,8 +119,9 @@ export function WelcomeSection() {
             {/* Mobile Arrow Button */}
             <Button
               onClick={() => handleAction(item.action, index)}
-              className="sm:hidden bg-primary hover:bg-royal-blue-dark text-white p-2 rounded-full transition-all duration-75 
-                       group-hover:scale-101 group-hover:shadow-sm"
+              className="sm:hidden bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full transition-all duration-75 
+                       group-hover:scale-101 group-hover:shadow-sm flex items-center justify-center !rounded-full"
+              style={{ aspectRatio: '1/1' }}
             >
               <ArrowRightIcon className="h-4 w-4" />
             </Button>

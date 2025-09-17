@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components//ui/progress";
-import { TagIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { TagIcon, FilterIcon, XIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { optionsApi, dealApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -45,6 +46,7 @@ export function DealsSection() {
   console.log("user", user);
 
   const [showSalesModal, setShowSalesModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     categories: [],
     subCategories: [],
@@ -159,6 +161,53 @@ export function DealsSection() {
     return String(data);
   };
 
+  // Render filter components
+  const renderFilters = () => {
+    return filterConfig?.map((config) => {
+      const options = filterOptions[config.key] || [];
+      return (
+        <div key={config.key}>
+          <div className="text-royal-gray mb-1 font-bold">
+            {config.key}
+          </div>
+          <div>
+            <Select
+              value={
+                selectedFilters[config.key as keyof typeof selectedFilters] ||
+                "all"
+              }
+              onValueChange={(value) =>
+                handleFilterChange(config.key, value === "all" ? null : value)
+              }
+            >
+              <SelectTrigger className="border-royal-light-gray">
+                <SelectValue placeholder={config.placeholder} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {filterOptionsLoading ? (
+                  <SelectItem value="loading" disabled>
+                    Loading...
+                  </SelectItem>
+                ) : options.length > 0 ? (
+                  options?.map((option, index) => (
+                    <SelectItem key={index} value={option._id}>
+                      {option.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="no-options" disabled>
+                    No options available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      );
+    });
+  };
+
   return (
     <div className="flex-1 p-2">
       <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
@@ -171,53 +220,62 @@ export function DealsSection() {
         </div>
       </div>
 
-      <div className="bg-white p-3 rounded-lg border border-royal-light-gray mb-8">
+      {/* Desktop Filters - Hidden on mobile */}
+      <div className="hidden min-[800px]:block bg-white p-3 rounded-lg border border-royal-light-gray mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-1 sm:gap-4">
-          {filterConfig?.map((config) => {
-            const options = filterOptions[config.key] || [];
-            return (
-              <div key={config.key}>
-                <div className="text-royal-gray mb-1 font-bold">
-                  {config.key}
-                </div>
-                <div>
-                  <Select
-                    value={
-                      selectedFilters[config.key as keyof typeof selectedFilters] ||
-                      "all"
-                    }
-                    onValueChange={(value) =>
-                      handleFilterChange(config.key, value === "all" ? null : value)
-                    }
-                  >
-                    <SelectTrigger className="border-royal-light-gray">
-                      <SelectValue placeholder={config.placeholder} />
-                    </SelectTrigger>
-                    {/* Uncomment when ready */}
-                    <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      {filterOptionsLoading ? (
-                        <SelectItem value="loading" disabled>
-                          Loading...
-                        </SelectItem>
-                      ) : options.length > 0 ? (
-                        options?.map((option, index) => (
-                          <SelectItem key={index} value={option._id}>
-                            {option.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="no-options" disabled>
-                          No options available
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            );
-          })}
+          {renderFilters()}
         </div>
+      </div>
+
+      {/* Mobile Filter Button - Only visible on mobile */}
+      <div className="min-[800px]:hidden mb-4">
+        <Dialog open={showFilterModal} onOpenChange={setShowFilterModal}>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full flex items-center gap-2 bg-white border-royal-light-gray"
+            >
+              <FilterIcon className="h-4 w-4" />
+              Filter Deals
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FilterIcon className="h-5 w-5" />
+                Filter Deals
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-1 py-1">
+              {renderFilters()}
+            </div>
+            <div className="flex gap-1 pt-2 border-t">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilterModal(false)}
+                className="flex-1"
+              >
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  setSelectedFilters({
+                    categories: null,
+                    subCategories: null,
+                    types: null,
+                    strategies: null,
+                    requirements: null,
+                    sources: null
+                  });
+                  setShowFilterModal(false);
+                }}
+                className="flex-1"
+              >
+                Clear All
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="relative h-[660px]">

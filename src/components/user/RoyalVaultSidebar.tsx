@@ -71,10 +71,10 @@ export function RoyalVaultSidebar() {
     <Sidebar className="w-48">
       {/* Desktop Header */}
       <div className="sm:flex items-center p-6 border-b border-royal-light-gray">
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
           <img src='/imgs/logo.svg' className="w-5" />
           <span className="font-bold text-sm text-royal-dark-gray">ROYAL VAULT</span>
-        </div>
+        </Link>
       </div>
 
       <SidebarContent className="flex flex-col justify-between h-full">

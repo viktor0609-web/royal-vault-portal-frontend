@@ -3,14 +3,6 @@ import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command";
-import {
     Popover,
     PopoverContent,
     PopoverTrigger,
@@ -113,42 +105,45 @@ export function MultiSelect({
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
-                <Command>
-                    <CommandInput placeholder="Search..." />
-                    <CommandList className="max-h-[300px] overflow-y-auto">
-                        <CommandEmpty>
-                            {options.length === 0 ? "No options available" : "No option found."}
-                        </CommandEmpty>
-                        <CommandGroup>
-                            {options.length === 0 ? (
-                                <div className="p-2 text-sm text-muted-foreground text-center">
-                                    Loading options...
+                <div
+                    className="max-h-[300px] overflow-y-auto"
+                    style={{
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#d1d5db #f3f4f6',
+                        WebkitOverflowScrolling: 'touch'
+                    }}
+                    onWheel={(e) => {
+                        e.stopPropagation();
+                    }}
+                >
+                    {options.length === 0 ? (
+                        <div className="p-2 text-sm text-muted-foreground text-center">
+                            Loading options...
+                        </div>
+                    ) : (
+                        <div className="p-1">
+                            {options.map((option) => (
+                                <div
+                                    key={option.value}
+                                    onClick={() => {
+                                        handleSelect(option.value);
+                                    }}
+                                    className="flex items-center px-2 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-sm"
+                                >
+                                    <Check
+                                        className={cn(
+                                            "mr-2 h-4 w-4",
+                                            selected.includes(option.value)
+                                                ? "opacity-100"
+                                                : "opacity-0"
+                                        )}
+                                    />
+                                    {option.label}
                                 </div>
-                            ) : (
-                                options.map((option) => (
-                                    <CommandItem
-                                        key={option.value}
-                                        value={option.label}
-                                        onSelect={() => {
-                                            handleSelect(option.value);
-                                        }}
-                                        className="cursor-pointer"
-                                    >
-                                        <Check
-                                            className={cn(
-                                                "mr-2 h-4 w-4",
-                                                selected.includes(option.value)
-                                                    ? "opacity-100"
-                                                    : "opacity-0"
-                                            )}
-                                        />
-                                        {option.label}
-                                    </CommandItem>
-                                ))
-                            )}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </PopoverContent>
         </Popover>
     );

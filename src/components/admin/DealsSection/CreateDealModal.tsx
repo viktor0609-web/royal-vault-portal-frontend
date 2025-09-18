@@ -316,7 +316,14 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder={item.placeholder} />
                 </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
+                <SelectContent
+                  className="max-h-[300px] overflow-y-auto"
+                  style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#d1d5db #f3f4f6',
+                    WebkitOverflowScrolling: 'touch'
+                  }}
+                >
                   {options[item.id === 'source' ? 'sources' : item.id as keyof typeof options]?.map((option: MultiSelectOption) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}

@@ -240,7 +240,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                       <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
                       <div className="relative inline-block">
                         <img
-                          src={formData.image}
+                          src={import.meta.env.VITE_BACKEND_URL + formData.image}
                           alt="Current deal image"
                           className="w-32 h-32 object-cover rounded-lg border border-gray-300"
                         />

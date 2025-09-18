@@ -235,6 +235,18 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
               </Label>
               {item.type === 'file' ? (
                 <div className="mt-1">
+                  {editingDeal && formData.image && (
+                    <div className="mb-3">
+                      <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
+                      <div className="relative inline-block">
+                        <img
+                          src={formData.image}
+                          alt="Current deal image"
+                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                        />
+                      </div>
+                    </div>
+                  )}
                   <Input
                     id={item.id}
                     type="file"
@@ -242,6 +254,18 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                     onChange={handleImageChange}
                     className="mb-2"
                   />
+                  {imageFile && (
+                    <div className="mt-2">
+                      <Label className="text-sm text-gray-600 mb-2 block">New Image Preview:</Label>
+                      <div className="relative inline-block">
+                        <img
+                          src={URL.createObjectURL(imageFile)}
+                          alt="New image preview"
+                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <Input
@@ -292,7 +316,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder={item.placeholder} />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[300px]">
                   {options[item.id === 'source' ? 'sources' : item.id as keyof typeof options]?.map((option: MultiSelectOption) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}

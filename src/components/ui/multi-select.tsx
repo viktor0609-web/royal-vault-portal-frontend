@@ -115,7 +115,7 @@ export function MultiSelect({
             <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
                 <Command>
                     <CommandInput placeholder="Search..." />
-                    <CommandList className="max-h-[200px] overflow-y-auto">
+                    <CommandList className="max-h-[300px] overflow-y-auto">
                         <CommandEmpty>
                             {options.length === 0 ? "No options available" : "No option found."}
                         </CommandEmpty>
@@ -128,7 +128,7 @@ export function MultiSelect({
                                 options.map((option) => (
                                     <CommandItem
                                         key={option.value}
-                                        value={option.value}
+                                        value={option.label}
                                         onSelect={() => {
                                             handleSelect(option.value);
                                         }}

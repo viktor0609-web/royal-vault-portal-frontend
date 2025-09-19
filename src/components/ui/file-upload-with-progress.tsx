@@ -10,6 +10,7 @@ interface FileUploadWithProgressProps {
     maxSize?: number; // in MB
     className?: string;
     disabled?: boolean;
+    id?: string; // Add unique ID prop
 }
 
 export const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
@@ -17,7 +18,8 @@ export const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
     accept = '*/*',
     maxSize = 500, // 500MB default
     className,
-    disabled = false
+    disabled = false,
+    id
 }) => {
     const { uploadFile, isUploading, uploadError } = useFileUpload();
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -79,11 +81,11 @@ export const FileUploadWithProgress: React.FC<FileUploadWithProgressProps> = ({
                         accept={accept}
                         onChange={handleFileSelect}
                         className="hidden"
-                        id="file-upload"
+                        id={id || "file-upload"}
                         disabled={disabled}
                     />
                     <label
-                        htmlFor="file-upload"
+                        htmlFor={id || "file-upload"}
                         className="cursor-pointer flex flex-col items-center space-y-2"
                     >
                         <Upload className="h-8 w-8 text-gray-400" />

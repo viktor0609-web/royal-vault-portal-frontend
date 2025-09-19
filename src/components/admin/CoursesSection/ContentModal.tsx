@@ -35,7 +35,6 @@ interface Lecture {
   title: string;
   description: string;
   videoUrl: string;
-  pdfUrl: string;
   completedBy: string[];
 }
 
@@ -52,7 +51,6 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
     title: "",
     description: "",
     videoUrl: "",
-    pdfUrl: "",
     courseId: ""
   });
   const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
@@ -68,7 +66,6 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
           title: editingLecture.title || "",
           description: editingLecture.description || "",
           videoUrl: editingLecture.videoUrl || "",
-          pdfUrl: editingLecture.pdfUrl || "",
           courseId: selectedCourseId || ""
         });
       } else {
@@ -76,7 +73,6 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
           title: "",
           description: "",
           videoUrl: "",
-          pdfUrl: "",
           courseId: selectedCourseId || ""
         });
       }
@@ -106,15 +102,13 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
         response = await courseApi.updateLecture(editingLecture._id, {
           title: formData.title,
           description: formData.description,
-          videoUrl: formData.videoUrl,
-          pdfUrl: formData.pdfUrl
+          videoUrl: formData.videoUrl
         });
       } else {
         response = await courseApi.createLecture({
           title: formData.title,
           description: formData.description,
           videoUrl: formData.videoUrl,
-          pdfUrl: formData.pdfUrl,
           courseId: formData.courseId
         });
       }
@@ -212,18 +206,6 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
             />
           </div>
 
-          <div>
-            <Label htmlFor="pdfUrl" className="text-royal-dark-gray font-medium">
-              PDF URL (Optional)
-            </Label>
-            <Input
-              id="pdfUrl"
-              value={formData.pdfUrl}
-              onChange={(e) => handleInputChange("pdfUrl", e.target.value)}
-              className="mt-1"
-              placeholder="https://example.com/document.pdf"
-            />
-          </div>
 
           {error && (
             <div className="text-red-500 text-sm">{error}</div>

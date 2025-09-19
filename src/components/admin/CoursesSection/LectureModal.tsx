@@ -22,7 +22,6 @@ interface Lecture {
     content: string;
     videoUrl: string;
     videoFile?: string;
-    pdfUrl?: string;
     relatedFiles?: RelatedFile[];
     createdBy: {
         _id: string;
@@ -33,7 +32,6 @@ interface Lecture {
 }
 
 interface RelatedFile {
-    _id?: string;
     name: string;
     url: string;
     file?: File;
@@ -54,8 +52,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         description: "",
         content: "",
         videoUrl: "",
-        videoFile: "",
-        pdfUrl: ""
+        videoFile: ""
     });
     const [relatedFiles, setRelatedFiles] = useState<RelatedFile[]>([]);
     const [newRelatedFile, setNewRelatedFile] = useState({ name: "", url: "", file: null as File | null, uploadedUrl: "" });
@@ -71,8 +68,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 description: editingLecture.description || "",
                 content: editingLecture.content || "",
                 videoUrl: editingLecture.videoUrl || "",
-                videoFile: editingLecture.videoFile || "",
-                pdfUrl: editingLecture.pdfUrl || ""
+                videoFile: editingLecture.videoFile || ""
             });
             setRelatedFiles(editingLecture.relatedFiles || []);
         } else {
@@ -81,8 +77,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 description: "",
                 content: "",
                 videoUrl: "",
-                videoFile: "",
-                pdfUrl: ""
+                videoFile: ""
             });
             setRelatedFiles([]);
         }
@@ -116,6 +111,13 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 relatedFiles: cleanedRelatedFiles,
                 courseId: courseId
             };
+
+            console.log('Final lecture data being sent:', lectureData);
+            console.log('Related files count:', cleanedRelatedFiles.length);
+
+
+
+
 
             let response;
             if (editingLecture) {
@@ -151,20 +153,25 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
     };
 
     const handleAddRelatedFile = () => {
-        if (newRelatedFile.name && (newRelatedFile.url || newRelatedFile.uploadedUrl)) {
+        if (newRelatedFile.url || newRelatedFile.uploadedUrl) {
             const fileUrl = newRelatedFile.uploadedUrl || newRelatedFile.url;
-            setRelatedFiles(prev => [...prev, {
-                _id: Date.now().toString(),
-                name: newRelatedFile.name,
+            const newFile = {
+                name: newRelatedFile.name || "",
                 url: fileUrl,
                 uploadedUrl: newRelatedFile.uploadedUrl || ""
-            }]);
+            };
+            setRelatedFiles(prev => {
+                const updated = [...prev, newFile];
+                console.log('Added related file:', newFile);
+                console.log('Updated related files:', updated);
+                return updated;
+            });
             setNewRelatedFile({ name: "", url: "", file: null, uploadedUrl: "" });
         }
     };
 
-    const handleRemoveRelatedFile = (id: string) => {
-        setRelatedFiles(prev => prev.filter(file => file._id !== id));
+    const handleRemoveRelatedFile = (index: number) => {
+        setRelatedFiles(prev => prev.filter((_, i) => i !== index));
     };
 
     const handleRelatedFileChange = (field: 'name' | 'url', value: string) => {
@@ -217,13 +224,13 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                     {/* Video Section */}
                     <div>
                         <Label className="text-royal-dark-gray font-bold text-base">
-                            Video <span className="text-gray-500 font-normal">(Optional - provide either URL or file)</span>
+                            Video <span className="text-gray-500 font-normal">(Optional - URL takes priority over file)</span>
                         </Label>
 
                         {/* Video URL */}
                         <div className="mt-2">
                             <Label htmlFor="videoUrl" className="text-sm text-gray-600">
-                                Video URL
+                                Video URL (Priority)
                             </Label>
                             <Input
                                 id="videoUrl"
@@ -245,7 +252,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                         {/* Video File Upload */}
                         <div>
                             <Label className="text-sm text-gray-600">
-                                Upload Video File
+                                Upload Video File (Fallback)
                             </Label>
                             <div className="mt-1">
                                 {formData.videoFile ? (
@@ -267,7 +274,10 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                     </div>
                                 ) : (
                                     <FileUploadWithProgress
+                                        key="video-file-upload"
+                                        id="video-file-upload"
                                         onFileUploaded={(fileUrl, fileName) => {
+                                            console.log('Video file uploaded:', fileUrl, fileName);
                                             setFormData(prev => ({ ...prev, videoFile: fileUrl }));
                                         }}
                                         accept="video/*"
@@ -282,22 +292,22 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                     {/* Related Files Section */}
                     <div>
                         <Label className="text-royal-dark-gray font-bold text-base">
-                            Related Files/Resources <span className="text-gray-500 font-normal">(Upload required for each item)</span>
+                            Related Files/Resources <span className="text-gray-500 font-normal">(Optional - Upload required for each item)</span>
                         </Label>
                         <div className="mt-2 bg-white border border-gray-200 rounded-lg overflow-hidden">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-1/3">Name</TableHead>
+                                        <TableHead className="w-1/3">Name (Optional)</TableHead>
                                         <TableHead className="w-1/4">Source</TableHead>
                                         <TableHead className="w-1/4">Upload/URL</TableHead>
                                         <TableHead className="w-20">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {relatedFiles.map((file) => (
-                                        <TableRow key={file._id}>
-                                            <TableCell className="font-medium">{file.name}</TableCell>
+                                    {relatedFiles.map((file, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell className="font-medium">{file.name || "Untitled"}</TableCell>
                                             <TableCell className="text-sm text-gray-500">
                                                 {file.uploadedUrl ? "Uploaded File" : "External URL"}
                                             </TableCell>
@@ -312,7 +322,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                                         type="button"
                                                         size="sm"
                                                         variant="outline"
-                                                        onClick={() => handleRemoveRelatedFile(file._id!)}
+                                                        onClick={() => handleRemoveRelatedFile(index)}
                                                         className="h-8 px-2"
                                                     >
                                                         <Trash2 className="h-3 w-3" />
@@ -326,9 +336,8 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                             <Input
                                                 value={newRelatedFile.name}
                                                 onChange={(e) => handleRelatedFileChange("name", e.target.value)}
-                                                placeholder="File name"
+                                                placeholder="File name (optional)"
                                                 className="border-gray-200"
-                                                required
                                             />
                                         </TableCell>
                                         <TableCell>
@@ -341,10 +350,13 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                                 {/* Upload Option */}
                                                 <div>
                                                     <FileUploadWithProgress
+                                                        key="related-file-upload"
+                                                        id="related-file-upload"
                                                         onFileUploaded={(fileUrl, fileName) => {
+                                                            console.log('Related file uploaded:', fileUrl, fileName);
                                                             setNewRelatedFile(prev => ({
                                                                 ...prev,
-                                                                name: fileName,
+                                                                name: prev.name || fileName, // Only use fileName if name is empty
                                                                 url: fileUrl,
                                                                 uploadedUrl: fileUrl
                                                             }));
@@ -380,7 +392,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                                 size="sm"
                                                 onClick={handleAddRelatedFile}
                                                 className="h-8 px-2 bg-blue-600 hover:bg-blue-700"
-                                                disabled={!newRelatedFile.name || (!newRelatedFile.url && !newRelatedFile.uploadedUrl)}
+                                                disabled={!newRelatedFile.url && !newRelatedFile.uploadedUrl}
                                             >
                                                 <PlusIcon className="h-3 w-3" />
                                             </Button>

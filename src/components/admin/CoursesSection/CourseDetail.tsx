@@ -11,8 +11,14 @@ interface Lecture {
   _id: string;
   title: string;
   description: string;
+  content: string;
   videoUrl: string;
-  pdfUrl?: string;
+  videoFile?: string;
+  relatedFiles?: Array<{
+    name: string;
+    url: string;
+    uploadedUrl?: string;
+  }>;
   createdBy: {
     _id: string;
     name: string;
@@ -200,13 +206,12 @@ export function CourseDetail() {
         <div className="text-xs text-gray-500 text-center py-2 bg-gray-50 border-b border-gray-200 sm:hidden">
           ← Scroll horizontally to see all columns →
         </div>
-        <Table className="w-full min-w-[1000px] text-sm">
+        <Table className="w-full min-w-[900px] text-sm">
           <TableHeader>
             <TableRow>
               <TableHead className="w-48 min-w-48">Title</TableHead>
               <TableHead className="w-64 min-w-64">Description</TableHead>
-              <TableHead className="w-40 min-w-40">Video URL</TableHead>
-              <TableHead className="w-40 min-w-40">PDF URL</TableHead>
+              <TableHead className="w-40 min-w-40">Video (URL/File)</TableHead>
               <TableHead className="w-32 min-w-32">Created By</TableHead>
               <TableHead className="w-32 min-w-32">Created At</TableHead>
               <TableHead className="w-32 min-w-32 text-right">
@@ -221,7 +226,7 @@ export function CourseDetail() {
           <TableBody>
             {lectures.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={6} className="text-center py-8">
                   No lectures found. Create your first lecture!
                 </TableCell>
               </TableRow>
@@ -238,19 +243,16 @@ export function CourseDetail() {
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline text-sm"
                       >
-                        View Video
+                        View Video (URL)
                       </a>
-                    ) : 'N/A'}
-                  </TableCell>
-                  <TableCell>
-                    {lecture.pdfUrl ? (
+                    ) : lecture.videoFile ? (
                       <a
-                        href={lecture.pdfUrl}
+                        href={lecture.videoFile}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm"
+                        className="text-green-600 hover:underline text-sm"
                       >
-                        View PDF
+                        View Video (File)
                       </a>
                     ) : 'N/A'}
                   </TableCell>

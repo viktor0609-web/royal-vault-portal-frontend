@@ -25,6 +25,8 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (token && !config.headers["Authorization"]) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
+
+
   return config;
 });
 

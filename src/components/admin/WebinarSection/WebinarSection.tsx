@@ -69,19 +69,22 @@ export function WebinarSection() {
                 <VideoIcon className="h-10 w-10 text-royal-gray hidden min-[700px]:block" />
                 <h1 className="text-2xl font-bold text-royal-dark-gray mb-2 uppercase">Webinars</h1>
             </div>
-            <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto">
-                <Table className="w-full min-w-max">
+            <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <div className="text-xs text-gray-500 text-center py-2 bg-gray-50 border-b border-gray-200 sm:hidden">
+                    ← Scroll horizontally to see all columns →
+                </div>
+                <Table className="w-full min-w-[1000px] text-sm">
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-64 min-w-64">Webinar</TableHead>
-                            <TableHead className="w-48 min-w-48">Status</TableHead>
-                            <TableHead className="w-48 min-w-48">PortalDisplay</TableHead>
-                            <TableHead className="w-48 min-w-48">Date EST</TableHead>
-                            <TableHead className="w-48 min-w-48">Registrants</TableHead>
-                            <TableHead className="w-48 min-w-48">Attendees</TableHead>
-                            <TableHead className="w-48 min-w-48">Re-Watch</TableHead>
-                            <TableHead className="w-96 min-w-96 text-right">
-                                <Button className="w-24" onClick={() => handlebtnClick('create', '')}>Create</Button>
+                            <TableHead className="w-48 min-w-48">Webinar</TableHead>
+                            <TableHead className="w-32 min-w-32">Status</TableHead>
+                            <TableHead className="w-32 min-w-32">PortalDisplay</TableHead>
+                            <TableHead className="w-32 min-w-32">Date EST</TableHead>
+                            <TableHead className="w-32 min-w-32">Registrants</TableHead>
+                            <TableHead className="w-32 min-w-32">Attendees</TableHead>
+                            <TableHead className="w-32 min-w-32">Re-Watch</TableHead>
+                            <TableHead className="w-32 min-w-32 text-right">
+                                <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={() => handlebtnClick('create', '')}>Create</Button>
                             </TableHead>
                         </TableRow>
                     </TableHeader>

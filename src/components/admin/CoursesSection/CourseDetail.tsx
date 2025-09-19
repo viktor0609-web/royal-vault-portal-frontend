@@ -247,7 +247,7 @@ export function CourseDetail() {
                       </a>
                     ) : lecture.videoFile ? (
                       <a
-                        href={lecture.videoFile}
+                        href={import.meta.env.VITE_BACKEND_URL + lecture.videoFile}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-green-600 hover:underline text-sm"

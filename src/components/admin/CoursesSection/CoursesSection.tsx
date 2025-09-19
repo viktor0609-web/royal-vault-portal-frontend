@@ -1,15 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import {
-  EyeOffIcon,
-  NetworkIcon,
-  RefreshCwIcon,
-  KeyIcon,
-  TruckIcon,
-  GraduationCapIcon,
-  ClockIcon,
-  PlusIcon
-} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
+import { GraduationCapIcon, Trash2, Edit, PlusIcon, EyeIcon } from "lucide-react";
 import { GroupModal } from "./GroupModal";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -26,287 +19,13 @@ interface CourseGroup {
     email: string;
   };
   courses: any[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-// Mock data for course groups
-const mockCourseGroups: CourseGroup[] = [
-  {
-    _id: "anonymity",
-    title: "Anonymity",
-    description: "Make yourself invisible and prevent lawsuits before they begin.",
-    icon: "eye-off",
-    createdBy: {
-      _id: "admin",
-      name: "Admin",
-      email: "admin@royalvault.com"
-    },
-    courses: [
-      {
-        _id: "anon-1",
-        title: "Digital Privacy Fundamentals",
-        description: "Learn the basics of protecting your digital identity",
-        duration: "2 hours",
-        level: "Beginner"
-      },
-      {
-        _id: "anon-2",
-        title: "Advanced Anonymity Techniques",
-        description: "Master advanced methods for complete anonymity",
-        duration: "4 hours",
-        level: "Advanced"
-      },
-      {
-        _id: "anon-3",
-        title: "Digital Privacy Fundamentals",
-        description: "Learn the basics of protecting your digital identity",
-        duration: "2 hours",
-        level: "Beginner"
-      },
-      {
-        _id: "anon-4",
-        title: "Advanced Anonymity Techniques",
-        description: "Master advanced methods for complete anonymity",
-        duration: "4 hours",
-        level: "Advanced"
-      },
-      {
-        _id: "anon-5",
-        title: "Digital Privacy Fundamentals",
-        description: "Learn the basics of protecting your digital identity",
-        duration: "2 hours",
-        level: "Beginner"
-      },
-      {
-        _id: "anon-6",
-        title: "Advanced Anonymity Techniques",
-        description: "Master advanced methods for complete anonymity",
-        duration: "4 hours",
-        level: "Advanced"
-      }
-    ]
-  },
-  {
-    _id: "asset-holding",
-    title: "Asset Holding",
-    description: "Hold your assets anonymously and securely.",
-    icon: "network",
-    createdBy: {
-      _id: "admin",
-      name: "Admin",
-      email: "admin@royalvault.com"
-    },
-    courses: [
-      {
-        _id: "asset-1",
-        title: "Offshore Trusts 101",
-        description: "Understanding offshore trust structures",
-        duration: "3 hours",
-        level: "Intermediate"
-      },
-      {
-        _id: "asset-2",
-        title: "Cryptocurrency Asset Protection",
-        description: "Securing digital assets with proper structures",
-        duration: "2.5 hours",
-        level: "Intermediate"
-      }
-    ]
-  },
-  {
-    _id: "operations",
-    title: "Operations",
-    description: "Run your business without liability.",
-    icon: "refresh-cw",
-    createdBy: {
-      _id: "admin",
-      name: "Admin",
-      email: "admin@royalvault.com"
-    },
-    courses: [
-      {
-        _id: "ops-1",
-        title: "Business Entity Selection",
-        description: "Choose the right entity structure for your business",
-        duration: "2 hours",
-        level: "Beginner"
-      },
-      {
-        _id: "ops-2",
-        title: "Liability Protection Strategies",
-        description: "Protect your personal assets from business liabilities",
-        duration: "3.5 hours",
-        level: "Advanced"
-      }
-    ]
-  },
-  {
-    _id: "estate-planning",
-    title: "Estate Planning",
-    description: "Transfer your wealth to future generations.",
-    icon: "key",
-    createdBy: {
-      _id: "admin",
-      name: "Admin",
-      email: "admin@royalvault.com"
-    },
-    courses: [
-      {
-        _id: "estate-1",
-        title: "Wealth Transfer Strategies",
-        description: "Effective methods for transferring wealth to heirs",
-        duration: "4 hours",
-        level: "Advanced"
-      },
-      {
-        _id: "estate-2",
-        title: "Trust Administration",
-        description: "Managing and administering family trusts",
-        duration: "3 hours",
-        level: "Intermediate"
-      }
-    ]
-  },
-  {
-    _id: "tax-vehicles",
-    title: "Tax Vehicles",
-    description: "Optimize your taxes for the first $150k annual revenue.",
-    icon: "truck",
-    createdBy: {
-      _id: "admin",
-      name: "Admin",
-      email: "admin@royalvault.com"
-    },
-    courses: [
-      {
-        _id: "tax-1",
-        title: "Tax Optimization Basics",
-        description: "Fundamental tax reduction strategies",
-        duration: "2.5 hours",
-        level: "Beginner"
-      },
-      {
-        _id: "tax-2",
-        title: "Advanced Tax Structures",
-        description: "Complex tax planning for high earners",
-        duration: "5 hours",
-        level: "Advanced"
-      }
-    ]
-  },
-  {
-    _id: "royal-life-1",
-    title: "Royal Life 1.0",
-    description: "Learn how to achieve an extraordinary life on every level.",
-    icon: "graduation-cap",
-    createdBy: {
-      _id: "admin",
-      name: "Admin",
-      email: "admin@royalvault.com"
-    },
-    courses: [
-      {
-        _id: "royal-1",
-        title: "Mindset Mastery",
-        description: "Develop the mindset of extraordinary success",
-        duration: "6 hours",
-        level: "All Levels"
-      },
-      {
-        _id: "royal-2",
-        title: "Lifestyle Design",
-        description: "Design and live your ideal lifestyle",
-        duration: "4 hours",
-        level: "Intermediate"
-      }
-    ]
-  },
-  {
-    _id: "royal-life-2",
-    title: "Royal Life 2.0",
-    description: "Advanced strategies for achieving the royal lifestyle.",
-    icon: "graduation-cap",
-    createdBy: {
-      _id: "admin",
-      name: "Admin",
-      email: "admin@royalvault.com"
-    },
-    courses: [
-      {
-        _id: "royal2-1",
-        title: "Wealth Building Mastery",
-        description: "Advanced wealth accumulation strategies",
-        duration: "8 hours",
-        level: "Advanced"
-      }
-    ]
-  },
-  {
-    _id: "coming-soon",
-    title: "Coming Soon",
-    description: "Exciting new courses are being developed.",
-    icon: "clock",
-    createdBy: {
-      _id: "admin",
-      name: "Admin",
-      email: "admin@royalvault.com"
-    },
-    courses: []
-  }
-];
-
-// Default categories with icons for fallback
-const defaultCategories = [
-  {
-    icon: EyeOffIcon,
-    title: "Anonymity",
-    description: "Make yourself invisible and prevent lawsuits before they begin.",
-    id: "anonymity",
-  },
-  {
-    icon: NetworkIcon,
-    title: "Asset Holding",
-    description: "Hold your assets anonymously and securely.",
-    id: "asset-holding",
-  },
-  {
-    icon: RefreshCwIcon,
-    title: "Operations",
-    description: "Run your business without liability.",
-    id: "operations",
-  },
-  {
-    icon: KeyIcon,
-    title: "Estate Planning",
-    description: "Transfer your wealth to future generations.",
-    id: "estate-planning",
-  },
-  {
-    icon: TruckIcon,
-    title: "Tax Vehicles",
-    description: "Optimize your taxes for the first $150k annual revenue.",
-    id: "tax-vehicles",
-  },
-  {
-    icon: GraduationCapIcon,
-    title: "Royal Life 1.0",
-    description: "Learn how to achieve an extraordinary life on every level.",
-    id: "royal-life-1",
-  },
-  {
-    icon: GraduationCapIcon,
-    title: "Royal Life 2.0",
-    description: "",
-    id: "royal-life-2",
-  },
-  {
-    icon: ClockIcon,
-    title: "Coming Soon",
-    description: "",
-    id: "coming-soon",
-  },
-];
 
 export function CoursesSection() {
+  const navigate = useNavigate();
   const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -336,6 +55,36 @@ export function CoursesSection() {
     }
   };
 
+  const handleEdit = (group: CourseGroup) => {
+    setEditingGroup(group);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (groupId: string) => {
+    if (window.confirm('Are you sure you want to delete this course group? This will also delete all associated courses and lectures.')) {
+      try {
+        await courseApi.deleteCourseGroup(groupId);
+        fetchCourseGroups(); // Refresh the list
+        toast({
+          title: "Success",
+          description: "Course group deleted successfully",
+        });
+      } catch (error: any) {
+        console.error('Error deleting course group:', error);
+        setError(error.response?.data?.message || 'Failed to delete course group');
+        toast({
+          title: "Error",
+          description: error.response?.data?.message || 'Failed to delete course group',
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  const handleViewGroup = (groupId: string) => {
+    navigate(`/admin/courses/group/${groupId}`);
+  };
+
   const fetchCourseGroups = async () => {
     try {
       setLoading(true);
@@ -358,107 +107,96 @@ export function CoursesSection() {
     fetchCourseGroups();
   }, []);
 
-  // Use mock course groups and map them to display categories
-  const displayCategories = courseGroups.length > 0
-    ? courseGroups.map((group, index) => ({
-      icon: defaultCategories[index % defaultCategories.length]?.icon || GraduationCapIcon,
-      title: group.title,
-      description: group.description,
-      id: group._id,
-    }))
-    : defaultCategories;
-
-  if (loading) {
-    return (
-      <div className="flex-1 p-4">
-        <div className="flex items-center justify-between bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-          <div className="flex items-center gap-4">
-            <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
-            <div>
-              <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">COURSES</h1>
-              <p className="text-royal-gray">
-                Learn everything you need to know to optimize your asset protection and tax structure.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleAddCourseGroup}
-            className="flex items-center gap-2 px-4 py-2 bg-royal-blue text-white rounded-lg hover:bg-royal-blue/90 transition-colors font-medium"
-          >
-            <PlusIcon className="h-4 w-4" />
-            Add
-          </button>
-        </div>
-        <div className="text-center py-8">Loading courses...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex-1 p-4">
-        <div className="flex items-center justify-between bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-          <div className="flex items-center gap-4">
-            <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
-            <div>
-              <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">COURSES</h1>
-              <p className="text-royal-gray">
-                Learn everything you need to know to optimize your asset protection and tax structure.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleAddCourseGroup}
-            className="flex items-center gap-2 px-4 py-2 bg-royal-blue text-white rounded-lg hover:bg-royal-blue/90 transition-colors font-medium"
-          >
-            <PlusIcon className="h-4 w-4" />
-            Add
-          </button>
-        </div>
-        <div className="text-center py-8 text-red-500">{error}</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex-1 p-4 animate-in fade-in duration-300">
-      <div className="flex items-center justify-between bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-        <div className="flex items-center gap-4">
-          <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
-          <div>
-            <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">COURSES</h1>
-            <p className="text-royal-gray">
-              Learn everything you need to know to optimize your asset protection and tax structure.
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={handleAddCourseGroup}
-          className="flex items-center gap-2 px-4 py-2 bg-royal-blue text-white rounded-lg hover:bg-royal-blue/90 transition-colors font-medium"
-        >
-          <PlusIcon className="h-4 w-4" />
-          Add
-        </button>
+    <div className="flex-1 p-4 flex flex-col">
+      <div className="flex gap-4 items-center bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
+        <GraduationCapIcon className="h-10 w-10 text-royal-gray hidden min-[700px]:block" />
+        <h1 className="text-2xl font-bold text-royal-dark-gray mb-2 uppercase">Course Groups</h1>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-6 mb-12">
-        {displayCategories.map((category, index) => (
-          <Link
-            key={category.id}
-            to={`/admin/courses/group/${category.id}`}
-            className="text-center p-6 bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow cursor-pointer block"
-          >
-            <div className="flex justify-center mb-4">
-              <category.icon className="h-16 w-16 text-royal-gray" />
-            </div>
-            <h3 className="text-lg font-bold text-royal-dark-gray mb-2">
-              {category.title}
-            </h3>
-            <p className="text-sm text-royal-gray leading-relaxed">
-              {category.description}
-            </p>
-          </Link>
-        ))}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+
+      <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto">
+        <Table className="w-full min-w-max">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-64 min-w-64">Title</TableHead>
+              <TableHead className="w-48 min-w-48">Description</TableHead>
+              <TableHead className="w-32 min-w-32">Icon</TableHead>
+              <TableHead className="w-32 min-w-32">Courses Count</TableHead>
+              <TableHead className="w-48 min-w-48">Created By</TableHead>
+              <TableHead className="w-32 min-w-32">Created At</TableHead>
+              <TableHead className="w-40 min-w-40 text-right">
+                <Button className="w-24" onClick={handleAddCourseGroup}>
+                  <PlusIcon className="h-4 w-4 mr-2" />
+                  Create
+                </Button>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  Loading course groups...
+                </TableCell>
+              </TableRow>
+            ) : courseGroups.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  No course groups found. Create your first course group!
+                </TableCell>
+              </TableRow>
+            ) : (
+              courseGroups.map((group) => (
+                <TableRow key={group._id}>
+                  <TableCell className="font-medium">{group.title}</TableCell>
+                  <TableCell className="max-w-xs truncate">{group.description}</TableCell>
+                  <TableCell>
+                    <span className="text-sm text-gray-500">{group.icon}</span>
+                  </TableCell>
+                  <TableCell>{group.courses?.length || 0}</TableCell>
+                  <TableCell>{group.createdBy?.name || 'N/A'}</TableCell>
+                  <TableCell>
+                    {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}
+                  </TableCell>
+                  <TableCell className="w-40 min-w-40">
+                    <div className="flex gap-2 justify-end">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleViewGroup(group._id)}
+                        title="View Details"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(group)}
+                        title="Edit"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(group._id)}
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       <GroupModal

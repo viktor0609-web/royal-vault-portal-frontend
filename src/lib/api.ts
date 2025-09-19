@@ -174,6 +174,13 @@ export const courseApi = {
       'Content-Type': 'multipart/form-data',
     },
   }),
+
+  // File upload (for all file types)
+  uploadFile: (formData: FormData) => api.post('/api/upload/file', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }),
 };
 
 // Image upload API
@@ -183,5 +190,16 @@ export const imageApi = {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+  }),
+};
+
+// File upload API (for all file types)
+export const fileApi = {
+  // Upload file
+  uploadFile: (formData: FormData, config?: any) => api.post('/api/upload/file', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    ...config
   }),
 };

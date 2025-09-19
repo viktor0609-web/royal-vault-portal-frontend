@@ -10,9 +10,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import RichTextEditor from "@/components/ui/RichTextEditor";
-import { courseApi, imageApi } from "@/lib/api";
+import { FileUploadWithProgress } from "@/components/ui/file-upload-with-progress";
+import { courseApi, imageApi, fileApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { PlusIcon, Trash2 } from "lucide-react";
+import { PlusIcon, Trash2, X } from "lucide-react";
 
 interface Lecture {
     _id: string;
@@ -95,19 +96,16 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         setError(null);
 
         try {
-            let videoFileUrl = formData.videoFile;
-
-            // Upload video file if a new file is selected
-            if (videoFile) {
-                const formData = new FormData();
-                formData.append('image', videoFile);
-                const response = await imageApi.uploadImage(formData);
-                videoFileUrl = response.data.url;
+            // Validate that at least one video option is provided
+            if (!formData.videoUrl && !formData.videoFile) {
+                setError("Please provide either a video URL or upload a video file");
+                setLoading(false);
+                return;
             }
 
+            // Files are now uploaded immediately when selected, so we just need to prepare the data
             const lectureData = {
                 ...formData,
-                videoFile: videoFileUrl,
                 relatedFiles: relatedFiles,
                 courseId: courseId
             };
@@ -145,41 +143,12 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setVideoFile(file);
-            setFormData(prev => ({ ...prev, videoFile: file.name }));
-        }
-    };
-
-    const handleAddRelatedFile = async () => {
-        if (newRelatedFile.name && (newRelatedFile.url || newRelatedFile.file)) {
-            let fileUrl = newRelatedFile.url;
-
-            // Upload file if a file is selected
-            if (newRelatedFile.file) {
-                try {
-                    const formData = new FormData();
-                    formData.append('image', newRelatedFile.file);
-                    const response = await imageApi.uploadImage(formData);
-                    fileUrl = response.data.url;
-                } catch (error) {
-                    console.error('Error uploading file:', error);
-                    toast({
-                        title: "Error",
-                        description: "Failed to upload file",
-                        variant: "destructive",
-                    });
-                    return;
-                }
-            }
-
+    const handleAddRelatedFile = () => {
+        if (newRelatedFile.name && newRelatedFile.url) {
             setRelatedFiles(prev => [...prev, {
                 ...newRelatedFile,
                 _id: Date.now().toString(),
-                url: fileUrl,
-                uploadedUrl: fileUrl
+                uploadedUrl: newRelatedFile.url
             }]);
             setNewRelatedFile({ name: "", url: "", file: null });
         }
@@ -191,18 +160,6 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
 
     const handleRelatedFileChange = (field: 'name' | 'url', value: string) => {
         setNewRelatedFile(prev => ({ ...prev, [field]: value }));
-    };
-
-    const handleRelatedFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setNewRelatedFile(prev => ({
-                ...prev,
-                file: file,
-                name: file.name,
-                url: "" // Clear URL when file is selected
-            }));
-        }
     };
 
     return (
@@ -243,39 +200,63 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                         </div>
                     </div>
 
-                    {/* URL Section */}
-                    <div>
-                        <Label htmlFor="videoUrl" className="text-royal-dark-gray font-bold text-base">
-                            URL
-                        </Label>
-                        <Input
-                            id="videoUrl"
-                            type="url"
-                            value={formData.videoUrl}
-                            onChange={(e) => handleInputChange("videoUrl", e.target.value)}
-                            className="mt-2 bg-gray-50 border-gray-200 rounded-lg"
-                            placeholder="https://example.com/video.mp4"
-                        />
-                    </div>
-
-                    {/* Video File Section */}
+                    {/* Video Section */}
                     <div>
                         <Label className="text-royal-dark-gray font-bold text-base">
-                            Video File
+                            Video <span className="text-gray-500 font-normal">(Optional - provide either URL or file)</span>
                         </Label>
+
+                        {/* Video URL */}
                         <div className="mt-2">
-                            {formData.videoFile ? (
-                                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-600 text-sm">
-                                    {formData.videoFile}
-                                </div>
-                            ) : (
-                                <Input
-                                    type="file"
-                                    accept="video/*"
-                                    onChange={handleVideoFileChange}
-                                    className="bg-gray-50 border-gray-200 rounded-lg"
-                                />
-                            )}
+                            <Label htmlFor="videoUrl" className="text-sm text-gray-600">
+                                Video URL
+                            </Label>
+                            <Input
+                                id="videoUrl"
+                                type="url"
+                                value={formData.videoUrl}
+                                onChange={(e) => handleInputChange("videoUrl", e.target.value)}
+                                className="mt-1 bg-gray-50 border-gray-200 rounded-lg"
+                                placeholder="https://example.com/video.mp4"
+                            />
+                        </div>
+
+                        {/* OR Divider */}
+                        <div className="flex items-center my-4">
+                            <div className="flex-1 border-t border-gray-300"></div>
+                            <span className="px-3 text-sm text-gray-500 bg-white">OR</span>
+                            <div className="flex-1 border-t border-gray-300"></div>
+                        </div>
+
+                        {/* Video File Upload */}
+                        <div>
+                            <Label className="text-sm text-gray-600">
+                                Upload Video File
+                            </Label>
+                            <div className="mt-1">
+                                {formData.videoFile ? (
+                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-600 text-sm flex items-center justify-between">
+                                        <span>{formData.videoFile}</span>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => setFormData(prev => ({ ...prev, videoFile: "" }))}
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <FileUploadWithProgress
+                                        onFileUploaded={(fileUrl, fileName) => {
+                                            setFormData(prev => ({ ...prev, videoFile: fileName }));
+                                        }}
+                                        accept="video/*"
+                                        maxSize={500}
+                                        className="w-full"
+                                    />
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -336,15 +317,21 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                                 onChange={(e) => handleRelatedFileChange("url", e.target.value)}
                                                 placeholder="https://example.com/file.pdf"
                                                 className="border-gray-200"
-                                                disabled={!!newRelatedFile.file}
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            <Input
-                                                type="file"
-                                                onChange={handleRelatedFileUpload}
-                                                className="border-gray-200 text-sm"
+                                            <FileUploadWithProgress
+                                                onFileUploaded={(fileUrl, fileName) => {
+                                                    setNewRelatedFile(prev => ({
+                                                        ...prev,
+                                                        file: null, // Clear file since it's handled by component
+                                                        name: fileName,
+                                                        url: fileUrl
+                                                    }));
+                                                }}
                                                 accept="*/*"
+                                                maxSize={500}
+                                                className="w-full"
                                             />
                                         </TableCell>
                                         <TableCell>
@@ -353,7 +340,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                                 size="sm"
                                                 onClick={handleAddRelatedFile}
                                                 className="h-8 px-2 bg-blue-600 hover:bg-blue-700"
-                                                disabled={!newRelatedFile.name || (!newRelatedFile.url && !newRelatedFile.file)}
+                                                disabled={!newRelatedFile.name || !newRelatedFile.url}
                                             >
                                                 <PlusIcon className="h-3 w-3" />
                                             </Button>

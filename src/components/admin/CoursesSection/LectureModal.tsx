@@ -35,6 +35,8 @@ interface RelatedFile {
     _id?: string;
     name: string;
     url: string;
+    file?: File;
+    uploadedUrl?: string;
 }
 
 interface LectureModalProps {
@@ -55,7 +57,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         pdfUrl: ""
     });
     const [relatedFiles, setRelatedFiles] = useState<RelatedFile[]>([]);
-    const [newRelatedFile, setNewRelatedFile] = useState({ name: "", url: "" });
+    const [newRelatedFile, setNewRelatedFile] = useState({ name: "", url: "", file: null as File | null });
     const [videoFile, setVideoFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -83,7 +85,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
             });
             setRelatedFiles([]);
         }
-        setNewRelatedFile({ name: "", url: "" });
+        setNewRelatedFile({ name: "", url: "", file: null });
         setVideoFile(null);
     }, [editingLecture, isOpen]);
 
@@ -151,10 +153,35 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         }
     };
 
-    const handleAddRelatedFile = () => {
-        if (newRelatedFile.name && newRelatedFile.url) {
-            setRelatedFiles(prev => [...prev, { ...newRelatedFile, _id: Date.now().toString() }]);
-            setNewRelatedFile({ name: "", url: "" });
+    const handleAddRelatedFile = async () => {
+        if (newRelatedFile.name && (newRelatedFile.url || newRelatedFile.file)) {
+            let fileUrl = newRelatedFile.url;
+
+            // Upload file if a file is selected
+            if (newRelatedFile.file) {
+                try {
+                    const formData = new FormData();
+                    formData.append('image', newRelatedFile.file);
+                    const response = await imageApi.uploadImage(formData);
+                    fileUrl = response.data.url;
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                    toast({
+                        title: "Error",
+                        description: "Failed to upload file",
+                        variant: "destructive",
+                    });
+                    return;
+                }
+            }
+
+            setRelatedFiles(prev => [...prev, {
+                ...newRelatedFile,
+                _id: Date.now().toString(),
+                url: fileUrl,
+                uploadedUrl: fileUrl
+            }]);
+            setNewRelatedFile({ name: "", url: "", file: null });
         }
     };
 
@@ -164,6 +191,18 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
 
     const handleRelatedFileChange = (field: 'name' | 'url', value: string) => {
         setNewRelatedFile(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleRelatedFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setNewRelatedFile(prev => ({
+                ...prev,
+                file: file,
+                name: file.name,
+                url: "" // Clear URL when file is selected
+            }));
+        }
     };
 
     return (
@@ -249,8 +288,9 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="w-1/2">Name</TableHead>
-                                        <TableHead className="w-1/3">URL</TableHead>
+                                        <TableHead className="w-1/3">Name</TableHead>
+                                        <TableHead className="w-1/4">URL/File</TableHead>
+                                        <TableHead className="w-1/4">Upload</TableHead>
                                         <TableHead className="w-20">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -260,8 +300,11 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                             <TableCell className="font-medium">{file.name}</TableCell>
                                             <TableCell className="text-blue-600 hover:underline">
                                                 <a href={file.url} target="_blank" rel="noopener noreferrer">
-                                                    {file.url.length > 30 ? `${file.url.substring(0, 30)}...` : file.url}
+                                                    {file.url.length > 25 ? `${file.url.substring(0, 25)}...` : file.url}
                                                 </a>
+                                            </TableCell>
+                                            <TableCell className="text-sm text-gray-500">
+                                                {file.uploadedUrl ? "Uploaded" : "URL"}
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex gap-1">
@@ -293,6 +336,15 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                                 onChange={(e) => handleRelatedFileChange("url", e.target.value)}
                                                 placeholder="https://example.com/file.pdf"
                                                 className="border-gray-200"
+                                                disabled={!!newRelatedFile.file}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Input
+                                                type="file"
+                                                onChange={handleRelatedFileUpload}
+                                                className="border-gray-200 text-sm"
+                                                accept="*/*"
                                             />
                                         </TableCell>
                                         <TableCell>
@@ -301,6 +353,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                                 size="sm"
                                                 onClick={handleAddRelatedFile}
                                                 className="h-8 px-2 bg-blue-600 hover:bg-blue-700"
+                                                disabled={!newRelatedFile.name || (!newRelatedFile.url && !newRelatedFile.file)}
                                             >
                                                 <PlusIcon className="h-3 w-3" />
                                             </Button>

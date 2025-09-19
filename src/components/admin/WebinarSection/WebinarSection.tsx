@@ -69,46 +69,48 @@ export function WebinarSection() {
                 <VideoIcon className="h-10 w-10 text-royal-gray hidden min-[700px]:block" />
                 <h1 className="text-2xl font-bold text-royal-dark-gray mb-2 uppercase">Webinars</h1>
             </div>
-            <Table className="w-full">
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-64">Webinar</TableHead>
-                        <TableHead className="w-48">Status</TableHead>
-                        <TableHead className="w-48">PortalDisplay</TableHead>
-                        <TableHead className="w-48">Date EST</TableHead>
-                        <TableHead className="w-48">Registrants</TableHead>
-                        <TableHead className="w-48">Attendees</TableHead>
-                        <TableHead className="w-48">Re-Watch</TableHead>
-                        <TableHead className="sticky right-0 bg-white z-10">
-                            <Button className="w-[470px]" onClick={() => handlebtnClick('create', '')}>Create</Button>
-                        </TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {sampleData.map((item, index) => (
-                        <TableRow key={index}>
-                            <TableCell>{item.webinar}</TableCell>
-                            <TableCell>{item.status}</TableCell>
-                            <TableCell>{item.portalDisplay}</TableCell>
-                            <TableCell>{item.date}</TableCell>
-                            <TableCell>{item.registrants}</TableCell>
-                            <TableCell>{item.attendees}</TableCell>
-                            <TableCell>{item.reWatch}</TableCell>
-                            <TableCell className="sticky right-0 bg-white z-10 pt-0 pb-0">
-                                <div className="flex gap-1">
-                                    <Button className="w-16" onClick={() => handlebtnClick('edit', item)}>Edit</Button>
-                                    <Button className="w-16" onClick={() => handlebtnClick('reg', item)}>Reg</Button>
-                                    <Button className="w-16" onClick={() => handlebtnClick('web', item)}>Web</Button>
-                                    <Button className="w-16" onClick={() => handlebtnClick('host', item)}>Host</Button>
-                                    <Button className="w-16" onClick={() => handlebtnClick('guest', item)}>Guest</Button>
-                                    <Button className="w-16" onClick={() => handlebtnClick('stats', item)}>Stats</Button>
-                                    <Button className="w-16" onClick={() => handlebtnClick('recs', item)}>Recs</Button>
-                                </div>
-                            </TableCell>
+            <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto">
+                <Table className="w-full min-w-max">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-64 min-w-64">Webinar</TableHead>
+                            <TableHead className="w-48 min-w-48">Status</TableHead>
+                            <TableHead className="w-48 min-w-48">PortalDisplay</TableHead>
+                            <TableHead className="w-48 min-w-48">Date EST</TableHead>
+                            <TableHead className="w-48 min-w-48">Registrants</TableHead>
+                            <TableHead className="w-48 min-w-48">Attendees</TableHead>
+                            <TableHead className="w-48 min-w-48">Re-Watch</TableHead>
+                            <TableHead className="w-96 min-w-96 text-right">
+                                <Button className="w-24" onClick={() => handlebtnClick('create', '')}>Create</Button>
+                            </TableHead>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {sampleData.map((item, index) => (
+                            <TableRow key={index}>
+                                <TableCell>{item.webinar}</TableCell>
+                                <TableCell>{item.status}</TableCell>
+                                <TableCell>{item.portalDisplay}</TableCell>
+                                <TableCell>{item.date}</TableCell>
+                                <TableCell>{item.registrants}</TableCell>
+                                <TableCell>{item.attendees}</TableCell>
+                                <TableCell>{item.reWatch}</TableCell>
+                                <TableCell className="w-96 min-w-96">
+                                    <div className="flex gap-1 justify-end">
+                                        <Button className="w-16" onClick={() => handlebtnClick('edit', item)}>Edit</Button>
+                                        <Button className="w-16" onClick={() => handlebtnClick('reg', item)}>Reg</Button>
+                                        <Button className="w-16" onClick={() => handlebtnClick('web', item)}>Web</Button>
+                                        <Button className="w-16" onClick={() => handlebtnClick('host', item)}>Host</Button>
+                                        <Button className="w-16" onClick={() => handlebtnClick('guest', item)}>Guest</Button>
+                                        <Button className="w-16" onClick={() => handlebtnClick('stats', item)}>Stats</Button>
+                                        <Button className="w-16" onClick={() => handlebtnClick('recs', item)}>Recs</Button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
             <WebinarModal isOpen={open} closeDialog={closeModal} />
             <RecsModal isOpen={recsOpen} closeDialog={closeModal} />
         </div>

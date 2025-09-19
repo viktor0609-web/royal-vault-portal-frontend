@@ -91,19 +91,19 @@ export function DealsSection() {
                 </div>
             )}
 
-            <div className="bg-white rounded-lg border border-royal-light-gray overflow-hidden">
-                <Table className="w-full">
+            <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto">
+                <Table className="w-full min-w-max">
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-64">Deal</TableHead>
-                            <TableHead className="w-48">Source</TableHead>
-                            <TableHead className="w-48">Categories</TableHead>
-                            <TableHead className="w-48">Subcategories</TableHead>
-                            <TableHead className="w-48">Types</TableHead>
-                            <TableHead className="w-48">Strategies</TableHead>
-                            <TableHead className="w-48">Requirements</TableHead>
-                            <TableHead className="w-48">URL</TableHead>
-                            <TableHead className="sticky right-0 bg-white z-10">
+                            <TableHead className="w-64 min-w-64">Deal</TableHead>
+                            <TableHead className="w-48 min-w-48">Source</TableHead>
+                            <TableHead className="w-48 min-w-48">Categories</TableHead>
+                            <TableHead className="w-48 min-w-48">Subcategories</TableHead>
+                            <TableHead className="w-48 min-w-48">Types</TableHead>
+                            <TableHead className="w-48 min-w-48">Strategies</TableHead>
+                            <TableHead className="w-48 min-w-48">Requirements</TableHead>
+                            <TableHead className="w-48 min-w-48">URL</TableHead>
+                            <TableHead className="w-40 min-w-40 text-right">
                                 <Button className="w-24" onClick={() => handlebtnClick('create')}>Create</Button>
                             </TableHead>
                         </TableRow>
@@ -143,8 +143,8 @@ export function DealsSection() {
                                             </a>
                                         ) : 'N/A'}
                                     </TableCell>
-                                    <TableCell className="sticky right-0 bg-white z-10">
-                                        <div className="flex gap-2">
+                                    <TableCell className="w-40 min-w-40">
+                                        <div className="flex gap-2 justify-end">
                                             <Button
                                                 size="sm"
                                                 variant="outline"

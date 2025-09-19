@@ -29,7 +29,7 @@ const welcomeItems = [
 ];
 
 // Video URL - same as used in CourseDetailSection
-const OVERVIEW_VIDEO_URL = "https://www.w3schools.com/html/mov_bbb.mp4";
+const OVERVIEW_VIDEO_URL = "https://0d88b5ddee68dce2495b6ffe5bae4d92.cdn.bubble.io/f1743194100197x949841200291605900/Wealth%20Portal.mp4?_gl=1*1dgmy28*_gcl_au*OTc2OTE1NDc1LjE3NDMxNzc5MjA.*_ga*MTE3MjAzNDc3Ni4xNzM3NDA4NDU0*_ga_BFPVR2DEE2*MTc0MzE3MjEzMS42Mi4xLjE3NDMxOTQ3MzkuNDUuMC4w#t=0.5";
 
 export function WelcomeSection() {
   const navigate = useNavigate();

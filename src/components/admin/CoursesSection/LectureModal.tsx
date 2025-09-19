@@ -91,12 +91,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         setError(null);
 
         try {
-            // Validate that at least one video option is provided (only for new lectures)
-            if (!editingLecture && !formData.videoUrl && !formData.videoFile) {
-                setError("Please provide either a video URL or upload a video file");
-                setLoading(false);
-                return;
-            }
+            // Video is completely optional - no validation required
 
             // Files are now uploaded immediately when selected, so we just need to prepare the data
             // Remove _id from relatedFiles as it's not needed for backend
@@ -114,6 +109,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
 
             console.log('Final lecture data being sent:', lectureData);
             console.log('Related files count:', cleanedRelatedFiles.length);
+            console.log('Related files array:', cleanedRelatedFiles);
 
 
 
@@ -224,13 +220,13 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                     {/* Video Section */}
                     <div>
                         <Label className="text-royal-dark-gray font-bold text-base">
-                            Video <span className="text-gray-500 font-normal">(Optional - URL takes priority over file)</span>
+                            Video <span className="text-gray-500 font-normal">(Optional)</span>
                         </Label>
 
                         {/* Video URL */}
                         <div className="mt-2">
                             <Label htmlFor="videoUrl" className="text-sm text-gray-600">
-                                Video URL (Priority)
+                                Video URL
                             </Label>
                             <Input
                                 id="videoUrl"
@@ -252,7 +248,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                         {/* Video File Upload */}
                         <div>
                             <Label className="text-sm text-gray-600">
-                                Upload Video File (Fallback)
+                                Upload Video File
                             </Label>
                             <div className="mt-1">
                                 {formData.videoFile ? (
@@ -292,7 +288,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                     {/* Related Files Section */}
                     <div>
                         <Label className="text-royal-dark-gray font-bold text-base">
-                            Related Files/Resources <span className="text-gray-500 font-normal">(Optional - Upload required for each item)</span>
+                            Related Files/Resources <span className="text-gray-500 font-normal">(Optional - Upload or URL required for each item)</span>
                         </Label>
                         <div className="mt-2 bg-white border border-gray-200 rounded-lg overflow-hidden">
                             <Table>
@@ -342,7 +338,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                         </TableCell>
                                         <TableCell>
                                             <div className="text-xs text-gray-500">
-                                                Choose upload or URL
+                                                Choose upload or URL (one required)
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -357,7 +353,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                                             setNewRelatedFile(prev => ({
                                                                 ...prev,
                                                                 name: prev.name || fileName, // Only use fileName if name is empty
-                                                                url: fileUrl,
+                                                                url: "", // Clear URL when file is uploaded
                                                                 uploadedUrl: fileUrl
                                                             }));
                                                         }}

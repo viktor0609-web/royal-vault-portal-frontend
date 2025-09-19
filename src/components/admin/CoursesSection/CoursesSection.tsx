@@ -120,20 +120,24 @@ export function CoursesSection() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto">
-        <Table className="w-full min-w-max">
+      <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <div className="text-xs text-gray-500 text-center py-2 bg-gray-50 border-b border-gray-200 sm:hidden">
+          ← Scroll horizontally to see all columns →
+        </div>
+        <Table className="w-full min-w-[900px] text-sm">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-64 min-w-64">Title</TableHead>
-              <TableHead className="w-48 min-w-48">Description</TableHead>
-              <TableHead className="w-32 min-w-32">Icon</TableHead>
+              <TableHead className="w-48 min-w-48">Title</TableHead>
+              <TableHead className="w-64 min-w-64">Description</TableHead>
+              <TableHead className="w-24 min-w-24">Icon</TableHead>
               <TableHead className="w-32 min-w-32">Courses Count</TableHead>
-              <TableHead className="w-48 min-w-48">Created By</TableHead>
+              <TableHead className="w-32 min-w-32">Created By</TableHead>
               <TableHead className="w-32 min-w-32">Created At</TableHead>
-              <TableHead className="w-40 min-w-40 text-right">
-                <Button className="w-24" onClick={handleAddCourseGroup}>
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Create
+              <TableHead className="w-32 min-w-32 text-right">
+                <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={handleAddCourseGroup}>
+                  <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Create</span>
+                  <span className="sm:hidden">+</span>
                 </Button>
               </TableHead>
             </TableRow>

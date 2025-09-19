@@ -91,20 +91,23 @@ export function DealsSection() {
                 </div>
             )}
 
-            <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto">
-                <Table className="w-full min-w-max">
+            <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                <div className="text-xs text-gray-500 text-center py-2 bg-gray-50 border-b border-gray-200 sm:hidden">
+                    ← Scroll horizontally to see all columns →
+                </div>
+                <Table className="w-full min-w-[1200px] text-sm">
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-64 min-w-64">Deal</TableHead>
-                            <TableHead className="w-48 min-w-48">Source</TableHead>
-                            <TableHead className="w-48 min-w-48">Categories</TableHead>
-                            <TableHead className="w-48 min-w-48">Subcategories</TableHead>
-                            <TableHead className="w-48 min-w-48">Types</TableHead>
-                            <TableHead className="w-48 min-w-48">Strategies</TableHead>
-                            <TableHead className="w-48 min-w-48">Requirements</TableHead>
-                            <TableHead className="w-48 min-w-48">URL</TableHead>
-                            <TableHead className="w-40 min-w-40 text-right">
-                                <Button className="w-24" onClick={() => handlebtnClick('create')}>Create</Button>
+                            <TableHead className="w-48 min-w-48">Deal</TableHead>
+                            <TableHead className="w-32 min-w-32">Source</TableHead>
+                            <TableHead className="w-32 min-w-32">Categories</TableHead>
+                            <TableHead className="w-32 min-w-32">Subcategories</TableHead>
+                            <TableHead className="w-32 min-w-32">Types</TableHead>
+                            <TableHead className="w-32 min-w-32">Strategies</TableHead>
+                            <TableHead className="w-32 min-w-32">Requirements</TableHead>
+                            <TableHead className="w-32 min-w-32">URL</TableHead>
+                            <TableHead className="w-32 min-w-32 text-right">
+                                <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={() => handlebtnClick('create')}>Create</Button>
                             </TableHead>
                         </TableRow>
                     </TableHeader>

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, EyeOffIcon, CheckCircleIcon, PlayIcon, ClockIcon, DownloadIcon, FileIcon, ExternalLinkIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { courseApi } from "@/lib/api";
+import { sanitizeHtml } from "@/lib/htmlSanitizer";
 
 interface Course {
   _id: string;
@@ -183,6 +184,7 @@ export function CourseDetailSection() {
 
 
 
+
   // Auto-mark as complete when video ends
   useEffect(() => {
     const video = videoRef.current;
@@ -258,6 +260,16 @@ export function CourseDetailSection() {
   return (
     <>
       <style>{`
+        .lecture-content {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif !important;
+          line-height: 1.6 !important;
+          color: #374151 !important;
+        }
+        
+        .lecture-content * {
+          box-sizing: border-box !important;
+        }
+        
         .lecture-content h1 {
           font-size: 1.875rem !important; /* 30px */
           font-weight: 700 !important;
@@ -309,23 +321,32 @@ export function CourseDetailSection() {
         .lecture-content p {
           margin-bottom: 0.75rem !important;
           line-height: 1.6 !important;
+          color: #374151 !important;
         }
         .lecture-content a {
           color: #3b82f6 !important; /* royal-blue */
           text-decoration: none !important;
+          transition: color 0.2s ease !important;
         }
         .lecture-content a:hover {
           text-decoration: underline !important;
+          color: #1d4ed8 !important;
         }
-        .lecture-content strong {
+        .lecture-content strong, .lecture-content b {
           font-weight: 600 !important;
           color: #1f2937 !important; /* royal-dark-gray */
+        }
+        .lecture-content em, .lecture-content i {
+          font-style: italic !important;
+          color: #4b5563 !important;
         }
         .lecture-content code {
           background-color: #f3f4f6 !important;
           padding: 0.125rem 0.25rem !important;
           border-radius: 0.25rem !important;
           font-size: 0.875rem !important;
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+          color: #e11d48 !important;
         }
         .lecture-content pre {
           background-color: #f9fafb !important;
@@ -333,12 +354,22 @@ export function CourseDetailSection() {
           border-radius: 0.5rem !important;
           padding: 1rem !important;
           overflow-x: auto !important;
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+          font-size: 0.875rem !important;
+          line-height: 1.5 !important;
+        }
+        .lecture-content pre code {
+          background: none !important;
+          padding: 0 !important;
+          color: #374151 !important;
         }
         .lecture-content blockquote {
           border-left: 4px solid #3b82f6 !important;
           background-color: #eff6ff !important;
-          padding: 0.5rem 1rem !important;
+          padding: 0.75rem 1rem !important;
           margin: 1rem 0 !important;
+          border-radius: 0 0.375rem 0.375rem 0 !important;
+          font-style: italic !important;
         }
         .lecture-content ul, .lecture-content ol {
           margin: 0.75rem 0 !important;
@@ -346,6 +377,58 @@ export function CourseDetailSection() {
         }
         .lecture-content li {
           margin: 0.25rem 0 !important;
+          line-height: 1.6 !important;
+        }
+        .lecture-content ul li {
+          list-style-type: disc !important;
+        }
+        .lecture-content ol li {
+          list-style-type: decimal !important;
+        }
+        .lecture-content table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+          margin: 1rem 0 !important;
+          border: 1px solid #e5e7eb !important;
+          border-radius: 0.5rem !important;
+          overflow: hidden !important;
+        }
+        .lecture-content th, .lecture-content td {
+          padding: 0.75rem !important;
+          text-align: left !important;
+          border-bottom: 1px solid #e5e7eb !important;
+        }
+        .lecture-content th {
+          background-color: #f9fafb !important;
+          font-weight: 600 !important;
+          color: #1f2937 !important;
+        }
+        .lecture-content tr:last-child td {
+          border-bottom: none !important;
+        }
+        .lecture-content img {
+          max-width: 100% !important;
+          height: auto !important;
+          border-radius: 0.375rem !important;
+          margin: 0.5rem 0 !important;
+        }
+        .lecture-content hr {
+          border: none !important;
+          border-top: 1px solid #e5e7eb !important;
+          margin: 1.5rem 0 !important;
+        }
+        .lecture-content mark {
+          background-color: #fef3c7 !important;
+          padding: 0.125rem 0.25rem !important;
+          border-radius: 0.25rem !important;
+        }
+        .lecture-content del {
+          text-decoration: line-through !important;
+          color: #9ca3af !important;
+        }
+        .lecture-content ins {
+          text-decoration: underline !important;
+          color: #059669 !important;
         }
       `}</style>
       <div className="p-2 sm:p-4 animate-in fade-in duration-100">
@@ -445,7 +528,9 @@ export function CourseDetailSection() {
                     <div className="bg-white rounded-lg border border-royal-light-gray p-4 mb-4">
                       <div
                         className="lecture-content max-w-none text-royal-gray leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: lectures[currentItem].content }}
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
+                        }}
                         style={{
                           fontSize: '14px',
                           lineHeight: '1.6'
@@ -681,7 +766,9 @@ export function CourseDetailSection() {
                   <div className="bg-white rounded-lg border border-royal-light-gray p-6 mb-6">
                     <div
                       className="lecture-content max-w-none text-royal-gray leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: lectures[currentItem].content }}
+                      dangerouslySetInnerHTML={{
+                        __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
+                      }}
                       style={{
                         fontSize: '14px',
                         lineHeight: '1.6'

@@ -757,7 +757,7 @@ export function CourseDetailSection() {
                     {lectures[currentItem]?.videoUrl || lectures[currentItem]?.videoFile ? (
                       <video
                         ref={videoRef}
-                        src={import.meta.env.VITE_BACKEND_URL + (lectures[currentItem]?.videoUrl || lectures[currentItem]?.videoFile)}
+                        src={lectures[currentItem]?.videoUrl || import.meta.env.VITE_BACKEND_URL + lectures[currentItem]?.videoFile}
                         className="w-full h-full object-cover"
                         controls
                         preload="metadata"

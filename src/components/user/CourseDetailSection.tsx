@@ -4,6 +4,7 @@ import { ArrowLeftIcon, EyeOffIcon, CheckCircleIcon, PlayIcon, ClockIcon, Downlo
 import { useNavigate, useParams } from "react-router-dom";
 import { courseApi } from "@/lib/api";
 import { sanitizeHtml } from "@/lib/htmlSanitizer";
+import { useAuth } from "@/context/AuthContext";
 
 interface Course {
   _id: string;
@@ -49,6 +50,7 @@ interface Lecture {
 
 export function CourseDetailSection() {
   const { courseId } = useParams<{ courseId: string }>();
+  const { user } = useAuth();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,12 +73,17 @@ export function CourseDetailSection() {
         const response = await courseApi.getCourseById(courseId, 'full');
         setCourse(response.data);
 
-        // Initialize completed items based on lecture completion status
+        // Initialize completed items based on lecture completion status (only for authenticated users)
         const lectures = response.data.lectures || [];
-        const completed = lectures.map((lecture: Lecture) =>
-          lecture.completedBy && lecture.completedBy.length > 0
-        );
-        setCompletedItems(completed);
+        if (user) {
+          const completed = lectures.map((lecture: Lecture) =>
+            lecture.completedBy && lecture.completedBy.length > 0
+          );
+          setCompletedItems(completed);
+        } else {
+          // For non-authenticated users, initialize with all false
+          setCompletedItems(new Array(lectures.length).fill(false));
+        }
       } catch (err) {
         console.error('Error fetching course:', err);
         setError('Failed to load course. Please try again.');
@@ -86,19 +93,26 @@ export function CourseDetailSection() {
     };
 
     fetchCourse();
-  }, [courseId]);
+  }, [courseId, user]);
 
-  // Save to localStorage whenever completedItems changes
+  // Save to localStorage whenever completedItems changes (only for authenticated users)
   useEffect(() => {
-    if (course) {
+    if (course && user) {
       localStorage.setItem(`courseDetailCompletedItems_${course._id}`, JSON.stringify(completedItems));
     }
-  }, [completedItems, course]);
+  }, [completedItems, course, user]);
 
   const handleCheckboxClick = async (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
 
     if (!course || !course.lectures[index]) return;
+
+    // Only allow completion tracking for authenticated users
+    if (!user) {
+      // Show a message or redirect to login
+      alert('Please log in to track your progress');
+      return;
+    }
 
     const lecture = course.lectures[index];
     const isCurrentlyCompleted = completedItems[index];
@@ -480,11 +494,13 @@ export function CourseDetailSection() {
                     </h1>
                     {/* Completion Status Checkbox */}
                     <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 cursor-pointer flex-shrink-0 ${completedItems[currentItem]
-                        ? "bg-primary border-primary"
-                        : "border-royal-light-gray"
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                        } ${completedItems[currentItem]
+                          ? "bg-primary border-primary"
+                          : "border-royal-light-gray"
                         }`}
                       onClick={(e) => handleCheckboxClick(currentItem, e)}
+                      title={user ? 'Mark as complete' : 'Login required to track progress'}
                     >
                       {completedItems[currentItem] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75" />}
                     </div>
@@ -611,11 +627,13 @@ export function CourseDetailSection() {
                       >
                         <div className="flex items-center gap-3 sm:gap-4">
                           <div
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75  flex-shrink-0 cursor-pointer ${completedItems[index]
-                              ? "bg-primary border-primary "
-                              : "border-royal-light-gray "
+                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                              } ${completedItems[index]
+                                ? "bg-primary border-primary "
+                                : "border-royal-light-gray "
                               }`}
                             onClick={(e) => handleCheckboxClick(index, e)}
+                            title={user ? 'Mark as complete' : 'Login required to track progress'}
                           >
                             {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 " />}
                           </div>
@@ -670,11 +688,13 @@ export function CourseDetailSection() {
                       >
                         <div className="flex items-center gap-3 sm:gap-4">
                           <div
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75  flex-shrink-0 cursor-pointer ${completedItems[index]
-                              ? "bg-primary border-primary "
-                              : "border-royal-light-gray "
+                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                              } ${completedItems[index]
+                                ? "bg-primary border-primary "
+                                : "border-royal-light-gray "
                               }`}
                             onClick={(e) => handleCheckboxClick(index, e)}
+                            title={user ? 'Mark as complete' : 'Login required to track progress'}
                           >
                             {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 " />}
                           </div>
@@ -718,11 +738,13 @@ export function CourseDetailSection() {
                   </h1>
                   {/* Completion Status Checkbox */}
                   <div
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 cursor-pointer flex-shrink-0 ${completedItems[currentItem]
-                      ? "bg-primary border-primary"
-                      : "border-royal-light-gray"
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                      } ${completedItems[currentItem]
+                        ? "bg-primary border-primary"
+                        : "border-royal-light-gray"
                       }`}
                     onClick={(e) => handleCheckboxClick(currentItem, e)}
+                    title={user ? 'Mark as complete' : 'Login required to track progress'}
                   >
                     {completedItems[currentItem] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75" />}
                   </div>

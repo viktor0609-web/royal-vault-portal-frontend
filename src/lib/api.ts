@@ -96,13 +96,15 @@ api.interceptors.response.use(
   }
 );
 
-// Deal API functions
+// Deal API functions - OPTIMIZED
 export const dealApi = {
-  // Get all deals
-  getAllDeals: () => api.get('/api/deals'),
+  // Get all deals with field selection
+  getAllDeals: (fields: 'basic' | 'detailed' | 'full' = 'basic') =>
+    api.get(`/api/deals?fields=${fields}`),
 
-  // Get deal by ID
-  getDealById: (dealId: string) => api.get(`/api/deals/${dealId}`),
+  // Get deal by ID with field selection
+  getDealById: (dealId: string, fields: 'basic' | 'detailed' | 'full' = 'full') =>
+    api.get(`/api/deals/${dealId}?fields=${fields}`),
 
   // Create new deal
   createDeal: (dealData: any) => api.post('/api/deals', dealData),
@@ -113,8 +115,9 @@ export const dealApi = {
   // Delete deal
   deleteDeal: (dealId: string) => api.delete(`/api/deals/${dealId}`),
 
-  // Filter deals
-  filterDeals: (filters: any) => api.get('/api/deals/filter', { params: filters }),
+  // Filter deals with field selection
+  filterDeals: (filters: any, fields: 'basic' | 'detailed' | 'full' = 'basic') =>
+    api.get('/api/deals/filter', { params: { ...filters, fields } }),
 };
 
 // Options API functions for dropdowns
@@ -138,27 +141,31 @@ export const optionsApi = {
   getSources: () => api.get('/api/sources'),
 };
 
-// Course API functions - matching new backend structure
+// Course API functions - OPTIMIZED
 export const courseApi = {
-  // Course Groups
-  getAllCourseGroups: (filters?: { type?: string; search?: string }) => {
+  // Course Groups with field selection
+  getAllCourseGroups: (filters?: { type?: string; search?: string }, fields: 'basic' | 'detailed' | 'full' = 'basic') => {
     const params = new URLSearchParams();
     if (filters?.type) params.append('type', filters.type);
     if (filters?.search) params.append('search', filters.search);
+    params.append('fields', fields);
     return api.get(`/api/courses/groups?${params.toString()}`);
   },
   createCourseGroup: (groupData: any) => api.post('/api/courses/groups', groupData),
-  getCourseGroupById: (groupId: string) => api.get(`/api/courses/groups/${groupId}`),
+  getCourseGroupById: (groupId: string, fields: 'basic' | 'detailed' | 'full' = 'full') =>
+    api.get(`/api/courses/groups/${groupId}?fields=${fields}`),
   updateCourseGroup: (groupId: string, groupData: any) => api.put(`/api/courses/groups/${groupId}`, groupData),
   deleteCourseGroup: (groupId: string) => api.delete(`/api/courses/groups/${groupId}`),
 
-  // Courses
-  getAllCourses: () => api.get('/api/courses/courses'),
+  // Courses with field selection
+  getAllCourses: (fields: 'basic' | 'detailed' | 'full' = 'basic') =>
+    api.get(`/api/courses/courses?fields=${fields}`),
   createCourse: (courseData: any, courseGroupId: string) => {
     const data = courseData;
     return api.post(`/api/courses/courses/${courseGroupId}`, data);
   },
-  getCourseById: (courseId: string) => api.get(`/api/courses/courses/${courseId}`),
+  getCourseById: (courseId: string, fields: 'basic' | 'detailed' | 'full' = 'full') =>
+    api.get(`/api/courses/courses/${courseId}?fields=${fields}`),
   updateCourse: (courseId: string, courseData: any) => api.put(`/api/courses/courses/${courseId}`, courseData),
   deleteCourse: (courseId: string) => api.delete(`/api/courses/courses/${courseId}`),
 
@@ -204,4 +211,23 @@ export const fileApi = {
     },
     ...config
   }),
+};
+
+// Webinar API functions - OPTIMIZED
+export const webinarApi = {
+  // Get all webinars with field selection
+  getAllWebinars: (fields: 'basic' | 'detailed' | 'full' = 'basic') =>
+    api.get(`/api/webinars?fields=${fields}`),
+
+  // Get webinar by ID with field selection
+  getWebinarById: (webinarId: string, fields: 'basic' | 'detailed' | 'full' = 'full') =>
+    api.get(`/api/webinars/${webinarId}?fields=${fields}`),
+
+  // Register for webinar
+  registerForWebinar: (webinarId: string) =>
+    api.post(`/api/webinars/${webinarId}/register`),
+
+  // Mark as attended
+  markAsAttended: (webinarId: string) =>
+    api.post(`/api/webinars/${webinarId}/attend`),
 };

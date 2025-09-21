@@ -60,7 +60,8 @@ export function DealsSection() {
         try {
             setLoading(true);
             setError(null);
-            const response = await dealApi.getAllDeals();
+            // Use 'full' fields for admin view to show all details
+            const response = await dealApi.getAllDeals('full');
             setDeals(response.data.deals || []);
         } catch (error) {
             console.error('Error fetching deals:', error);

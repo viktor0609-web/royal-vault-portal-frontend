@@ -107,7 +107,7 @@ export function DealsSection() {
     fetchFilterOptions();
   }, []);
 
-  // Fetch deals with current filters
+  // Fetch deals with current filters - OPTIMIZED
   const fetchDeals = async (filters = selectedFilters) => {
     try {
       setLoading(true);
@@ -121,10 +121,11 @@ export function DealsSection() {
       if (filters.requirements) filterParams.requirementId = filters.requirements;
       if (filters.sources) filterParams.sourceId = filters.sources;
 
+      // Use 'basic' fields for list view to improve performance
       const response =
         Object.keys(filterParams).length > 0
-          ? await dealApi.filterDeals(filterParams)
-          : await dealApi.getAllDeals();
+          ? await dealApi.filterDeals(filterParams, 'basic')
+          : await dealApi.getAllDeals('basic');
 
       setDeals(response.data.deals || []);
     } catch (error) {

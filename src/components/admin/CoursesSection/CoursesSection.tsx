@@ -89,7 +89,8 @@ export function CoursesSection() {
     try {
       setLoading(true);
       setError(null);
-      const response = await courseApi.getAllCourseGroups();
+      // Use 'detailed' fields for admin list view to show course counts
+      const response = await courseApi.getAllCourseGroups({}, 'detailed');
       setCourseGroups(response.data);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch course groups');

@@ -59,14 +59,15 @@ export function CourseDetailSection() {
   // Initialize checkbox state from localStorage or default values
   const [completedItems, setCompletedItems] = useState<boolean[]>([]);
 
-  // Fetch course data
+  // Fetch course data - OPTIMIZED
   useEffect(() => {
     const fetchCourse = async () => {
       if (!courseId) return;
 
       try {
         setLoading(true);
-        const response = await courseApi.getCourseById(courseId);
+        // Use 'full' fields for course detail page to get all lecture data
+        const response = await courseApi.getCourseById(courseId, 'full');
         setCourse(response.data);
 
         // Initialize completed items based on lecture completion status

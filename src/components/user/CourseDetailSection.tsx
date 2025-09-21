@@ -103,11 +103,10 @@ export function CourseDetailSection() {
     const isCurrentlyCompleted = completedItems[index];
 
     try {
-      if (!isCurrentlyCompleted) {
-        // Mark as completed
-        await courseApi.completeLecture(lecture._id);
-      }
+      // Call API to toggle completion status
+      const response = await courseApi.completeLecture(lecture._id);
 
+      // Update local state based on API response
       setCompletedItems(prev =>
         prev.map((completed, i) => i === index ? !completed : completed)
       );

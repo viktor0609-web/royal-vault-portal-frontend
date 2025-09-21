@@ -12,6 +12,7 @@ import {
   ArrowLeftIcon,
   HomeIcon
 } from "lucide-react";
+import { courseApi } from "@/lib/api";
 
 
 interface CourseGroup {
@@ -19,257 +20,99 @@ interface CourseGroup {
   title: string;
   description: string;
   icon: string;
-  createdBy: string;
-  courses: any[];
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  courses: Course[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-// Mock data for course groups
-const mockCourseGroups: CourseGroup[] = [
-  {
-    _id: "anonymity",
-    title: "Anonymity",
-    description: "Make yourself invisible and prevent lawsuits before they begin.",
-    icon: "eye-off",
-    createdBy: "admin",
-    courses: [
-      {
-        _id: "anon-1",
-        title: "Digital Privacy Fundamentals",
-        description: "Learn the basics of protecting your digital identity",
-        duration: "2 hours",
-        level: "Beginner"
-      },
-      {
-        _id: "anon-2",
-        title: "Advanced Anonymity Techniques",
-        description: "Master advanced methods for complete anonymity",
-        duration: "4 hours",
-        level: "Advanced"
-      }
-    ]
-  },
-  {
-    _id: "asset-holding",
-    title: "Asset Holding",
-    description: "Hold your assets anonymously and securely.",
-    icon: "network",
-    createdBy: "admin",
-    courses: [
-      {
-        _id: "asset-1",
-        title: "Offshore Trusts 101",
-        description: "Understanding offshore trust structures",
-        duration: "3 hours",
-        level: "Intermediate"
-      },
-      {
-        _id: "asset-2",
-        title: "Cryptocurrency Asset Protection",
-        description: "Securing digital assets with proper structures",
-        duration: "2.5 hours",
-        level: "Intermediate"
-      }
-    ]
-  },
-  {
-    _id: "operations",
-    title: "Operations",
-    description: "Run your business without liability.",
-    icon: "refresh-cw",
-    createdBy: "admin",
-    courses: [
-      {
-        _id: "ops-1",
-        title: "Business Entity Selection",
-        description: "Choose the right entity structure for your business",
-        duration: "2 hours",
-        level: "Beginner"
-      },
-      {
-        _id: "ops-2",
-        title: "Liability Protection Strategies",
-        description: "Protect your personal assets from business liabilities",
-        duration: "3.5 hours",
-        level: "Advanced"
-      }
-    ]
-  },
-  {
-    _id: "estate-planning",
-    title: "Estate Planning",
-    description: "Transfer your wealth to future generations.",
-    icon: "key",
-    createdBy: "admin",
-    courses: [
-      {
-        _id: "estate-1",
-        title: "Wealth Transfer Strategies",
-        description: "Effective methods for transferring wealth to heirs",
-        duration: "4 hours",
-        level: "Advanced"
-      },
-      {
-        _id: "estate-2",
-        title: "Trust Administration",
-        description: "Managing and administering family trusts",
-        duration: "3 hours",
-        level: "Intermediate"
-      }
-    ]
-  },
-  {
-    _id: "tax-vehicles",
-    title: "Tax Vehicles",
-    description: "Optimize your taxes for the first $150k annual revenue.",
-    icon: "truck",
-    createdBy: "admin",
-    courses: [
-      {
-        _id: "tax-1",
-        title: "Tax Optimization Basics",
-        description: "Fundamental tax reduction strategies",
-        duration: "2.5 hours",
-        level: "Beginner"
-      },
-      {
-        _id: "tax-2",
-        title: "Advanced Tax Structures",
-        description: "Complex tax planning for high earners",
-        duration: "5 hours",
-        level: "Advanced"
-      }
-    ]
-  },
-  {
-    _id: "royal-life-1",
-    title: "Royal Life 1.0",
-    description: "Learn how to achieve an extraordinary life on every level.",
-    icon: "graduation-cap",
-    createdBy: "admin",
-    courses: [
-      {
-        _id: "royal-1",
-        title: "Mindset Mastery",
-        description: "Develop the mindset of extraordinary success",
-        duration: "6 hours",
-        level: "All Levels"
-      },
-      {
-        _id: "royal-2",
-        title: "Lifestyle Design",
-        description: "Design and live your ideal lifestyle",
-        duration: "4 hours",
-        level: "Intermediate"
-      }
-    ]
-  },
-  {
-    _id: "royal-life-2",
-    title: "Royal Life 2.0",
-    description: "Advanced strategies for achieving the royal lifestyle.",
-    icon: "graduation-cap",
-    createdBy: "admin",
-    courses: [
-      {
-        _id: "royal2-1",
-        title: "Wealth Building Mastery",
-        description: "Advanced wealth accumulation strategies",
-        duration: "8 hours",
-        level: "Advanced"
-      }
-    ]
-  },
-  {
-    _id: "coming-soon",
-    title: "Coming Soon",
-    description: "Exciting new courses are being developed.",
-    icon: "clock",
-    createdBy: "admin",
-    courses: []
-  }
-];
+interface Course {
+  _id: string;
+  title: string;
+  description: string;
+  courseGroup: string;
+  lectures: Lecture[];
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
 
-// Default categories with icons for fallback
-const defaultCategories = [
-  {
-    icon: EyeOffIcon,
-    title: "Anonymity",
-    description: "Make yourself invisible and prevent lawsuits before they begin.",
-    id: "anonymity",
-  },
-  {
-    icon: NetworkIcon,
-    title: "Asset Holding",
-    description: "Hold your assets anonymously and securely.",
-    id: "asset-holding",
-  },
-  {
-    icon: RefreshCwIcon,
-    title: "Operations",
-    description: "Run your business without liability.",
-    id: "operations",
-  },
-  {
-    icon: KeyIcon,
-    title: "Estate Planning",
-    description: "Transfer your wealth to future generations.",
-    id: "estate-planning",
-  },
-  {
-    icon: TruckIcon,
-    title: "Tax Vehicles",
-    description: "Optimize your taxes for the first $150k annual revenue.",
-    id: "tax-vehicles",
-  },
-  {
-    icon: GraduationCapIcon,
-    title: "Royal Life 1.0",
-    description: "Learn how to achieve an extraordinary life on every level.",
-    id: "royal-life-1",
-  },
-  {
-    icon: GraduationCapIcon,
-    title: "Royal Life 2.0",
-    description: "",
-    id: "royal-life-2",
-  },
-  {
-    icon: ClockIcon,
-    title: "Coming Soon",
-    description: "",
-    id: "coming-soon",
-  },
-];
+interface Lecture {
+  _id: string;
+  title: string;
+  description?: string;
+  content?: string;
+  videoUrl?: string;
+  videoFile?: string;
+  relatedFiles: {
+    name: string;
+    url: string;
+    uploadedUrl: string;
+  }[];
+  completedBy: string[];
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Icon mapping for course groups
+const getIconForGroup = (iconName: string) => {
+  const iconMap: { [key: string]: any } = {
+    'eye-off': EyeOffIcon,
+    'network': NetworkIcon,
+    'refresh-cw': RefreshCwIcon,
+    'key': KeyIcon,
+    'truck': TruckIcon,
+    'graduation-cap': GraduationCapIcon,
+    'clock': ClockIcon,
+  };
+  return iconMap[iconName] || GraduationCapIcon;
+};
+
 
 export function CoursesSection() {
   const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showBackButton, setShowBackButton] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // Simulate loading delay for better UX
-    const timer = setTimeout(() => {
-      setCourseGroups(mockCourseGroups);
-      setLoading(false);
-    }, 500);
+    const fetchCourseGroups = async () => {
+      try {
+        setLoading(true);
+        const response = await courseApi.getAllCourseGroups();
+        setCourseGroups(response.data);
+      } catch (err) {
+        console.error('Error fetching course groups:', err);
+        setError('Failed to load courses. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    fetchCourseGroups();
   }, []);
 
-  // No back button needed for main courses page
-
-  // Use mock course groups and map them to display categories
-  const displayCategories = courseGroups.length > 0
-    ? courseGroups.map((group, index) => ({
-      icon: defaultCategories[index % defaultCategories.length]?.icon || GraduationCapIcon,
-      title: group.title,
-      description: group.description,
-      id: group._id,
-    }))
-    : defaultCategories;
+  // Map course groups to display categories
+  const displayCategories = courseGroups.map((group) => ({
+    icon: getIconForGroup(group.icon),
+    title: group.title,
+    description: group.description,
+    id: group._id,
+  }));
 
   if (loading) {
     return (
@@ -321,7 +164,7 @@ export function CoursesSection() {
         {displayCategories.map((category, index) => (
           <Link
             key={category.id}
-            to={`/courses/${category.id}`}
+            to={`/course-groups/${category.id}`}
             className="text-center p-3 sm:p-6 bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
           >
             <div className="flex justify-center mb-4">

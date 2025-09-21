@@ -12,6 +12,7 @@ import { WebinarsSection } from "./components/user/WebinarsSection";
 import { CoursesSection } from "./components/user/CoursesSection";
 import { DealsSection } from "./components/user/DealsSection";
 import { CourseDetailSection } from "./components/user/CourseDetailSection";
+import { CourseGroupDetailSection } from "./components/user/CourseGroupDetailSection";
 import { ProfileSection } from "./components/user/ProfileSection";
 import { WebinarRegistration } from "./components/user/WebinarRegistration";
 
@@ -76,7 +77,8 @@ const App = () => (
                 <Route path="/" element={<RoyalVaultLayout><WelcomeSection /></RoyalVaultLayout>} />
                 <Route path="/royal-tv" element={<RoyalVaultLayout><WebinarsSection /></RoyalVaultLayout>} />
                 <Route path="/courses" element={<RoyalVaultLayout><CoursesSection /></RoyalVaultLayout>} />
-                <Route path="/courses/:id" element={<RoyalVaultLayout><CourseDetailSection /></RoyalVaultLayout>} />
+                <Route path="/course-groups/:groupId" element={<RoyalVaultLayout><CourseGroupDetailSection /></RoyalVaultLayout>} />
+                <Route path="/courses/:courseId" element={<RoyalVaultLayout><CourseDetailSection /></RoyalVaultLayout>} />
                 <Route path="/deals" element={<RoyalVaultLayout><DealsSection /></RoyalVaultLayout>} />
                 <Route path="/profile" element={<UserRoute><RoyalVaultLayout><ProfileSection /></RoyalVaultLayout></UserRoute>} />
                 <Route path="/registration" element={<WebinarRegistration webinar={webinarData} />} />

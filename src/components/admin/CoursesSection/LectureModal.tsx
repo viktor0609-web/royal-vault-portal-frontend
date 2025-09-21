@@ -309,7 +309,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                             </TableCell>
                                             <TableCell className="text-blue-600 hover:underline">
                                                 <a href={file.url} target="_blank" rel="noopener noreferrer">
-                                                    {file.url.length > 25 ? `${file.url.substring(0, 25)}...` : file.url}
+                                                    {import.meta.env.VITE_BACKEND_URL + file.url.length > 25 ? `${file.url.substring(0, 25)}...` : file.url}
                                                 </a>
                                             </TableCell>
                                             <TableCell>

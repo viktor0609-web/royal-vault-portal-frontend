@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftIcon, EyeOffIcon, CheckCircleIcon, PlayIcon, ClockIcon } from "lucide-react";
+import { ArrowLeftIcon, EyeOffIcon, CheckCircleIcon, PlayIcon, ClockIcon, DownloadIcon, FileIcon, ExternalLinkIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { courseApi } from "@/lib/api";
 
@@ -127,6 +127,58 @@ export function CourseDetailSection() {
 
   const handleBackToList = () => {
     setShowMobileContent(false);
+  };
+
+  // Handle file download
+  const handleFileDownload = (file: { name: string; url: string; uploadedUrl: string }) => {
+    const fileUrl = file.uploadedUrl || file.url;
+    if (fileUrl) {
+      // Create a temporary link element to trigger download
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = file.name;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  // Get file icon based on file extension
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return '📄';
+      case 'doc':
+      case 'docx':
+        return '📝';
+      case 'xls':
+      case 'xlsx':
+        return '📊';
+      case 'ppt':
+      case 'pptx':
+        return '📋';
+      case 'txt':
+        return '📄';
+      case 'zip':
+      case 'rar':
+        return '🗜️';
+      case 'mp4':
+      case 'avi':
+      case 'mov':
+        return '🎥';
+      case 'mp3':
+      case 'wav':
+        return '🎵';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return '🖼️';
+      default:
+        return '📎';
+    }
   };
 
 
@@ -264,7 +316,7 @@ export function CourseDetailSection() {
                 </div>
 
                 {/* Video Content */}
-                <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96">
+                <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-4">
                   <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
                     {/* Video Element with Default Controls */}
                     {lectures[currentItem]?.videoUrl || lectures[currentItem]?.videoFile ? (
@@ -285,6 +337,57 @@ export function CourseDetailSection() {
                     )}
                   </div>
                 </div>
+
+                {/* Lecture Description */}
+                {lectures[currentItem]?.description && (
+                  <div className="bg-white rounded-lg border border-royal-light-gray p-4 mb-4">
+                    <h3 className="text-lg font-semibold text-royal-dark-gray mb-3">Description</h3>
+                    <p className="text-royal-gray text-sm leading-relaxed">
+                      {lectures[currentItem].description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Related Files Section */}
+                {lectures[currentItem]?.relatedFiles && lectures[currentItem].relatedFiles.length > 0 && (
+                  <div className="bg-white rounded-lg border border-royal-light-gray p-4">
+                    <h3 className="text-lg font-semibold text-royal-dark-gray mb-3 flex items-center gap-2">
+                      <FileIcon className="h-5 w-5" />
+                      Related Files
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {lectures[currentItem].relatedFiles.map((file, fileIndex) => (
+                        <div
+                          key={fileIndex}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <span className="text-2xl flex-shrink-0">
+                              {getFileIcon(file.name)}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-royal-dark-gray truncate">
+                                {file.name}
+                              </p>
+                              <p className="text-xs text-royal-gray">
+                                {(file.uploadedUrl ? 'Uploaded file' : 'External link')}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleFileDownload(file)}
+                            className="flex-shrink-0 ml-2"
+                          >
+                            <DownloadIcon className="h-4 w-4 mr-1" />
+                            Download
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -325,12 +428,22 @@ export function CourseDetailSection() {
                         >
                           {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 " />}
                         </div>
-                        <span className={`font-medium transition-colors duration-75  ${index === currentItem
-                          ? "text-primary font-semibold"
-                          : "text-royal-dark-gray"
-                          }`}>
-                          {lecture.title}
-                        </span>
+                        <div className="flex-1 min-w-0">
+                          <span className={`font-medium transition-colors duration-75  ${index === currentItem
+                            ? "text-primary font-semibold"
+                            : "text-royal-dark-gray"
+                            }`}>
+                            {lecture.title}
+                          </span>
+                          {lecture.relatedFiles && lecture.relatedFiles.length > 0 && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <FileIcon className="h-3 w-3 text-royal-gray" />
+                              <span className="text-xs text-royal-gray">
+                                {lecture.relatedFiles.length} file{lecture.relatedFiles.length !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -366,12 +479,22 @@ export function CourseDetailSection() {
                         >
                           {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 " />}
                         </div>
-                        <span className={`font-medium transition-colors duration-75  ${index === currentItem
-                          ? "text-primary font-semibold"
-                          : "text-royal-dark-gray"
-                          }`}>
-                          {lecture.title}
-                        </span>
+                        <div className="flex-1 min-w-0">
+                          <span className={`font-medium transition-colors duration-75  ${index === currentItem
+                            ? "text-primary font-semibold"
+                            : "text-royal-dark-gray"
+                            }`}>
+                            {lecture.title}
+                          </span>
+                          {lecture.relatedFiles && lecture.relatedFiles.length > 0 && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <FileIcon className="h-3 w-3 text-royal-gray" />
+                              <span className="text-xs text-royal-gray">
+                                {lecture.relatedFiles.length} file{lecture.relatedFiles.length !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -399,7 +522,7 @@ export function CourseDetailSection() {
               </div>
 
               {/* Video Content */}
-              <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96">
+              <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-6">
                 <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
                   {/* Video Element with Default Controls */}
                   {lectures[currentItem]?.videoUrl || lectures[currentItem]?.videoFile ? (
@@ -420,6 +543,57 @@ export function CourseDetailSection() {
                   )}
                 </div>
               </div>
+
+              {/* Lecture Description */}
+              {lectures[currentItem]?.description && (
+                <div className="bg-white rounded-lg border border-royal-light-gray p-6 mb-6">
+                  <h3 className="text-lg font-semibold text-royal-dark-gray mb-4">Description</h3>
+                  <p className="text-royal-gray text-sm leading-relaxed">
+                    {lectures[currentItem].description}
+                  </p>
+                </div>
+              )}
+
+              {/* Related Files Section */}
+              {lectures[currentItem]?.relatedFiles && lectures[currentItem].relatedFiles.length > 0 && (
+                <div className="bg-white rounded-lg border border-royal-light-gray p-6">
+                  <h3 className="text-lg font-semibold text-royal-dark-gray mb-4 flex items-center gap-2">
+                    <FileIcon className="h-5 w-5" />
+                    Related Files
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {lectures[currentItem].relatedFiles.map((file, fileIndex) => (
+                      <div
+                        key={fileIndex}
+                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors group"
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <span className="text-2xl flex-shrink-0">
+                            {getFileIcon(file.name)}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-royal-dark-gray truncate group-hover:text-royal-blue transition-colors">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-royal-gray">
+                              {(file.uploadedUrl ? 'Uploaded file' : 'External link')}
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleFileDownload(file)}
+                          className="flex-shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <DownloadIcon className="h-4 w-4 mr-1" />
+                          <span className="hidden sm:inline">Download</span>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}

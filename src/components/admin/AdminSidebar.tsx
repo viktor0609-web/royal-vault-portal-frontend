@@ -16,6 +16,7 @@ import {
 
 
 const navigationItems = [
+  { title: "Dashboard", path: "/admin/dashboard", icon: null },
   { title: "Webinars", path: "/admin/webinars", icon: null },
   { title: "Courses", path: "/admin/courses", icon: null },
   { title: "Deals", path: "/admin/deals", icon: null },

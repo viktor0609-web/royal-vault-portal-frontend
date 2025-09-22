@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    historyApiFallback: true,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
@@ -18,5 +19,9 @@ export default defineConfig(({ mode }) => ({
   base: "/",
   build: {
     chunkSizeWarningLimit: 1600, // increase from 500kb
+  },
+  preview: {
+    port: 8080,
+    host: "::",
   },
 }));

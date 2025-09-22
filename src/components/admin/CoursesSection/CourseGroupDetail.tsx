@@ -41,7 +41,7 @@ interface CourseGroup {
 }
 
 export function CourseGroupDetail() {
-    const { id } = useParams<{ id: string }>();
+    const { groupId } = useParams<{ groupId: string }>();
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -101,16 +101,16 @@ export function CourseGroupDetail() {
     };
 
     const handleViewCourse = (courseId: string) => {
-        navigate(`/admin/courses/group/${id}/course/${courseId}`);
+        navigate(`/admin/courses/groups/${groupId}/courses/${courseId}`);
     };
 
     const fetchCourseGroup = async () => {
-        if (!id) return;
+        if (!groupId) return;
 
         try {
             setLoading(true);
             setError(null);
-            const response = await courseApi.getCourseGroupById(id);
+            const response = await courseApi.getCourseGroupById(groupId);
             setCourseGroup(response.data);
             setCourses(response.data.courses || []);
         } catch (err: any) {
@@ -127,7 +127,7 @@ export function CourseGroupDetail() {
 
     useEffect(() => {
         fetchCourseGroup();
-    }, [id]);
+    }, [groupId]);
 
     if (loading) {
         return (
@@ -277,7 +277,7 @@ export function CourseGroupDetail() {
                 closeDialog={handleCloseModal}
                 editingCourse={editingCourse}
                 onCourseSaved={handleCourseSaved}
-                courseGroupId={id}
+                courseGroupId={groupId}
             />
         </div>
     );

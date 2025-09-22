@@ -257,12 +257,7 @@ export function CourseDetail() {
               lectures.map((lecture) => (
                 <TableRow key={lecture._id}>
                   <TableCell className="font-medium">
-                    <button
-                      onClick={() => handleViewLecture(lecture._id)}
-                      className="text-left hover:text-royal-blue transition-colors cursor-pointer"
-                    >
-                      {lecture.title}
-                    </button>
+                    {lecture.title}
                   </TableCell>
                   <TableCell className="max-w-xs truncate">{lecture.description}</TableCell>
                   <TableCell>

@@ -88,8 +88,7 @@ const App = () => (
                 <Route path="/registration" element={<WebinarRegistration webinar={webinarData} />} />
 
                 {/* Admin Routes */}
-                <Route path="/admin" element={<AdminRoute><AdminLayout><Navigate to="/admin/dashboard" replace /></AdminLayout></AdminRoute>} />
-                <Route path="/admin/dashboard" element={<AdminRoute><AdminLayout><AdminStats /></AdminLayout></AdminRoute>} />
+                <Route path="/admin" element={<AdminRoute><AdminLayout><Navigate to="/admin/courses" replace /></AdminLayout></AdminRoute>} />
                 <Route path="/admin/deals" element={<AdminRoute><AdminLayout><AdminDeals /></AdminLayout></AdminRoute>} />
                 <Route path="/admin/webinars" element={<AdminRoute><AdminLayout><AdminWebinar /></AdminLayout></AdminRoute>} />
                 <Route path="/admin/webinars/stats" element={<AdminRoute><AdminLayout><AdminStats /></AdminLayout></AdminRoute>} />

@@ -1,6 +1,6 @@
 import { useState } from "react";
-
 import { useLocation, useParams } from "react-router-dom";
+import { useAdminPageState } from "@/hooks/useUrlState";
 import { BoxSelectIcon } from "lucide-react";
 import { Label } from "../ui/label";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../ui/select";
@@ -16,9 +16,10 @@ const stages = [
 
 export function StatsSection() {
     const location = useLocation();
+    const { getCurrentSection, getBreadcrumbs } = useAdminPageState();
 
     const queryParams = new URLSearchParams(location.search);
-    const title = queryParams.get("title");
+    const title = queryParams.get("title") || "Dashboard";
 
     return (
         <div className="flex-1 p-4 flex flex-col">

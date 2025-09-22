@@ -82,7 +82,7 @@ export function CoursesSection() {
   };
 
   const handleViewGroup = (groupId: string) => {
-    navigate(`/admin/courses/group/${groupId}`);
+    navigate(`/admin/courses/groups/${groupId}`);
   };
 
   const fetchCourseGroups = async () => {

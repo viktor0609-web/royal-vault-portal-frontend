@@ -1,13 +1,48 @@
 import { ReactNode } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { RoyalVaultSidebar } from "./RoyalVaultSidebar";
-import { Link } from "react-router-dom";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { Link, useLocation } from "react-router-dom";
 
 interface RoyalVaultLayoutProps {
   children: ReactNode;
 }
 
 export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
+  const location = useLocation();
+
+  // Generate breadcrumbs for user pages
+  const getBreadcrumbs = () => {
+    const pathParts = location.pathname.split('/').filter(Boolean);
+    const breadcrumbs = [];
+
+    if (pathParts.length > 0) {
+      breadcrumbs.push({ label: 'Home', path: '/' });
+
+      if (pathParts[0] === 'royal-tv') {
+        breadcrumbs.push({ label: 'Royal TV', path: '/royal-tv' });
+      } else if (pathParts[0] === 'courses') {
+        breadcrumbs.push({ label: 'Courses', path: '/courses' });
+        if (pathParts[1]) {
+          breadcrumbs.push({ label: 'Course Details', isActive: true });
+        }
+      } else if (pathParts[0] === 'course-groups') {
+        breadcrumbs.push({ label: 'Course Groups', path: '/courses' });
+        if (pathParts[1]) {
+          breadcrumbs.push({ label: 'Group Details', isActive: true });
+        }
+      } else if (pathParts[0] === 'deals') {
+        breadcrumbs.push({ label: 'Deals', path: '/deals' });
+      } else if (pathParts[0] === 'profile') {
+        breadcrumbs.push({ label: 'Profile', path: '/profile' });
+      }
+    }
+
+    return breadcrumbs;
+  };
+
+  const breadcrumbs = getBreadcrumbs();
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -25,6 +60,14 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
         <RoyalVaultSidebar />
         <SidebarInset className="flex-1">
           <div className="md:hidden h-20"></div> {/* Spacer for mobile header */}
+
+          {/* Breadcrumb Navigation */}
+          {breadcrumbs.length > 1 && (
+            <div className="px-4 py-2 bg-white border-b border-royal-light-gray">
+              <Breadcrumb items={breadcrumbs} />
+            </div>
+          )}
+
           {children}
         </SidebarInset>
       </div>

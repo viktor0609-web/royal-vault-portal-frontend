@@ -32,7 +32,7 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
 
           {/* Breadcrumb Navigation */}
           {breadcrumbs.length > 1 && (
-            <div className="px-4 py-3 bg-white border-b border-royal-light-gray shadow-sm">
+            <div className="px-2 sm:px-4 py-2 sm:py-3 bg-white border-b border-royal-light-gray shadow-sm">
               <Breadcrumb items={breadcrumbs} />
             </div>
           )}

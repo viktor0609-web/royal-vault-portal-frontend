@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
-import { ReceiptRussianRuble, VideoIcon } from "lucide-react";
+import { ReceiptRussianRuble, VideoIcon, Users, Eye, Edit, BarChart3, Calendar, UserCheck } from "lucide-react";
 import { WebinarModal } from "./WebinarModal";
 import { RecsModal } from "./RecsModal";
 
@@ -64,15 +64,14 @@ export function WebinarSection() {
     };
 
     return (
-        <div className="flex-1 p-4 flex flex-col animate-in fade-in duration-100">
-            <div className="flex gap-4 items-center bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-                <VideoIcon className="h-10 w-10 text-royal-gray hidden min-[700px]:block" />
-                <h1 className="text-2xl font-bold text-royal-dark-gray mb-2 uppercase">Webinars</h1>
+        <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col animate-in fade-in duration-100">
+            <div className="flex gap-2 items-center bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+                <VideoIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray hidden sm:block" />
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">Webinars</h1>
             </div>
-            <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <div className="text-xs text-gray-500 text-center py-2 bg-gray-50 border-b border-gray-200 sm:hidden">
-                    ← Scroll horizontally to see all columns →
-                </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 <Table className="w-full min-w-[1000px] text-sm">
                     <TableHeader>
                         <TableRow>
@@ -114,6 +113,128 @@ export function WebinarSection() {
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Mobile/Tablet Card View */}
+            <div className="lg:hidden space-y-4">
+                {/* Add Button for Mobile */}
+                <div className="flex justify-end">
+                    <Button onClick={() => handlebtnClick('create', '')} className="flex items-center gap-2">
+                        <VideoIcon className="h-4 w-4" />
+                        Create Webinar
+                    </Button>
+                </div>
+
+                {sampleData.map((item, index) => (
+                    <div key={index} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
+                        <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                                <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">{item.webinar}</h3>
+                                <div className="flex items-center gap-2 text-xs sm:text-sm text-royal-gray mb-2">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.status === 'Scheduled'
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                        }`}>
+                                        {item.status}
+                                    </span>
+                                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                        {item.portalDisplay === 'yes' ? 'Visible' : 'Hidden'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="flex gap-1 ml-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handlebtnClick('edit', item)}
+                                    className="h-7 w-7 p-0"
+                                    title="Edit"
+                                >
+                                    <Edit className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handlebtnClick('stats', item)}
+                                    className="h-7 w-7 p-0"
+                                    title="Stats"
+                                >
+                                    <BarChart3 className="h-3 w-3" />
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray mb-2">
+                            <div className="flex items-center gap-3">
+                                <span className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    {item.date}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray mb-2">
+                            <div className="flex items-center gap-3">
+                                <span className="flex items-center gap-1">
+                                    <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    {item.registrants} registrants
+                                </span>
+                                <span className="flex items-center gap-1">
+                                    <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    {item.attendees} attendees
+                                </span>
+                                <span className="flex items-center gap-1">
+                                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    {item.reWatch} re-watch
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-1 flex-wrap">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlebtnClick('reg', item)}
+                                className="text-xs px-2 py-1"
+                            >
+                                Reg
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlebtnClick('web', item)}
+                                className="text-xs px-2 py-1"
+                            >
+                                Web
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlebtnClick('host', item)}
+                                className="text-xs px-2 py-1"
+                            >
+                                Host
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlebtnClick('guest', item)}
+                                className="text-xs px-2 py-1"
+                            >
+                                Guest
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlebtnClick('recs', item)}
+                                className="text-xs px-2 py-1"
+                            >
+                                Recs
+                            </Button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
             <WebinarModal isOpen={open} closeDialog={closeModal} />
             <RecsModal isOpen={recsOpen} closeDialog={closeModal} />
         </div>

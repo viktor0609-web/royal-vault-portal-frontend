@@ -182,21 +182,21 @@ export function CourseGroupDetail() {
     }
 
     return (
-        <div className="flex-1 p-4 flex flex-col">
-            <div className="flex items-center justify-between bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-                <div className="flex items-center gap-4">
+        <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3 gap-2 sm:gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={() => navigate('/admin/courses')}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-1 w-fit text-xs sm:text-sm"
                     >
-                        <ArrowLeftIcon className="h-4 w-4" />
-                        Back
+                        <ArrowLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Back</span>
                     </Button>
                     <div>
-                        <h1 className="text-2xl font-bold text-royal-dark-gray uppercase">{courseGroup.title}</h1>
-                        <p className="text-royal-gray">{courseGroup.description}</p>
+                        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">{courseGroup.title}</h1>
+                        <p className="text-royal-gray text-xs sm:text-sm lg:text-base">{courseGroup.description}</p>
                     </div>
                 </div>
             </div>
@@ -207,10 +207,8 @@ export function CourseGroupDetail() {
                 </div>
             )}
 
-            <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <div className="text-xs text-gray-500 text-center py-2 bg-gray-50 border-b border-gray-200 sm:hidden">
-                    ← Scroll horizontally to see all columns →
-                </div>
+            {/* Desktop Table View */}
+            <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 <Table className="w-full min-w-[800px] text-sm">
                     <TableHeader>
                         <TableRow>
@@ -278,6 +276,71 @@ export function CourseGroupDetail() {
                         )}
                     </TableBody>
                 </Table>
+            </div>
+
+            {/* Mobile/Tablet Card View */}
+            <div className="lg:hidden space-y-4">
+                {/* Add Button for Mobile */}
+                <div className="flex justify-end">
+                    <Button onClick={handleAddCourse} className="flex items-center gap-2">
+                        <PlusIcon className="h-4 w-4" />
+                        Create Course
+                    </Button>
+                </div>
+
+                {courses.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                        No courses found. Create your first course!
+                    </div>
+                ) : (
+                    courses.map((course) => (
+                        <div key={course._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
+                            <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">{course.title}</h3>
+                                    <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{course.description}</p>
+                                </div>
+                                <div className="flex gap-1 ml-2">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleViewCourse(course._id)}
+                                        className="h-7 w-7 p-0"
+                                    >
+                                        <EyeIcon className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleEdit(course)}
+                                        className="h-7 w-7 p-0"
+                                    >
+                                        <Edit className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleDelete(course._id)}
+                                        className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
+                                    >
+                                        <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray">
+                                <div className="flex items-center gap-3">
+                                    <span className="flex items-center gap-1">
+                                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                                        {course.lectures?.length || 0} lectures
+                                    </span>
+                                    <span className="hidden sm:inline">{course.createdBy?.name || 'N/A'}</span>
+                                </div>
+                                <span className="text-xs">{course.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'N/A'}</span>
+                            </div>
+                        </div>
+                    ))
+                )}
             </div>
 
             <CourseModal

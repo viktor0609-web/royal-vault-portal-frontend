@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, EyeIcon, PlayIcon } from "lucide-react";
@@ -51,10 +52,17 @@ export function CourseDetail() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [course, setCourse] = useState<Course | null>(null);
+  // Use admin state management
+  const {
+    state: course,
+    setState: setCourse,
+    isLoading: loading,
+    error,
+    setError,
+    getUrlParams
+  } = useAdminState<Course | null>(null, `course_${courseId}`);
+
   const [lectures, setLectures] = useState<Lecture[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isLectureModalOpen, setIsLectureModalOpen] = useState(false);
   const [editingLecture, setEditingLecture] = useState<Lecture | null>(null);
 
@@ -106,24 +114,26 @@ export function CourseDetail() {
     }
   };
 
+  const handleViewLecture = (lectureId: string) => {
+    navigate(`/admin/courses/groups/${groupId}/courses/${courseId}/lectures/${lectureId}`);
+  };
+
   const fetchCourse = async () => {
     if (!courseId) return;
 
     try {
-      setLoading(true);
       setError(null);
       const response = await courseApi.getCourseById(courseId);
       setCourse(response.data);
       setLectures(response.data.lectures || []);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch course');
+      const errorMessage = err.response?.data?.message || 'Failed to fetch course';
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: err.response?.data?.message || 'Failed to fetch course',
+        description: errorMessage,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -134,18 +144,20 @@ export function CourseDetail() {
   if (loading) {
     return (
       <div className="flex-1 p-4">
-        <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(`/admin/courses/group/${groupId}`)}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-royal-dark-gray">Loading...</h1>
+        <div className="bg-white rounded-lg border border-royal-light-gray shadow-sm mb-6">
+          <div className="px-6 py-4 border-b border-royal-light-gray">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate(`/admin/courses/groups/${groupId}`)}
+                className="flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded-md transition-all duration-200 group"
+              >
+                <ArrowLeftIcon className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                <span className="text-sm font-medium">Back to Course Group</span>
+              </button>
+            </div>
+          </div>
+          <div className="px-6 py-4">
+            <h1 className="text-2xl font-bold text-royal-dark-gray">Loading Course...</h1>
           </div>
         </div>
         <div className="text-center py-8">Loading course...</div>
@@ -156,42 +168,54 @@ export function CourseDetail() {
   if (error || !course) {
     return (
       <div className="flex-1 p-4">
-        <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(`/admin/courses/group/${groupId}`)}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Back
-          </Button>
-          <div>
+        <div className="bg-white rounded-lg border border-royal-light-gray shadow-sm mb-6">
+          <div className="px-6 py-4 border-b border-royal-light-gray">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate(`/admin/courses/groups/${groupId}`)}
+                className="flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded-md transition-all duration-200 group"
+              >
+                <ArrowLeftIcon className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                <span className="text-sm font-medium">Back to Course Group</span>
+              </button>
+            </div>
+          </div>
+          <div className="px-6 py-4">
             <h1 className="text-2xl font-bold text-royal-dark-gray">Error</h1>
           </div>
         </div>
-        <div className="text-center py-8 text-red-500">{error || 'Course not found'}</div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <h3 className="text-red-800 font-medium mb-2">Error Loading Course</h3>
+          <p className="text-red-600">{error || 'Course not found'}</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex-1 p-4 flex flex-col">
-      <div className="flex items-center justify-between bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(`/admin/courses/group/${groupId}`)}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-royal-dark-gray uppercase">{course.title}</h1>
-            <p className="text-royal-gray">{course.description}</p>
-            <p className="text-sm text-gray-500">Course Group: {course.courseGroup?.title}</p>
+      <div className="bg-white rounded-lg border border-royal-light-gray shadow-sm mb-6">
+        <div className="px-6 py-4 border-b border-royal-light-gray">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(`/admin/courses/groups/${groupId}`)}
+              className="flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded-md transition-all duration-200 group"
+            >
+              <ArrowLeftIcon className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+              <span className="text-sm font-medium">Back to Course Group</span>
+            </button>
+          </div>
+        </div>
+        <div className="px-6 py-4">
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">{course.title}</h1>
+              <p className="text-royal-gray mb-3">{course.description}</p>
+              <div className="flex items-center gap-2 text-sm text-royal-gray">
+                <span className="font-medium">Course Group:</span>
+                <span className="px-2 py-1 bg-royal-light-gray rounded-md">{course.courseGroup?.title}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -233,7 +257,14 @@ export function CourseDetail() {
             ) : (
               lectures.map((lecture) => (
                 <TableRow key={lecture._id}>
-                  <TableCell className="font-medium">{lecture.title}</TableCell>
+                  <TableCell className="font-medium">
+                    <button
+                      onClick={() => handleViewLecture(lecture._id)}
+                      className="text-left hover:text-royal-blue transition-colors cursor-pointer"
+                    >
+                      {lecture.title}
+                    </button>
+                  </TableCell>
                   <TableCell className="max-w-xs truncate">{lecture.description}</TableCell>
                   <TableCell>
                     {lecture.videoUrl ? (

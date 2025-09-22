@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
 import { TagIcon, Trash2, Edit } from "lucide-react";
@@ -23,10 +24,17 @@ interface Deal {
 }
 export function DealsSection() {
     const navigate = useNavigate();
+
+    // Use admin state management
+    const {
+        state: deals,
+        setState: setDeals,
+        isLoading: loading,
+        error,
+        setError
+    } = useAdminState<Deal[]>([], 'deals');
+
     const [open, setOpen] = useState(false);
-    const [deals, setDeals] = useState<Deal[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
 
     const closeModal = () => {
@@ -58,7 +66,6 @@ export function DealsSection() {
 
     const fetchDeals = async () => {
         try {
-            setLoading(true);
             setError(null);
             // Use 'full' fields for admin view to show all details
             const response = await dealApi.getAllDeals('full');
@@ -66,8 +73,6 @@ export function DealsSection() {
         } catch (error) {
             console.error('Error fetching deals:', error);
             setError('Failed to fetch deals');
-        } finally {
-            setLoading(false);
         }
     };
 

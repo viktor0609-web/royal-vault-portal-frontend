@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, EyeIcon, PlayIcon } from "lucide-react";
@@ -45,10 +46,17 @@ export function CourseGroupDetail() {
     const navigate = useNavigate();
     const { toast } = useToast();
 
-    const [courseGroup, setCourseGroup] = useState<CourseGroup | null>(null);
+    // Use admin state management
+    const {
+        state: courseGroup,
+        setState: setCourseGroup,
+        isLoading: loading,
+        error,
+        setError,
+        getUrlParams
+    } = useAdminState<CourseGroup | null>(null, `courseGroup_${groupId}`);
+
     const [courses, setCourses] = useState<Course[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
@@ -108,20 +116,18 @@ export function CourseGroupDetail() {
         if (!groupId) return;
 
         try {
-            setLoading(true);
             setError(null);
             const response = await courseApi.getCourseGroupById(groupId);
             setCourseGroup(response.data);
             setCourses(response.data.courses || []);
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Failed to fetch course group');
+            const errorMessage = err.response?.data?.message || 'Failed to fetch course group';
+            setError(errorMessage);
             toast({
                 title: "Error",
-                description: err.response?.data?.message || 'Failed to fetch course group',
+                description: errorMessage,
                 variant: "destructive",
             });
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -132,18 +138,20 @@ export function CourseGroupDetail() {
     if (loading) {
         return (
             <div className="flex-1 p-4">
-                <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate('/admin/courses')}
-                        className="flex items-center gap-2"
-                    >
-                        <ArrowLeftIcon className="h-4 w-4" />
-                        Back
-                    </Button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-royal-dark-gray">Loading...</h1>
+                <div className="bg-white rounded-lg border border-royal-light-gray shadow-sm mb-6">
+                    <div className="px-6 py-4 border-b border-royal-light-gray">
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => navigate('/admin/courses')}
+                                className="flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded-md transition-all duration-200 group"
+                            >
+                                <ArrowLeftIcon className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                                <span className="text-sm font-medium">Back to Courses</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div className="px-6 py-4">
+                        <h1 className="text-2xl font-bold text-royal-dark-gray">Loading Course Group...</h1>
                     </div>
                 </div>
                 <div className="text-center py-8">Loading course group...</div>

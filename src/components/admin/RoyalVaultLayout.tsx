@@ -3,15 +3,14 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { AdminSidebar } from "./AdminSidebar";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
-import { useAdminPageState } from "@/hooks/useUrlState";
+import { useBreadcrumbs } from "@/hooks/useBreadcrumbs";
 
 interface RoyalVaultLayoutProps {
   children: ReactNode;
 }
 
 export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
-  const { getBreadcrumbs, isAdminPage } = useAdminPageState();
-  const breadcrumbs = getBreadcrumbs();
+  const { breadcrumbs, loading } = useBreadcrumbs();
 
   return (
     <SidebarProvider>
@@ -32,8 +31,8 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
           <div className="md:hidden h-20"></div> {/* Spacer for mobile header */}
 
           {/* Breadcrumb Navigation */}
-          {isAdminPage() && breadcrumbs.length > 1 && (
-            <div className="px-4 py-2 bg-white border-b border-royal-light-gray">
+          {breadcrumbs.length > 1 && (
+            <div className="px-4 py-3 bg-white border-b border-royal-light-gray shadow-sm">
               <Breadcrumb items={breadcrumbs} />
             </div>
           )}

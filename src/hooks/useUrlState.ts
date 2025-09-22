@@ -117,24 +117,89 @@ export function useAdminPageState() {
         const breadcrumbs = [];
 
         if (pathParts[0] === 'admin') {
+            // Always start with Admin
             breadcrumbs.push({ label: 'Admin', path: '/admin' });
 
-            if (pathParts[1]) {
-                breadcrumbs.push({
-                    label: pathParts[1].charAt(0).toUpperCase() + pathParts[1].slice(1),
-                    path: `/admin/${pathParts[1]}`
-                });
-            }
+            // Handle different admin sections
+            if (pathParts[1] === 'courses') {
+                breadcrumbs.push({ label: 'Courses', path: '/admin/courses' });
 
-            if (pathParts[2]) {
+                // Handle course groups
+                if (pathParts[2] === 'groups' && pathParts[3]) {
+                    breadcrumbs.push({
+                        label: 'Group',
+                        path: `/admin/courses/groups/${pathParts[3]}`,
+                        isActive: pathParts.length === 4 // Only active if this is the final level
+                    });
+
+                    // Handle courses within groups
+                    if (pathParts[4] === 'courses' && pathParts[5]) {
+                        breadcrumbs.push({
+                            label: 'Course',
+                            path: `/admin/courses/groups/${pathParts[3]}/courses/${pathParts[5]}`,
+                            isActive: pathParts.length === 6 // Only active if this is the final level
+                        });
+
+                        // Handle lectures within courses
+                        if (pathParts[6] === 'lectures' && pathParts[7]) {
+                            breadcrumbs.push({
+                                label: 'Lecture',
+                                isActive: true // Always active as this is the deepest level
+                            });
+                        }
+                    }
+                }
+            } else if (pathParts[1]) {
+                // Handle other admin sections (dashboard, deals, webinars, etc.)
+                const sectionName = pathParts[1].charAt(0).toUpperCase() + pathParts[1].slice(1);
                 breadcrumbs.push({
-                    label: pathParts[2].charAt(0).toUpperCase() + pathParts[2].slice(1),
-                    path: `/admin/${pathParts[1]}/${pathParts[2]}`
+                    label: sectionName,
+                    path: `/admin/${pathParts[1]}`,
+                    isActive: pathParts.length === 2 // Only active if this is the final level
                 });
+
+                if (pathParts[2]) {
+                    const subSectionName = pathParts[2].charAt(0).toUpperCase() + pathParts[2].slice(1);
+                    breadcrumbs.push({
+                        label: subSectionName,
+                        path: `/admin/${pathParts[1]}/${pathParts[2]}`,
+                        isActive: pathParts.length === 3 // Only active if this is the final level
+                    });
+                }
             }
         }
 
         return breadcrumbs;
+    };
+
+    // Get URL parameters for admin pages
+    const getUrlParams = () => {
+        const pathParts = location.pathname.split('/').filter(Boolean);
+        const params: Record<string, string> = {};
+
+        if (pathParts[0] === 'admin') {
+            if (pathParts[1] === 'courses' && pathParts[2] === 'groups' && pathParts[3]) {
+                params.groupId = pathParts[3];
+                if (pathParts[4] === 'courses' && pathParts[5]) {
+                    params.courseId = pathParts[5];
+                    if (pathParts[6] === 'lectures' && pathParts[7]) {
+                        params.lectureId = pathParts[7];
+                    }
+                }
+            }
+        }
+
+        return params;
+    };
+
+    // Check if we're on a specific admin page
+    const isOnPage = (page: string) => {
+        return location.pathname === `/admin/${page}`;
+    };
+
+    // Check if we're on a specific admin section
+    const isOnSection = (section: string) => {
+        return location.pathname.startsWith(`/admin/${section}`);
     };
 
     return {
@@ -142,6 +207,9 @@ export function useAdminPageState() {
         navigateToAdminSection,
         isAdminPage,
         getBreadcrumbs,
+        getUrlParams,
+        isOnPage,
+        isOnSection,
         currentPath: location.pathname,
         searchParams: new URLSearchParams(location.search)
     };

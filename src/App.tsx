@@ -23,6 +23,7 @@ import { WebinarSection as AdminWebinar } from "./components/admin/WebinarSectio
 import { CoursesSection as AdminCourses } from "./components/admin/CoursesSection/CoursesSection";
 import { CourseGroupDetail } from "./components/admin/CoursesSection/CourseGroupDetail";
 import { CourseDetail } from "./components/admin/CoursesSection/CourseDetail";
+import { LectureDetail } from "./components/admin/CoursesSection/LectureDetail";
 import { StatsSection as AdminStats } from "./components/admin/StatsSection";
 
 //For DailyCore
@@ -95,6 +96,7 @@ const App = () => (
                 <Route path="/admin/courses" element={<AdminRoute><AdminLayout><AdminCourses /></AdminLayout></AdminRoute>} />
                 <Route path="/admin/courses/groups/:groupId" element={<AdminRoute><AdminLayout><CourseGroupDetail /></AdminLayout></AdminRoute>} />
                 <Route path="/admin/courses/groups/:groupId/courses/:courseId" element={<AdminRoute><AdminLayout><CourseDetail /></AdminLayout></AdminRoute>} />
+                <Route path="/admin/courses/groups/:groupId/courses/:courseId/lectures/:lectureId" element={<AdminRoute><AdminLayout><LectureDetail /></AdminLayout></AdminRoute>} />
 
                 {/*Daily Core */}
                 <Route path="/webinar_host" element={<VideoMeeting />} />

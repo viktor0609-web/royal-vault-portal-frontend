@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
 import { GraduationCapIcon, Trash2, Edit, PlusIcon, EyeIcon } from "lucide-react";
@@ -26,12 +27,20 @@ interface CourseGroup {
 
 export function CoursesSection() {
   const navigate = useNavigate();
-  const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  // Use admin state management
+  const {
+    state: courseGroups,
+    setState: setCourseGroups,
+    isLoading: loading,
+    error,
+    setError,
+    getCurrentSection
+  } = useAdminState<CourseGroup[]>([], 'courseGroups');
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<CourseGroup | null>(null);
-  const { toast } = useToast();
 
   const handleAddCourseGroup = () => {
     setEditingGroup(null);
@@ -87,20 +96,18 @@ export function CoursesSection() {
 
   const fetchCourseGroups = async () => {
     try {
-      setLoading(true);
       setError(null);
       // Use 'detailed' fields for admin list view to show course counts
       const response = await courseApi.getAllCourseGroups({}, 'detailed');
       setCourseGroups(response.data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch course groups');
+      const errorMessage = err.response?.data?.message || 'Failed to fetch course groups';
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: err.response?.data?.message || 'Failed to fetch course groups',
+        description: errorMessage,
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 

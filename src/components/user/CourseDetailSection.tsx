@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { courseApi } from "@/lib/api";
 import { sanitizeHtml } from "@/lib/htmlSanitizer";
 import { useAuth } from "@/context/AuthContext";
+import { VideoPlayer } from "@/components/ui/VideoPlayer";
 
 interface Course {
   _id: string;
@@ -31,11 +32,10 @@ interface Lecture {
   title: string;
   description?: string;
   content?: string;
-  videoUrl?: string;
-  videoFile?: string;
+  youtubeUrl?: string;
+  youtubeVideoId?: string;
   relatedFiles: {
     name: string;
-    url: string;
     uploadedUrl: string;
   }[];
   completedBy: string[];
@@ -145,12 +145,11 @@ export function CourseDetailSection() {
   };
 
   // Handle file download
-  const handleFileDownload = (file: { name: string; url: string; uploadedUrl: string }) => {
-    const fileUrl = file.uploadedUrl || file.url;
-    if (fileUrl) {
+  const handleFileDownload = (file: { name: string; uploadedUrl: string }) => {
+    if (file.uploadedUrl) {
       // Create a temporary link element to trigger download
       const link = document.createElement('a');
-      link.href = fileUrl;
+      link.href = file.uploadedUrl;
       link.download = file.name;
       link.target = '_blank';
       document.body.appendChild(link);
@@ -509,23 +508,17 @@ export function CourseDetailSection() {
                   {/* Video Content */}
                   <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-4">
                     <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
-                      {/* Video Element with Default Controls */}
-                      {lectures[currentItem]?.videoUrl || lectures[currentItem]?.videoFile ? (
-                        <video
-                          ref={videoRef}
-                          src={lectures[currentItem]?.videoUrl || lectures[currentItem]?.videoFile}
-                          className="w-full h-full object-cover"
-                          controls
-                          preload="metadata"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-white">
-                          <div className="text-center">
-                            <PlayIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                            <p className="text-lg">No video available for this lecture</p>
-                          </div>
-                        </div>
-                      )}
+                      <VideoPlayer
+                        youtubeUrl={lectures[currentItem]?.youtubeUrl}
+                        youtubeVideoId={lectures[currentItem]?.youtubeVideoId}
+                        className="w-full h-full"
+                        onEnded={() => {
+                          // Auto-mark as complete when video ends (only for authenticated users)
+                          if (user && !completedItems[currentItem]) {
+                            handleCheckboxClick(currentItem, {} as React.MouseEvent);
+                          }
+                        }}
+                      />
                     </div>
                   </div>
 
@@ -577,7 +570,7 @@ export function CourseDetailSection() {
                                   {file.name}
                                 </p>
                                 <p className="text-xs text-royal-gray">
-                                  {(file.uploadedUrl ? 'Uploaded file' : 'External link')}
+                                  Uploaded file
                                 </p>
                               </div>
                             </div>
@@ -753,23 +746,17 @@ export function CourseDetailSection() {
                 {/* Video Content */}
                 <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-6">
                   <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
-                    {/* Video Element with Default Controls */}
-                    {lectures[currentItem]?.videoUrl || lectures[currentItem]?.videoFile ? (
-                      <video
-                        ref={videoRef}
-                        src={lectures[currentItem]?.videoUrl || import.meta.env.VITE_BACKEND_URL + lectures[currentItem]?.videoFile}
-                        className="w-full h-full object-cover"
-                        controls
-                        preload="metadata"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-white">
-                        <div className="text-center">
-                          <PlayIcon className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                          <p className="text-lg">No video available for this lecture</p>
-                        </div>
-                      </div>
-                    )}
+                    <VideoPlayer
+                      youtubeUrl={lectures[currentItem]?.youtubeUrl}
+                      youtubeVideoId={lectures[currentItem]?.youtubeVideoId}
+                      className="w-full h-full"
+                      onEnded={() => {
+                        // Auto-mark as complete when video ends (only for authenticated users)
+                        if (user && !completedItems[currentItem]) {
+                          handleCheckboxClick(currentItem, {} as React.MouseEvent);
+                        }
+                      }}
+                    />
                   </div>
                 </div>
 
@@ -821,7 +808,7 @@ export function CourseDetailSection() {
                                 {file.name}
                               </p>
                               <p className="text-xs text-royal-gray">
-                                {(file.uploadedUrl ? 'Uploaded file' : 'External link')}
+                                Uploaded file
                               </p>
                             </div>
                           </div>

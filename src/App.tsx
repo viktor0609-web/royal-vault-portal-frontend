@@ -38,6 +38,9 @@ import { SetPassword } from "./components/auth/SettingPasswordPage";
 import { ReSettingPasswordPage } from "./components/auth/ReSettingPasswordPage";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/AuthContext";
+import YouTubeCallback from "./pages/YouTubeCallback";
+import { YouTubeTestPlayer } from "./components/ui/YouTubeTestPlayer";
+import YouTubeTest from "./pages/YouTubeTest";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +101,15 @@ const App = () => (
 
                 <Route path="/verify/:token" element={<SetPassword />} />
                 <Route path="/reset-password/:token" element={<ReSettingPasswordPage />} />
+
+                {/* YouTube OAuth Callback */}
+                <Route path="/auth/youtube/callback" element={<YouTubeCallback />} />
+
+                {/* YouTube Player Test Route */}
+                <Route path="/test-youtube" element={<YouTubeTestPlayer />} />
+
+                {/* YouTube API Test Route */}
+                <Route path="/youtube-test" element={<YouTubeTest />} />
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

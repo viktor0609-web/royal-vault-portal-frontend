@@ -190,6 +190,14 @@ export const courseApi = {
       'Content-Type': 'multipart/form-data',
     },
   }),
+
+  // Save YouTube video URL to lecture
+  saveYouTubeVideo: (lectureId: string, videoData: {
+    youtubeUrl: string;
+    title?: string;
+    description?: string;
+    videoId?: string;
+  }) => api.post(`/api/courses/lectures/${lectureId}/youtube`, videoData),
 };
 
 // Image upload API

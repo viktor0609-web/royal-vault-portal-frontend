@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { RoyalVaultSidebar } from "./RoyalVaultSidebar";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { UserBreadcrumb } from "@/components/ui/user-breadcrumb";
 import { Link, useLocation } from "react-router-dom";
 
 interface RoyalVaultLayoutProps {
@@ -20,7 +20,7 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
       breadcrumbs.push({ label: 'Home', path: '/' });
 
       if (pathParts[0] === 'royal-tv') {
-        breadcrumbs.push({ label: 'Royal TV', path: '/royal-tv' });
+        breadcrumbs.push({ label: 'Royal TV', path: '/royal-tv', isActive: true });
       } else if (pathParts[0] === 'courses') {
         breadcrumbs.push({ label: 'Courses', path: '/courses' });
         if (pathParts[1]) {
@@ -32,9 +32,11 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
           breadcrumbs.push({ label: 'Group Details', isActive: true });
         }
       } else if (pathParts[0] === 'deals') {
-        breadcrumbs.push({ label: 'Deals', path: '/deals' });
+        breadcrumbs.push({ label: 'Deals', path: '/deals', isActive: true });
       } else if (pathParts[0] === 'profile') {
-        breadcrumbs.push({ label: 'Profile', path: '/profile' });
+        breadcrumbs.push({ label: 'My Profile', path: '/profile', isActive: true });
+      } else if (pathParts[0] === 'registration') {
+        breadcrumbs.push({ label: 'Webinar Registration', path: '/registration', isActive: true });
       }
     }
 
@@ -63,8 +65,8 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
 
           {/* Breadcrumb Navigation */}
           {breadcrumbs.length > 1 && (
-            <div className="px-4 py-2 bg-white border-b border-royal-light-gray">
-              <Breadcrumb items={breadcrumbs} />
+            <div className="px-4 py-3 bg-white border-b border-royal-light-gray shadow-sm">
+              <UserBreadcrumb items={breadcrumbs} />
             </div>
           )}
 

@@ -45,11 +45,10 @@ interface Lecture {
     title: string;
     description?: string;
     content?: string;
-    videoUrl?: string;
-    videoFile?: string;
+    youtubeUrl?: string;
+    youtubeVideoId?: string;
     relatedFiles: {
         name: string;
-        url: string;
         uploadedUrl: string;
     }[];
     completedBy: string[];

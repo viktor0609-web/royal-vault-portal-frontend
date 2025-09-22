@@ -193,27 +193,28 @@ export function CourseDetail() {
   }
 
   return (
-    <div className="flex-1 p-4 flex flex-col">
-      <div className="bg-white rounded-lg border border-royal-light-gray shadow-sm mb-6">
-        <div className="px-6 py-4 border-b border-royal-light-gray">
-          <div className="flex items-center gap-3">
+    <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
+      <div className="bg-white rounded-lg border border-royal-light-gray shadow-sm mb-3 sm:mb-6">
+        <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-royal-light-gray">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => navigate(`/admin/courses/groups/${groupId}`)}
-              className="flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded-md transition-all duration-200 group"
+              className="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded transition-all duration-200 group text-xs sm:text-sm"
             >
-              <ArrowLeftIcon className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
-              <span className="text-sm font-medium">Back to Course Group</span>
+              <ArrowLeftIcon className="h-3 w-3 sm:h-4 sm:w-4 group-hover:-translate-x-0.5 transition-transform" />
+              <span className="font-medium hidden sm:inline">Back to Course Group</span>
+              <span className="font-medium sm:hidden">Back</span>
             </button>
           </div>
         </div>
-        <div className="px-6 py-4">
+        <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">{course.title}</h1>
-              <p className="text-royal-gray mb-3">{course.description}</p>
-              <div className="flex items-center gap-2 text-sm text-royal-gray">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray mb-2">{course.title}</h1>
+              <p className="text-royal-gray mb-3 text-xs sm:text-sm lg:text-base">{course.description}</p>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm text-royal-gray">
                 <span className="font-medium">Course Group:</span>
-                <span className="px-2 py-1 bg-royal-light-gray rounded-md">{course.courseGroup?.title}</span>
+                <span className="px-2 py-1 bg-royal-light-gray rounded-md w-fit text-xs">{course.courseGroup?.title}</span>
               </div>
             </div>
           </div>
@@ -226,10 +227,8 @@ export function CourseDetail() {
         </div>
       )}
 
-      <div className="bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        <div className="text-xs text-gray-500 text-center py-2 bg-gray-50 border-b border-gray-200 sm:hidden">
-          ← Scroll horizontally to see all columns →
-        </div>
+      {/* Desktop Table View */}
+      <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         <Table className="w-full min-w-[900px] text-sm">
           <TableHeader>
             <TableRow>
@@ -316,6 +315,96 @@ export function CourseDetail() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile/Tablet Card View */}
+      <div className="lg:hidden space-y-4">
+        {/* Add Button for Mobile */}
+        <div className="flex justify-end">
+          <Button onClick={handleAddLecture} className="flex items-center gap-2">
+            <PlusIcon className="h-4 w-4" />
+            Create Lecture
+          </Button>
+        </div>
+
+        {lectures.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No lectures found. Create your first lecture!
+          </div>
+        ) : (
+          lectures.map((lecture) => (
+            <div key={lecture._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">
+                    <button
+                      onClick={() => handleViewLecture(lecture._id)}
+                      className="text-left hover:text-royal-blue transition-colors cursor-pointer"
+                    >
+                      {lecture.title}
+                    </button>
+                  </h3>
+                  <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{lecture.description}</p>
+                </div>
+                <div className="flex gap-1 ml-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEdit(lecture)}
+                    className="h-7 w-7 p-0"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDelete(lecture._id)}
+                    className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray">
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-1">
+                    {lecture.videoUrl ? (
+                      <a
+                        href={lecture.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline flex items-center gap-1"
+                      >
+                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Video URL</span>
+                        <span className="sm:hidden">URL</span>
+                      </a>
+                    ) : lecture.videoFile ? (
+                      <a
+                        href={import.meta.env.VITE_BACKEND_URL + lecture.videoFile}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-600 hover:underline flex items-center gap-1"
+                      >
+                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Video File</span>
+                        <span className="sm:hidden">File</span>
+                      </a>
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        No Video
+                      </span>
+                    )}
+                  </span>
+                  <span className="hidden sm:inline">{lecture.createdBy?.name || 'N/A'}</span>
+                </div>
+                <span className="text-xs">{lecture.createdAt ? new Date(lecture.createdAt).toLocaleDateString() : 'N/A'}</span>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       <LectureModal

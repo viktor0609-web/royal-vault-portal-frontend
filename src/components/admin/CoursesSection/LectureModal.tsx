@@ -123,14 +123,6 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 courseId: courseId
             };
 
-            console.log('Final lecture data being sent:', lectureData);
-            console.log('Related files count:', cleanedRelatedFiles.length);
-            console.log('Related files array:', cleanedRelatedFiles);
-
-
-
-
-
             let response;
             if (editingLecture) {
                 response = await courseApi.updateLecture(editingLecture._id, lectureData);
@@ -251,7 +243,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                             <RichTextEditor
                                 value={formData.content}
                                 onChange={(value) => handleInputChange("content", value)}
-                                className="bg-white rounded-lg border border-gray-200"
+                                className="bg-white rounded-lg "
                                 style={{ height: '200px' }}
                                 placeholder="Enter lecture content here..."
                             />
@@ -260,7 +252,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
 
                     {/* Video Section */}
                     <div>
-                        <Label className="text-royal-dark-gray font-bold text-base">
+                        <Label className="text-royal-dark-gray font-bold text-base mp-6">
                             Video <span className="text-gray-500 font-normal">(Upload to YouTube)</span>
                         </Label>
 

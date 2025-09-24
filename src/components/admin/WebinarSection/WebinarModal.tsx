@@ -293,12 +293,16 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
             }
           })}
 
+          {error && (
+            <div className="text-red-500 text-sm">{error}</div>
+          )}
+
           <Button
             type="submit"
             className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
             disabled={loading}
           >
-            {loading ? "Creating..." : "Create Webinar"}
+            {loading ? (editingWebinar ? "Updating..." : "Creating...") : (editingWebinar ? "Update Webinar" : "Create Webinar")}
           </Button>
         </form>
       </DialogContent>

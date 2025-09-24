@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DailyCall } from '@daily-co/daily-js';
-
-interface ChatBoxProps {
-  dailyRoom: DailyCall | null;
-  userName: string;
-}
-
+import { useDailyMeeting } from '@/context/DailyMeetingContext';
 interface Message {
   id: string;
   sender: string;
@@ -13,7 +8,8 @@ interface Message {
   timestamp: number;
 }
 
-export const ChatBox: React.FC<ChatBoxProps> = ({ dailyRoom, userName }) => {
+export const ChatBox: React.FC = () => {
+  const { dailyRoom } = useDailyMeeting();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -55,7 +51,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ dailyRoom, userName }) => {
     if (!dailyRoom || !input.trim()) return;
 
     const messageData = {
-      sender: userName,
+      sender: dailyRoom.participants().local.user_name || "Guest",
       text: input.trim(),
     };
 
@@ -72,14 +68,13 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ dailyRoom, userName }) => {
   };
 
   return (
-    <div className="flex flex-col border rounded-lg p-2 w-full max-w-md h-full bg-white shadow-lg">
+    <div className="flex flex-col border rounded-lg p-2 h-full bg-white shadow-lg">
       <div className="flex-1 overflow-y-auto mb-2 space-y-1 px-1">
         {messages.map(msg => (
           <div
             key={msg.id}
-            className={`p-2 rounded-md ${
-              msg.sender === userName ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-gray-800 self-start'
-            }`}
+            className={`p-2 rounded-md ${msg.sender === (dailyRoom.participants().local.user_name || "Guest") ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-gray-800 self-start'
+              }`}
           >
             <span className="font-semibold text-sm">{msg.sender}: </span>
             <span className="text-sm">{msg.text}</span>
@@ -91,7 +86,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ dailyRoom, userName }) => {
       <div className="flex space-x-2">
         <input
           type="text"
-          className="flex-1 border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="flex-1 border rounded text-black px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
           placeholder="Type a message..."
           value={input}
           onChange={e => setInput(e.target.value)}

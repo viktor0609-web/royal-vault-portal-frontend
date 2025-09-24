@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { DatetimePicker } from "@/components/ui/datetimepicker";
 import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -79,9 +78,16 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
   // Populate form when editing
   useEffect(() => {
     if (editingWebinar) {
+      // Format date for datetime-local input
+      const formatDateForInput = (dateString: string) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toISOString().slice(0, 16);
+      };
+
       setFormData({
         streamType: editingWebinar.streamType || "",
-        date: editingWebinar.date || "",
+        date: formatDateForInput(editingWebinar.date),
         name: editingWebinar.name || "",
         slug: editingWebinar.slug || "",
         line1: editingWebinar.line1 || "",
@@ -146,15 +152,21 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
     setError(null);
 
     try {
+      // Prepare data for submission - convert date to proper format
+      const submitData = {
+        ...formData,
+        date: formData.date ? new Date(formData.date).toISOString() : null
+      };
+
       let response;
       if (editingWebinar) {
-        response = await webinarApi.updateWebinar(editingWebinar._id, formData);
+        response = await webinarApi.updateWebinar(editingWebinar._id, submitData);
         toast({
           title: "Success",
           description: "Webinar updated successfully",
         });
       } else {
-        response = await webinarApi.createWebinar(formData);
+        response = await webinarApi.createWebinar(submitData);
         toast({
           title: "Success",
           description: "Webinar created successfully",
@@ -217,7 +229,10 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
                       {isRequired && <span className="text-red-500 ml-1">*</span>}
                       {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
                     </Label>
-                    <Select onValueChange={(value) => handleInputChange(item.id, value)}>
+                    <Select
+                      value={formData[item.id]}
+                      onValueChange={(value) => handleInputChange(item.id, value)}
+                    >
                       <SelectTrigger className="border-royal-light-gray">
                         <SelectValue placeholder={item.placeholder} />
                       </SelectTrigger>
@@ -262,10 +277,13 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
                       {isRequired && <span className="text-red-500 ml-1">*</span>}
                       {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
                     </Label>
-                    <DatetimePicker
-                      className="w-full"
-                      value={formData[item.id]}
-                      onChange={(value) => handleInputChange(item.id, value)}
+                    <input
+                      type="datetime-local"
+                      id={item.id}
+                      value={formData[item.id] ? new Date(formData[item.id]).toISOString().slice(0, 16) : ''}
+                      onChange={(e) => handleInputChange(item.id, e.target.value)}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      required={isRequired}
                     />
                   </div>
                 )

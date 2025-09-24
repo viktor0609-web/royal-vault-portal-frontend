@@ -223,19 +223,44 @@ export const fileApi = {
 
 // Webinar API functions - OPTIMIZED
 export const webinarApi = {
-  // Get all webinars with field selection
-  getAllWebinars: (fields: 'basic' | 'detailed' | 'full' = 'basic') =>
-    api.get(`/api/webinars?fields=${fields}`),
+  // Admin functions
+  getAllWebinars: (fields: 'basic' | 'detailed' | 'full' = 'basic', filters?: { status?: string; streamType?: string }) => {
+    const params = new URLSearchParams();
+    params.append('fields', fields);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.streamType) params.append('streamType', filters.streamType);
+    return api.get(`/api/webinars/admin?${params.toString()}`);
+  },
 
-  // Get webinar by ID with field selection
   getWebinarById: (webinarId: string, fields: 'basic' | 'detailed' | 'full' = 'full') =>
-    api.get(`/api/webinars/${webinarId}?fields=${fields}`),
+    api.get(`/api/webinars/admin/${webinarId}?fields=${fields}`),
 
-  // Register for webinar
-  registerForWebinar: (webinarId: string) =>
-    api.post(`/api/webinars/${webinarId}/register`),
+  createWebinar: (webinarData: any) => api.post('/api/webinars/admin', webinarData),
 
-  // Mark as attended
-  markAsAttended: (webinarId: string) =>
-    api.post(`/api/webinars/${webinarId}/attend`),
+  updateWebinar: (webinarId: string, webinarData: any) => api.put(`/api/webinars/admin/${webinarId}`, webinarData),
+
+  deleteWebinar: (webinarId: string) => api.delete(`/api/webinars/admin/${webinarId}`),
+
+  getWebinarAttendees: (webinarId: string) => api.get(`/api/webinars/admin/${webinarId}/attendees`),
+
+  markUserAsAttended: (webinarId: string, userId: string) =>
+    api.post(`/api/webinars/admin/${webinarId}/user/${userId}/attend`),
+
+  markUserAsMissed: (webinarId: string, userId: string) =>
+    api.post(`/api/webinars/admin/${webinarId}/user/${userId}/missed`),
+
+  // Public/User functions
+  getPublicWebinars: (fields: 'basic' | 'detailed' | 'full' = 'basic', filters?: { status?: string; streamType?: string }) => {
+    const params = new URLSearchParams();
+    params.append('fields', fields);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.streamType) params.append('streamType', filters.streamType);
+    return api.get(`/api/webinars/public?${params.toString()}`);
+  },
+
+  getPublicWebinarById: (webinarId: string) => api.get(`/api/webinars/public/${webinarId}`),
+
+  registerForWebinar: (webinarId: string) => api.post(`/api/webinars/${webinarId}/register`),
+
+  markAsAttended: (webinarId: string) => api.post(`/api/webinars/${webinarId}/attend`),
 };

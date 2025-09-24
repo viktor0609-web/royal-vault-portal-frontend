@@ -443,7 +443,7 @@ export function WebinarSection() {
             <div className="lg:hidden space-y-4">
                 {/* Add Button for Mobile */}
                 <div className="flex justify-end">
-                    <Button onClick={() => handlebtnClick('create', '')} className="flex items-center gap-2">
+                    <Button onClick={() => handlebtnClick('create', null)} className="flex items-center gap-2">
                         <VideoIcon className="h-4 w-4" />
                         Create Webinar
                     </Button>

@@ -6,6 +6,7 @@ import { MeetingControlsBar } from "./MeetingControlsBar";
 import { Mic, MicOff, Hand } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
 import { useState, useEffect, useRef, Fragment } from "react";
+import { useAuth } from "../../../context/AuthContext";
 
 export const AdminMeeting = () => {
     const {
@@ -32,6 +33,10 @@ export const AdminMeeting = () => {
     );
     const animationTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
+    // Get user info and set name
+    const { user } = useAuth();
+    const { setUserName } = useDailyMeeting();
+
     // Video/Audio refs
     const localVideoRef = useRef<HTMLVideoElement | null>(null);
     const screenshareRef = useRef<HTMLVideoElement | null>(null);
@@ -48,6 +53,13 @@ export const AdminMeeting = () => {
     useEffect(() => {
         setIsManager(true);
     }, [setIsManager]);
+
+    // Set user name when component mounts
+    useEffect(() => {
+        if (user && user.name) {
+            setUserName(user.name);
+        }
+    }, [user, setUserName]);
 
     // Auto-join the room on component mount
     useEffect(() => {

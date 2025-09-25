@@ -567,7 +567,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setIsCameraOff(!willTurnOn);
     };
 
-    const toggleMicrophone = () => {
+    const toggleMicrophone = useCallback(() => {
         const willTurnOn = isMicrophoneMuted; // if currently muted, we want to turn ON
         if (dailyRoom) {
             try {
@@ -580,7 +580,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
             localStream.getAudioTracks().forEach((t) => (t.enabled = willTurnOn));
         }
         setIsMicrophoneMuted(!willTurnOn);
-    };
+    }, [dailyRoom, localStream, isMicrophoneMuted]);
 
     /* ---------- Background filter (fix applied here) ---------- */
 

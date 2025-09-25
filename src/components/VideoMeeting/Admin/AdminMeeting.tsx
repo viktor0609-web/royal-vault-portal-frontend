@@ -56,13 +56,15 @@ export const AdminMeeting = () => {
         if (dailyRoomUrl && !joined) {
             console.log('Admin - Setting room URL:', dailyRoomUrl);
             setRoomUrl(dailyRoomUrl);
-            // Auto-join after a short delay
+            // Auto-join after a short delay, but only if not already joined
             setTimeout(() => {
-                console.log('Admin - Attempting to join room with URL:', dailyRoomUrl);
-                joinRoom();
+                if (!joined) {
+                    console.log('Admin - Attempting to join room with URL:', dailyRoomUrl);
+                    joinRoom();
+                }
             }, 1000);
         }
-    }, [setRoomUrl, joinRoom, joined]);
+    }, []); // Empty dependency array to run only once on mount
 
     // Attach local video
     useEffect(() => {

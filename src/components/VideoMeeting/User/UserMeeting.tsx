@@ -69,7 +69,13 @@ export const UserMeeting = () => {
                     // Use the pre-configured Daily.co room URL
                     const dailyRoomUrl = import.meta.env.VITE_DAILY_ROOM_URL;
                     if (dailyRoomUrl) {
+                        console.log('Setting room URL:', dailyRoomUrl);
                         setRoomUrl(dailyRoomUrl);
+                        // Auto-join the room after a short delay
+                        setTimeout(() => {
+                            console.log('Attempting to join room with URL:', dailyRoomUrl);
+                            joinRoom();
+                        }, 1000);
                     } else {
                         console.error('VITE_DAILY_ROOM_URL environment variable is not set');
                         toast({
@@ -299,39 +305,25 @@ export const UserMeeting = () => {
                     )}
                     {!joined && (
                         <div className="flex flex-col gap-4 items-center justify-center p-4 bg-gray-800 text-white w-full h-full">
-                            <h1 className="text-3xl font-bold mb-4">Welcome to the Webinar</h1>
-                            {webinar && (
-                                <div className="text-center mb-6">
-                                    <h2 className="text-xl font-semibold mb-2">{webinar.name}</h2>
-                                    <p className="text-gray-300">
-                                        {new Date(webinar.date).toLocaleDateString('en-US', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </p>
-                                </div>
-                            )}
-                            <div className="flex flex-col gap-4 w-full max-w-md">
-                                <div className="text-center text-gray-300 text-sm mb-2">
-                                    Connecting to live webinar room...
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Room URL"
-                                        value={roomUrl || ''}
-                                        readOnly
-                                        className="flex-1 p-2 border rounded-md text-black bg-gray-100"
-                                    />
-                                    <Button onClick={copyRoomUrl} disabled={!roomUrl}>Copy</Button>
-                                </div>
-                                <Button onClick={joinRoom} disabled={!roomUrl} className="w-full">
-                                    Join Live Webinar
-                                </Button>
+                            <div className="text-center">
+                                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                <h1 className="text-2xl font-bold mb-2">Joining Webinar</h1>
+                                {webinar && (
+                                    <div className="text-center mb-4">
+                                        <h2 className="text-lg font-semibold mb-2">{webinar.name}</h2>
+                                        <p className="text-gray-300 text-sm">
+                                            {new Date(webinar.date).toLocaleDateString('en-US', {
+                                                weekday: 'long',
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </p>
+                                    </div>
+                                )}
+                                <p className="text-gray-300">Please wait while we connect you to the live session...</p>
                             </div>
                         </div>
                     )}

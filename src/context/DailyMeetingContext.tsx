@@ -62,6 +62,8 @@ interface DailyMeetingContextType {
     hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission
     muteAllParticipants: () => void;
     unmuteAllParticipants: () => void;
+    toggleMuteAllParticipants: () => void;
+    allParticipantsMuted: boolean;
     setMainScreenParticipant: (participantId: string) => void;
     mainScreenParticipantId: string | null;
 }
@@ -90,6 +92,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const [localParticipant, setLocalParticipant] = useState<any>(null); // State for local participant
     const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(true); // State for local audio permission
     const [mainScreenParticipantId, setMainScreenParticipantId] = useState<string | null>(null);
+    const [allParticipantsMuted, setAllParticipantsMuted] = useState<boolean>(false);
 
     const [backgroundFilterType, setBackgroundFilterType] = useState<BackgroundFilterType>('none');
     const [selectedBackgroundImage, setSelectedBackgroundImage] = useState<string | undefined>(undefined);
@@ -167,6 +170,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         try {
             let currentDailyRoom = dailyRoom;
             if (!currentDailyRoom) {
+                console.log('Creating Daily.co call object for Admin with userName:', userName || 'Admin');
                 currentDailyRoom = DailyIframe.createCallObject({
                     url: roomUrl,
                     userName: userName || 'Admin', // Pass userName here
@@ -203,6 +207,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         try {
             let currentDailyRoom = dailyRoom;
             if (!currentDailyRoom) {
+                console.log('Creating Daily.co call object for Guest with userName:', userName || 'Guest');
                 currentDailyRoom = DailyIframe.createCallObject({
                     url: roomUrl,
                     userName: userName || 'Guest', // Pass userName here
@@ -543,10 +548,11 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (!dailyRoom) return;
         try {
             participants.forEach(participant => {
-                if (!participant.local && participant.permissions?.canSend) {
+                if (!participant.local) {
                     dailyRoom.updateParticipant(participant.id, { setAudio: false });
                 }
             });
+            setAllParticipantsMuted(true);
         } catch (err) {
             console.error('Error muting all participants:', err);
         }
@@ -561,8 +567,19 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
                     dailyRoom.updateParticipant(participant.id, { setAudio: true });
                 }
             });
+            setAllParticipantsMuted(false);
         } catch (err) {
             console.error('Error unmuting all participants:', err);
+        }
+    };
+
+    // Toggle mute all participants
+    const toggleMuteAllParticipants = () => {
+        if (allParticipantsMuted) {
+            unmuteAllParticipants();
+        } else {
+            muteAllParticipants();
+            setAllParticipantsMuted(true);
         }
     };
 
@@ -765,6 +782,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 hasLocalAudioPermission, // Provide hasLocalAudioPermission
                 muteAllParticipants,
                 unmuteAllParticipants,
+                toggleMuteAllParticipants,
+                allParticipantsMuted,
                 setMainScreenParticipant,
                 mainScreenParticipantId,
             }}

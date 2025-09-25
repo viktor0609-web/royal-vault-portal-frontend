@@ -31,6 +31,8 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = React.memo(
     participants,
     muteAllParticipants,
     unmuteAllParticipants,
+    toggleMuteAllParticipants,
+    allParticipantsMuted,
   } = useDailyMeeting();
 
   const raisedHandsCount = raisedHands.size;
@@ -76,28 +78,16 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = React.memo(
 
             {/* Host Controls */}
             {isManager && (
-              <>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="secondary"
-                    onClick={() => { console.log("Mute All Clicked"); muteAllParticipants(); }}
-                    className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 h-auto w-auto"
-                  >
-                    <VolumeX size={24} />
-                  </Button>
-                  <span className="text-sm">Mute All</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="secondary"
-                    onClick={() => { console.log("Unmute All Clicked"); unmuteAllParticipants(); }}
-                    className="bg-green-600 hover:bg-green-700 text-white rounded-full p-3 h-auto w-auto"
-                  >
-                    <Volume2 size={24} />
-                  </Button>
-                  <span className="text-sm">Unmute All</span>
-                </div>
-              </>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => { console.log("Toggle Mute All Clicked"); toggleMuteAllParticipants(); }}
+                  className={`${allParticipantsMuted ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white rounded-full p-3 h-auto w-auto`}
+                >
+                  {allParticipantsMuted ? <Volume2 size={24} /> : <VolumeX size={24} />}
+                </Button>
+                <span className="text-sm">{allParticipantsMuted ? 'Unmute All' : 'Mute All'}</span>
+              </div>
             )}
             <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto relative">
               <Users size={24} />

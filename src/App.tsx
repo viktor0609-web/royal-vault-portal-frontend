@@ -46,6 +46,7 @@ import YouTubeCallback from "./pages/YouTubeCallback";
 import { YouTubeTestPlayer } from "./components/ui/YouTubeTestPlayer";
 import YouTubeTest from "./pages/YouTubeTest";
 import { DailyMeetingProvider } from "./context/DailyMeetingContext";
+import { GuestMeeting } from "./components/VideoMeeting/Guest/GuestMeeting";
 
 const queryClient = new QueryClient();
 
@@ -107,8 +108,7 @@ const App = () => (
                 <Route path="/webinar_admin" element={<VideoMeeting />} /> */}
 
                   <Route path="/webinar_host" element={<AdminMeeting />} />
-                  <Route path="/webinar_guest" element={<AdminMeeting />} />
-                  <Route path="/webinar_admin" element={<AdminMeeting />} />
+                  <Route path="/webinar_guest" element={<GuestMeeting />} />
                   <Route path="/webinar_user" element={<UserMeeting />} />
 
                   <Route path="/verify/:token" element={<SetPassword />} />

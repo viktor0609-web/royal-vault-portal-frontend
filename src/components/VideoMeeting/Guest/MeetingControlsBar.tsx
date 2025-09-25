@@ -66,12 +66,11 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = React.memo(
                             </Button>
                             <span className="text-sm">Turn off</span>
                         </div>
-                        {/* Guest can always speak - no mute button */}
                         <div className="flex items-center gap-2">
-                            <div className="bg-green-600 text-white rounded-full p-3 h-auto w-auto flex items-center justify-center">
-                                <Mic size={24} />
-                            </div>
-                            <span className="text-sm text-green-400">Always On</span>
+                            <Button variant="secondary" onClick={() => { console.log("Toggle Microphone Clicked"); toggleMicrophone(); }} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
+                                {isMicrophoneMuted ? <MicOff size={24} /> : <Mic size={24} />}
+                            </Button>
+                            <span className="text-sm">Mute</span>
                         </div>
                         <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto relative">
                             <Users size={24} />
@@ -82,13 +81,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = React.memo(
                                 </span>
                             )}
                         </Button>
-                        <Button
-                            variant="secondary"
-                            onClick={() => (raisedHands.has(dailyRoom?.participants().local.session_id || '') ? lowerHand() : raiseHand())}
-                            className={`rounded-full p-3 h-auto w-auto ${raisedHands.has(dailyRoom?.participants().local.session_id || '') ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
-                        >
-                            <Hand size={24} />
-                        </Button>
+                        {/* Remove raise hand button for guests */}
                         {!isScreensharing ? (
                             <Button variant="secondary" onClick={startScreenshare} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
                                 <Monitor size={24} />

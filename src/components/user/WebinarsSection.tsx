@@ -147,6 +147,11 @@ export function WebinarsSection() {
         title: "Success!",
         description: "You have successfully unregistered from the webinar",
       });
+
+      // Force refresh webinars to update registration status immediately
+      setTimeout(async () => {
+        await fetchWebinars();
+      }, 500);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -207,6 +212,7 @@ export function WebinarsSection() {
         return [];
     }
   }, [webinars, filterIndex, user]);
+
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -319,11 +325,10 @@ export function WebinarsSection() {
                     handleJoinWebinar(webinar);
                   }
                 }}
-                className={`flex items-center justify-between p-3 min-[700px]:p-6 bg-sidebar rounded-lg border border-royal-light-gray transition-all duration-75 ease-in-out group animate-in slide-in-from-bottom duration-200 ${filterIndex === 0 && !isRegistered
+                className={`flex items-center justify-between p-3 min-[700px]:p-6 bg-sidebar rounded-lg border border-royal-light-gray transition-all duration-75 ease-in-out group ${filterIndex === 0 && !isRegistered
                   ? 'cursor-not-allowed opacity-75 hover:opacity-100'
                   : 'cursor-pointer hover:shadow-sm hover:scale-[1.005] hover:border-royal-blue/10'
                   }`}
-                style={{ animationDelay: `${200 + index * 100}ms` }}
               >
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-royal-dark-gray mb-2 group-hover:text-royal-blue transition-colors duration-75">

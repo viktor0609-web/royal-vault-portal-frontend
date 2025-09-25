@@ -71,11 +71,13 @@ export const UserMeeting = () => {
                     if (dailyRoomUrl) {
                         console.log('Setting room URL:', dailyRoomUrl);
                         setRoomUrl(dailyRoomUrl);
-                        // Auto-join the room after a short delay
-                        setTimeout(() => {
-                            console.log('Attempting to join room with URL:', dailyRoomUrl);
-                            joinRoom();
-                        }, 1000);
+                        // Auto-join the room after a short delay, but only if not already joined
+                        if (!joined) {
+                            setTimeout(() => {
+                                console.log('Attempting to join room with URL:', dailyRoomUrl);
+                                joinRoom();
+                            }, 1000);
+                        }
                     } else {
                         console.error('VITE_DAILY_ROOM_URL environment variable is not set');
                         toast({
@@ -106,7 +108,7 @@ export const UserMeeting = () => {
         };
 
         checkAccess();
-    }, [user, webinarId, toast]);
+    }, [user, webinarId, toast]); // Keep these dependencies as they're needed for access control
 
     // Get the local admin's video track
     const localAdminVideoTrack = participants.find(p => p.permissions.canAdmin)?.videoTrack;

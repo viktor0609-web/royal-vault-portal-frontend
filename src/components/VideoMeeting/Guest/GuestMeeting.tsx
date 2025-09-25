@@ -49,6 +49,7 @@ export const GuestMeeting = () => {
     // Set user name when component mounts
     useEffect(() => {
         if (user && user.name) {
+            console.log('Setting user name for GuestMeeting:', user.name);
             setUserName(user.name);
         }
     }, [user, setUserName]);

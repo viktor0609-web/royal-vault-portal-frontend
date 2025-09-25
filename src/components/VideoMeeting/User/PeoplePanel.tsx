@@ -22,11 +22,12 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
         {participants.map((p) => (
           <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
             <div className="flex items-center gap-2">
-              <span className="font-medium">{p.local ? "You" : p.name || `Guest ${p.id.substring(0, 4)}`}</span>
+              <span className="font-medium">{p.local ? "You" : p.user_name || p.name || `Guest ${p.id.substring(0, 4)}`}</span>
+              {p.local && <span className="text-xs bg-green-600 text-white px-2 py-1 rounded">USER</span>}
               {p.audioTrack ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
               {p.videoTrack ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
               {raisedHands.has(p.id) && (
-                  <Hand size={16} className="text-blue-500" />
+                <Hand size={16} className="text-blue-500" />
               )}
             </div>
             {/* Removed manager-specific controls */}

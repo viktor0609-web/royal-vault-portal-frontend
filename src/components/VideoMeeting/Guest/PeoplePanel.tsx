@@ -27,7 +27,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                 {participants.map((p) => (
                     <div key={p.id} className={`flex items-center justify-between p-3 rounded-md ${mainScreenParticipantId === p.id ? 'bg-blue-600' : 'bg-gray-800'}`}>
                         <div className="flex items-center gap-2">
-                            <span className="font-medium">{p.local ? "You (Guest)" : p.name || `Guest ${p.id.substring(0, 4)}`}</span>
+                            <span className="font-medium">{p.local ? "You (Guest)" : p.user_name || p.name || `Guest ${p.id.substring(0, 4)}`}</span>
+                            {p.local && <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded">GUEST</span>}
                             {p.audioTrack ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
                             {p.videoTrack ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
                             {raisedHands.has(p.id) && (

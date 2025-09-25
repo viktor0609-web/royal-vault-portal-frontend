@@ -50,6 +50,7 @@ export const UserMeeting = () => {
     // Set user name when component mounts
     useEffect(() => {
         if (user && user.name) {
+            console.log('Setting user name for UserMeeting:', user.name);
             setUserName(user.name);
         }
     }, [user, setUserName]);

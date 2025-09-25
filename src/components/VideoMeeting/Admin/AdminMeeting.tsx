@@ -57,6 +57,7 @@ export const AdminMeeting = () => {
     // Set user name when component mounts
     useEffect(() => {
         if (user && user.name) {
+            console.log('Setting user name for AdminMeeting:', user.name);
             setUserName(user.name);
         }
     }, [user, setUserName]);

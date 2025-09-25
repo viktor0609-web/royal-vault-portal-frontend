@@ -142,6 +142,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const joinRoom = () => {
         if (!roomUrl) {
             console.error('Room URL is not set. Please check VITE_DAILY_ROOM_URL environment variable.');
+            console.error('Current roomUrl value:', roomUrl);
+            console.error('Environment variable value:', import.meta.env.VITE_DAILY_ROOM_URL);
             return;
         }
         // Show pre-join UI / preview:

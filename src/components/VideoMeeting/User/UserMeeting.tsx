@@ -68,6 +68,10 @@ export const UserMeeting = () => {
                     setHasAccess(true);
                     // Use the pre-configured Daily.co room URL
                     const dailyRoomUrl = import.meta.env.VITE_DAILY_ROOM_URL;
+                    console.log('Environment variable VITE_DAILY_ROOM_URL:', dailyRoomUrl);
+                    console.log('Type of dailyRoomUrl:', typeof dailyRoomUrl);
+                    console.log('Boolean check:', !!dailyRoomUrl);
+                    console.log('Length:', dailyRoomUrl?.length);
                     if (dailyRoomUrl) {
                         console.log('Setting room URL:', dailyRoomUrl);
                         setRoomUrl(dailyRoomUrl);

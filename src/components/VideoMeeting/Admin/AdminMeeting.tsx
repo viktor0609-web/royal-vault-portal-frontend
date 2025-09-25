@@ -52,7 +52,10 @@ export const AdminMeeting = () => {
     // Auto-join the room on component mount
     useEffect(() => {
         const dailyRoomUrl = import.meta.env.VITE_DAILY_ROOM_URL;
-        console.log('Admin - Daily room URL:', dailyRoomUrl);
+        console.log('Admin - Environment variable VITE_DAILY_ROOM_URL:', dailyRoomUrl);
+        console.log('Admin - Type of dailyRoomUrl:', typeof dailyRoomUrl);
+        console.log('Admin - Boolean check:', !!dailyRoomUrl);
+        console.log('Admin - Length:', dailyRoomUrl?.length);
         if (dailyRoomUrl && !joined) {
             console.log('Admin - Setting room URL:', dailyRoomUrl);
             setRoomUrl(dailyRoomUrl);

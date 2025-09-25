@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand } from "lucide-react";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand, Monitor } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { BackgroundFilterModal } from '../BackgroundFilterModal';
 
@@ -98,11 +98,11 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = React.memo(
             </Button>
             {!isScreensharing ? (
               <Button variant="secondary" onClick={startScreenshare} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
-                <MonitorPlay size={24} />
+                <Monitor size={24} />
               </Button>
             ) : (
               <Button variant="secondary" onClick={stopScreenshare} className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 h-auto w-auto">
-                <MonitorPlay size={24} />
+                <Monitor size={24} />
               </Button>
             )}
             <BackgroundFilterModal>

@@ -60,12 +60,16 @@ interface DailyMeetingContextType {
     setIsManager: (value: boolean) => void;
     localParticipant: any; // Add localParticipant to context type
     hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission
+    muteAllParticipants: () => void;
+    unmuteAllParticipants: () => void;
+    setMainScreenParticipant: (participantId: string) => void;
+    mainScreenParticipantId: string | null;
 }
 
 const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(undefined);
 
 export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [roomUrl, setRoomUrl] = useState<string>('');
+    const [roomUrl, setRoomUrl] = useState<string>(import.meta.env.VITE_DAILY_ROOM_URL || '');
     const [roomName, setRoomName] = useState<string>('');
     const [joined, setJoined] = useState<boolean>(false);
     const [dailyRoom, setDailyRoom] = useState<DailyCall | null>(null);
@@ -85,6 +89,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const [userName, setUserName] = useState<string>(''); // New state for user name
     const [localParticipant, setLocalParticipant] = useState<any>(null); // State for local participant
     const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(true); // State for local audio permission
+    const [mainScreenParticipantId, setMainScreenParticipantId] = useState<string | null>(null);
 
     const [backgroundFilterType, setBackgroundFilterType] = useState<BackgroundFilterType>('none');
     const [selectedBackgroundImage, setSelectedBackgroundImage] = useState<string | undefined>(undefined);
@@ -144,8 +149,11 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
             console.error('Room URL is not set. Please check VITE_DAILY_ROOM_URL environment variable.');
             console.error('Current roomUrl value:', roomUrl);
             console.error('Environment variable value:', import.meta.env.VITE_DAILY_ROOM_URL);
+            console.error('Environment variable type:', typeof import.meta.env.VITE_DAILY_ROOM_URL);
+            console.error('Environment variable length:', import.meta.env.VITE_DAILY_ROOM_URL?.length);
             return;
         }
+        console.log('Joining room with URL:', roomUrl);
         // Show pre-join UI / preview:
         startLocalPreview();
         setIsPermissionModalOpen(true);
@@ -530,6 +538,46 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
     };
 
+    // Mute all participants except the host
+    const muteAllParticipants = () => {
+        if (!dailyRoom) return;
+        try {
+            participants.forEach(participant => {
+                if (!participant.local && participant.permissions?.canSend) {
+                    dailyRoom.updateParticipant(participant.id, { setAudio: false });
+                }
+            });
+        } catch (err) {
+            console.error('Error muting all participants:', err);
+        }
+    };
+
+    // Unmute all participants
+    const unmuteAllParticipants = () => {
+        if (!dailyRoom) return;
+        try {
+            participants.forEach(participant => {
+                if (!participant.local) {
+                    dailyRoom.updateParticipant(participant.id, { setAudio: true });
+                }
+            });
+        } catch (err) {
+            console.error('Error unmuting all participants:', err);
+        }
+    };
+
+    // Set main screen participant
+    const setMainScreenParticipant = (participantId: string) => {
+        setMainScreenParticipantId(participantId);
+        // Send app message to all participants about the main screen change
+        if (dailyRoom) {
+            dailyRoom.sendAppMessage({
+                type: 'set-main-screen',
+                participantId: participantId
+            });
+        }
+    };
+
 
     const startScreenshare = async () => {
         if (!dailyRoom) return;
@@ -715,6 +763,10 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 setUserName,
                 localParticipant, // Provide localParticipant
                 hasLocalAudioPermission, // Provide hasLocalAudioPermission
+                muteAllParticipants,
+                unmuteAllParticipants,
+                setMainScreenParticipant,
+                mainScreenParticipantId,
             }}
         >
             {children}

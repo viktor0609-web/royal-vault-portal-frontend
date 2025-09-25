@@ -1,18 +1,17 @@
-
 import { Button } from "../../ui/button";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
-import { MeetingControlsBar } from "./MeetingControlsBar"; // Import the new MeetingControlsBar
-import { Mic, MicOff, Hand, ArrowLeft } from "lucide-react"; // Import Mic and MicOff icons
-import { PeoplePanel } from "./PeoplePanel"; // Import PeoplePanel
-import { useState, useEffect, useRef, Fragment } from 'react'; // Added useEffect and useRef
+import { MeetingControlsBar } from "./MeetingControlsBar";
+import { Mic, MicOff, Hand, ArrowLeft } from "lucide-react";
+import { PeoplePanel } from "./PeoplePanel";
+import { useState, useEffect, useRef, Fragment } from 'react';
 import { useAuth } from "../../../context/AuthContext";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { webinarApi } from "../../../lib/api";
 import { useToast } from "../../../hooks/use-toast";
 
-export const UserMeeting = () => {
+export const GuestMeeting = () => {
     const {
         roomUrl,
         joined,
@@ -25,8 +24,8 @@ export const UserMeeting = () => {
         isScreensharing,
         screenshareParticipantId,
         raisedHands,
-        localParticipant, // Import localParticipant
-        hasLocalAudioPermission, // Import hasLocalAudioPermission
+        localParticipant,
+        hasLocalAudioPermission,
     } = useDailyMeeting();
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(new Set());
@@ -122,7 +121,7 @@ export const UserMeeting = () => {
         };
 
         checkAccess();
-    }, [user, webinarId, toast]); // Keep these dependencies as they're needed for access control
+    }, [user, webinarId, toast]);
 
     // Get the local admin's video track
     const localAdminVideoTrack = participants.find(p => p.permissions.canAdmin)?.videoTrack;
@@ -246,11 +245,8 @@ export const UserMeeting = () => {
         ? participants.find((p) => p.id === screenshareParticipantId)?.screenVideoTrack
         : null;
 
-
     return (
         <div className="flex flex-col h-full w-full">
-            {/* Top Control Bar */}
-
             {/* Main Meeting Area */}
             <div className="flex flex-1 overflow-hidden">
                 <div id="daily-video-container" className={`flex-1 flex items-center justify-center bg-black ${joined ? "" : "p-4"}`}>

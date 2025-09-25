@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand } from "lucide-react";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand, VolumeX, Volume2 } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { BackgroundFilterModal } from '../BackgroundFilterModal';
 
@@ -28,6 +28,9 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = React.memo(
     raiseHand,
     lowerHand,
     dailyRoom,
+    participants,
+    muteAllParticipants,
+    unmuteAllParticipants,
   } = useDailyMeeting();
 
   const raisedHandsCount = raisedHands.size;
@@ -70,6 +73,32 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = React.memo(
               </Button>
               <span className="text-sm">Mute</span>
             </div>
+
+            {/* Host Controls */}
+            {isManager && (
+              <>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    onClick={() => { console.log("Mute All Clicked"); muteAllParticipants(); }}
+                    className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 h-auto w-auto"
+                  >
+                    <VolumeX size={24} />
+                  </Button>
+                  <span className="text-sm">Mute All</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    onClick={() => { console.log("Unmute All Clicked"); unmuteAllParticipants(); }}
+                    className="bg-green-600 hover:bg-green-700 text-white rounded-full p-3 h-auto w-auto"
+                  >
+                    <Volume2 size={24} />
+                  </Button>
+                  <span className="text-sm">Unmute All</span>
+                </div>
+              </>
+            )}
             <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto relative">
               <Users size={24} />
               {raisedHandsCount > 0 && (
@@ -79,13 +108,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = React.memo(
                 </span>
               )}
             </Button>
-            <Button
-              variant="secondary"
-              onClick={() => (raisedHands.has(dailyRoom?.participants().local.session_id || '') ? lowerHand() : raiseHand())}
-              className={`rounded-full p-3 h-auto w-auto ${raisedHands.has(dailyRoom?.participants().local.session_id || '') ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
-            >
-              <Hand size={24} />
-            </Button>
+            {/* Remove raise hand button for host - hosts don't need to raise hands */}
             {!isScreensharing ? (
               <Button variant="secondary" onClick={startScreenshare} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
                 <MonitorPlay size={24} />

@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 
 // Define shape of user data (adjust fields based on your API response)
 export interface User {
-    id: string;
+    _id: string;
     name: string;
     email: string;
     role?: "user" | "admin";

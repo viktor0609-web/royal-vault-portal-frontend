@@ -41,8 +41,6 @@ export function WebinarsSection() {
   const { user } = useAuth();
   const { openDialog } = useAuthDialog();
 
-  // Debug user object
-  console.log('WebinarsSection - User object:', user);
 
   const fetchWebinars = useCallback(async () => {
     try {
@@ -54,23 +52,15 @@ export function WebinarsSection() {
       // Initialize registered webinars state
       if (user && user._id) {
         const registeredIds = new Set<string>();
-        console.log('Current user ID:', user._id);
-        console.log('Webinars data:', webinarsData);
-
         webinarsData.forEach(webinar => {
-          console.log('Webinar attendees:', webinar.attendees);
           if (webinar.attendees?.some(attendee => {
             const attendeeUserId = attendee.user.toString();
             const currentUserId = user._id.toString();
-            console.log('Checking webinar:', webinar._id, 'attendee:', attendeeUserId, 'current:', currentUserId, 'match:', attendeeUserId === currentUserId);
             return attendeeUserId === currentUserId;
           })) {
             registeredIds.add(webinar._id);
-            console.log('Added to registered set:', webinar._id);
           }
         });
-
-        console.log('Final registered webinars set:', Array.from(registeredIds));
         setRegisteredWebinars(registeredIds);
       }
     } catch (error: any) {
@@ -169,6 +159,16 @@ export function WebinarsSection() {
   };
 
   const handleJoinWebinar = (webinar: Webinar) => {
+    // Check if user is registered for upcoming webinars
+    if (filterIndex === 0 && !isUserRegistered(webinar)) {
+      toast({
+        title: "Registration Required",
+        description: "Please register for this webinar to access the live session",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Navigate to live webinar page
     const webinarUrl = `/webinar_user?webinarId=${webinar._id}&name=${encodeURIComponent(webinar.name)}`;
     window.open(webinarUrl, '_blank');
@@ -228,21 +228,16 @@ export function WebinarsSection() {
 
     // Check local state first (immediate UI update)
     if (registeredWebinars.has(webinar._id)) {
-      console.log('User registered (local state):', webinar._id);
       return true;
     }
 
     // Check database state
     if (webinar.attendees) {
-      const isRegistered = webinar.attendees.some(attendee => {
+      return webinar.attendees.some(attendee => {
         const attendeeUserId = attendee.user.toString();
         const currentUserId = user._id.toString();
-        console.log('Comparing user IDs:', { attendeeUserId, currentUserId, match: attendeeUserId === currentUserId });
         return attendeeUserId === currentUserId;
       });
-
-      console.log('User registered (database state):', isRegistered, 'for webinar:', webinar._id);
-      return isRegistered;
     }
 
     return false;
@@ -300,9 +295,19 @@ export function WebinarsSection() {
               <div
                 key={webinar._id}
                 onClick={() => {
-                  if (filterIndex === 0 && isRegistered) {
+                  if (filterIndex === 0) {
                     // For upcoming webinars, only registered users can access live webinar
-                    handleJoinWebinar(webinar);
+                    if (isRegistered) {
+                      handleJoinWebinar(webinar);
+                    } else {
+                      // Prevent navigation and show message
+                      toast({
+                        title: "Registration Required",
+                        description: "Please register for this webinar to access the live session",
+                        variant: "destructive",
+                      });
+                      return; // Prevent any further action
+                    }
                   } else if (filterIndex === 1) {
                     // For replays, anyone can access
                     handleJoinWebinar(webinar);
@@ -311,7 +316,10 @@ export function WebinarsSection() {
                     handleJoinWebinar(webinar);
                   }
                 }}
-                className="flex items-center justify-between p-3 min-[700px]:p-6 bg-sidebar rounded-lg border border-royal-light-gray hover:shadow-sm hover:scale-[1.005] hover:border-royal-blue/10 transition-all duration-75 ease-in-out cursor-pointer group animate-in slide-in-from-bottom duration-200"
+                className={`flex items-center justify-between p-3 min-[700px]:p-6 bg-sidebar rounded-lg border border-royal-light-gray transition-all duration-75 ease-in-out group animate-in slide-in-from-bottom duration-200 ${filterIndex === 0 && !isRegistered
+                  ? 'cursor-not-allowed opacity-75 hover:opacity-100'
+                  : 'cursor-pointer hover:shadow-sm hover:scale-[1.005] hover:border-royal-blue/10'
+                  }`}
                 style={{ animationDelay: `${200 + index * 100}ms` }}
               >
                 <div className="flex-1">

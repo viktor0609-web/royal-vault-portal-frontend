@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import DailyIframe, { DailyCall } from '@daily-co/daily-js';
 
 type BackgroundFilterType = 'none' | 'blur' | 'image';
@@ -552,7 +552,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     /* ---------- Camera / mic toggles ---------- */
 
-    const toggleCamera = () => {
+    const toggleCamera = useCallback(() => {
         const willTurnOn = isCameraOff; // if currently off, we want to turn ON
         if (dailyRoom) {
             try {
@@ -565,7 +565,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
             localStream.getVideoTracks().forEach((t) => (t.enabled = willTurnOn));
         }
         setIsCameraOff(!willTurnOn);
-    };
+    }, [dailyRoom, localStream, isCameraOff]);
 
     const toggleMicrophone = useCallback(() => {
         const willTurnOn = isMicrophoneMuted; // if currently muted, we want to turn ON

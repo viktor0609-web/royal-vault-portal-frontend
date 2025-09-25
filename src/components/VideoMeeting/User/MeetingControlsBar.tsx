@@ -11,7 +11,7 @@ interface MeetingControlsBarProps {
   hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission to props
 }
 
-export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, localParticipant, hasLocalAudioPermission }) => {
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = React.memo(({ position, togglePeoplePanel, localParticipant, hasLocalAudioPermission }) => {
   const {
     joined,
     isManager,
@@ -118,4 +118,4 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
       </div>
     </div>
   );
-};
+});

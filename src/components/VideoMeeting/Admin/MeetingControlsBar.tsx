@@ -9,7 +9,7 @@ interface MeetingControlsBarProps {
   togglePeoplePanel: () => void;
 }
 
-export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel }) => {
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = React.memo(({ position, togglePeoplePanel }) => {
   const {
     joined,
     isManager,
@@ -45,7 +45,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
       <div className="flex items-center gap-2">
         {position === "top" && isManager && (
           <div className="flex gap-4">
-           {!isRecording ? (
+            {!isRecording ? (
               <Button variant="ghost" className="text-white" onClick={() => { console.log("Start Recording Clicked"); startRecording(); }}>Start Recording</Button>
             ) : (
               <Button variant="ghost" className="text-white" onClick={() => { console.log("Stop Recording Clicked"); stopRecording(); }}>Stop Recording</Button>
@@ -108,4 +108,4 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
       </div>
     </div>
   );
-};
+});

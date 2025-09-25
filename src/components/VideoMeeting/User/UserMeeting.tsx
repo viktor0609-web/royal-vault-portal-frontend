@@ -4,9 +4,13 @@ import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar"; // Import the new MeetingControlsBar
-import { Mic, MicOff, Hand } from "lucide-react"; // Import Mic and MicOff icons
+import { Mic, MicOff, Hand, ArrowLeft } from "lucide-react"; // Import Mic and MicOff icons
 import { PeoplePanel } from "./PeoplePanel"; // Import PeoplePanel
 import { useState, useEffect, useRef, Fragment } from 'react'; // Added useEffect and useRef
+import { useAuth } from "../../../context/AuthContext";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { webinarApi } from "../../../lib/api";
+import { useToast } from "../../../hooks/use-toast";
 
 export const UserMeeting = () => {
     const {
@@ -27,6 +31,76 @@ export const UserMeeting = () => {
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(new Set());
     const animationTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
+    // Access control
+    const { user } = useAuth();
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const { toast } = useToast();
+    const [accessChecking, setAccessChecking] = useState(true);
+    const [hasAccess, setHasAccess] = useState(false);
+    const [webinar, setWebinar] = useState<any>(null);
+
+    const webinarId = searchParams.get('webinarId');
+    const webinarName = searchParams.get('name');
+
+    // Check access control and set room URL
+    useEffect(() => {
+        const checkAccess = async () => {
+            if (!user || !webinarId) {
+                setAccessChecking(false);
+                setHasAccess(false);
+                return;
+            }
+
+            try {
+                // Fetch webinar details
+                const response = await webinarApi.getPublicWebinarById(webinarId);
+                const webinarData = response.data.webinar;
+                setWebinar(webinarData);
+
+                // Check if user is registered for this webinar
+                const isRegistered = webinarData.attendees?.some((attendee: any) =>
+                    attendee.user.toString() === user._id.toString()
+                );
+
+                if (isRegistered) {
+                    setHasAccess(true);
+                    // Use the pre-configured Daily.co room URL
+                    const dailyRoomUrl = import.meta.env.VITE_DAILY_ROOM_URL;
+                    if (dailyRoomUrl) {
+                        setRoomUrl(dailyRoomUrl);
+                    } else {
+                        console.error('VITE_DAILY_ROOM_URL environment variable is not set');
+                        toast({
+                            title: "Configuration Error",
+                            description: "Daily.co room URL is not configured",
+                            variant: "destructive",
+                        });
+                    }
+                } else {
+                    setHasAccess(false);
+                    toast({
+                        title: "Access Denied",
+                        description: "You must be registered for this webinar to access the live session",
+                        variant: "destructive",
+                    });
+                }
+            } catch (error) {
+                console.error('Error checking access:', error);
+                setHasAccess(false);
+                toast({
+                    title: "Error",
+                    description: "Failed to verify webinar access",
+                    variant: "destructive",
+                });
+            } finally {
+                setAccessChecking(false);
+            }
+        };
+
+        checkAccess();
+    }, [user, webinarId, toast]);
 
     // Get the local admin's video track
     const localAdminVideoTrack = participants.find(p => p.permissions.canAdmin)?.videoTrack;
@@ -86,6 +160,57 @@ export const UserMeeting = () => {
             });
         }
     };
+
+    // Show loading while checking access
+    if (accessChecking) {
+        return (
+            <div className="flex flex-1 items-center justify-center text-xl bg-gray-800 text-white">
+                <div className="text-center">
+                    <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <div>Verifying access...</div>
+                </div>
+            </div>
+        );
+    }
+
+    // Show access denied if user is not registered
+    if (!hasAccess) {
+        return (
+            <div className="flex flex-1 items-center justify-center bg-gray-800 text-white">
+                <div className="text-center max-w-md mx-auto p-8">
+                    <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Hand className="w-8 h-8 text-white" />
+                    </div>
+                    <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+                    <p className="text-gray-300 mb-6">
+                        You must be registered for this webinar to access the live session.
+                    </p>
+                    {webinar && (
+                        <div className="bg-gray-700 rounded-lg p-4 mb-6">
+                            <h3 className="font-semibold text-lg mb-2">{webinar.name}</h3>
+                            <p className="text-sm text-gray-300">
+                                {new Date(webinar.date).toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                            </p>
+                        </div>
+                    )}
+                    <Button
+                        onClick={() => navigate('/royal-tv')}
+                        className="bg-primary hover:bg-royal-blue-dark text-white px-6 py-2"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-2" />
+                        Back to Webinars
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     if (isLoading && !isPermissionModalOpen) {
         return <div className="flex flex-1 items-center justify-center text-xl bg-gray-800 text-white">Loading...</div>;
@@ -174,19 +299,39 @@ export const UserMeeting = () => {
                     )}
                     {!joined && (
                         <div className="flex flex-col gap-4 items-center justify-center p-4 bg-gray-800 text-white w-full h-full">
-                            <h1 className="text-3xl font-bold mb-4">Welcome to the Meeting</h1>
+                            <h1 className="text-3xl font-bold mb-4">Welcome to the Webinar</h1>
+                            {webinar && (
+                                <div className="text-center mb-6">
+                                    <h2 className="text-xl font-semibold mb-2">{webinar.name}</h2>
+                                    <p className="text-gray-300">
+                                        {new Date(webinar.date).toLocaleDateString('en-US', {
+                                            weekday: 'long',
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </p>
+                                </div>
+                            )}
                             <div className="flex flex-col gap-4 w-full max-w-md">
+                                <div className="text-center text-gray-300 text-sm mb-2">
+                                    Connecting to live webinar room...
+                                </div>
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="text"
-                                        placeholder="Enter room URL to join"
-                                        value={roomUrl}
-                                        onChange={(e) => setRoomUrl(e.target.value)}
-                                        className="flex-1 p-2 border rounded-md text-black"
+                                        placeholder="Room URL"
+                                        value={roomUrl || ''}
+                                        readOnly
+                                        className="flex-1 p-2 border rounded-md text-black bg-gray-100"
                                     />
-                                    <Button onClick={copyRoomUrl}>Copy</Button>
+                                    <Button onClick={copyRoomUrl} disabled={!roomUrl}>Copy</Button>
                                 </div>
-                                <Button onClick={joinRoom} disabled={!roomUrl}>Join Room</Button>
+                                <Button onClick={joinRoom} disabled={!roomUrl} className="w-full">
+                                    Join Live Webinar
+                                </Button>
                             </div>
                         </div>
                     )}
@@ -204,7 +349,7 @@ export const UserMeeting = () => {
             </div>
 
             {/* Bottom Control Bar */}
-            <MeetingControlsBar position="bottom" togglePeoplePanel={() => setShowPeoplePanel(prev => !prev)} localParticipant={localParticipant} hasLocalAudioPermission={hasLocalAudioPermission}/>
+            <MeetingControlsBar position="bottom" togglePeoplePanel={() => setShowPeoplePanel(prev => !prev)} localParticipant={localParticipant} hasLocalAudioPermission={hasLocalAudioPermission} />
         </div>
     );
 };

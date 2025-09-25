@@ -41,6 +41,9 @@ import YouTubeCallback from "./pages/YouTubeCallback";
 import { YouTubeTestPlayer } from "./components/ui/YouTubeTestPlayer";
 import YouTubeTest from "./pages/YouTubeTest";
 
+import { AdminMeeting } from "./components/VideoMeeting/Admin/AdminMeeting";
+import { UserMeeting } from "./components/VideoMeeting/User/UserMeeting";
+
 const queryClient = new QueryClient();
 
 const webinarData = {
@@ -97,6 +100,9 @@ const App = () => (
 
                 <Route path="/verify/:token" element={<SetPassword />} />
                 <Route path="/reset-password/:token" element={<ReSettingPasswordPage />} />
+
+                <Route path="/webinar_admin" element={<AdminMeeting />} />
+                <Route path="/webinar_user" element={<UserMeeting />} />
 
                 {/* YouTube OAuth Callback */}
                 <Route path="/auth/youtube/callback" element={<YouTubeCallback />} />

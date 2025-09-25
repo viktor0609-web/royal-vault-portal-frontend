@@ -162,47 +162,26 @@ export function WebinarSection() {
                     break;
                 }
                 case 'web': {
-                    // Make API request to get webinar details for admin panel
-                    const response = await webinarApi.getWebinarById(item!._id, 'full');
-                    const webinarData = response.data.webinar;
-
-                    // Open webinar admin page with webinar data
-                    const adminUrl = `https://royal-vault-nu.vercel.app/webinar_admin?webinarId=${webinarData._id}&name=${encodeURIComponent(webinarData.name)}`;
-                    window.open(adminUrl, '_blank');
-
                     toast({
-                        title: "Webinar Admin",
-                        description: "Opening webinar admin panel",
+                        title: "Live Video Unavailable",
+                        description: "Live video meetings are currently not available.",
+                        variant: "destructive",
                     });
                     break;
                 }
                 case 'host': {
-                    // Make API request to get webinar details for host panel
-                    const response = await webinarApi.getWebinarById(item!._id, 'full');
-                    const webinarData = response.data.webinar;
-
-                    // Open host panel with webinar data
-                    const hostUrl = `https://royal-vault-nu.vercel.app/webinar_host?webinarId=${webinarData._id}&name=${encodeURIComponent(webinarData.name)}`;
-                    window.open(hostUrl, '_blank');
-
                     toast({
-                        title: "Host Panel",
-                        description: "Opening webinar host panel",
+                        title: "Live Video Unavailable",
+                        description: "Live video meetings are currently not available.",
+                        variant: "destructive",
                     });
                     break;
                 }
                 case 'guest': {
-                    // Make API request to get webinar details for guest panel
-                    const response = await webinarApi.getWebinarById(item!._id, 'full');
-                    const webinarData = response.data.webinar;
-
-                    // Open guest panel with webinar data
-                    const guestUrl = `https://royal-vault-nu.vercel.app/webinar_guest?webinarId=${webinarData._id}&name=${encodeURIComponent(webinarData.name)}`;
-                    window.open(guestUrl, '_blank');
-
                     toast({
-                        title: "Guest Panel",
-                        description: "Opening webinar guest panel",
+                        title: "Live Video Unavailable",
+                        description: "Live video meetings are currently not available.",
+                        variant: "destructive",
                     });
                     break;
                 }

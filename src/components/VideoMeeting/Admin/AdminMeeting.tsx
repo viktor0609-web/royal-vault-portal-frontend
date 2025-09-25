@@ -16,7 +16,6 @@ export const AdminMeeting = () => {
         setIsManager,
         setRoomUrl,
         joinRoom,
-        createRoom,
         ejectParticipant,
         toggleParticipantAudio,
         isPermissionModalOpen,
@@ -49,6 +48,21 @@ export const AdminMeeting = () => {
     useEffect(() => {
         setIsManager(true);
     }, [setIsManager]);
+
+    // Auto-join the room on component mount
+    useEffect(() => {
+        const dailyRoomUrl = import.meta.env.VITE_DAILY_ROOM_URL;
+        console.log('Admin - Daily room URL:', dailyRoomUrl);
+        if (dailyRoomUrl && !joined) {
+            console.log('Admin - Setting room URL:', dailyRoomUrl);
+            setRoomUrl(dailyRoomUrl);
+            // Auto-join after a short delay
+            setTimeout(() => {
+                console.log('Admin - Attempting to join room with URL:', dailyRoomUrl);
+                joinRoom();
+            }, 1000);
+        }
+    }, [setRoomUrl, joinRoom, joined]);
 
     // Attach local video
     useEffect(() => {
@@ -270,22 +284,10 @@ export const AdminMeeting = () => {
 
                     {!joined && (
                         <div className="flex flex-col gap-4 items-center justify-center p-4 bg-gray-800 text-white w-full h-full">
-                            <h1 className="text-3xl font-bold mb-4">Welcome to the Meeting</h1>
-                            <div className="flex flex-col gap-4 w-full max-w-md">
-                                <Button onClick={createRoom}>Create Room</Button>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Enter room URL to join"
-                                        value={roomUrl}
-                                        onChange={(e) => setRoomUrl(e.target.value)}
-                                        className="flex-1 p-2 border rounded-md text-black"
-                                    />
-                                    <Button onClick={copyRoomUrl}>Copy</Button>
-                                </div>
-                                <Button onClick={joinRoom} disabled={!roomUrl}>
-                                    Join Room
-                                </Button>
+                            <div className="text-center">
+                                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                <h1 className="text-2xl font-bold mb-2">Joining Admin Room</h1>
+                                <p className="text-gray-300">Please wait while we connect you to the admin session...</p>
                             </div>
                         </div>
                     )}

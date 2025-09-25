@@ -169,9 +169,12 @@ export function WebinarsSection() {
       return;
     }
 
-    // Navigate to live webinar page
-    const webinarUrl = `/webinar_user?webinarId=${webinar._id}&name=${encodeURIComponent(webinar.name)}`;
-    window.open(webinarUrl, '_blank');
+    // Live video functionality has been removed
+    toast({
+      title: "Live Video Unavailable",
+      description: "Live video meetings are currently not available. Please check back later.",
+      variant: "destructive",
+    });
   };
 
   const changeFilter = (index: number) => {

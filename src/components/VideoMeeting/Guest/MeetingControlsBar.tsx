@@ -11,6 +11,7 @@ interface MeetingControlsBarProps {
     showChatBox: boolean;
     toggleFullscreen: () => void;
     isFullscreen: boolean;
+    localParticipant: any;
     chatUnreadCount?: number;
 }
 
@@ -21,6 +22,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
     showChatBox,
     toggleFullscreen,
     isFullscreen,
+    localParticipant,
     chatUnreadCount = 0
 }) => {
     const {
@@ -41,7 +43,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
         raiseHand,
         lowerHand,
         dailyRoom,
-        hasLocalAudioPermission,
+        hasLocalAudioPermission, // ✅ use context directly
     } = useDailyMeeting();
 
     if (!joined) return null;
@@ -49,11 +51,22 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
     const raisedHandsCount = raisedHands.size;
 
     return (
-        <div className={`flex items-center justify-between p-4 bg-gray-800 ${position === "top" ? "border-b" : "border-t"}`}>
+        <div className={`flex justify-center items-center p-4 bg-gray-800 text-white ${position === "top" ? "justify-between" : "gap-8"}`}>
+            {position === "top" && (
+                <div className="flex items-center gap-2">
+                    <span className="text-lg font-semibold">Waiting for others to join</span>
+                </div>
+            )}
+
             <div className="flex items-center gap-2">
-                {position === "top" && (
+                {position === "top" && isManager && (
                     <div className="flex gap-4">
-                        <span className="text-sm text-white">Guest View - Webinar Mode</span>
+                        {!isRecording ? (
+                            <Button variant="ghost" className="text-white" onClick={startRecording}>Start Recording</Button>
+                        ) : (
+                            <Button variant="ghost" className="text-white" onClick={stopRecording}>Stop Recording</Button>
+                        )}
+                        <span className="text-sm text-white">{isRecording ? "Recording..." : "Not Recording"}</span>
                     </div>
                 )}
 
@@ -117,6 +130,16 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
                         >
                             {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
                         </Button>
+
+                        {!isScreensharing ? (
+                            <Button variant="secondary" onClick={startScreenshare} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
+                                <MonitorPlay size={24} />
+                            </Button>
+                        ) : (
+                            <Button variant="secondary" onClick={stopScreenshare} className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 h-auto w-auto">
+                                <MonitorPlay size={24} />
+                            </Button>
+                        )}
 
                         <BackgroundFilterModal>
                             <Button variant="secondary" className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">

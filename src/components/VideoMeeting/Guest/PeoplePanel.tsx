@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
-import { X, Mic, MicOff, Video, VideoOff, Hand } from "lucide-react";
+import { X, Mic, MicOff, Video, VideoOff } from "lucide-react";
 import { Button } from "../../ui/button";
 
 interface PeoplePanelProps {
@@ -8,7 +8,7 @@ interface PeoplePanelProps {
 }
 
 export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
-    const { participants, raisedHands } = useDailyMeeting();
+    const { participants } = useDailyMeeting();
 
     return (
         <div className="w-80 bg-gray-900 text-white p-4 flex flex-col">
@@ -25,9 +25,6 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                             <span className="font-medium">{p.local ? "You" : p.name || `Guest ${p.id.substring(0, 4)}`}</span>
                             {p.audioTrack ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
                             {p.videoTrack ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
-                            {raisedHands.has(p.id) && (
-                                <Hand size={16} className="text-blue-500" />
-                            )}
                         </div>
                         {/* Removed manager-specific controls */}
                     </div>

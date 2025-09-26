@@ -3,7 +3,6 @@ import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
-import { Hand } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
 import { useState, useEffect, useRef, Fragment } from "react";
 import React from "react";
@@ -43,7 +42,6 @@ export const GuestMeeting = () => {
         isLoading,
         isScreensharing,
         screenshareParticipantId,
-        raisedHands,
         localParticipant,
         hasLocalAudioPermission,
     } = useDailyMeeting();
@@ -51,9 +49,7 @@ export const GuestMeeting = () => {
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-    const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(new Set());
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
-    const animationTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
     const hasAttemptedJoin = useRef<boolean>(false);
     const videoContainerRef = useRef<HTMLDivElement>(null);
 
@@ -111,48 +107,6 @@ export const GuestMeeting = () => {
         };
     }, []);
 
-    // Handle raised hand animations
-    useEffect(() => {
-        const currentRaisedIds = Array.from(raisedHands);
-        const currentlyAnimatedIds = Array.from(animatedRaisedHands);
-
-        // Add new raised hands
-        currentRaisedIds.forEach(participantId => {
-            if (!animatedRaisedHands.has(participantId) && !animationTimeouts.current.has(participantId)) {
-                setAnimatedRaisedHands(prev => new Set(prev).add(participantId));
-                const timeoutId = setTimeout(() => {
-                    setAnimatedRaisedHands(prev => {
-                        const newSet = new Set(prev);
-                        newSet.delete(participantId);
-                        return newSet;
-                    });
-                    animationTimeouts.current.delete(participantId);
-                }, 5000);
-                animationTimeouts.current.set(participantId, timeoutId);
-            }
-        });
-
-        // Remove hands that are no longer raised
-        currentlyAnimatedIds.forEach(participantId => {
-            if (!raisedHands.has(participantId)) {
-                const timeoutId = animationTimeouts.current.get(participantId);
-                if (timeoutId) {
-                    clearTimeout(timeoutId);
-                    animationTimeouts.current.delete(participantId);
-                }
-                setAnimatedRaisedHands(prev => {
-                    const newSet = new Set(prev);
-                    newSet.delete(participantId);
-                    return newSet;
-                });
-            }
-        });
-
-        return () => {
-            animationTimeouts.current.forEach(timeoutId => clearTimeout(timeoutId));
-            animationTimeouts.current.clear();
-        };
-    }, [raisedHands]);
 
 
     if (isLoading && !isPermissionModalOpen) {
@@ -187,12 +141,6 @@ export const GuestMeeting = () => {
                                     <div className="text-white text-xl">No active video.</div>
                                 )}
 
-                                {/* Raised hand animation */}
-                                {animatedRaisedHands.size > 0 && (
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500 rounded-full p-3 animate-bounce transition-opacity duration-500 ease-out">
-                                        <Hand size={32} className="text-white" />
-                                    </div>
-                                )}
 
                                 {/* Name label */}
                                 {localAdminVideoTrack && (

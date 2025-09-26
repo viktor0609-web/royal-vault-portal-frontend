@@ -13,9 +13,10 @@ interface MeetingControlsBarProps {
   isFullscreen: boolean;
   localParticipant: any; // Add localParticipant to props
   hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission to props
+  chatUnreadCount?: number; // Add chatUnreadCount to props
 }
 
-export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox, toggleFullscreen, isFullscreen, localParticipant, hasLocalAudioPermission }) => {
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox, toggleFullscreen, isFullscreen, localParticipant, hasLocalAudioPermission, chatUnreadCount = 0 }) => {
   const {
     joined,
     isManager,
@@ -101,9 +102,15 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
             <Button
               variant="secondary"
               onClick={toggleChatBox}
-              className={`rounded-full p-3 h-auto w-auto ${showChatBox ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+              className={`rounded-full p-3 h-auto w-auto ${showChatBox ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white relative`}
             >
               {showChatBox ? <MessageSquareX size={24} /> : <MessageSquare size={24} />}
+              {!showChatBox && chatUnreadCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
+                  {chatUnreadCount}
+                  <span className="sr-only">unread messages</span>
+                </span>
+              )}
             </Button>
             <Button
               variant="secondary"

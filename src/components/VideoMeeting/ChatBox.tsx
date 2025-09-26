@@ -9,11 +9,64 @@ interface Message {
   timestamp: number;
 }
 
-export const ChatBox: React.FC = () => {
+interface ChatBoxProps {
+  isVisible?: boolean;
+  onUnreadCountChange?: (count: number) => void;
+}
+
+export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCountChange }) => {
   const { dailyRoom } = useDailyMeeting();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [unreadCount, setUnreadCount] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastVisibleMessageId = useRef<string | null>(null);
+
+  // Load messages from localStorage on component mount
+  useEffect(() => {
+    const savedMessages = localStorage.getItem('chat-messages');
+    if (savedMessages) {
+      try {
+        const parsedMessages = JSON.parse(savedMessages);
+        setMessages(parsedMessages);
+      } catch (error) {
+        console.error('Error loading chat messages from localStorage:', error);
+      }
+    }
+  }, []);
+
+  // Save messages to localStorage whenever messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('chat-messages', JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  // Track unread messages when chat is not visible
+  useEffect(() => {
+    if (!isVisible && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastVisibleMessageId.current !== lastMessage.id) {
+        setUnreadCount(prev => prev + 1);
+      }
+    }
+  }, [messages, isVisible]);
+
+  // Clear unread count when chat becomes visible
+  useEffect(() => {
+    if (isVisible) {
+      setUnreadCount(0);
+      if (messages.length > 0) {
+        lastVisibleMessageId.current = messages[messages.length - 1].id;
+      }
+      onUnreadCountChange?.(0);
+    }
+  }, [isVisible, messages, onUnreadCountChange]);
+
+  // Notify parent component of unread count changes
+  useEffect(() => {
+    onUnreadCountChange?.(unreadCount);
+  }, [unreadCount, onUnreadCountChange]);
 
   // Scroll to bottom when a new message arrives
   const scrollToBottom = () => {
@@ -37,7 +90,14 @@ export const ChatBox: React.FC = () => {
         timestamp: Date.now(),
       };
 
-      setMessages(prev => [...prev, newMessage]);
+      setMessages(prev => {
+        const updatedMessages = [...prev, newMessage];
+        // If chat is not visible, increment unread count
+        if (!isVisible) {
+          setUnreadCount(prevCount => prevCount + 1);
+        }
+        return updatedMessages;
+      });
     };
 
     dailyRoom.on('app-message', handleMessage);
@@ -45,7 +105,7 @@ export const ChatBox: React.FC = () => {
     return () => {
       dailyRoom.off('app-message', handleMessage);
     };
-  }, [dailyRoom]);
+  }, [dailyRoom, isVisible]);
 
   // Send a message
   const sendMessage = () => {
@@ -59,8 +119,14 @@ export const ChatBox: React.FC = () => {
     // Send message via Daily app-message
     (dailyRoom as any).sendAppMessage(messageData, '*');
 
-    // Optionally append locally
-    setMessages(prev => [...prev, { ...messageData, id: crypto.randomUUID(), timestamp: Date.now() }]);
+    // Add message locally (don't increment unread count for own messages)
+    const newMessage: Message = {
+      ...messageData,
+      id: crypto.randomUUID(),
+      timestamp: Date.now(),
+    };
+
+    setMessages(prev => [...prev, newMessage]);
     setInput('');
   };
 
@@ -74,9 +140,8 @@ export const ChatBox: React.FC = () => {
         {messages.map(msg => (
           <div
             key={msg.id}
-            className={`p-2 rounded-md ${
-              msg.sender === (dailyRoom.participants().local.user_name || "Guest") ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-gray-800 self-start'
-            }`}
+            className={`p-2 rounded-md ${msg.sender === (dailyRoom.participants().local.user_name || "Guest") ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-gray-800 self-start'
+              }`}
           >
             <span className="font-semibold text-sm">{msg.sender}: </span>
             <span className="text-sm">{msg.text}</span>

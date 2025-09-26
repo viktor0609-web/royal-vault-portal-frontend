@@ -1,12 +1,36 @@
-
 import { Button } from "../../ui/button";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
-import { MeetingControlsBar } from "./MeetingControlsBar"; // Import the new MeetingControlsBar
-import { Mic, MicOff, Hand } from "lucide-react"; // Import Mic and MicOff icons
-import { PeoplePanel } from "./PeoplePanel"; // Import PeoplePanel
-import { useState, useEffect, useRef, Fragment } from 'react'; // Added useEffect and useRef
+import { MeetingControlsBar } from "./MeetingControlsBar";
+import { Hand } from "lucide-react";
+import { PeoplePanel } from "./PeoplePanel";
+import { useState, useEffect, useRef, Fragment } from "react";
+import React from "react";
+
+
+// 🔹 VideoPlayer Component (memoized to avoid re-renders)
+const VideoPlayer = React.memo(({ track, type }: { track: MediaStreamTrack | null, type?: "screen" | "camera" }) => {
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    useEffect(() => {
+        if (videoRef.current && track) {
+            videoRef.current.srcObject = new MediaStream([track]);
+        }
+    }, [track]);
+
+    if (!track) return null;
+
+    return (
+        <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            className={type === "screen" ? "w-full h-full object-contain" : "w-full h-full object-cover"}
+        />
+    );
+});
+
 
 export const UserMeeting = () => {
     const {
@@ -20,9 +44,10 @@ export const UserMeeting = () => {
         isScreensharing,
         screenshareParticipantId,
         raisedHands,
-        localParticipant, // Import localParticipant
-        hasLocalAudioPermission, // Import hasLocalAudioPermission
+        localParticipant,
+        hasLocalAudioPermission,
     } = useDailyMeeting();
+
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -33,9 +58,6 @@ export const UserMeeting = () => {
 
     // Get the local admin's video track
     const localAdminVideoTrack = participants.find(p => p.permissions.canAdmin)?.videoTrack;
-    participants.forEach(p => {
-        console.log(p);
-    })
 
     // Auto-join the room when component mounts
     useEffect(() => {
@@ -77,22 +99,23 @@ export const UserMeeting = () => {
             setIsFullscreen(!!document.fullscreenElement);
         };
 
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+        document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+        document.addEventListener("msfullscreenchange", handleFullscreenChange);
 
         return () => {
-            document.removeEventListener('fullscreenchange', handleFullscreenChange);
-            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-            document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+            document.removeEventListener("fullscreenchange", handleFullscreenChange);
+            document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+            document.removeEventListener("msfullscreenchange", handleFullscreenChange);
         };
     }, []);
 
+    // Handle raised hand animations
     useEffect(() => {
         const currentRaisedIds = Array.from(raisedHands);
         const currentlyAnimatedIds = Array.from(animatedRaisedHands);
 
-        // Add new raised hands to animated set
+        // Add new raised hands
         currentRaisedIds.forEach(participantId => {
             if (!animatedRaisedHands.has(participantId) && !animationTimeouts.current.has(participantId)) {
                 setAnimatedRaisedHands(prev => new Set(prev).add(participantId));
@@ -103,7 +126,7 @@ export const UserMeeting = () => {
                         return newSet;
                     });
                     animationTimeouts.current.delete(participantId);
-                }, 5000); // Animation visible for 5 seconds
+                }, 5000);
                 animationTimeouts.current.set(participantId, timeoutId);
             }
         });
@@ -124,7 +147,6 @@ export const UserMeeting = () => {
             }
         });
 
-        // Cleanup on unmount
         return () => {
             animationTimeouts.current.forEach(timeoutId => clearTimeout(timeoutId));
             animationTimeouts.current.clear();
@@ -157,53 +179,35 @@ export const UserMeeting = () => {
                     {joined && (
                         <div className="h-full flex flex-col min-h-0 max-w-full">
                             <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
-                                {/* Main Video Display: Prioritize screenshare, then local admin camera */}
-                                {screenshareTrack && (
-                                    <video
-                                        ref={(videoElement) => {
-                                            if (videoElement && screenshareTrack) {
-                                                videoElement.srcObject = new MediaStream([screenshareTrack]);
-                                            }
-                                        }}
-                                        autoPlay
-                                        playsInline
-                                        className="w-full h-full object-contain"
-                                    />
-                                )}
-                                {!screenshareTrack && localAdminVideoTrack && (
-                                    <video
-                                        ref={(videoElement) => {
-                                            if (videoElement && localAdminVideoTrack) {
-                                                videoElement.srcObject = new MediaStream([localAdminVideoTrack]);
-                                            }
-                                        }}
-                                        autoPlay
-                                        playsInline
-                                        className="w-full h-full object-cover"
-                                    />
-                                )}
-                                {!screenshareTrack && !localAdminVideoTrack && ( // Display a message if no screenshare and no local admin camera
+                                {/* Main Video Display */}
+                                {screenshareTrack && <VideoPlayer track={screenshareTrack} type="screen" />}
+                                {!screenshareTrack && localAdminVideoTrack && <VideoPlayer track={localAdminVideoTrack} type="camera" />}
+                                {!screenshareTrack && !localAdminVideoTrack && (
                                     <div className="text-white text-xl">No active video.</div>
                                 )}
-                                {animatedRaisedHands.size && (
+
+                                {/* Raised hand animation */}
+                                {animatedRaisedHands.size > 0 && (
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500 rounded-full p-3 animate-bounce transition-opacity duration-500 ease-out">
                                         <Hand size={32} className="text-white" />
                                     </div>
                                 )}
+
                                 {/* Name label */}
-                                {localAdminVideoTrack && <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-                                    Admin
-                                </div>}
+                                {localAdminVideoTrack && (
+                                    <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">
+                                        Admin
+                                    </div>
+                                )}
                             </div>
-                            {/* Smaller Remote Participants (if any, excluding dominant and screenshare owner) */}
+
+                            {/* Remote participants audio */}
                             {participants.length > 1 && (
                                 <>
                                     {participants.filter(p => p.id !== participants[0].id).map((p) => (
-
                                         <Fragment key={p.id}>
                                             {p.audioTrack && (
                                                 <audio
-                                                    key={p.id}
                                                     ref={(audioElement) => {
                                                         if (audioElement && p.audioTrack) {
                                                             audioElement.srcObject = new MediaStream([p.audioTrack]);
@@ -221,11 +225,8 @@ export const UserMeeting = () => {
                     )}
                 </div>
 
-                {/* Right Sidebars for Chat and People */}
-                {joined && showPeoplePanel && (
-                    <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
-                )}
-
+                {/* Right Sidebars */}
+                {joined && showPeoplePanel && <PeoplePanel onClose={() => setShowPeoplePanel(false)} />}
                 {joined && showChatBox && (
                     <div className="flex border-l bg-gray-900 text-white">
                         <div className="w-80 p-4 flex flex-col">

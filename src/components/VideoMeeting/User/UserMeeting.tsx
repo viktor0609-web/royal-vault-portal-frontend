@@ -249,7 +249,6 @@ export const UserMeeting = () => {
                 toggleFullscreen={toggleFullscreen}
                 isFullscreen={isFullscreen}
                 localParticipant={localParticipant}
-                hasLocalAudioPermission={hasLocalAudioPermission}
                 chatUnreadCount={chatUnreadCount}
             />
         </div>

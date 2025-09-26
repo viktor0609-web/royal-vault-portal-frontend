@@ -84,7 +84,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [raisedHands, setRaisedHands] = useState<Set<string>>(new Set());
   const [userName, setUserName] = useState<string>(''); // New state for user name
   const [localParticipant, setLocalParticipant] = useState<any>(null); // State for local participant
-  const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(true); // State for local audio permission
+  const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(false);
+
 
   const [backgroundFilterType, setBackgroundFilterType] = useState<BackgroundFilterType>('none');
   const [selectedBackgroundImage, setSelectedBackgroundImage] = useState<string | undefined>(undefined);
@@ -340,14 +341,9 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         const local = pList.find(p => p.local);
         setLocalParticipant(local);
         if (local) {
-          let canSendAudio = false;
-          if (typeof local.permissions?.canSend === 'boolean') {
-            canSendAudio = local.permissions.canSend;
-          } else if (Array.isArray(local.permissions?.canSend)) {
-            canSendAudio = local.permissions.canSend.includes('audio');
-          }
-          setHasLocalAudioPermission(canSendAudio);
-          if (!canSendAudio && !isMicrophoneMuted) {
+          // Keep the initial hasLocalAudioPermission setting (false for clients)
+          // Don't override it with participant permissions
+          if (!hasLocalAudioPermission && !isMicrophoneMuted) {
             dailyRoom.setLocalAudio(false);
             setIsMicrophoneMuted(true);
           }

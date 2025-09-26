@@ -293,11 +293,12 @@ export const AdminMeeting = () => {
                     )}
                 </div>
 
+                {joined && showPeoplePanel && (
+                    <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
+                )}
+
                 {joined && showChatBox && (
                     <div className="flex border-l bg-gray-900 text-white">
-                        {showPeoplePanel && (
-                            <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
-                        )}
                         <div className="w-80 p-4 flex flex-col">
                             <ChatBox />
                         </div>

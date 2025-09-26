@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand, MessageSquare, MessageSquareX } from "lucide-react";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { BackgroundFilterModal } from '../BackgroundFilterModal';
 
@@ -9,9 +9,11 @@ interface MeetingControlsBarProps {
   togglePeoplePanel: () => void;
   toggleChatBox: () => void;
   showChatBox: boolean;
+  toggleFullscreen: () => void;
+  isFullscreen: boolean;
 }
 
-export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox }) => {
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox, toggleFullscreen, isFullscreen }) => {
   const {
     joined,
     isManager,
@@ -94,6 +96,13 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
               className={`rounded-full p-3 h-auto w-auto ${showChatBox ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
             >
               {showChatBox ? <MessageSquareX size={24} /> : <MessageSquare size={24} />}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={toggleFullscreen}
+              className={`rounded-full p-3 h-auto w-auto ${isFullscreen ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+            >
+              {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
             </Button>
             {!isScreensharing ? (
               <Button variant="secondary" onClick={startScreenshare} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">

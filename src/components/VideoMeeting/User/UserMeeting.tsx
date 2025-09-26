@@ -5,31 +5,8 @@ import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
 import { Hand } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
+import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment } from "react";
-import React from "react";
-
-
-// 🔹 VideoPlayer Component (memoized to avoid re-renders)
-const VideoPlayer = React.memo(({ track, type }: { track: MediaStreamTrack | null, type?: "screen" | "camera" }) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
-
-    useEffect(() => {
-        if (videoRef.current && track) {
-            videoRef.current.srcObject = new MediaStream([track]);
-        }
-    }, [track]);
-
-    if (!track) return null;
-
-    return (
-        <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className={type === "screen" ? "w-full h-full object-contain" : "w-full h-full object-cover"}
-        />
-    );
-});
 
 
 export const UserMeeting = () => {
@@ -199,7 +176,10 @@ export const UserMeeting = () => {
                                 {/* Name label */}
                                 {mainVideoTrack && (
                                     <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-                                        {guestVideoTrack ? 'Guest' : 'You'}
+                                        {guestVideoTrack
+                                            ? `Guest: ${participants.find(p => !p.local && !p.permissions.canAdmin)?.name || 'Guest'}`
+                                            : `You: ${participants.find(p => p.local)?.name || 'User'}`
+                                        }
                                     </div>
                                 )}
                             </div>

@@ -5,6 +5,7 @@ import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
 import { Mic, MicOff, Hand } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
+import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment, useMemo } from "react";
 
 export const AdminMeeting = () => {
@@ -22,7 +23,6 @@ export const AdminMeeting = () => {
         isScreensharing,
         screenshareParticipantId,
         raisedHands,
-        dailyRoom
     } = useDailyMeeting();
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
@@ -34,17 +34,16 @@ export const AdminMeeting = () => {
         new Set()
     );
     const animationTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
-    const videoContainerRef = useRef<HTMLDivElement>(null);
 
-    // Video/Audio refs
-    const localVideoRef = useRef<HTMLVideoElement | null>(null);
-    const localTrackRef = useRef<MediaStreamTrack | null>(null);
-    const screenshareRef = useRef<HTMLVideoElement | null>(null);
+    const videoContainerRef = useRef<HTMLDivElement>(null);
+    // Audio refs
     const mainAudioRef = useRef<HTMLAudioElement | null>(null);
     const remoteAudioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
 
-    // Tracks
+    // Get the main video track - prioritize guest video, then local admin's video
+    const guestVideoTrack = participants.find(p => !p.local && !p.permissions.canAdmin)?.videoTrack;
     const localAdminVideoTrack = participants.find((p) => p.local)?.videoTrack;
+    const mainVideoTrack = guestVideoTrack || localAdminVideoTrack;
     const screenshareTrack = isScreensharing
         ? participants.find((p) => p.id === screenshareParticipantId)
             ?.screenVideoTrack
@@ -52,7 +51,7 @@ export const AdminMeeting = () => {
 
     useEffect(() => {
         setIsManager(true);
-    }, [setIsManager]);
+    }, []);
 
     // Auto-join the room when component mounts
     useEffect(() => {
@@ -62,30 +61,6 @@ export const AdminMeeting = () => {
         }
     }, [roomUrl, joined, isLoading, joinRoom]);
 
-    // Attach local video
-    useEffect(() => {
-        const updateLocalVideo = () => {
-            const localTrack = participants.find(p => p.local)?.videoTrack;
-            if (localVideoRef.current && localTrack && localTrackRef.current !== localTrack) {
-                localVideoRef.current.srcObject = new MediaStream([localTrack]);
-                localTrackRef.current = localTrack; // remember current track
-            }
-        };
-
-        updateLocalVideo(); // run immediately
-
-        dailyRoom?.on("participant-updated", updateLocalVideo);
-        return () => {
-            dailyRoom?.off("participant-updated", updateLocalVideo);
-        };
-    }, [participants, dailyRoom]);
-
-    // Attach screenshare
-    useEffect(() => {
-        if (screenshareRef.current && screenshareTrack) {
-            screenshareRef.current.srcObject = new MediaStream([screenshareTrack]);
-        }
-    }, [screenshareTrack]);
 
     // Attach main participant audio
     useEffect(() => {
@@ -224,26 +199,16 @@ export const AdminMeeting = () => {
                             <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
                                 {/* Screenshare first */}
                                 {screenshareTrack && (
-                                    <video
-                                        ref={screenshareRef}
-                                        autoPlay
-                                        playsInline
-                                        className="w-full h-full object-contain"
-                                    />
+                                    <VideoPlayer track={screenshareTrack} type="screen" />
                                 )}
 
-                                {/* Local admin video */}
-                                {!screenshareTrack && localAdminVideoTrack && (
-                                    <video
-                                        ref={localVideoRef}
-                                        autoPlay
-                                        playsInline
-                                        className="w-full h-full object-cover"
-                                    />
+                                {/* Main video - guest screen if available, otherwise admin screen */}
+                                {!screenshareTrack && mainVideoTrack && (
+                                    <VideoPlayer track={mainVideoTrack} type="camera" />
                                 )}
 
                                 {/* Fallback */}
-                                {!screenshareTrack && !localAdminVideoTrack && (
+                                {!screenshareTrack && !mainVideoTrack && (
                                     <div className="text-white text-xl">No active video.</div>
                                 )}
 
@@ -265,31 +230,41 @@ export const AdminMeeting = () => {
                                 )}
 
                                 {/* Name label */}
-                                {localAdminVideoTrack && <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-                                    {participants[0]?.local
-                                        ? `You:${participants[0]?.name}`
-                                        : participants[0]?.name || participants[0]?.id}
-                                </div>}
+                                {mainVideoTrack && (
+                                    <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">
+                                        {guestVideoTrack
+                                            ? `Guest: ${participants.find(p => !p.local && !p.permissions.canAdmin)?.name || 'Guest'}`
+                                            : `You: ${participants.find(p => p.local)?.name || 'Admin'}`
+                                        }
+                                    </div>
+                                )}
 
-                                {/* Admin controls */}
-                                {isManager && !participants[0]?.local && (
+                                {/* Admin controls - only show for guest video */}
+                                {isManager && guestVideoTrack && (
                                     <div className="absolute top-2 right-2 flex gap-2">
-                                        <Button
-                                            size="sm"
-                                            onClick={() => toggleParticipantAudio(participants[0].id)}
-                                            variant="secondary"
-                                            className="bg-opacity-50"
-                                        >
-                                            {participants[0]?.audioTrack ? <Mic /> : <MicOff />}
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            onClick={() => ejectParticipant(participants[0].id)}
-                                            variant="destructive"
-                                            className="bg-opacity-50"
-                                        >
-                                            Eject
-                                        </Button>
+                                        {(() => {
+                                            const guestParticipant = participants.find(p => !p.local && !p.permissions.canAdmin);
+                                            return guestParticipant ? (
+                                                <>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => toggleParticipantAudio(guestParticipant.id)}
+                                                        variant="secondary"
+                                                        className="bg-opacity-50"
+                                                    >
+                                                        {guestParticipant.audioTrack ? <Mic /> : <MicOff />}
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => ejectParticipant(guestParticipant.id)}
+                                                        variant="destructive"
+                                                        className="bg-opacity-50"
+                                                    >
+                                                        Eject
+                                                    </Button>
+                                                </>
+                                            ) : null;
+                                        })()}
                                     </div>
                                 )}
                             </div>

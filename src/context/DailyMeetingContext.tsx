@@ -82,7 +82,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [isScreensharing, setIsScreensharing] = useState<boolean>(false);
   const [screenshareParticipantId, setScreenshareParticipantId] = useState<string | null>(null);
   const [raisedHands, setRaisedHands] = useState<Set<string>>(new Set());
-  const [userName, setUserName] = useState<string>(''); // New state for user name
+  const [userName, setUserName] = useState<string>('New User'); // New state for user name
   const [localParticipant, setLocalParticipant] = useState<any>(null); // State for local participant
   const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(true);
 
@@ -324,6 +324,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!dailyRoom) return;
 
     const updateParticipants = async () => {
+      console.log("updateParticipants called");
+
       try {
         const pObj = await dailyRoom.participants();
         const pList = Object.values(pObj).map((participant: any) => ({

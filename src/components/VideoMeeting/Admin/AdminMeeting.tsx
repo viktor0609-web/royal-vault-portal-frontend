@@ -238,35 +238,6 @@ export const AdminMeeting = () => {
                                         }
                                     </div>
                                 )}
-
-                                {/* Admin controls - only show for guest video */}
-                                {isManager && guestVideoTrack && (
-                                    <div className="absolute top-2 right-2 flex gap-2">
-                                        {(() => {
-                                            const guestParticipant = participants.find(p => !p.local && !p.permissions.canAdmin);
-                                            return guestParticipant ? (
-                                                <>
-                                                    <Button
-                                                        size="sm"
-                                                        onClick={() => toggleParticipantAudio(guestParticipant.id)}
-                                                        variant="secondary"
-                                                        className="bg-opacity-50"
-                                                    >
-                                                        {guestParticipant.audioTrack ? <Mic /> : <MicOff />}
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        onClick={() => ejectParticipant(guestParticipant.id)}
-                                                        variant="destructive"
-                                                        className="bg-opacity-50"
-                                                    >
-                                                        Eject
-                                                    </Button>
-                                                </>
-                                            ) : null;
-                                        })()}
-                                    </div>
-                                )}
                             </div>
 
                             {/* Remote participants audio */}

@@ -28,6 +28,7 @@ export const AdminMeeting = () => {
     } = useDailyMeeting();
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
+    const [showChatBox, setShowChatBox] = useState<boolean>(true);
     const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(
         new Set()
     );
@@ -169,16 +170,16 @@ export const AdminMeeting = () => {
 
 
     return (
-        <div className="flex flex-col h-full w-full">
-            <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-col h-full w-full min-h-0 max-w-full">
+            <div className="flex flex-1 overflow-hidden min-h-0 max-w-full">
                 <div
                     id="daily-video-container"
-                    className={`flex-1 flex items-center justify-center bg-black ${joined ? "" : "p-4"
+                    className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full ${joined ? "" : "p-4"
                         }`}
                 >
                     {joined && (
-                        <div className="h-full flex flex-col">
-                            <div className="flex-grow flex items-center justify-center relative w-full h-full">
+                        <div className="h-full flex flex-col min-h-0 max-w-full">
+                            <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
                                 {/* Screenshare first */}
                                 {screenshareTrack && (
                                     <video
@@ -292,7 +293,7 @@ export const AdminMeeting = () => {
                     )}
                 </div>
 
-                {joined && (
+                {joined && showChatBox && (
                     <div className="flex border-l bg-gray-900 text-white">
                         {showPeoplePanel && (
                             <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
@@ -307,6 +308,8 @@ export const AdminMeeting = () => {
             <MeetingControlsBar
                 position="bottom"
                 togglePeoplePanel={() => setShowPeoplePanel((prev) => !prev)}
+                toggleChatBox={() => setShowChatBox((prev) => !prev)}
+                showChatBox={showChatBox}
             />
         </div>
     );

@@ -1,15 +1,17 @@
 import React from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand } from "lucide-react";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand, MessageSquare, MessageSquareX } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { BackgroundFilterModal } from '../BackgroundFilterModal';
 
 interface MeetingControlsBarProps {
   position: "top" | "bottom";
   togglePeoplePanel: () => void;
+  toggleChatBox: () => void;
+  showChatBox: boolean;
 }
 
-export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel }) => {
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox }) => {
   const {
     joined,
     isManager,
@@ -35,7 +37,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
   if (!joined) return null;
 
   return (
-    <div className={`flex justify-center items-center p-4 bg-gray-800 text-white ${position === "top" ? "justify-between" : "gap-8"}`}>
+    <div className={`flex justify-center items-center p-4 bg-gray-800 text-white flex-shrink-0 ${position === "top" ? "justify-between" : "gap-8"}`}>
       {position === "top" && (
         <div className="flex items-center gap-2">
           <span className="text-lg font-semibold">Waiting for others to join</span>
@@ -45,7 +47,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
       <div className="flex items-center gap-2">
         {position === "top" && isManager && (
           <div className="flex gap-4">
-           {!isRecording ? (
+            {!isRecording ? (
               <Button variant="ghost" className="text-white" onClick={() => { console.log("Start Recording Clicked"); startRecording(); }}>Start Recording</Button>
             ) : (
               <Button variant="ghost" className="text-white" onClick={() => { console.log("Stop Recording Clicked"); stopRecording(); }}>Stop Recording</Button>
@@ -85,6 +87,13 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
               className={`rounded-full p-3 h-auto w-auto ${raisedHands.has(dailyRoom?.participants().local.session_id || '') ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
             >
               <Hand size={24} />
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={toggleChatBox}
+              className={`rounded-full p-3 h-auto w-auto ${showChatBox ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+            >
+              {showChatBox ? <MessageSquareX size={24} /> : <MessageSquare size={24} />}
             </Button>
             {!isScreensharing ? (
               <Button variant="secondary" onClick={startScreenshare} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">

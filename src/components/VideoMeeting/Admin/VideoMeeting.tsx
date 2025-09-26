@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { BoxSelectIcon, UserIcon } from "lucide-react";
-import { Button } from "../../ui/button";
 import { AdminMeeting } from "./AdminMeeting";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui/select";
 
@@ -31,7 +30,6 @@ export const VideoMeeting = () => {
         <div className="flex-1 p-4 flex flex-col min-h-0">
           <AdminMeeting />
         </div>
-
       </div>
     </div>
   );

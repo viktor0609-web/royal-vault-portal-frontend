@@ -12,7 +12,6 @@ interface DailyMeetingContextType {
   setRoomUrl: (url: string) => void;
   joinRoom: () => void;
   leaveRoom: () => void;
-  createRoom: () => Promise<void>;
   isRecording: boolean;
   startRecording: () => Promise<void>;
   stopRecording: () => Promise<void>;
@@ -66,7 +65,7 @@ interface DailyMeetingContextType {
 const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(undefined);
 
 export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [roomUrl, setRoomUrl] = useState<string>('');
+  const [roomUrl, setRoomUrl] = useState<string>(import.meta.env.VITE_DAILY_ROOM_URL || '');
   const [roomName, setRoomName] = useState<string>('');
   const [joined, setJoined] = useState<boolean>(false);
   const [dailyRoom, setDailyRoom] = useState<DailyCall | null>(null);
@@ -122,36 +121,6 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   /* ---------- Room management ---------- */
 
-  const createRoom = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('https://api.daily.co/v1/rooms', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_DAILY_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          properties: {
-            enable_screenshare: true,
-            enable_prejoin_ui: false,
-            start_video_off: false,
-            start_audio_off: false,
-            owner_only_broadcast: false,
-            eject_at_room_exp: true,
-          },
-        }),
-      });
-      const data = await response.json();
-      setRoomUrl(data.url);
-      setRoomName(data.name);
-      console.log('Room created:', data);
-    } catch (error) {
-      console.error('Error creating room:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
   const getAdminToken = async (roomName: string) => {
     const response = await fetch("https://api.daily.co/v1/meeting-tokens", {
       method: "POST",
@@ -698,7 +667,6 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setRoomUrl,
         joinRoom,
         leaveRoom,
-        createRoom,
         isRecording,
         startRecording,
         stopRecording,

@@ -76,8 +76,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [hasMicPermission, setHasMicPermission] = useState<boolean>(false);
   const [hasCamPermission, setHasCamPermission] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isMicrophoneMuted, setIsMicrophoneMuted] = useState<boolean>(false);
-  const [isCameraOff, setIsCameraOff] = useState<boolean>(false);
+  const [isMicrophoneMuted, setIsMicrophoneMuted] = useState<boolean>(true);
+  const [isCameraOff, setIsCameraOff] = useState<boolean>(true);
   const [permissionRequested, setPermissionRequested] = useState<boolean>(false);
   const [isScreensharing, setIsScreensharing] = useState<boolean>(false);
   const [screenshareParticipantId, setScreenshareParticipantId] = useState<string | null>(null);
@@ -151,7 +151,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setLocalStream(stream);
       setHasCamPermission(true);
       setHasMicPermission(true);
-      setIsMicrophoneMuted(false);
+      setIsMicrophoneMuted(true);
       setIsCameraOff(false);
     } catch (error) {
       console.error('Error starting local preview:', error);

@@ -5,7 +5,7 @@ import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
 import { Mic, MicOff, Hand } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
-import { useState, useEffect, useRef, Fragment } from "react";
+import { useState, useEffect, useRef, Fragment, useMemo } from "react";
 
 export const AdminMeeting = () => {
     const {
@@ -35,6 +35,7 @@ export const AdminMeeting = () => {
 
     // Video/Audio refs
     const localVideoRef = useRef<HTMLVideoElement | null>(null);
+    const localTrackRef = useRef<MediaStreamTrack | null>(null);
     const screenshareRef = useRef<HTMLVideoElement | null>(null);
     const mainAudioRef = useRef<HTMLAudioElement | null>(null);
     const remoteAudioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
@@ -54,21 +55,20 @@ export const AdminMeeting = () => {
     useEffect(() => {
         const updateLocalVideo = () => {
             const localTrack = participants.find(p => p.local)?.videoTrack;
-            if (localVideoRef.current && localTrack) {
+            if (localVideoRef.current && localTrack && localTrackRef.current !== localTrack) {
                 localVideoRef.current.srcObject = new MediaStream([localTrack]);
+                localTrackRef.current = localTrack; // remember current track
             }
         };
 
         updateLocalVideo(); // run immediately
 
-        // listen for participant updates (e.g. when processor changes)
         dailyRoom?.on("participant-updated", updateLocalVideo);
-
         return () => {
             dailyRoom?.off("participant-updated", updateLocalVideo);
         };
     }, [participants, dailyRoom]);
-    
+
     // Attach screenshare
     useEffect(() => {
         if (screenshareRef.current && screenshareTrack) {
@@ -166,6 +166,7 @@ export const AdminMeeting = () => {
     if (isPermissionModalOpen) {
         return <PreJoinScreen />;
     }
+
 
     return (
         <div className="flex flex-col h-full w-full">

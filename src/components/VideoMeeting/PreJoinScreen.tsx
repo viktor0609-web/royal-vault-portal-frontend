@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Button } from "../ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../ui/select";
 import { Video, Mic, Volume2, MicOff, VideoOff } from "lucide-react";
@@ -31,6 +31,15 @@ export const PreJoinScreen: React.FC = () => {
     userName,
     setUserName,
   } = useDailyMeeting();
+
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Attach localStream to video element
+  useEffect(() => {
+    if (localVideoRef.current && localStream) {
+      localVideoRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
 
   if (isLoading) {
     return <div className="flex flex-1 items-center justify-center text-xl bg-gray-800 text-white">Joining...</div>;
@@ -74,27 +83,24 @@ export const PreJoinScreen: React.FC = () => {
       />
 
       <div className="relative w-[640px] h-[360px] bg-black rounded-lg overflow-hidden mb-4">
-        {localStream && (
+        {localStream ? (
           <video
-            ref={(videoElement) => {
-              if (videoElement && localStream) {
-                videoElement.srcObject = localStream;
-              }
-            }}
+            ref={localVideoRef}
             autoPlay
             playsInline
-            muted // Always mute local preview
+            muted
             className="w-full h-full object-cover"
           />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-white">Camera Off</div>
         )}
-        {!localStream && <div className="w-full h-full flex items-center justify-center text-white">Camera Off</div>}
 
         <div className="absolute bottom-2 left-2 flex gap-2">
           <Button variant="secondary" size="icon" onClick={toggleMicrophone}>
-            {isMicrophoneMuted ? <MicOff /> : <Mic />} {/* Icon to indicate mic status */}
+            {isMicrophoneMuted ? <MicOff /> : <Mic />}
           </Button>
           <Button variant="secondary" size="icon" onClick={toggleCamera}>
-            {isCameraOff ? <VideoOff /> : <Video />} {/* Icon to indicate video status */}
+            {isCameraOff ? <VideoOff /> : <Video />}
           </Button>
         </div>
       </div>
@@ -149,7 +155,11 @@ export const PreJoinScreen: React.FC = () => {
         </div>
       </div>
 
-      <Button onClick={()=> isManager ? joinMeetingAsAdmin() : joinMeetingAsGuest()} className="w-[150px] bg-green-500 hover:bg-green-600" disabled={!localStream || !userName}>
+      <Button
+        onClick={() => isManager ? joinMeetingAsAdmin() : joinMeetingAsGuest()}
+        className="w-[150px] bg-green-500 hover:bg-green-600"
+        disabled={!localStream || !userName}
+      >
         Join
       </Button>
     </div>

@@ -21,6 +21,7 @@ export const PreJoinScreen: React.FC = () => {
     toggleMicrophone,
     joinMeetingAsAdmin,
     joinMeetingAsGuest,
+    joinMeetingAsClient,
     isMicrophoneMuted,
     isCameraOff,
     isLoading,
@@ -30,6 +31,7 @@ export const PreJoinScreen: React.FC = () => {
     requestPermissions,
     userName,
     setUserName,
+    userRole,
   } = useDailyMeeting();
 
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -156,7 +158,16 @@ export const PreJoinScreen: React.FC = () => {
       </div>
 
       <Button
-        onClick={() => isManager ? joinMeetingAsAdmin() : joinMeetingAsGuest()}
+        onClick={() => {
+          console.log('Join button clicked, userRole:', userRole);
+          if (userRole === 'admin') {
+            joinMeetingAsAdmin();
+          } else if (userRole === 'client') {
+            joinMeetingAsClient();
+          } else {
+            joinMeetingAsGuest();
+          }
+        }}
         className="w-[150px] bg-green-500 hover:bg-green-600"
         disabled={!localStream || !userName}
       >

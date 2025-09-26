@@ -35,6 +35,12 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
         dailyRoom,
     } = useDailyMeeting();
 
+    // Debug logging
+    console.log('GuestMeetingControlsBar - canControlAudio:', canControlAudio);
+    console.log('GuestMeetingControlsBar - canControlVideo:', canControlVideo);
+    console.log('GuestMeetingControlsBar - isMicrophoneMuted:', isMicrophoneMuted);
+    console.log('GuestMeetingControlsBar - isCameraOff:', isCameraOff);
+
     if (!joined) return null;
 
     return (

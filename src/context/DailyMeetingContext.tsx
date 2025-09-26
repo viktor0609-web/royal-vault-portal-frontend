@@ -39,6 +39,7 @@ interface DailyMeetingContextType {
   toggleMicrophone: () => void;
   joinMeetingAsAdmin: () => Promise<void>;
   joinMeetingAsGuest: () => Promise<void>;
+  joinMeetingAsClient: () => Promise<void>;
   isMicrophoneMuted: boolean;
   isCameraOff: boolean;
   permissionRequested: boolean;
@@ -99,6 +100,11 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const canControlAudio = userRole === 'guest' || userRole === 'admin';
   // Video: All users can control
   const canControlVideo = true;
+
+  // Debug logging
+  console.log('Current userRole:', userRole);
+  console.log('canControlAudio:', canControlAudio);
+  console.log('canControlVideo:', canControlVideo);
 
   // Predefined background images (relative paths OK — code resolves to absolute)
   const backgroundImages = [
@@ -162,6 +168,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setLocalStream(stream);
       setHasCamPermission(true);
       setHasMicPermission(true);
+      // Keep preview unmuted for testing, but actual join will be muted
       setIsMicrophoneMuted(false);
       setIsCameraOff(false);
     } catch (error) {
@@ -196,6 +203,10 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setUserRole('guest');
     }
 
+    // Ensure all users enter muted by default
+    setIsMicrophoneMuted(true);
+    console.log("All users will enter muted by default");
+
     // Show pre-join UI / preview:
     startLocalPreview();
     setIsPermissionModalOpen(true);
@@ -204,6 +215,10 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const joinMeetingAsAdmin = async () => {
     console.log("join as admin");
     setUserRole('admin'); // Set role as admin
+    console.log("Set userRole to admin");
+    // Ensure admin enters muted
+    setIsMicrophoneMuted(true);
+    console.log("Admin will enter muted");
     setIsLoading(true);
     // stop preview to avoid duplicate tracks when joining
     stopLocalPreview();
@@ -222,6 +237,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       const token = await getAdminToken(roomName);
       // join the call
+      console.log("Admin joining with startAudioOff:", isMicrophoneMuted, "startVideoOff:", isCameraOff);
       await currentDailyRoom.join({
         token,
         startVideoOff: isCameraOff,
@@ -239,8 +255,12 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
   const joinMeetingAsGuest = async () => {
-    console.log("join as user");
+    console.log("join as guest");
     setUserRole('guest'); // Set role as guest
+    console.log("Set userRole to guest");
+    // Ensure guest enters muted
+    setIsMicrophoneMuted(true);
+    console.log("Guest will enter muted");
     setIsLoading(true);
     // stop preview to avoid duplicate tracks when joining
     stopLocalPreview();
@@ -258,6 +278,48 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
 
       // join the call
+      console.log("Guest joining with startAudioOff:", isMicrophoneMuted, "startVideoOff:", isCameraOff);
+      await currentDailyRoom.join({
+        startVideoOff: isCameraOff,
+        startAudioOff: isMicrophoneMuted,
+      });
+
+      setJoined(true);
+      setIsPermissionModalOpen(false);
+    } catch (error) {
+      console.error('Error joining Daily.co room:', error);
+      // re-start preview if join fails
+      startLocalPreview();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const joinMeetingAsClient = async () => {
+    console.log("join as client");
+    setUserRole('client'); // Set role as client
+    console.log("Set userRole to client");
+    // Ensure client enters muted
+    setIsMicrophoneMuted(true);
+    console.log("Client will enter muted");
+    setIsLoading(true);
+    // stop preview to avoid duplicate tracks when joining
+    stopLocalPreview();
+    try {
+      let currentDailyRoom = dailyRoom;
+      if (!currentDailyRoom) {
+        currentDailyRoom = DailyIframe.createCallObject({
+          url: roomUrl,
+          userName: userName || 'Client', // Pass userName here
+          // pass device IDs as sources if selected
+          videoSource: selectedCamera || undefined,
+          audioSource: selectedMicrophone || undefined,
+        });
+        setDailyRoom(currentDailyRoom);
+      }
+
+      // join the call
+      console.log("Client joining with startAudioOff:", isMicrophoneMuted, "startVideoOff:", isCameraOff);
       await currentDailyRoom.join({
         startVideoOff: isCameraOff,
         startAudioOff: isMicrophoneMuted,
@@ -717,6 +779,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         toggleMicrophone,
         joinMeetingAsAdmin,
         joinMeetingAsGuest,
+        joinMeetingAsClient,
         isMicrophoneMuted,
         isCameraOff,
         permissionRequested,

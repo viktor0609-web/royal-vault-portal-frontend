@@ -40,6 +40,12 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
 
   const raisedHandsCount = raisedHands.size;
 
+  // Debug logging
+  console.log('UserMeetingControlsBar - canControlAudio:', canControlAudio);
+  console.log('UserMeetingControlsBar - canControlVideo:', canControlVideo);
+  console.log('UserMeetingControlsBar - isMicrophoneMuted:', isMicrophoneMuted);
+  console.log('UserMeetingControlsBar - isCameraOff:', isCameraOff);
+
   // Determine if the local user can send audio
   const canSendAudio = localParticipant?.permissions?.canSend;
 

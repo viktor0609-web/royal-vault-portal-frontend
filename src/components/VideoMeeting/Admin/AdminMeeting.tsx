@@ -26,7 +26,7 @@ export const AdminMeeting = () => {
     } = useDailyMeeting();
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
-    const [showChatBox, setShowChatBox] = useState<boolean>(true);
+    const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const hasAttemptedJoin = useRef<boolean>(false);
     const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(

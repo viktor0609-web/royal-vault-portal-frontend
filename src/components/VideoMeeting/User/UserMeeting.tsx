@@ -14,7 +14,6 @@ export const UserMeeting = () => {
         joined,
         participants,
         isManager,
-        setRoomUrl,
         joinRoom,
         isPermissionModalOpen,
         isLoading,
@@ -25,14 +24,69 @@ export const UserMeeting = () => {
         hasLocalAudioPermission, // Import hasLocalAudioPermission
     } = useDailyMeeting();
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
+    const [showChatBox, setShowChatBox] = useState<boolean>(false);
+    const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(new Set());
     const animationTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
+    const hasAttemptedJoin = useRef<boolean>(false);
+    const videoContainerRef = useRef<HTMLDivElement>(null);
 
     // Get the local admin's video track
     const localAdminVideoTrack = participants.find(p => p.permissions.canAdmin)?.videoTrack;
     participants.forEach(p => {
         console.log(p);
     })
+
+    // Auto-join the room when component mounts
+    useEffect(() => {
+        if (roomUrl && !joined && !isLoading && !hasAttemptedJoin.current) {
+            hasAttemptedJoin.current = true;
+            joinRoom();
+        }
+    }, [roomUrl, joined, isLoading, joinRoom]);
+
+    const toggleFullscreen = async () => {
+        if (!videoContainerRef.current) return;
+
+        try {
+            if (!isFullscreen) {
+                if (videoContainerRef.current.requestFullscreen) {
+                    await videoContainerRef.current.requestFullscreen();
+                } else if ((videoContainerRef.current as any).webkitRequestFullscreen) {
+                    await (videoContainerRef.current as any).webkitRequestFullscreen();
+                } else if ((videoContainerRef.current as any).msRequestFullscreen) {
+                    await (videoContainerRef.current as any).msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if ((document as any).webkitExitFullscreen) {
+                    await (document as any).webkitExitFullscreen();
+                } else if ((document as any).msExitFullscreen) {
+                    await (document as any).msExitFullscreen();
+                }
+            }
+        } catch (error) {
+            console.error("Error toggling fullscreen:", error);
+        }
+    };
+
+    // Listen for fullscreen changes
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+        };
+    }, []);
 
     useEffect(() => {
         const currentRaisedIds = Array.from(raisedHands);
@@ -77,15 +131,6 @@ export const UserMeeting = () => {
         };
     }, [raisedHands]);
 
-    const copyRoomUrl = () => {
-        if (roomUrl) {
-            navigator.clipboard.writeText(roomUrl).then(() => {
-                alert("Room URL copied to clipboard!");
-            }).catch((error) => {
-                console.error("Failed to copy URL:", error);
-            });
-        }
-    };
 
     if (isLoading && !isPermissionModalOpen) {
         return <div className="flex flex-1 items-center justify-center text-xl bg-gray-800 text-white">Loading...</div>;
@@ -101,15 +146,17 @@ export const UserMeeting = () => {
 
 
     return (
-        <div className="flex flex-col h-full w-full">
-            {/* Top Control Bar */}
-
+        <div className="flex flex-col h-full w-full min-h-0 max-w-full">
             {/* Main Meeting Area */}
-            <div className="flex flex-1 overflow-hidden">
-                <div id="daily-video-container" className={`flex-1 flex items-center justify-center bg-black ${joined ? "" : "p-4"}`}>
+            <div className="flex flex-1 overflow-hidden min-h-0 max-w-full">
+                <div
+                    ref={videoContainerRef}
+                    id="daily-video-container"
+                    className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full ${joined ? "" : "p-4"}`}
+                >
                     {joined && (
-                        <div className=" h-full flex  flex-col">
-                            <div className="flex-grow flex items-center justify-center relative w-full h-full">
+                        <div className="h-full flex flex-col min-h-0 max-w-full">
+                            <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
                                 {/* Main Video Display: Prioritize screenshare, then local admin camera */}
                                 {screenshareTrack && (
                                     <video
@@ -172,30 +219,15 @@ export const UserMeeting = () => {
                             )}
                         </div>
                     )}
-                    {!joined && (
-                        <div className="flex flex-col gap-4 items-center justify-center p-4 bg-gray-800 text-white w-full h-full">
-                            <h1 className="text-3xl font-bold mb-4">Welcome to the Meeting</h1>
-                            <div className="flex flex-col gap-4 w-full max-w-md">
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Enter room URL to join"
-                                        value={roomUrl}
-                                        onChange={(e) => setRoomUrl(e.target.value)}
-                                        className="flex-1 p-2 border rounded-md text-black"
-                                    />
-                                    <Button onClick={copyRoomUrl}>Copy</Button>
-                                </div>
-                                <Button onClick={joinRoom} disabled={!roomUrl}>Join Room</Button>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {/* Right Sidebars for Chat and People */}
-                {joined && (
+                {joined && showPeoplePanel && (
+                    <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
+                )}
+
+                {joined && showChatBox && (
                     <div className="flex border-l bg-gray-900 text-white">
-                        {showPeoplePanel && <PeoplePanel onClose={() => setShowPeoplePanel(false)} />}
                         <div className="w-80 p-4 flex flex-col">
                             <ChatBox />
                         </div>
@@ -204,7 +236,16 @@ export const UserMeeting = () => {
             </div>
 
             {/* Bottom Control Bar */}
-            <MeetingControlsBar position="bottom" togglePeoplePanel={() => setShowPeoplePanel(prev => !prev)} localParticipant={localParticipant} hasLocalAudioPermission={hasLocalAudioPermission}/>
+            <MeetingControlsBar
+                position="bottom"
+                togglePeoplePanel={() => setShowPeoplePanel(prev => !prev)}
+                toggleChatBox={() => setShowChatBox(prev => !prev)}
+                showChatBox={showChatBox}
+                toggleFullscreen={toggleFullscreen}
+                isFullscreen={isFullscreen}
+                localParticipant={localParticipant}
+                hasLocalAudioPermission={hasLocalAudioPermission}
+            />
         </div>
     );
 };

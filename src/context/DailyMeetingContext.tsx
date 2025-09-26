@@ -84,7 +84,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [raisedHands, setRaisedHands] = useState<Set<string>>(new Set());
   const [userName, setUserName] = useState<string>(''); // New state for user name
   const [localParticipant, setLocalParticipant] = useState<any>(null); // State for local participant
-  const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(false);
+  const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(true);
 
 
   const [backgroundFilterType, setBackgroundFilterType] = useState<BackgroundFilterType>('none');

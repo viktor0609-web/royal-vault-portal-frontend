@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { BackgroundFilterModal } from '../BackgroundFilterModal';
 
@@ -29,8 +29,6 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
     startScreenshare,
     stopScreenshare,
     raisedHands,
-    raiseHand,
-    lowerHand,
     dailyRoom,
   } = useDailyMeeting();
 
@@ -84,13 +82,6 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
                   <span className="sr-only">users with raised hands</span>
                 </span>
               )}
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => (raisedHands.has(dailyRoom?.participants().local.session_id || '') ? lowerHand() : raiseHand())}
-              className={`rounded-full p-3 h-auto w-auto ${raisedHands.has(dailyRoom?.participants().local.session_id || '') ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
-            >
-              <Hand size={24} />
             </Button>
             <Button
               variant="secondary"

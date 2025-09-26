@@ -28,6 +28,7 @@ export const AdminMeeting = () => {
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(true);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+    const hasAttemptedJoin = useRef<boolean>(false);
     const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(
         new Set()
     );
@@ -54,7 +55,8 @@ export const AdminMeeting = () => {
 
     // Auto-join the room when component mounts
     useEffect(() => {
-        if (roomUrl && !joined && !isLoading) {
+        if (roomUrl && !joined && !isLoading && !hasAttemptedJoin.current) {
+            hasAttemptedJoin.current = true;
             joinRoom();
         }
     }, [roomUrl, joined, isLoading, joinRoom]);

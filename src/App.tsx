@@ -105,6 +105,9 @@ const App = () => (
                   <Route path="/verify/:token" element={<SetPassword />} />
                   <Route path="/reset-password/:token" element={<ReSettingPasswordPage />} />
 
+                  {/* Guest webinar route - no authentication required */}
+                  <Route path="/webinar_guest" element={<UserMeeting />} />
+
                   <Route path="/webinar_admin" element={<AdminMeeting />} />
                   <Route path="/webinar_user" element={<UserMeeting />} />
 

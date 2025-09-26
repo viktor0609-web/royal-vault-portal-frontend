@@ -54,36 +54,49 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-3">
-        {participants.map((p) => (
-          <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{p.local ? "You (Admin)" : p.name || `Guest ${p.id.substring(0, 4)}`}</span>
-              {p.audioTrack ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
-              {p.videoTrack ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
-              {raisedHands.has(p.id) && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="p-0 h-auto w-auto"
-                  onClick={() => isManager && !p.local && lowerParticipantHand(p.id)}
-                  disabled={!isManager || p.local}
-                >
-                  <Hand size={16} className="text-blue-500" />
-                </Button>
+        {participants.map((p) => {
+          // Determine role for display
+          const getRole = (participant: any) => {
+            if (participant.local && participant.permissions.canAdmin) return "Admin";
+            if (participant.local && !participant.permissions.canAdmin) return "User";
+            if (!participant.local && !participant.permissions.canAdmin) return "Guest";
+            return "Unknown";
+          };
+
+          const role = getRole(p);
+          const displayName = p.local ? "You" : (p.name || `Guest ${p.id.substring(0, 4)}`);
+
+          return (
+            <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">{displayName} ({role})</span>
+                {p.audioTrack ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
+                {p.videoTrack ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
+                {raisedHands.has(p.id) && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="p-0 h-auto w-auto"
+                    onClick={() => isManager && !p.local && lowerParticipantHand(p.id)}
+                    disabled={!isManager || p.local}
+                  >
+                    <Hand size={16} className="text-blue-500" />
+                  </Button>
+                )}
+              </div>
+              {isManager && !p.local && (
+                <div className="flex gap-1">
+                  <Button size="sm" onClick={() => toggleParticipantAudioPermission(p.id)} variant="secondary" className="bg-opacity-50 p-1 h-auto w-auto">
+                    {p.permissions?.canSend === true ? <Mic size={16} /> : <MicOff size={16} />}
+                  </Button>
+                  <Button size="sm" onClick={() => ejectParticipant(p.id)} variant="destructive" className="bg-opacity-50 p-1 h-auto w-auto">
+                    Eject
+                  </Button>
+                </div>
               )}
             </div>
-            {isManager && !p.local && (
-              <div className="flex gap-1">
-                <Button size="sm" onClick={() => toggleParticipantAudioPermission(p.id)} variant="secondary" className="bg-opacity-50 p-1 h-auto w-auto">
-                  {p.permissions?.canSend === true ? <Mic size={16} /> : <MicOff size={16} />}
-                </Button>
-                <Button size="sm" onClick={() => ejectParticipant(p.id)} variant="destructive" className="bg-opacity-50 p-1 h-auto w-auto">
-                  Eject
-                </Button>
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

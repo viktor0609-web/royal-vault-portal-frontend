@@ -1,0 +1,135 @@
+import React from 'react';
+import { Button } from "../../ui/button";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
+import { useDailyMeeting } from "../../../context/DailyMeetingContext";
+import { BackgroundFilterModal } from '../BackgroundFilterModal';
+
+interface MeetingControlsBarProps {
+    position: "top" | "bottom";
+    togglePeoplePanel: () => void;
+    toggleChatBox: () => void;
+    showChatBox: boolean;
+    toggleFullscreen: () => void;
+    isFullscreen: boolean;
+    chatUnreadCount?: number;
+}
+
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
+    position,
+    togglePeoplePanel,
+    toggleChatBox,
+    showChatBox,
+    toggleFullscreen,
+    isFullscreen,
+    chatUnreadCount = 0
+}) => {
+    const {
+        joined,
+        isManager,
+        isRecording,
+        startRecording,
+        stopRecording,
+        leaveRoom,
+        toggleCamera,
+        toggleMicrophone,
+        isMicrophoneMuted,
+        isCameraOff,
+        isScreensharing,
+        startScreenshare,
+        stopScreenshare,
+        raisedHands,
+        raiseHand,
+        lowerHand,
+        dailyRoom,
+        hasLocalAudioPermission,
+    } = useDailyMeeting();
+
+    if (!joined) return null;
+
+    const raisedHandsCount = raisedHands.size;
+
+    return (
+        <div className={`flex items-center justify-between p-4 bg-gray-800 ${position === "top" ? "border-b" : "border-t"}`}>
+            <div className="flex items-center gap-2">
+                {position === "top" && (
+                    <div className="flex gap-4">
+                        <span className="text-sm text-white">Guest View - Webinar Mode</span>
+                    </div>
+                )}
+
+                {position === "top" && <Button variant="ghost" className="text-white"><LayoutGrid className="mr-2" />Speaker view</Button>}
+
+                {position === "bottom" && (
+                    <>
+                        <Button
+                            variant="secondary"
+                            onClick={toggleCamera}
+                            className={`rounded-full p-3 h-auto w-auto ${isCameraOff ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+                        >
+                            {isCameraOff ? <VideoOff size={24} /> : <Video size={24} />}
+                        </Button>
+
+                        <Button
+                            variant="secondary"
+                            onClick={toggleMicrophone}
+                            disabled={!hasLocalAudioPermission}
+                            className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!hasLocalAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            {isMicrophoneMuted ? <MicOff size={24} /> : <Mic size={24} />}
+                        </Button>
+
+                        <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto relative">
+                            <Users size={24} />
+                            {raisedHandsCount > 0 && (
+                                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
+                                    {raisedHandsCount}
+                                    <span className="sr-only">users with raised hands</span>
+                                </span>
+                            )}
+                        </Button>
+
+                        <Button
+                            variant="secondary"
+                            onClick={() => (raisedHands.has(dailyRoom?.participants().local.session_id || '') ? lowerHand() : raiseHand())}
+                            className={`rounded-full p-3 h-auto w-auto ${raisedHands.has(dailyRoom?.participants().local.session_id || '') ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+                        >
+                            <Hand size={24} />
+                        </Button>
+
+                        <Button
+                            variant="secondary"
+                            onClick={toggleChatBox}
+                            className={`rounded-full p-3 h-auto w-auto ${showChatBox ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white relative`}
+                        >
+                            {showChatBox ? <MessageSquareX size={24} /> : <MessageSquare size={24} />}
+                            {!showChatBox && chatUnreadCount > 0 && (
+                                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
+                                    {chatUnreadCount}
+                                    <span className="sr-only">unread messages</span>
+                                </span>
+                            )}
+                        </Button>
+
+                        <Button
+                            variant="secondary"
+                            onClick={toggleFullscreen}
+                            className={`rounded-full p-3 h-auto w-auto ${isFullscreen ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+                        >
+                            {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+                        </Button>
+
+                        <BackgroundFilterModal>
+                            <Button variant="secondary" className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
+                                <Filter size={24} />
+                            </Button>
+                        </BackgroundFilterModal>
+
+                        <Button onClick={leaveRoom} variant="destructive" className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 h-auto w-auto">
+                            <LogOut size={24} />
+                        </Button>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};

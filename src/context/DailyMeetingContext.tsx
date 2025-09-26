@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import DailyIframe, { DailyCall } from '@daily-co/daily-js';
 
 type BackgroundFilterType = 'none' | 'blur' | 'image';
@@ -140,7 +140,36 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return data.token; // ✅ admin token
   };
 
-  const joinRoom = () => {
+  const startLocalPreview = useCallback(async () => {
+    if (localStream) stopLocalPreview();
+    setPermissionRequested(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true,
+        audio: selectedMicrophone ? { deviceId: { exact: selectedMicrophone } } : true,
+      });
+      setLocalStream(stream);
+      setHasCamPermission(true);
+      setHasMicPermission(true);
+      setIsMicrophoneMuted(false);
+      setIsCameraOff(false);
+    } catch (error) {
+      console.error('Error starting local preview:', error);
+      if (error instanceof DOMException && error.name === 'NotReadableError') {
+        console.error('NotReadableError: device in use or inaccessible.');
+      }
+      setHasCamPermission(false);
+      setHasMicPermission(false);
+      setLocalStream(null);
+    }
+  }, [localStream, selectedCamera, selectedMicrophone]);
+
+  const stopLocalPreview = useCallback(() => {
+    localStream?.getTracks().forEach((t) => t.stop());
+    setLocalStream(null);
+  }, [localStream]);
+
+  const joinRoom = useCallback(() => {
     if (!roomUrl) {
       alert('Please create a room first.');
       return;
@@ -148,7 +177,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Show pre-join UI / preview:
     startLocalPreview();
     setIsPermissionModalOpen(true);
-  };
+  }, [roomUrl, startLocalPreview]);
 
   const joinMeetingAsAdmin = async () => {
     console.log("join as admin");
@@ -276,35 +305,6 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     } catch (err) {
       console.error('Error enumerating devices:', err);
     }
-  };
-
-  const startLocalPreview = async () => {
-    if (localStream) stopLocalPreview();
-    setPermissionRequested(true);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: selectedCamera ? { deviceId: { exact: selectedCamera } } : true,
-        audio: selectedMicrophone ? { deviceId: { exact: selectedMicrophone } } : true,
-      });
-      setLocalStream(stream);
-      setHasCamPermission(true);
-      setHasMicPermission(true);
-      setIsMicrophoneMuted(false);
-      setIsCameraOff(false);
-    } catch (error) {
-      console.error('Error starting local preview:', error);
-      if (error instanceof DOMException && error.name === 'NotReadableError') {
-        console.error('NotReadableError: device in use or inaccessible.');
-      }
-      setHasCamPermission(false);
-      setHasMicPermission(false);
-      setLocalStream(null);
-    }
-  };
-
-  const stopLocalPreview = () => {
-    localStream?.getTracks().forEach((t) => t.stop());
-    setLocalStream(null);
   };
 
   /* ---------- Meeting / participants ---------- */

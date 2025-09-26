@@ -70,6 +70,8 @@ export const PreJoinScreen: React.FC = () => {
     );
   }
 
+  console.log("rendering")
+
   return (
     <div className="flex flex-col items-center justify-center h-full w-full p-4 bg-gray-100 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-4">Ready to join?</h2>

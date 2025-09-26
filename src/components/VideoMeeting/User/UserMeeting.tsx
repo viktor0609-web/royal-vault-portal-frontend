@@ -57,8 +57,10 @@ export const UserMeeting = () => {
     const hasAttemptedJoin = useRef<boolean>(false);
     const videoContainerRef = useRef<HTMLDivElement>(null);
 
-    // Get the local admin's video track
-    const localAdminVideoTrack = participants.find(p => p.permissions.canAdmin)?.videoTrack;
+    // Get the main video track - prioritize guest video, then local user's video
+    const guestVideoTrack = participants.find(p => !p.local && !p.permissions.canAdmin)?.videoTrack;
+    const localUserVideoTrack = participants.find(p => p.local)?.videoTrack;
+    const mainVideoTrack = guestVideoTrack || localUserVideoTrack;
 
     // Auto-join the room when component mounts
     useEffect(() => {
@@ -182,8 +184,8 @@ export const UserMeeting = () => {
                             <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
                                 {/* Main Video Display */}
                                 {screenshareTrack && <VideoPlayer track={screenshareTrack} type="screen" />}
-                                {!screenshareTrack && localAdminVideoTrack && <VideoPlayer track={localAdminVideoTrack} type="camera" />}
-                                {!screenshareTrack && !localAdminVideoTrack && (
+                                {!screenshareTrack && mainVideoTrack && <VideoPlayer track={mainVideoTrack} type="camera" />}
+                                {!screenshareTrack && !mainVideoTrack && (
                                     <div className="text-white text-xl">No active video.</div>
                                 )}
 
@@ -195,9 +197,9 @@ export const UserMeeting = () => {
                                 )}
 
                                 {/* Name label */}
-                                {localAdminVideoTrack && (
+                                {mainVideoTrack && (
                                     <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-                                        Admin
+                                        {guestVideoTrack ? 'Guest' : 'You'}
                                     </div>
                                 )}
                             </div>

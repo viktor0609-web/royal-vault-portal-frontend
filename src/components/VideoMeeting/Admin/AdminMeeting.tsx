@@ -29,10 +29,12 @@ export const AdminMeeting = () => {
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(true);
+    const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(
         new Set()
     );
     const animationTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
+    const videoContainerRef = useRef<HTMLDivElement>(null);
 
     // Video/Audio refs
     const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -156,6 +158,49 @@ export const AdminMeeting = () => {
         }
     };
 
+    const toggleFullscreen = async () => {
+        if (!videoContainerRef.current) return;
+
+        try {
+            if (!isFullscreen) {
+                if (videoContainerRef.current.requestFullscreen) {
+                    await videoContainerRef.current.requestFullscreen();
+                } else if ((videoContainerRef.current as any).webkitRequestFullscreen) {
+                    await (videoContainerRef.current as any).webkitRequestFullscreen();
+                } else if ((videoContainerRef.current as any).msRequestFullscreen) {
+                    await (videoContainerRef.current as any).msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    await document.exitFullscreen();
+                } else if ((document as any).webkitExitFullscreen) {
+                    await (document as any).webkitExitFullscreen();
+                } else if ((document as any).msExitFullscreen) {
+                    await (document as any).msExitFullscreen();
+                }
+            }
+        } catch (error) {
+            console.error("Error toggling fullscreen:", error);
+        }
+    };
+
+    // Listen for fullscreen changes
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+        document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+        return () => {
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+        };
+    }, []);
+
     if (isLoading && !isPermissionModalOpen) {
         return (
             <div className="flex flex-1 items-center justify-center text-xl bg-gray-800 text-white">
@@ -173,6 +218,7 @@ export const AdminMeeting = () => {
         <div className="flex flex-col h-full w-full min-h-0 max-w-full">
             <div className="flex flex-1 overflow-hidden min-h-0 max-w-full">
                 <div
+                    ref={videoContainerRef}
                     id="daily-video-container"
                     className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full ${joined ? "" : "p-4"
                         }`}
@@ -311,6 +357,8 @@ export const AdminMeeting = () => {
                 togglePeoplePanel={() => setShowPeoplePanel((prev) => !prev)}
                 toggleChatBox={() => setShowChatBox((prev) => !prev)}
                 showChatBox={showChatBox}
+                toggleFullscreen={toggleFullscreen}
+                isFullscreen={isFullscreen}
             />
         </div>
     );

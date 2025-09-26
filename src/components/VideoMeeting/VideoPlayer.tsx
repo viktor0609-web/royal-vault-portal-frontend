@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 
 // 🔹 VideoPlayer Component (memoized to avoid re-renders)
-export const VideoPlayer = React.memo(({ track, type }: { track: MediaStreamTrack | null, type?: "screen" | "camera" }) => {
+export const VideoPlayer = React.memo(({ track, type, thumbnail }: { track: MediaStreamTrack | null, type?: "screen" | "camera", thumbnail?: boolean }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
@@ -12,12 +12,15 @@ export const VideoPlayer = React.memo(({ track, type }: { track: MediaStreamTrac
 
     if (!track) return null;
 
+    // Use object-contain for thumbnails to show complete video
+    const objectFit = thumbnail ? "object-contain" : (type === "screen" ? "object-contain" : "object-cover");
+
     return (
         <video
             ref={videoRef}
             autoPlay
             playsInline
-            className={type === "screen" ? "w-full h-full object-contain" : "w-full h-full object-cover"}
+            className={`w-full h-full ${objectFit}`}
         />
     );
 });

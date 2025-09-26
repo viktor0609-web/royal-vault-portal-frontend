@@ -40,14 +40,16 @@ export const AdminMeeting = () => {
     const mainAudioRef = useRef<HTMLAudioElement | null>(null);
     const remoteAudioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
 
-    // Get the main video track - prioritize guest video, then local admin's video
+    // Get video tracks
     const guestVideoTrack = participants.find(p => !p.local && !p.permissions.canAdmin)?.videoTrack;
     const localAdminVideoTrack = participants.find((p) => p.local)?.videoTrack;
-    const mainVideoTrack = guestVideoTrack || localAdminVideoTrack;
     const screenshareTrack = isScreensharing
         ? participants.find((p) => p.id === screenshareParticipantId)
             ?.screenVideoTrack
         : null;
+
+    // Main video: prioritize guest video, then local admin's video
+    const mainVideoTrack = guestVideoTrack || localAdminVideoTrack;
 
     useEffect(() => {
         setIsManager(true);
@@ -202,15 +204,25 @@ export const AdminMeeting = () => {
                                     <VideoPlayer track={screenshareTrack} type="screen" />
                                 )}
 
-                                {/* Main video - guest screen if available, otherwise admin screen */}
+                                {/* Main video when no screenshare */}
                                 {!screenshareTrack && mainVideoTrack && (
-                                    <VideoPlayer track={mainVideoTrack} type="camera" />
+                                    <>
+                                        <VideoPlayer track={mainVideoTrack} type="camera" />
+                                        {/* Name label for main video */}
+                                        <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
+                                            {guestVideoTrack
+                                                ? `Guest: ${participants.find(p => !p.local && !p.permissions.canAdmin)?.name || 'Guest'}`
+                                                : `You: ${participants.find(p => p.local)?.name || 'Admin'}`
+                                            }
+                                        </div>
+                                    </>
                                 )}
 
                                 {/* Fallback */}
                                 {!screenshareTrack && !mainVideoTrack && (
                                     <div className="text-white text-xl">No active video.</div>
                                 )}
+
 
                                 {/* Main participant audio */}
                                 {participants[0]?.audioTrack && (
@@ -229,15 +241,6 @@ export const AdminMeeting = () => {
                                     </div>
                                 )}
 
-                                {/* Name label */}
-                                {mainVideoTrack && (
-                                    <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-                                        {guestVideoTrack
-                                            ? `Guest: ${participants.find(p => !p.local && !p.permissions.canAdmin)?.name || 'Guest'}`
-                                            : `You: ${participants.find(p => p.local)?.name || 'Admin'}`
-                                        }
-                                    </div>
-                                )}
                             </div>
 
                             {/* Remote participants audio */}

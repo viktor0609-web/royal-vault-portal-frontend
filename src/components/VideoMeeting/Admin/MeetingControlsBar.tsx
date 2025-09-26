@@ -62,18 +62,20 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
 
         {position === "bottom" && (
           <>
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" onClick={() => { console.log("Toggle Camera Clicked"); toggleCamera(); }} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
-                {isCameraOff ? <VideoOff size={24} /> : <Video size={24} />}
-              </Button>
-              <span className="text-sm">Turn off</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" onClick={() => { console.log("Toggle Microphone Clicked"); toggleMicrophone(); }} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
-                {isMicrophoneMuted ? <MicOff size={24} /> : <Mic size={24} />}
-              </Button>
-              <span className="text-sm">Mute</span>
-            </div>
+            <Button
+              variant="secondary"
+              onClick={() => { console.log("Toggle Camera Clicked"); toggleCamera(); }}
+              className={`rounded-full p-3 h-auto w-auto ${isCameraOff ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+            >
+              {isCameraOff ? <VideoOff size={24} /> : <Video size={24} />}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => { console.log("Toggle Microphone Clicked"); toggleMicrophone(); }}
+              className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+            >
+              {isMicrophoneMuted ? <MicOff size={24} /> : <Mic size={24} />}
+            </Button>
             <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto relative">
               <Users size={24} />
               {raisedHandsCount > 0 && (

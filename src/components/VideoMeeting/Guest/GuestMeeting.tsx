@@ -5,30 +5,10 @@ import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
 import { PeoplePanel } from "./PeoplePanel";
 import { useState, useEffect, useRef, Fragment } from "react";
-import React from "react";
+import { VideoPlayer } from "../VideoPlayer";
 
 
-// 🔹 VideoPlayer Component (memoized to avoid re-renders)
-const VideoPlayer = React.memo(({ track, type }: { track: MediaStreamTrack | null, type?: "screen" | "camera" }) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
 
-    useEffect(() => {
-        if (videoRef.current && track) {
-            videoRef.current.srcObject = new MediaStream([track]);
-        }
-    }, [track]);
-
-    if (!track) return null;
-
-    return (
-        <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className={type === "screen" ? "w-full h-full object-contain" : "w-full h-full object-cover"}
-        />
-    );
-});
 
 
 export const GuestMeeting = () => {
@@ -53,10 +33,9 @@ export const GuestMeeting = () => {
     const hasAttemptedJoin = useRef<boolean>(false);
     const videoContainerRef = useRef<HTMLDivElement>(null);
 
-    // Get the main video track - prioritize guest video, then local user's video
-    const guestVideoTrack = participants.find(p => !p.local && !p.permissions.canAdmin)?.videoTrack;
+    // Get the main video track - guests only see their own screen
     const localUserVideoTrack = participants.find(p => p.local)?.videoTrack;
-    const mainVideoTrack = guestVideoTrack || localUserVideoTrack;
+    const mainVideoTrack = localUserVideoTrack;
 
     // Auto-join the room when component mounts
     useEffect(() => {
@@ -143,11 +122,10 @@ export const GuestMeeting = () => {
                                     <div className="text-white text-xl">No active video.</div>
                                 )}
 
-
                                 {/* Name label */}
                                 {mainVideoTrack && (
                                     <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-                                        {guestVideoTrack ? 'Guest' : 'You'}
+                                        You: {participants.find(p => p.local)?.name || 'Guest'}
                                     </div>
                                 )}
                             </div>

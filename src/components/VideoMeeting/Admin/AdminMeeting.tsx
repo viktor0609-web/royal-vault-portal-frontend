@@ -14,9 +14,7 @@ export const AdminMeeting = () => {
         participants,
         isManager,
         setIsManager,
-        setRoomUrl,
         joinRoom,
-        createRoom,
         ejectParticipant,
         toggleParticipantAudio,
         isPermissionModalOpen,
@@ -53,6 +51,13 @@ export const AdminMeeting = () => {
     useEffect(() => {
         setIsManager(true);
     }, [setIsManager]);
+
+    // Auto-join the room when component mounts
+    useEffect(() => {
+        if (roomUrl && !joined && !isLoading) {
+            joinRoom();
+        }
+    }, [roomUrl, joined, isLoading, joinRoom]);
 
     // Attach local video
     useEffect(() => {
@@ -145,18 +150,6 @@ export const AdminMeeting = () => {
         };
     }, [raisedHands]);
 
-    const copyRoomUrl = () => {
-        if (roomUrl) {
-            navigator.clipboard
-                .writeText(roomUrl)
-                .then(() => {
-                    alert("Room URL copied to clipboard!");
-                })
-                .catch((error) => {
-                    console.error("Failed to copy URL:", error);
-                });
-        }
-    };
 
     const toggleFullscreen = async () => {
         if (!videoContainerRef.current) return;
@@ -316,27 +309,6 @@ export const AdminMeeting = () => {
                         </div>
                     )}
 
-                    {!joined && (
-                        <div className="flex flex-col gap-4 items-center justify-center p-4 bg-gray-800 text-white w-full h-full">
-                            <h1 className="text-3xl font-bold mb-4">Welcome to the Meeting</h1>
-                            <div className="flex flex-col gap-4 w-full max-w-md">
-                                <Button onClick={createRoom}>Create Room</Button>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Enter room URL to join"
-                                        value={roomUrl}
-                                        onChange={(e) => setRoomUrl(e.target.value)}
-                                        className="flex-1 p-2 border rounded-md text-black"
-                                    />
-                                    <Button onClick={copyRoomUrl}>Copy</Button>
-                                </div>
-                                <Button onClick={joinRoom} disabled={!roomUrl}>
-                                    Join Room
-                                </Button>
-                            </div>
-                        </div>
-                    )}
                 </div>
 
                 {joined && showPeoplePanel && (

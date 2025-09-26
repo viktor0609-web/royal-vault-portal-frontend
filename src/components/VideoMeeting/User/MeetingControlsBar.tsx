@@ -11,12 +11,20 @@ interface MeetingControlsBarProps {
   showChatBox: boolean;
   toggleFullscreen: () => void;
   isFullscreen: boolean;
-  localParticipant: any; // Add localParticipant to props
-  hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission to props
-  chatUnreadCount?: number; // Add chatUnreadCount to props
+  localParticipant: any;
+  chatUnreadCount?: number;
 }
 
-export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox, toggleFullscreen, isFullscreen, localParticipant, hasLocalAudioPermission, chatUnreadCount = 0 }) => {
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
+  position,
+  togglePeoplePanel,
+  toggleChatBox,
+  showChatBox,
+  toggleFullscreen,
+  isFullscreen,
+  localParticipant,
+  chatUnreadCount = 0
+}) => {
   const {
     joined,
     isManager,
@@ -35,14 +43,12 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
     raiseHand,
     lowerHand,
     dailyRoom,
+    hasLocalAudioPermission, // ✅ use context directly
   } = useDailyMeeting();
 
-  const raisedHandsCount = raisedHands.size;
-
-  // Determine if the local user can send audio
-  const canSendAudio = localParticipant?.permissions?.canSend;
-
   if (!joined) return null;
+
+  const raisedHandsCount = raisedHands.size;
 
   return (
     <div className={`flex justify-center items-center p-4 bg-gray-800 text-white ${position === "top" ? "justify-between" : "gap-8"}`}>
@@ -56,9 +62,9 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
         {position === "top" && isManager && (
           <div className="flex gap-4">
             {!isRecording ? (
-              <Button variant="ghost" className="text-white" onClick={() => { console.log("Start Recording Clicked"); startRecording(); }}>Start Recording</Button>
+              <Button variant="ghost" className="text-white" onClick={startRecording}>Start Recording</Button>
             ) : (
-              <Button variant="ghost" className="text-white" onClick={() => { console.log("Stop Recording Clicked"); stopRecording(); }}>Stop Recording</Button>
+              <Button variant="ghost" className="text-white" onClick={stopRecording}>Stop Recording</Button>
             )}
             <span className="text-sm text-white">{isRecording ? "Recording..." : "Not Recording"}</span>
           </div>
@@ -70,19 +76,21 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
           <>
             <Button
               variant="secondary"
-              onClick={() => { console.log("Toggle Camera Clicked"); toggleCamera(); }}
+              onClick={toggleCamera}
               className={`rounded-full p-3 h-auto w-auto ${isCameraOff ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
             >
               {isCameraOff ? <VideoOff size={24} /> : <Video size={24} />}
             </Button>
+
             <Button
               variant="secondary"
-              onClick={() => { console.log("Toggle Microphone Clicked"); toggleMicrophone(); }}
-              className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!hasLocalAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={toggleMicrophone}
               disabled={!hasLocalAudioPermission}
+              className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!hasLocalAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isMicrophoneMuted ? <MicOff size={24} /> : <Mic size={24} />}
             </Button>
+
             <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto relative">
               <Users size={24} />
               {raisedHandsCount > 0 && (
@@ -92,6 +100,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
                 </span>
               )}
             </Button>
+
             <Button
               variant="secondary"
               onClick={() => (raisedHands.has(dailyRoom?.participants().local.session_id || '') ? lowerHand() : raiseHand())}
@@ -99,6 +108,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
             >
               <Hand size={24} />
             </Button>
+
             <Button
               variant="secondary"
               onClick={toggleChatBox}
@@ -112,6 +122,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
                 </span>
               )}
             </Button>
+
             <Button
               variant="secondary"
               onClick={toggleFullscreen}
@@ -119,6 +130,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
             >
               {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
             </Button>
+
             {!isScreensharing ? (
               <Button variant="secondary" onClick={startScreenshare} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
                 <MonitorPlay size={24} />
@@ -128,12 +140,14 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
                 <MonitorPlay size={24} />
               </Button>
             )}
+
             <BackgroundFilterModal>
               <Button variant="secondary" className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
                 <Filter size={24} />
               </Button>
             </BackgroundFilterModal>
-            <Button onClick={() => { console.log("Leave Room Clicked"); leaveRoom(); }} variant="destructive" className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 h-auto w-auto">
+
+            <Button onClick={leaveRoom} variant="destructive" className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 h-auto w-auto">
               <LogOut size={24} />
             </Button>
           </>

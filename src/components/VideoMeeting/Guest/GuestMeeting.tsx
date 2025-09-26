@@ -1,14 +1,13 @@
-
 import { Button } from "../../ui/button";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar"; // Import the new MeetingControlsBar
-import { Mic, MicOff, Hand } from "lucide-react"; // Import Mic and MicOff icons
-import { PeoplePanel } from "./PeoplePanel"; // Import PeoplePanel
+import { Mic, MicOff } from "lucide-react"; // Import Mic and MicOff icons (removed Hand)
+import { PeoplePanel } from "../User/PeoplePanel"; // Import PeoplePanel from User
 import { useState, useEffect, useRef, Fragment } from 'react'; // Added useEffect and useRef
 
-export const UserMeeting = () => {
+export const GuestMeeting = () => {
     const {
         roomUrl,
         joined,
@@ -19,7 +18,6 @@ export const UserMeeting = () => {
         isLoading,
         isScreensharing,
         screenshareParticipantId,
-        raisedHands,
         localParticipant, // Import localParticipant
         hasLocalAudioPermission, // Import hasLocalAudioPermission
         canControlAudio, // Import canControlAudio
@@ -28,8 +26,6 @@ export const UserMeeting = () => {
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-    const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(new Set());
-    const animationTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
     const hasAttemptedJoin = useRef<boolean>(false);
     const videoContainerRef = useRef<HTMLDivElement>(null);
 
@@ -90,50 +86,6 @@ export const UserMeeting = () => {
         };
     }, []);
 
-    useEffect(() => {
-        const currentRaisedIds = Array.from(raisedHands);
-        const currentlyAnimatedIds = Array.from(animatedRaisedHands);
-
-        // Add new raised hands to animated set
-        currentRaisedIds.forEach(participantId => {
-            if (!animatedRaisedHands.has(participantId) && !animationTimeouts.current.has(participantId)) {
-                setAnimatedRaisedHands(prev => new Set(prev).add(participantId));
-                const timeoutId = setTimeout(() => {
-                    setAnimatedRaisedHands(prev => {
-                        const newSet = new Set(prev);
-                        newSet.delete(participantId);
-                        return newSet;
-                    });
-                    animationTimeouts.current.delete(participantId);
-                }, 5000); // Animation visible for 5 seconds
-                animationTimeouts.current.set(participantId, timeoutId);
-            }
-        });
-
-        // Remove hands that are no longer raised
-        currentlyAnimatedIds.forEach(participantId => {
-            if (!raisedHands.has(participantId)) {
-                const timeoutId = animationTimeouts.current.get(participantId);
-                if (timeoutId) {
-                    clearTimeout(timeoutId);
-                    animationTimeouts.current.delete(participantId);
-                }
-                setAnimatedRaisedHands(prev => {
-                    const newSet = new Set(prev);
-                    newSet.delete(participantId);
-                    return newSet;
-                });
-            }
-        });
-
-        // Cleanup on unmount
-        return () => {
-            animationTimeouts.current.forEach(timeoutId => clearTimeout(timeoutId));
-            animationTimeouts.current.clear();
-        };
-    }, [raisedHands]);
-
-
     if (isLoading && !isPermissionModalOpen) {
         return <div className="flex flex-1 items-center justify-center text-xl bg-gray-800 text-white">Loading...</div>;
     }
@@ -186,11 +138,6 @@ export const UserMeeting = () => {
                                 )}
                                 {!screenshareTrack && !localAdminVideoTrack && ( // Display a message if no screenshare and no local admin camera
                                     <div className="text-white text-xl">No active video.</div>
-                                )}
-                                {animatedRaisedHands.size && (
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500 rounded-full p-3 animate-bounce transition-opacity duration-500 ease-out">
-                                        <Hand size={32} className="text-white" />
-                                    </div>
                                 )}
                                 {/* Name label */}
                                 {localAdminVideoTrack && <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">

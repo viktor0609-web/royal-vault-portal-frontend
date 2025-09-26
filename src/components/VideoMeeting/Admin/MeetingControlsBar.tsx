@@ -11,9 +11,13 @@ interface MeetingControlsBarProps {
   showChatBox: boolean;
   toggleFullscreen: () => void;
   isFullscreen: boolean;
+  localParticipant: any; // Add localParticipant to props
+  hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission to props
+  canControlAudio: boolean; // Add canControlAudio to props
+  canControlVideo: boolean; // Add canControlVideo to props
 }
 
-export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox, toggleFullscreen, isFullscreen }) => {
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox, toggleFullscreen, isFullscreen, localParticipant, hasLocalAudioPermission, canControlAudio, canControlVideo }) => {
   const {
     joined,
     isManager,

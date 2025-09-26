@@ -43,6 +43,7 @@ import YouTubeTest from "./pages/YouTubeTest";
 
 import { VideoMeeting as AdminMeeting } from "./components/VideoMeeting/Admin/VideoMeeting";
 import { VideoMeeting as UserMeeting } from "./components/VideoMeeting/User/VideoMeeting";
+import { VideoMeeting as GuestMeeting } from "./components/VideoMeeting/Guest/VideoMeeting";
 import { DailyMeetingProvider } from "./context/DailyMeetingContext";
 
 const queryClient = new QueryClient();
@@ -106,9 +107,9 @@ const App = () => (
                   <Route path="/reset-password/:token" element={<ReSettingPasswordPage />} />
 
                   {/* Guest webinar route - no authentication required */}
-                  <Route path="/webinar_guest" element={<UserMeeting />} />
 
                   <Route path="/webinar_admin" element={<AdminMeeting />} />
+                  <Route path="/webinar_guest" element={<GuestMeeting />} />
                   <Route path="/webinar_user" element={<UserMeeting />} />
 
                   {/* YouTube OAuth Callback */}

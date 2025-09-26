@@ -13,9 +13,11 @@ interface MeetingControlsBarProps {
   isFullscreen: boolean;
   localParticipant: any; // Add localParticipant to props
   hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission to props
+  canControlAudio: boolean; // Add canControlAudio to props
+  canControlVideo: boolean; // Add canControlVideo to props
 }
 
-export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox, toggleFullscreen, isFullscreen, localParticipant, hasLocalAudioPermission }) => {
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox, toggleFullscreen, isFullscreen, localParticipant, hasLocalAudioPermission, canControlAudio, canControlVideo }) => {
   const {
     joined,
     isManager,
@@ -70,15 +72,16 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
             <Button
               variant="secondary"
               onClick={() => { console.log("Toggle Camera Clicked"); toggleCamera(); }}
-              className={`rounded-full p-3 h-auto w-auto ${isCameraOff ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+              className={`rounded-full p-3 h-auto w-auto ${isCameraOff ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!canControlVideo ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!canControlVideo}
             >
               {isCameraOff ? <VideoOff size={24} /> : <Video size={24} />}
             </Button>
             <Button
               variant="secondary"
               onClick={() => { console.log("Toggle Microphone Clicked"); toggleMicrophone(); }}
-              className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!hasLocalAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={!hasLocalAudioPermission}
+              className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!canControlAudio || !hasLocalAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!canControlAudio || !hasLocalAudioPermission}
             >
               {isMicrophoneMuted ? <MicOff size={24} /> : <Mic size={24} />}
             </Button>

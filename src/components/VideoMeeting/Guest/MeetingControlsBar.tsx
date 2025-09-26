@@ -1,0 +1,119 @@
+import React from 'react';
+import { Button } from "../../ui/button";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
+import { useDailyMeeting } from "../../../context/DailyMeetingContext";
+import { BackgroundFilterModal } from '../BackgroundFilterModal';
+
+interface MeetingControlsBarProps {
+    position: "top" | "bottom";
+    togglePeoplePanel: () => void;
+    toggleChatBox: () => void;
+    showChatBox: boolean;
+    toggleFullscreen: () => void;
+    isFullscreen: boolean;
+    localParticipant: any; // Add localParticipant to props
+    hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission to props
+    canControlAudio: boolean; // Add canControlAudio to props
+    canControlVideo: boolean; // Add canControlVideo to props
+}
+
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox, toggleFullscreen, isFullscreen, localParticipant, hasLocalAudioPermission, canControlAudio, canControlVideo }) => {
+    const {
+        joined,
+        isManager,
+        isRecording,
+        startRecording,
+        stopRecording,
+        leaveRoom,
+        toggleCamera,
+        toggleMicrophone,
+        isMicrophoneMuted,
+        isCameraOff,
+        isScreensharing,
+        startScreenshare,
+        stopScreenshare,
+        dailyRoom,
+    } = useDailyMeeting();
+
+    if (!joined) return null;
+
+    return (
+        <div className={`flex justify-center items-center p-4 bg-gray-800 text-white flex-shrink-0 ${position === "top" ? "justify-between" : "gap-8"}`}>
+            {position === "top" && (
+                <div className="flex items-center gap-2">
+                    <span className="text-lg font-semibold">Waiting for others to join</span>
+                </div>
+            )}
+
+            <div className="flex items-center gap-2">
+                {position === "top" && isManager && (
+                    <div className="flex gap-4">
+                        {!isRecording ? (
+                            <Button variant="ghost" className="text-white" onClick={() => { console.log("Start Recording Clicked"); startRecording(); }}>Start Recording</Button>
+                        ) : (
+                            <Button variant="ghost" className="text-white" onClick={() => { console.log("Stop Recording Clicked"); stopRecording(); }}>Stop Recording</Button>
+                        )}
+                        <span className="text-sm text-white">{isRecording ? "Recording..." : "Not Recording"}</span>
+                    </div>
+                )}
+
+                {position === "top" && <Button variant="ghost" className="text-white"><LayoutGrid className="mr-2" />Speaker view</Button>}
+
+                {position === "bottom" && (
+                    <>
+                        <Button
+                            variant="secondary"
+                            onClick={() => { console.log("Toggle Camera Clicked"); toggleCamera(); }}
+                            className={`rounded-full p-3 h-auto w-auto ${isCameraOff ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!canControlVideo ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={!canControlVideo}
+                        >
+                            {isCameraOff ? <VideoOff size={24} /> : <Video size={24} />}
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            onClick={() => { console.log("Toggle Microphone Clicked"); toggleMicrophone(); }}
+                            className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!canControlAudio || !hasLocalAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={!canControlAudio || !hasLocalAudioPermission}
+                        >
+                            {isMicrophoneMuted ? <MicOff size={24} /> : <Mic size={24} />}
+                        </Button>
+                        <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto relative">
+                            <Users size={24} />
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            onClick={toggleChatBox}
+                            className={`rounded-full p-3 h-auto w-auto ${showChatBox ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+                        >
+                            {showChatBox ? <MessageSquareX size={24} /> : <MessageSquare size={24} />}
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            onClick={toggleFullscreen}
+                            className={`rounded-full p-3 h-auto w-auto ${isFullscreen ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+                        >
+                            {isFullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
+                        </Button>
+                        {!isScreensharing ? (
+                            <Button variant="secondary" onClick={startScreenshare} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
+                                <MonitorPlay size={24} />
+                            </Button>
+                        ) : (
+                            <Button variant="secondary" onClick={stopScreenshare} className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 h-auto w-auto">
+                                <MonitorPlay size={24} />
+                            </Button>
+                        )}
+                        <BackgroundFilterModal>
+                            <Button variant="secondary" className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
+                                <Filter size={24} />
+                            </Button>
+                        </BackgroundFilterModal>
+                        <Button onClick={() => { console.log("Leave Room Clicked"); leaveRoom(); }} variant="destructive" className="bg-red-600 hover:bg-red-700 text-white rounded-full p-3 h-auto w-auto">
+                            <LogOut size={24} />
+                        </Button>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};

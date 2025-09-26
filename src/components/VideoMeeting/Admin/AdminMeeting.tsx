@@ -22,7 +22,11 @@ export const AdminMeeting = () => {
         isScreensharing,
         screenshareParticipantId,
         raisedHands,
-        dailyRoom
+        dailyRoom,
+        localParticipant,
+        hasLocalAudioPermission,
+        canControlAudio,
+        canControlVideo
     } = useDailyMeeting();
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
@@ -333,6 +337,10 @@ export const AdminMeeting = () => {
                 showChatBox={showChatBox}
                 toggleFullscreen={toggleFullscreen}
                 isFullscreen={isFullscreen}
+                localParticipant={localParticipant}
+                hasLocalAudioPermission={hasLocalAudioPermission}
+                canControlAudio={canControlAudio}
+                canControlVideo={canControlVideo}
             />
         </div>
     );

@@ -60,6 +60,10 @@ interface DailyMeetingContextType {
   setIsManager: (value: boolean) => void;
   localParticipant: any; // Add localParticipant to context type
   hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission
+  userRole: 'admin' | 'client' | 'guest'; // Add userRole to context type
+  setUserRole: (role: 'admin' | 'client' | 'guest') => void; // Add setUserRole to context type
+  canControlAudio: boolean; // Add canControlAudio to context type
+  canControlVideo: boolean; // Add canControlVideo to context type
 }
 
 const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(undefined);
@@ -71,13 +75,14 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [dailyRoom, setDailyRoom] = useState<DailyCall | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
   const [isManager, setIsManager] = useState<boolean>(false); // replace with real logic
+  const [userRole, setUserRole] = useState<'admin' | 'client' | 'guest'>('guest'); // Track user role
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState<boolean>(false);
   const [hasMicPermission, setHasMicPermission] = useState<boolean>(false);
   const [hasCamPermission, setHasCamPermission] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isMicrophoneMuted, setIsMicrophoneMuted] = useState<boolean>(false);
-  const [isCameraOff, setIsCameraOff] = useState<boolean>(false);
+  const [isMicrophoneMuted, setIsMicrophoneMuted] = useState<boolean>(true); // Default to muted
+  const [isCameraOff, setIsCameraOff] = useState<boolean>(true); // Default to camera off
   const [permissionRequested, setPermissionRequested] = useState<boolean>(false);
   const [isScreensharing, setIsScreensharing] = useState<boolean>(false);
   const [screenshareParticipantId, setScreenshareParticipantId] = useState<string | null>(null);
@@ -88,6 +93,12 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const [backgroundFilterType, setBackgroundFilterType] = useState<BackgroundFilterType>('none');
   const [selectedBackgroundImage, setSelectedBackgroundImage] = useState<string | undefined>(undefined);
+
+  // Computed values for control permissions
+  // Audio: Only guest and admin can control (client cannot)
+  const canControlAudio = userRole === 'guest' || userRole === 'admin';
+  // Video: All users can control
+  const canControlVideo = true;
 
   // Predefined background images (relative paths OK — code resolves to absolute)
   const backgroundImages = [
@@ -174,6 +185,17 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       alert('Please create a room first.');
       return;
     }
+
+    // Determine role based on current path
+    const currentPath = window.location.pathname;
+    if (currentPath.includes('webinar_admin')) {
+      setUserRole('admin');
+    } else if (currentPath.includes('webinar_user')) {
+      setUserRole('client');
+    } else {
+      setUserRole('guest');
+    }
+
     // Show pre-join UI / preview:
     startLocalPreview();
     setIsPermissionModalOpen(true);
@@ -181,6 +203,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const joinMeetingAsAdmin = async () => {
     console.log("join as admin");
+    setUserRole('admin'); // Set role as admin
     setIsLoading(true);
     // stop preview to avoid duplicate tracks when joining
     stopLocalPreview();
@@ -217,6 +240,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
   const joinMeetingAsGuest = async () => {
     console.log("join as user");
+    setUserRole('guest'); // Set role as guest
     setIsLoading(true);
     // stop preview to avoid duplicate tracks when joining
     stopLocalPreview();
@@ -714,6 +738,10 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setUserName,
         localParticipant, // Provide localParticipant
         hasLocalAudioPermission, // Provide hasLocalAudioPermission
+        userRole, // Provide userRole
+        setUserRole, // Provide setUserRole
+        canControlAudio, // Provide canControlAudio
+        canControlVideo, // Provide canControlVideo
       }}
     >
       {children}

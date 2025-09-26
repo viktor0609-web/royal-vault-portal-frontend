@@ -34,10 +34,15 @@ export const UserMeeting = () => {
     const hasAttemptedJoin = useRef<boolean>(false);
     const videoContainerRef = useRef<HTMLDivElement>(null);
 
-    // Get the main video track - prioritize guest video, then local user's video
+    // Get video tracks
     const guestVideoTrack = participants.find(p => !p.local && !p.permissions.canAdmin)?.videoTrack;
     const localUserVideoTrack = participants.find(p => p.local)?.videoTrack;
+
+    // Main video: prioritize guest video, then local user's video
     const mainVideoTrack = guestVideoTrack || localUserVideoTrack;
+
+    // Secondary video: show the other participant (if main is guest, show user; if main is user, show guest)
+    const secondaryVideoTrack = guestVideoTrack ? localUserVideoTrack : guestVideoTrack;
 
     // Auto-join the room when component mounts
     useEffect(() => {
@@ -159,27 +164,33 @@ export const UserMeeting = () => {
                     {joined && (
                         <div className="h-full flex flex-col min-h-0 max-w-full">
                             <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
-                                {/* Main Video Display */}
+                                {/* Screenshare first */}
                                 {screenshareTrack && <VideoPlayer track={screenshareTrack} type="screen" />}
-                                {!screenshareTrack && mainVideoTrack && <VideoPlayer track={mainVideoTrack} type="camera" />}
+
+                                {/* Main video when no screenshare */}
+                                {!screenshareTrack && mainVideoTrack && (
+                                    <>
+                                        <VideoPlayer track={mainVideoTrack} type="camera" />
+                                        {/* Name label for main video */}
+                                        <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
+                                            {guestVideoTrack
+                                                ? `Guest: ${participants.find(p => !p.local && !p.permissions.canAdmin)?.name || 'Guest'}`
+                                                : `You: ${participants.find(p => p.local)?.name || 'User'}`
+                                            }
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Fallback */}
                                 {!screenshareTrack && !mainVideoTrack && (
                                     <div className="text-white text-xl">No active video.</div>
                                 )}
+
 
                                 {/* Raised hand animation */}
                                 {animatedRaisedHands.size > 0 && (
                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500 rounded-full p-3 animate-bounce transition-opacity duration-500 ease-out">
                                         <Hand size={32} className="text-white" />
-                                    </div>
-                                )}
-
-                                {/* Name label */}
-                                {mainVideoTrack && (
-                                    <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-                                        {guestVideoTrack
-                                            ? `Guest: ${participants.find(p => !p.local && !p.permissions.canAdmin)?.name || 'Guest'}`
-                                            : `You: ${participants.find(p => p.local)?.name || 'User'}`
-                                        }
                                     </div>
                                 )}
                             </div>

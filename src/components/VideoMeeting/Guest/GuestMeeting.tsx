@@ -33,8 +33,10 @@ export const GuestMeeting = () => {
     const hasAttemptedJoin = useRef<boolean>(false);
     const videoContainerRef = useRef<HTMLDivElement>(null);
 
-    // Get the main video track - guests only see their own screen
+    // Get video tracks
     const localUserVideoTrack = participants.find(p => p.local)?.videoTrack;
+
+    // Main video: prioritize guest video, then local user's video
     const mainVideoTrack = localUserVideoTrack;
 
     // Auto-join the room when component mounts
@@ -115,19 +117,25 @@ export const GuestMeeting = () => {
                     {joined && (
                         <div className="h-full flex flex-col min-h-0 max-w-full">
                             <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
-                                {/* Main Video Display */}
+                                {/* Screenshare first */}
                                 {screenshareTrack && <VideoPlayer track={screenshareTrack} type="screen" />}
-                                {!screenshareTrack && mainVideoTrack && <VideoPlayer track={mainVideoTrack} type="camera" />}
+
+                                {/* Main video when no screenshare */}
+                                {!screenshareTrack && mainVideoTrack && (
+                                    <>
+                                        <VideoPlayer track={mainVideoTrack} type="camera" />
+                                        {/* Name label for main video */}
+                                        <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
+                                            You: ${participants.find(p => p.local)?.name || 'Guest'}
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Fallback */}
                                 {!screenshareTrack && !mainVideoTrack && (
                                     <div className="text-white text-xl">No active video.</div>
                                 )}
 
-                                {/* Name label */}
-                                {mainVideoTrack && (
-                                    <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded">
-                                        You: {participants.find(p => p.local)?.name || 'Guest'}
-                                    </div>
-                                )}
                             </div>
 
                             {/* Remote participants audio */}

@@ -28,6 +28,7 @@ export const AdminMeeting = () => {
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+    const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
     const hasAttemptedJoin = useRef<boolean>(false);
     const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(
         new Set()
@@ -320,7 +321,10 @@ export const AdminMeeting = () => {
                 {joined && showChatBox && (
                     <div className="flex border-l bg-gray-900 text-white">
                         <div className="w-80 p-4 flex flex-col">
-                            <ChatBox />
+                            <ChatBox
+                                isVisible={showChatBox}
+                                onUnreadCountChange={setChatUnreadCount}
+                            />
                         </div>
                     </div>
                 )}
@@ -333,6 +337,7 @@ export const AdminMeeting = () => {
                 showChatBox={showChatBox}
                 toggleFullscreen={toggleFullscreen}
                 isFullscreen={isFullscreen}
+                chatUnreadCount={chatUnreadCount}
             />
         </div>
     );

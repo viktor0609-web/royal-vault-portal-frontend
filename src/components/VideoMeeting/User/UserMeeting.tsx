@@ -52,6 +52,7 @@ export const UserMeeting = () => {
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(new Set());
+    const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
     const animationTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
     const hasAttemptedJoin = useRef<boolean>(false);
     const videoContainerRef = useRef<HTMLDivElement>(null);
@@ -230,7 +231,10 @@ export const UserMeeting = () => {
                 {joined && showChatBox && (
                     <div className="flex border-l bg-gray-900 text-white">
                         <div className="w-80 p-4 flex flex-col">
-                            <ChatBox />
+                            <ChatBox
+                                isVisible={showChatBox}
+                                onUnreadCountChange={setChatUnreadCount}
+                            />
                         </div>
                     </div>
                 )}
@@ -246,6 +250,7 @@ export const UserMeeting = () => {
                 isFullscreen={isFullscreen}
                 localParticipant={localParticipant}
                 hasLocalAudioPermission={hasLocalAudioPermission}
+                chatUnreadCount={chatUnreadCount}
             />
         </div>
     );

@@ -6,7 +6,6 @@ import { AdminMeeting } from "./AdminMeeting";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui/select";
 
 export const VideoMeeting = () => {
-
   return (
     <div className="flex flex-1 flex-col p-4">
       <div className="flex justify-between bg-white p-6 rounded-lg border border-royal-light-gray mb-3">

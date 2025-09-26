@@ -41,8 +41,9 @@ import YouTubeCallback from "./pages/YouTubeCallback";
 import { YouTubeTestPlayer } from "./components/ui/YouTubeTestPlayer";
 import YouTubeTest from "./pages/YouTubeTest";
 
-import { AdminMeeting } from "./components/VideoMeeting/Admin/AdminMeeting";
-import { UserMeeting } from "./components/VideoMeeting/User/UserMeeting";
+import { VideoMeeting as AdminMeeting } from "./components/VideoMeeting/Admin/VideoMeeting";
+import { VideoMeeting as UserMeeting } from "./components/VideoMeeting/User/VideoMeeting";
+import { DailyMeetingProvider } from "./context/DailyMeetingContext";
 
 const queryClient = new QueryClient();
 
@@ -73,52 +74,56 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <AuthDialogProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <SidebarProvider>
-              <Routes>
-                {/* Client Routes*/}
-                <Route path="/" element={<RoyalVaultLayout><WelcomeSection /></RoyalVaultLayout>} />
-                <Route path="/royal-tv" element={<RoyalVaultLayout><WebinarsSection /></RoyalVaultLayout>} />
-                <Route path="/courses" element={<RoyalVaultLayout><CoursesSection /></RoyalVaultLayout>} />
-                <Route path="/course-groups/:groupId" element={<RoyalVaultLayout><CourseGroupDetailSection /></RoyalVaultLayout>} />
-                <Route path="/courses/:courseId" element={<RoyalVaultLayout><CourseDetailSection /></RoyalVaultLayout>} />
-                <Route path="/deals" element={<RoyalVaultLayout><DealsSection /></RoyalVaultLayout>} />
-                <Route path="/profile" element={<UserRoute><RoyalVaultLayout><ProfileSection /></RoyalVaultLayout></UserRoute>} />
-
-                {/* Admin Routes */}
-                <Route path="/admin" element={<AdminRoute><AdminLayout><Navigate to="/admin/courses" replace /></AdminLayout></AdminRoute>} />
-                <Route path="/admin/deals" element={<AdminRoute><AdminLayout><AdminDeals /></AdminLayout></AdminRoute>} />
-                <Route path="/admin/webinars" element={<AdminRoute><AdminLayout><AdminWebinar /></AdminLayout></AdminRoute>} />
-                <Route path="/admin/webinars/stats" element={<AdminRoute><AdminLayout><AdminStats /></AdminLayout></AdminRoute>} />
-                <Route path="/admin/courses" element={<AdminRoute><AdminLayout><AdminCourses /></AdminLayout></AdminRoute>} />
-                <Route path="/admin/courses/groups/:groupId" element={<AdminRoute><AdminLayout><CourseGroupDetail /></AdminLayout></AdminRoute>} />
-                <Route path="/admin/courses/groups/:groupId/courses/:courseId" element={<AdminRoute><AdminLayout><CourseDetail /></AdminLayout></AdminRoute>} />
-                <Route path="/admin/courses/groups/:groupId/courses/:courseId/lectures/:lectureId" element={<AdminRoute><AdminLayout><LectureDetail /></AdminLayout></AdminRoute>} />
+          <DailyMeetingProvider>
 
 
-                <Route path="/verify/:token" element={<SetPassword />} />
-                <Route path="/reset-password/:token" element={<ReSettingPasswordPage />} />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <SidebarProvider>
+                <Routes>
+                  {/* Client Routes*/}
+                  <Route path="/" element={<RoyalVaultLayout><WelcomeSection /></RoyalVaultLayout>} />
+                  <Route path="/royal-tv" element={<RoyalVaultLayout><WebinarsSection /></RoyalVaultLayout>} />
+                  <Route path="/courses" element={<RoyalVaultLayout><CoursesSection /></RoyalVaultLayout>} />
+                  <Route path="/course-groups/:groupId" element={<RoyalVaultLayout><CourseGroupDetailSection /></RoyalVaultLayout>} />
+                  <Route path="/courses/:courseId" element={<RoyalVaultLayout><CourseDetailSection /></RoyalVaultLayout>} />
+                  <Route path="/deals" element={<RoyalVaultLayout><DealsSection /></RoyalVaultLayout>} />
+                  <Route path="/profile" element={<UserRoute><RoyalVaultLayout><ProfileSection /></RoyalVaultLayout></UserRoute>} />
 
-                <Route path="/webinar_admin" element={<AdminMeeting />} />
-                <Route path="/webinar_user" element={<UserMeeting />} />
+                  {/* Admin Routes */}
+                  <Route path="/admin" element={<AdminRoute><AdminLayout><Navigate to="/admin/courses" replace /></AdminLayout></AdminRoute>} />
+                  <Route path="/admin/deals" element={<AdminRoute><AdminLayout><AdminDeals /></AdminLayout></AdminRoute>} />
+                  <Route path="/admin/webinars" element={<AdminRoute><AdminLayout><AdminWebinar /></AdminLayout></AdminRoute>} />
+                  <Route path="/admin/webinars/stats" element={<AdminRoute><AdminLayout><AdminStats /></AdminLayout></AdminRoute>} />
+                  <Route path="/admin/courses" element={<AdminRoute><AdminLayout><AdminCourses /></AdminLayout></AdminRoute>} />
+                  <Route path="/admin/courses/groups/:groupId" element={<AdminRoute><AdminLayout><CourseGroupDetail /></AdminLayout></AdminRoute>} />
+                  <Route path="/admin/courses/groups/:groupId/courses/:courseId" element={<AdminRoute><AdminLayout><CourseDetail /></AdminLayout></AdminRoute>} />
+                  <Route path="/admin/courses/groups/:groupId/courses/:courseId/lectures/:lectureId" element={<AdminRoute><AdminLayout><LectureDetail /></AdminLayout></AdminRoute>} />
 
-                {/* YouTube OAuth Callback */}
-                <Route path="/auth/youtube/callback" element={<YouTubeCallback />} />
 
-                {/* YouTube Player Test Route */}
-                <Route path="/test-youtube" element={<YouTubeTestPlayer />} />
+                  <Route path="/verify/:token" element={<SetPassword />} />
+                  <Route path="/reset-password/:token" element={<ReSettingPasswordPage />} />
 
-                {/* YouTube API Test Route */}
-                <Route path="/youtube-test" element={<YouTubeTest />} />
+                  <Route path="/webinar_admin" element={<AdminMeeting />} />
+                  <Route path="/webinar_user" element={<UserMeeting />} />
 
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+                  {/* YouTube OAuth Callback */}
+                  <Route path="/auth/youtube/callback" element={<YouTubeCallback />} />
 
-            </SidebarProvider>
-          </BrowserRouter>
+                  {/* YouTube Player Test Route */}
+                  <Route path="/test-youtube" element={<YouTubeTestPlayer />} />
+
+                  {/* YouTube API Test Route */}
+                  <Route path="/youtube-test" element={<YouTubeTest />} />
+
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+
+              </SidebarProvider>
+            </BrowserRouter>
+          </DailyMeetingProvider>
           <Login />
           <SignUp />
           <ResetPassword />

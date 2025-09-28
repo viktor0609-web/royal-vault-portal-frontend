@@ -64,7 +64,7 @@ interface DailyMeetingContextType {
 
 const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(undefined);
 
-export type RoleType = "user" | "guest" | "admin";
+export type RoleType = "User" | "Guest" | "Admin";
 
 export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [roomUrl, setRoomUrl] = useState<string>(import.meta.env.VITE_DAILY_ROOM_URL || '');
@@ -72,7 +72,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [joined, setJoined] = useState<boolean>(false);
   const [dailyRoom, setDailyRoom] = useState<DailyCall | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
-  const [role, setRole] = useState<RoleType>("user"); // replace with real logic
+  const [role, setRole] = useState<RoleType>("User"); // replace with real logic
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState<boolean>(false);
   const [hasMicPermission, setHasMicPermission] = useState<boolean>(false);
@@ -193,7 +193,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (!currentDailyRoom) {
         currentDailyRoom = DailyIframe.createCallObject({
           url: roomUrl,
-          userName: userName + '_A' || '_A', // Pass userName here
+          userName: userName + '(' + role + ')' || '(' + role + ')', // Pass userName here
           // pass device IDs as sources if selected
           videoSource: selectedCamera || undefined,
           audioSource: selectedMicrophone || undefined,
@@ -229,7 +229,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (!currentDailyRoom) {
         currentDailyRoom = DailyIframe.createCallObject({
           url: roomUrl,
-          userName: userName || 'Guest', // Pass userName here
+          userName: userName + "(" + role + ")" || '(' + role + ')', // Pass userName here
           // pass device IDs as sources if selected
           videoSource: selectedCamera || undefined,
           audioSource: selectedMicrophone || undefined,

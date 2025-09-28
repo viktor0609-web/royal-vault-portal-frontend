@@ -59,7 +59,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
       )}
 
       <div className="flex items-center gap-2">
-        {position === "top" && role === "user" && (
+        {position === "top" && role === "User" && (
           <div className="flex gap-4">
             {!isRecording ? (
               <Button variant="ghost" className="text-white" onClick={startRecording}>Start Recording</Button>

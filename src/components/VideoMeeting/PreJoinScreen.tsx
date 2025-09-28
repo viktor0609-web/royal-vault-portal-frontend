@@ -156,7 +156,7 @@ export const PreJoinScreen: React.FC = () => {
       </div>
 
       <Button
-        onClick={() => role === "admin" ? joinMeetingAsAdmin() : joinMeetingAsGuest()}
+        onClick={() => role === "Admin" ? joinMeetingAsAdmin() : joinMeetingAsGuest()}
         className="w-[150px] bg-green-500 hover:bg-green-600"
         disabled={!localStream || !userName}
       >

@@ -170,11 +170,11 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
         {messages.map(msg => (
           <div
             key={msg.id}
-            className={`p-2 rounded-md ${msg.sender === (dailyRoom.participants().local.user_name || "Guest") ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-gray-800 self-start'
+            className={`px-2 py-1 rounded-md ${msg.sender === (dailyRoom.participants().local.user_name || "Guest") ? 'bg-blue-500 text-white self-end' : 'bg-gray-200 text-gray-800 self-start'
               }`}
           >
-            <span className="font-semibold text-sm">{msg.sender}: </span>
-            <span className="text-sm">{msg.text}</span>
+            <span className="font-bold text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">{msg.sender}:</span>
+            <span className="text-xs ml-2">{msg.text}</span>
           </div>
         ))}
         <div ref={messagesEndRef} />

@@ -13,7 +13,7 @@ export const PreJoinScreen: React.FC = () => {
     selectedMicrophone,
     selectedSpeaker,
     localStream,
-    isManager,
+    role,
     setSelectedCamera,
     setSelectedMicrophone,
     setSelectedSpeaker,
@@ -156,7 +156,7 @@ export const PreJoinScreen: React.FC = () => {
       </div>
 
       <Button
-        onClick={() => isManager ? joinMeetingAsAdmin() : joinMeetingAsGuest()}
+        onClick={() => role === "admin" ? joinMeetingAsAdmin() : joinMeetingAsGuest()}
         className="w-[150px] bg-green-500 hover:bg-green-600"
         disabled={!localStream || !userName}
       >

@@ -8,7 +8,6 @@ interface DailyMeetingContextType {
   joined: boolean;
   dailyRoom: DailyCall | null;
   participants: any[];
-  isManager: boolean;
   setRoomUrl: (url: string) => void;
   joinRoom: () => void;
   leaveRoom: () => void;
@@ -57,12 +56,15 @@ interface DailyMeetingContextType {
   raiseHand: () => Promise<void>;
   lowerHand: () => Promise<void>;
   lowerParticipantHand: (sessionId: string) => Promise<void>;
-  setIsManager: (value: boolean) => void;
+  setRole: (value: RoleType) => void;
   localParticipant: any; // Add localParticipant to context type
   hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission
+  role: RoleType;
 }
 
 const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(undefined);
+
+export type RoleType = "user" | "guest" | "admin";
 
 export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [roomUrl, setRoomUrl] = useState<string>(import.meta.env.VITE_DAILY_ROOM_URL || '');
@@ -70,7 +72,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [joined, setJoined] = useState<boolean>(false);
   const [dailyRoom, setDailyRoom] = useState<DailyCall | null>(null);
   const [participants, setParticipants] = useState<any[]>([]);
-  const [isManager, setIsManager] = useState<boolean>(false); // replace with real logic
+  const [role, setRole] = useState<RoleType>("user"); // replace with real logic
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState<boolean>(false);
   const [hasMicPermission, setHasMicPermission] = useState<boolean>(false);
@@ -185,12 +187,13 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setIsLoading(true);
     // stop preview to avoid duplicate tracks when joining
     stopLocalPreview();
+
     try {
       let currentDailyRoom = dailyRoom;
       if (!currentDailyRoom) {
         currentDailyRoom = DailyIframe.createCallObject({
           url: roomUrl,
-          userName: userName || 'Admin', // Pass userName here
+          userName: userName + '_A' || '_A', // Pass userName here
           // pass device IDs as sources if selected
           videoSource: selectedCamera || undefined,
           audioSource: selectedMicrophone || undefined,
@@ -660,8 +663,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         joined,
         dailyRoom,
         participants,
-        isManager,
-        setIsManager,
+        role,
+        setRole,
         setRoomUrl,
         joinRoom,
         leaveRoom,

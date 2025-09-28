@@ -14,7 +14,7 @@ export const UserMeeting = () => {
         roomUrl,
         joined,
         participants,
-        isManager,
+        role,
         joinRoom,
         isPermissionModalOpen,
         isLoading,

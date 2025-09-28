@@ -66,15 +66,6 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
 
       <div className="flex-1 overflow-y-auto space-y-3">
         {participants.map((p) => {
-          // Determine role for display
-          const getRole = (participant: any) => {
-            if (participant.local && participant.permissions.canAdmin) return "Admin";
-            if (participant.local && !participant.permissions.canAdmin) return "User";
-            if (!participant.local && !participant.permissions.canAdmin) return "Guest";
-            return "Unknown";
-          };
-
-          const role = getRole(p);
           const displayName = p.local ? "You (User)" : (p.name);
 
           return (

@@ -41,7 +41,7 @@ export const AdminMeeting = () => {
     const remoteAudioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
 
     // Get video tracks
-    const guestVideoTrack = participants.find(p => !p.local && !p.permissions.canAdmin)?.videoTrack;
+    const guestVideoTrack = participants.find(p => p.name.includes("Guest"))?.videoTrack;
     const localAdminVideoTrack = participants.find((p) => p.local)?.videoTrack;
     const screenshareTrack = isScreensharing
         ? participants.find((p) => p.id === screenshareParticipantId)
@@ -52,7 +52,7 @@ export const AdminMeeting = () => {
     const mainVideoTrack = guestVideoTrack || localAdminVideoTrack;
 
     useEffect(() => {
-        setRole("admin");
+        setRole("Admin");
     }, []);
 
     // Auto-join the room when component mounts
@@ -211,8 +211,8 @@ export const AdminMeeting = () => {
                                         {/* Name label for main video */}
                                         <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
                                             {guestVideoTrack
-                                                ? `Guest: ${participants.find(p => !p.local && !p.permissions.canAdmin)?.name || 'Guest'}`
-                                                : `You: ${participants.find(p => p.local)?.name || 'Admin'}`
+                                                ? `${participants.find(p => p.name.includes("Guest"))?.name}`
+                                                : `${participants.find(p => p.local)?.name}`
                                             }
                                         </div>
                                     </>

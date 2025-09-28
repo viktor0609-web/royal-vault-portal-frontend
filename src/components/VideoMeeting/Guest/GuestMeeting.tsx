@@ -75,7 +75,7 @@ export const GuestMeeting = () => {
 
     // Listen for fullscreen changes
     useEffect(() => {
-        setRole("guest");
+        setRole("Guest");
         const handleFullscreenChange = () => {
             setIsFullscreen(!!document.fullscreenElement);
         };

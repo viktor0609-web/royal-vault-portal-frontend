@@ -273,6 +273,7 @@ export const AdminMeeting = () => {
                             <ChatBox
                                 isVisible={showChatBox}
                                 onUnreadCountChange={setChatUnreadCount}
+                                isAdmin={true}
                             />
                         </div>
                     </div>

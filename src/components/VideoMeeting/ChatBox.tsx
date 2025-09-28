@@ -12,9 +12,10 @@ interface Message {
 interface ChatBoxProps {
   isVisible?: boolean;
   onUnreadCountChange?: (count: number) => void;
+  isAdmin?: boolean;
 }
 
-export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCountChange }) => {
+export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCountChange, isAdmin = false }) => {
   const { dailyRoom } = useDailyMeeting();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -138,8 +139,33 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
     if (e.key === 'Enter') sendMessage();
   };
 
+  // Clear chat function for admin
+  const clearChat = () => {
+    if (!dailyRoom || !isAdmin) return;
+
+    // Send clear-chat message to all participants
+    (dailyRoom as any).sendAppMessage({ message: { type: "clear-chat" } }, '*');
+
+    // Clear local messages immediately
+    setMessages([]);
+    localStorage.removeItem('chat-messages');
+  };
+
   return (
     <div className="flex flex-col border rounded-lg p-2 h-full bg-white shadow-lg">
+      {/* Header with clear button for admin */}
+      {isAdmin && (
+        <div className="flex justify-between items-center mb-2 pb-2 border-b">
+          <h3 className="text-sm font-semibold text-gray-700">Live Chat</h3>
+          <button
+            onClick={clearChat}
+            className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition-colors"
+            title="Clear chat for all participants"
+          >
+            Clear Chat
+          </button>
+        </div>
+      )}
       <div className="flex-1 overflow-y-auto mb-2 space-y-1 px-1">
         {messages.map(msg => (
           <div

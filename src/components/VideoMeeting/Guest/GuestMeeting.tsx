@@ -16,7 +16,7 @@ export const GuestMeeting = () => {
         roomUrl,
         joined,
         participants,
-        isManager,
+        setRole,
         joinRoom,
         isPermissionModalOpen,
         isLoading,
@@ -75,6 +75,7 @@ export const GuestMeeting = () => {
 
     // Listen for fullscreen changes
     useEffect(() => {
+        setRole("guest");
         const handleFullscreenChange = () => {
             setIsFullscreen(!!document.fullscreenElement);
         };

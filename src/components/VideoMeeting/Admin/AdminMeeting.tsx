@@ -13,8 +13,8 @@ export const AdminMeeting = () => {
         roomUrl,
         joined,
         participants,
-        isManager,
-        setIsManager,
+        role,
+        setRole,
         joinRoom,
         ejectParticipant,
         toggleParticipantAudio,
@@ -52,7 +52,7 @@ export const AdminMeeting = () => {
     const mainVideoTrack = guestVideoTrack || localAdminVideoTrack;
 
     useEffect(() => {
-        setIsManager(true);
+        setRole("admin");
     }, []);
 
     // Auto-join the room when component mounts

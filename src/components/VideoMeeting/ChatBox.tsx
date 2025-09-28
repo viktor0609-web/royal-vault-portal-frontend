@@ -80,6 +80,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
     if (!dailyRoom) return;
 
     const handleMessage = (event: any) => {
+      if (event.data.message?.type === "clear-chat") {
+        setMessages([]);  // clear local history
+        return;
+      }
       const data = event.data;
       if (!data || !data.text || !data.sender) return;
 

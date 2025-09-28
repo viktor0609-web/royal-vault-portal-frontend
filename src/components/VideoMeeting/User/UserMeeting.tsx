@@ -35,7 +35,7 @@ export const UserMeeting = () => {
     const videoContainerRef = useRef<HTMLDivElement>(null);
 
     // Get video tracks
-    const guestVideoTrack = participants.find(p => !p.local && !p.permissions.canAdmin)?.videoTrack;
+    const guestVideoTrack = participants.find(p => p.name.includes("Guest"))?.videoTrack;
     const localUserVideoTrack = participants.find(p => p.local)?.videoTrack;
 
     // Main video: prioritize guest video, then local user's video
@@ -174,8 +174,8 @@ export const UserMeeting = () => {
                                         {/* Name label for main video */}
                                         <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
                                             {guestVideoTrack
-                                                ? `Guest: ${participants.find(p => !p.local && !p.permissions.canAdmin)?.name || 'Guest'}`
-                                                : `You: ${participants.find(p => p.local)?.name || 'User'}`
+                                                ? `${participants.find(p => p.name.includes("Guest"))?.name}`
+                                                : `You: ${participants.find(p => p.local)?.name}`
                                             }
                                         </div>
                                     </>

@@ -193,7 +193,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (!currentDailyRoom) {
         currentDailyRoom = DailyIframe.createCallObject({
           url: roomUrl,
-          userName: userName + '(' + role + ')' || '(' + role + ')', // Pass userName here
+          userName: userName + ' (' + role + ')' || 'undefined (' + role + ')', // Pass userName here
           // pass device IDs as sources if selected
           videoSource: selectedCamera || undefined,
           audioSource: selectedMicrophone || undefined,
@@ -229,7 +229,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (!currentDailyRoom) {
         currentDailyRoom = DailyIframe.createCallObject({
           url: roomUrl,
-          userName: userName + "(" + role + ")" || '(' + role + ')', // Pass userName here
+          userName: userName + " (" + role + ")" || 'undefined (' + role + ')', // Pass userName here
           // pass device IDs as sources if selected
           videoSource: selectedCamera || undefined,
           audioSource: selectedMicrophone || undefined,

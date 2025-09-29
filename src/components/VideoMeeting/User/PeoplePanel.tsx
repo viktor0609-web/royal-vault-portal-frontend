@@ -9,7 +9,7 @@ interface PeoplePanelProps {
 }
 
 export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
-  const { participants, raisedHands } = useDailyMeeting();
+  const { participants, raisedHands, localParticipant } = useDailyMeeting();
 
   // Get video tracks for thumbnails - User sees all three roles
   const adminVideoTrack = participants.find(p => p.name.includes("Admin"))?.videoTrack;
@@ -86,6 +86,21 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                   {p.video ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
                   {raisedHands.has(p.id) && (
                     <Hand size={16} className="text-blue-500" />
+                  )}
+                  {p.local && (
+                    <span className={`text-xs px-2 py-1 rounded ${localParticipant?.permissions?.canSend === true
+                      ? 'text-green-400 bg-green-900'
+                      : raisedHands.has(p.id)
+                        ? 'text-yellow-400 bg-yellow-900'
+                        : 'text-red-400 bg-red-900'
+                      }`}>
+                      {localParticipant?.permissions?.canSend === true
+                        ? 'Audio Enabled'
+                        : raisedHands.has(p.id)
+                          ? 'Hand Raised'
+                          : 'Audio Disabled'
+                      }
+                    </span>
                   )}
                 </div>
                 {/* Removed manager-specific controls */}

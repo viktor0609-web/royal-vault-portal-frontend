@@ -87,9 +87,36 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                       <Hand size={16} className="text-blue-500" />
                     </Button>
                   )}
+                  {p.name.includes("(User)") && (
+                    <span className={`text-xs px-2 py-1 rounded ${p.permissions?.canSend === true
+                      ? 'text-green-400 bg-green-900'
+                      : raisedHands.has(p.id)
+                        ? 'text-yellow-400 bg-yellow-900'
+                        : 'text-red-400 bg-red-900'
+                      }`}>
+                      {p.permissions?.canSend === true
+                        ? 'Audio Enabled'
+                        : raisedHands.has(p.id)
+                          ? 'Hand Raised'
+                          : 'Audio Disabled'
+                      }
+                    </span>
+                  )}
                 </div>
                 {role === "Admin" && p.name.includes("(User)") && (
                   <div className="flex gap-1">
+                    {/* Audio permission toggle - only show for users with raised hands or current audio permission */}
+                    {(raisedHands.has(p.id) || p.permissions?.canSend === true) && (
+                      <Button
+                        size="sm"
+                        onClick={() => toggleParticipantAudioPermission(p.id)}
+                        variant="secondary"
+                        className={`bg-opacity-50 p-1 h-auto w-auto ${p.permissions?.canSend === true ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'}`}
+                        title={p.permissions?.canSend === true ? 'Revoke audio permission' : 'Grant audio permission'}
+                      >
+                        {p.permissions?.canSend === true ? <Mic size={16} /> : <MicOff size={16} />}
+                      </Button>
+                    )}
                     <Button size="sm" onClick={() => ejectParticipant(p.id)} variant="destructive" className="bg-opacity-50 p-1 h-auto w-auto">
                       Eject
                     </Button>

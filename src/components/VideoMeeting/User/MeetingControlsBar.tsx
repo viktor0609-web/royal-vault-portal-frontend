@@ -50,6 +50,12 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
 
   const raisedHandsCount = raisedHands.size;
 
+  // For users, audio is disabled by default unless explicitly granted by admin
+  // For admins and guests, use the normal permission check
+  const hasAudioPermission = role === "User"
+    ? (hasLocalAudioPermission && localParticipant?.permissions?.canSend === true)
+    : hasLocalAudioPermission;
+
   return (
     <div className={`flex justify-center items-center p-4 bg-gray-800 text-white ${position === "top" ? "justify-between" : "gap-8"}`}>
       {position === "top" && (
@@ -85,8 +91,13 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
             <Button
               variant="secondary"
               onClick={toggleMicrophone}
-              disabled={!hasLocalAudioPermission}
-              className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!hasLocalAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!hasAudioPermission}
+              className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!hasAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title={
+                !hasAudioPermission
+                  ? (role === "User" ? 'Raise your hand to request audio permission' : 'Audio permission required')
+                  : (isMicrophoneMuted ? 'Unmute microphone' : 'Mute microphone')
+              }
             >
               {isMicrophoneMuted ? <MicOff size={24} /> : <Mic size={24} />}
             </Button>

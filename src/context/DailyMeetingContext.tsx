@@ -60,6 +60,8 @@ interface DailyMeetingContextType {
   localParticipant: any; // Add localParticipant to context type
   hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission
   role: RoleType;
+  canUserControlAudio: boolean;
+  updateCanUserControlAudio: (sessionId: string) => Promise<void>;
 }
 
 const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(undefined);
@@ -86,7 +88,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [raisedHands, setRaisedHands] = useState<Set<string>>(new Set());
   const [userName, setUserName] = useState<string>('New User'); // New state for user name
   const [localParticipant, setLocalParticipant] = useState<any>(null); // State for local participant
-  const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(true);
+  const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(false);
+  const [canUserControlAudio, setCanUserControlAudio] = useState<boolean>(false);
 
 
   const [backgroundFilterType, setBackgroundFilterType] = useState<BackgroundFilterType>('none');
@@ -350,9 +353,12 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         const local = pList.find(p => p.local);
         setLocalParticipant(local);
         if (local) {
-          // Keep the initial hasLocalAudioPermission setting (false for clients)
-          // Don't override it with participant permissions
-          if (!hasLocalAudioPermission && !isMicrophoneMuted) {
+          // Update hasLocalAudioPermission based on participant permissions
+          const canSend = local.permissions?.canSend === true;
+          setHasLocalAudioPermission(canSend);
+
+          // If user doesn't have audio permission, ensure they're muted
+          if (!canSend && !isMicrophoneMuted) {
             dailyRoom.setLocalAudio(false);
             setIsMicrophoneMuted(true);
           }
@@ -363,6 +369,9 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         Object.values(pObj).forEach((p: any) => {
           if (p.userData?.raisedHand) {
             currentRaisedHands.add(p.session_id);
+          }
+          if (p.userData?.canControlAudio) {
+            setCanUserControlAudio(p.userData?.canControlAudio);
           }
         });
         setRaisedHands(currentRaisedHands);
@@ -476,6 +485,11 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       await dailyRoom.updateParticipant(sessionId, { updatePermissions: { canSend: !currentCanSend } });
 
+      // Update hasLocalAudioPermission for the local user if this is their permission being changed
+      if (participant.local) {
+        setHasLocalAudioPermission(!currentCanSend);
+      }
+
       // Force a participant update to reflect the new permissions immediately
       const updatedParticipants = await dailyRoom.participants();
       setParticipants(Object.values(updatedParticipants).map((p: any) => ({
@@ -490,6 +504,17 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     } catch (err) {
       console.error('Error toggling participant audio permission:', err);
+    }
+  };
+
+  const updateCanUserControlAudio = async (sessionId: string) => {
+    if (!dailyRoom || !joined) return;
+    try {
+      const participant = await dailyRoom.participants()[sessionId];
+      if (!participant) return;
+      await dailyRoom.updateParticipant(sessionId, { userData: { ...(participant.userData as any || {}), canControlAudio: !participant.userData?.canControlAudio } });
+    } catch (err) {
+      console.error('Error setting canUserControlAudio:', err);
     }
   };
 
@@ -735,6 +760,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setUserName,
         localParticipant, // Provide localParticipant
         hasLocalAudioPermission, // Provide hasLocalAudioPermission
+        canUserControlAudio,
+        updateCanUserControlAudio,
       }}
     >
       {children}

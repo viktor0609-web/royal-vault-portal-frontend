@@ -44,6 +44,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
     lowerHand,
     dailyRoom,
     hasLocalAudioPermission, // ✅ use context directly
+    canUserControlAudio,
   } = useDailyMeeting();
 
   if (!joined) return null;
@@ -91,10 +92,10 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
             <Button
               variant="secondary"
               onClick={toggleMicrophone}
-              disabled={!hasAudioPermission}
+              disabled={!canUserControlAudio}
               className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!hasAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
               title={
-                !hasAudioPermission
+                !canUserControlAudio
                   ? (role === "User" ? 'Raise your hand to request audio permission' : 'Audio permission required')
                   : (isMicrophoneMuted ? 'Unmute microphone' : 'Mute microphone')
               }

@@ -107,13 +107,13 @@ export const UserMeeting = () => {
 
 
     return (
-        <div className="flex flex-col h-full w-full min-h-0 max-w-full">
-            {/* Main Meeting Area */}
+        <div className="flex flex-col h-full w-full min-h-0 max-w-full @container/meeting">
+            {/* Main Meeting Area - Responsive video container */}
             <div className="flex flex-1 overflow-hidden min-h-0 max-w-full">
                 <div
                     ref={videoContainerRef}
                     id="daily-video-container"
-                    className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full ${joined ? "" : "p-4"}`}
+                    className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full relative aspect-video @[480px]/meeting:aspect-[16/9] ${joined ? "" : "p-2 sm:p-4"}`}
                 >
                     {joined && (
                         <div className="h-full flex flex-col min-h-0 max-w-full">

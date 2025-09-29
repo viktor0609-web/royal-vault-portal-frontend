@@ -39,23 +39,14 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
     isScreensharing,
     startScreenshare,
     stopScreenshare,
-    raisedHands,
-    raiseHand,
-    lowerHand,
-    dailyRoom,
     hasLocalAudioPermission, // ✅ use context directly
-    canUserControlAudio,
   } = useDailyMeeting();
 
   if (!joined) return null;
 
-  const raisedHandsCount = raisedHands.size;
-
   // For users, audio is disabled by default unless explicitly granted by admin
   // For admins and guests, use the normal permission check
-  const hasAudioPermission = role === "User"
-    ? (hasLocalAudioPermission && localParticipant?.permissions?.canSend === true)
-    : hasLocalAudioPermission;
+  const hasAudioPermission = hasLocalAudioPermission;
 
   return (
     <div className={`flex justify-center items-center p-4 bg-gray-800 text-white ${position === "top" ? "justify-between" : "gap-8"}`}>
@@ -92,31 +83,28 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
             <Button
               variant="secondary"
               onClick={toggleMicrophone}
-              disabled={!canUserControlAudio}
+              disabled={!hasAudioPermission}
               className={`rounded-full p-3 h-auto w-auto ${isMicrophoneMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} text-white ${!hasAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
               title={
-                !canUserControlAudio
-                  ? (role === "User" ? 'Raise your hand to request audio permission' : 'Audio permission required')
+                !hasAudioPermission
+                  ? (role === "User" ? 'Raise your hand to request speaking permission' : 'Audio permission required')
                   : (isMicrophoneMuted ? 'Unmute microphone' : 'Mute microphone')
               }
             >
               {isMicrophoneMuted ? <MicOff size={24} /> : <Mic size={24} />}
             </Button>
 
-            <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto relative">
+            <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
               <Users size={24} />
-              {raisedHandsCount > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
-                  {raisedHandsCount}
-                  <span className="sr-only">users with raised hands</span>
-                </span>
-              )}
             </Button>
 
             <Button
               variant="secondary"
-              onClick={() => (raisedHands.has(dailyRoom?.participants().local.session_id || '') ? lowerHand() : raiseHand())}
-              className={`rounded-full p-3 h-auto w-auto ${raisedHands.has(dailyRoom?.participants().local.session_id || '') ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+              onClick={() => {
+                // Simple hand button - you can add your own logic here
+                console.log('Hand button clicked');
+              }}
+              className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto"
             >
               <Hand size={24} />
             </Button>

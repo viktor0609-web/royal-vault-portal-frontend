@@ -52,16 +52,10 @@ interface DailyMeetingContextType {
   selectedBackgroundImage: string | undefined;
   userName: string; // Add userName to context type
   setUserName: (name: string) => void; // Add setUserName to context type
-  raisedHands: Set<string>; // Set of participant IDs who have raised their hand
-  raiseHand: () => Promise<void>;
-  lowerHand: () => Promise<void>;
-  lowerParticipantHand: (sessionId: string) => Promise<void>;
   setRole: (value: RoleType) => void;
   localParticipant: any; // Add localParticipant to context type
   hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission
   role: RoleType;
-  canUserControlAudio: boolean;
-  updateCanUserControlAudio: (sessionId: string) => Promise<void>;
 }
 
 const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(undefined);
@@ -85,11 +79,9 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [permissionRequested, setPermissionRequested] = useState<boolean>(false);
   const [isScreensharing, setIsScreensharing] = useState<boolean>(false);
   const [screenshareParticipantId, setScreenshareParticipantId] = useState<string | null>(null);
-  const [raisedHands, setRaisedHands] = useState<Set<string>>(new Set());
   const [userName, setUserName] = useState<string>('New User'); // New state for user name
   const [localParticipant, setLocalParticipant] = useState<any>(null); // State for local participant
   const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(false);
-  const [canUserControlAudio, setCanUserControlAudio] = useState<boolean>(false);
 
 
   const [backgroundFilterType, setBackgroundFilterType] = useState<BackgroundFilterType>('none');
@@ -343,7 +335,6 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
           audioTrack: participant.tracks?.audio?.persistentTrack,
           screenVideoTrack: participant.tracks?.screenVideo?.persistentTrack,
           permissions: participant.permissions,
-          raisedHand: participant.userData?.raisedHand || false, // Get raisedHand from userData
           // Add Daily.co participant properties for audio/video state
           audio: participant.audio,
           video: participant.video,
@@ -364,17 +355,6 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
           }
         }
 
-        // Update raised hands state based on participants
-        const currentRaisedHands = new Set<string>();
-        Object.values(pObj).forEach((p: any) => {
-          if (p.userData?.raisedHand) {
-            currentRaisedHands.add(p.session_id);
-          }
-          if (p.userData?.canControlAudio) {
-            setCanUserControlAudio(p.userData?.canControlAudio);
-          }
-        });
-        setRaisedHands(currentRaisedHands);
 
         const screenshare = Object.values(pObj).find((part: any) => part?.tracks?.screenVideo?.persistentTrack);
         if (screenshare) {
@@ -400,14 +380,11 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     updateParticipants();
 
     const handleAppMessage = (e: any) => {
-      if (e.data.type === 'lower-hand') {
-        lowerHand();
-      } else if (e.data.type === 'ejected') { // Handle ejected message
+      if (e.data.type === 'ejected') { // Handle ejected message
         console.log('You have been ejected from the room.');
         leaveRoom(); // Ejected participant leaves the room
 
         setTimeout(() => alert('You have been ejected from the meeting by the admin.'), 1000);
-
       }
     };
     dailyRoom.on('app-message', handleAppMessage);
@@ -507,57 +484,6 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const updateCanUserControlAudio = async (sessionId: string) => {
-    if (!dailyRoom || !joined) return;
-    try {
-      const participant = await dailyRoom.participants()[sessionId];
-      if (!participant) return;
-      await dailyRoom.updateParticipant(sessionId, { userData: { ...(participant.userData as any || {}), canControlAudio: !participant.userData?.canControlAudio } });
-    } catch (err) {
-      console.error('Error setting canUserControlAudio:', err);
-    }
-  };
-
-  const raiseHand = async () => {
-    if (!dailyRoom || !joined) return;
-    try {
-      await dailyRoom.setUserData({
-        raisedHand: true,
-      });
-      // No need to optimistically update local state here, it will be updated via participant-updated event
-    } catch (err) {
-      console.error('Error raising hand:', err);
-    }
-  };
-
-  const lowerHand = async () => {
-    if (!dailyRoom || !joined) return;
-    try {
-      await dailyRoom.setUserData({
-        raisedHand: false,
-      });
-      // No need to optimistically update local state here, it will be updated via participant-updated event
-    } catch (err) {
-      console.error('Error lowering hand:', err);
-    }
-  };
-
-  const lowerParticipantHand = async (sessionId: string) => {
-    if (!dailyRoom || !joined) return;
-    try {
-      // Send an app message to the participant to instruct them to lower their hand
-      dailyRoom.sendAppMessage({ type: 'lower-hand' }, sessionId);
-
-      // Optimistically update local state for the admin's view
-      setRaisedHands((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(sessionId);
-        return newSet;
-      });
-    } catch (err) {
-      console.error('Error lowering participant hand:', err);
-    }
-  };
 
 
   const startScreenshare = async () => {
@@ -752,16 +678,10 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         backgroundImages,
         selectedBackgroundImage,
         toggleParticipantAudioPermission,
-        raisedHands,
-        raiseHand,
-        lowerHand,
-        lowerParticipantHand,
         userName,
         setUserName,
         localParticipant, // Provide localParticipant
         hasLocalAudioPermission, // Provide hasLocalAudioPermission
-        canUserControlAudio,
-        updateCanUserControlAudio,
       }}
     >
       {children}

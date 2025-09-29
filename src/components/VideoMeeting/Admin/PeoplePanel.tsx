@@ -9,7 +9,7 @@ interface PeoplePanelProps {
 }
 
 export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
-  const { participants, role, ejectParticipant, toggleParticipantAudioPermission, raisedHands, lowerParticipantHand, updateCanUserControlAudio } = useDailyMeeting();
+  const { participants, role, ejectParticipant, toggleParticipantAudioPermission } = useDailyMeeting();
 
   // Get video tracks for thumbnails - Admin sees Admin and Guest only
   const adminVideoTrack = participants.find(p => p.local)?.videoTrack;
@@ -79,18 +79,6 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                 </div>
                 {role === "Admin" && p.name.includes("(User)") && (
                   <div className="flex gap-1">
-                    {/* Audio permission toggle - only show for users with raised hands */}
-                    {raisedHands.has(p.id) && (
-                      <Button
-                        size="sm"
-                        onClick={() => updateCanUserControlAudio(p.id)}
-                        variant="secondary"
-                        className={`bg-opacity-50 p-1 h-auto w-auto ${p.permissions?.canSend === true ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'}`}
-                        title={p.permissions?.canSend === true ? 'Revoke audio permission' : 'Grant audio permission'}
-                      >
-                        {p.permissions?.canSend === true ? <Mic size={16} /> : <MicOff size={16} />}
-                      </Button>
-                    )}
                     <Button size="sm" onClick={() => ejectParticipant(p.id)} variant="destructive" className="bg-opacity-50 p-1 h-auto w-auto">
                       Eject
                     </Button>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
-import { X, Mic, MicOff, Video, VideoOff, Hand } from "lucide-react";
+import { X, Mic, MicOff, Video, VideoOff } from "lucide-react";
 import { Button } from "../../ui/button";
 import { VideoPlayer } from "../VideoPlayer";
 
@@ -9,7 +9,7 @@ interface PeoplePanelProps {
 }
 
 export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
-  const { participants, raisedHands, localParticipant, toggleMicrophone, isMicrophoneMuted, hasLocalAudioPermission, role } = useDailyMeeting();
+  const { participants } = useDailyMeeting();
 
   // Get video tracks for thumbnails - User sees all three roles
   const adminVideoTrack = participants.find(p => p.name.includes("Admin"))?.videoTrack;
@@ -84,10 +84,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                   <span className="font-medium">{displayName} </span>
                   {p.audio ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
                   {p.video ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
-                  {raisedHands.has(p.id) && (
-                    <Hand size={16} className="text-blue-500" />
-                  )}
                 </div>
+
               </div>
             );
           })}

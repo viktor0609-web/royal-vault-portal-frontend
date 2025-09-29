@@ -87,21 +87,6 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                   {raisedHands.has(p.id) && (
                     <Hand size={16} className="text-blue-500" />
                   )}
-                  {p.local && (
-                    <span className={`text-xs px-2 py-1 rounded ${localParticipant?.permissions?.canSend === true
-                      ? 'text-green-400 bg-green-900'
-                      : raisedHands.has(p.id)
-                        ? 'text-yellow-400 bg-yellow-900'
-                        : 'text-red-400 bg-red-900'
-                      }`}>
-                      {localParticipant?.permissions?.canSend === true
-                        ? 'Audio Enabled'
-                        : raisedHands.has(p.id)
-                          ? 'Hand Raised'
-                          : 'Audio Disabled'
-                      }
-                    </span>
-                  )}
                 </div>
                 {/* Removed manager-specific controls */}
               </div>

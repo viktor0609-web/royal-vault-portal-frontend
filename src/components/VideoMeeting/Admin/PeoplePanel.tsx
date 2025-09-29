@@ -9,7 +9,7 @@ interface PeoplePanelProps {
 }
 
 export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
-  const { participants, role, ejectParticipant, toggleParticipantAudioPermission, raisedHands, lowerParticipantHand } = useDailyMeeting();
+  const { participants, role, ejectParticipant, toggleParticipantAudioPermission, raisedHands, lowerParticipantHand, updateCanUserControlAudio } = useDailyMeeting();
 
   // Get video tracks for thumbnails - Admin sees Admin and Guest only
   const adminVideoTrack = participants.find(p => p.local)?.videoTrack;
@@ -76,25 +76,14 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                   <span className="font-medium">{displayName}</span>
                   {p.audio ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
                   {p.video ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
-                  {raisedHands.has(p.id) && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="p-0 h-auto w-auto"
-                      onClick={() => role === "Admin" && !p.local && lowerParticipantHand(p.id)}
-                      disabled={role != "Admin" || p.local}
-                    >
-                      <Hand size={16} className="text-blue-500" />
-                    </Button>
-                  )}
                 </div>
                 {role === "Admin" && p.name.includes("(User)") && (
                   <div className="flex gap-1">
-                    {/* Audio permission toggle - only show for users with raised hands or current audio permission */}
-                    {(raisedHands.has(p.id) || p.permissions?.canSend === true) && (
+                    {/* Audio permission toggle - only show for users with raised hands */}
+                    {raisedHands.has(p.id) && (
                       <Button
                         size="sm"
-                        onClick={() => toggleParticipantAudioPermission(p.id)}
+                        onClick={() => updateCanUserControlAudio(p.id)}
                         variant="secondary"
                         className={`bg-opacity-50 p-1 h-auto w-auto ${p.permissions?.canSend === true ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'}`}
                         title={p.permissions?.canSend === true ? 'Revoke audio permission' : 'Grant audio permission'}

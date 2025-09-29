@@ -90,9 +90,6 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                 </div>
                 {role === "Admin" && p.name.includes("(User)") && (
                   <div className="flex gap-1">
-                    <Button size="sm" onClick={() => toggleParticipantAudioPermission(p.id)} variant="secondary" className="bg-opacity-50 p-1 h-auto w-auto">
-                      {p.permissions?.canSend === true ? <Mic size={16} /> : <MicOff size={16} />}
-                    </Button>
                     <Button size="sm" onClick={() => ejectParticipant(p.id)} variant="destructive" className="bg-opacity-50 p-1 h-auto w-auto">
                       Eject
                     </Button>

@@ -32,7 +32,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                 <h3 className="text-sm font-semibold text-gray-300">Video Thumbnails</h3>
                 <div className="grid grid-cols-1 gap-2">
                     {/* Admin video - only show if not in main video and video is enabled */}
-                    {adminVideoTrack && adminVideoTrack !== mainVideoTrack && participants.find(p => p.permissions.canAdmin)?.videoTrack && (
+                    {adminVideoTrack && adminVideoTrack !== mainVideoTrack && participants.find(p => p.permissions.canAdmin)?.video && (
                         <div className="relative bg-gray-800 rounded-lg overflow-hidden h-20">
                             <VideoPlayer track={adminVideoTrack} type="camera" thumbnail={true} />
                             <div className="absolute bottom-1 left-1 text-white bg-black bg-opacity-50 px-1 py-0.5 rounded text-xs">
@@ -42,7 +42,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                     )}
 
                     {/* Guest video - only show if not in main video and video is enabled */}
-                    {guestVideoTrack && guestVideoTrack !== mainVideoTrack && participants.find(p => !p.local && !p.permissions.canAdmin)?.videoTrack && (
+                    {guestVideoTrack && guestVideoTrack !== mainVideoTrack && participants.find(p => !p.local && !p.permissions.canAdmin)?.video && (
                         <div className="relative bg-gray-800 rounded-lg overflow-hidden h-20">
                             <VideoPlayer track={guestVideoTrack} type="camera" thumbnail={true} />
                             <div className="absolute bottom-1 left-1 text-white bg-black bg-opacity-50 px-1 py-0.5 rounded text-xs">
@@ -63,8 +63,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                         <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
                             <div className="flex items-center gap-2">
                                 <span className="font-medium">{displayName}</span>
-                                {(p.audioTrack && p.audioTrack.enabled) ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
-                                {(p.videoTrack && p.videoTrack.enabled) ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
+                                {p.audio ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
+                                {p.video ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
                             </div>
                             {/* Removed manager-specific controls */}
                         </div>

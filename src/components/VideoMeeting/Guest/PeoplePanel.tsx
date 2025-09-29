@@ -10,7 +10,7 @@ interface PeoplePanelProps {
 
 export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
     const { participants } = useDailyMeeting();
-
+    console.log("participants", participants)
     // Get video tracks for thumbnails - Guest sees Admin and Guest only
     const adminVideoTrack = participants.find(p => p.name.includes("Admin"))?.videoTrack;
     const guestVideoTrack = participants.find(p => p.name.includes("Guest"))?.videoTrack;
@@ -63,8 +63,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                         <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
                             <div className="flex items-center gap-2">
                                 <span className="font-medium">{displayName}</span>
-                                {p.audioTrack ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
-                                {p.videoTrack ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
+                                {(p.audioTrack && p.audioTrack.enabled) ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
+                                {(p.videoTrack && p.videoTrack.enabled) ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
                             </div>
                             {/* Removed manager-specific controls */}
                         </div>

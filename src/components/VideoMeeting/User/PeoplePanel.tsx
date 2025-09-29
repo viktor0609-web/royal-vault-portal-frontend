@@ -72,8 +72,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
             <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
               <div className="flex items-center gap-2">
                 <span className="font-medium">{displayName} </span>
-                {p.audioTrack ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
-                {p.videoTrack ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
+                {(p.audioTrack && p.audioTrack.enabled) ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
+                {(p.videoTrack && p.videoTrack.enabled) ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
                 {raisedHands.has(p.id) && (
                   <Hand size={16} className="text-blue-500" />
                 )}

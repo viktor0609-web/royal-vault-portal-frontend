@@ -18,7 +18,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
   // Get main video track to avoid duplication
   const mainVideoTrack = guestVideoTrack || adminVideoTrack;
 
-  console.log(participants);
+  console.log("participants", participants)
 
   return (
     <div className="w-80 bg-gray-900 text-white p-4 flex flex-col">
@@ -64,8 +64,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
             <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
               <div className="flex items-center gap-2">
                 <span className="font-medium">{displayName}</span>
-                {p.audioTrack ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
-                {p.videoTrack ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
+                {(p.audioTrack && p.audioTrack.enabled) ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
+                {(p.videoTrack && p.videoTrack.enabled) ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
                 {raisedHands.has(p.id) && (
                   <Button
                     variant="ghost"
@@ -78,7 +78,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                   </Button>
                 )}
               </div>
-              {role === "Admin" && !p.local && (
+              {role === "Admin" && p.name.includes("(User)") && (
                 <div className="flex gap-1">
                   <Button size="sm" onClick={() => toggleParticipantAudioPermission(p.id)} variant="secondary" className="bg-opacity-50 p-1 h-auto w-auto">
                     {p.permissions?.canSend === true ? <Mic size={16} /> : <MicOff size={16} />}

@@ -54,22 +54,31 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-3">
-                {participants.map((p) => {
-                    // Determine role for display
+                {participants
+                    .sort((a, b) => {
+                        // Sort order: Admin, Guest, Users
+                        const getRoleOrder = (participant: any) => {
+                            if (participant.permissions?.canAdmin) return 0; // Admin first
+                            if (participant.name.includes("Guest")) return 1; // Guest second
+                            return 2; // Users last
+                        };
+                        return getRoleOrder(a) - getRoleOrder(b);
+                    })
+                    .map((p) => {
+                        // Determine role for display
+                        const displayName = p.local ? "You (Guest)" : (p.name);
 
-                    const displayName = p.local ? "You (Guest)" : (p.name);
-
-                    return (
-                        <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
-                            <div className="flex items-center gap-2">
-                                <span className="font-medium">{displayName}</span>
-                                {p.audio ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
-                                {p.video ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
+                        return (
+                            <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium">{displayName}</span>
+                                    {p.audio ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
+                                    {p.video ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
+                                </div>
+                                {/* Removed manager-specific controls */}
                             </div>
-                            {/* Removed manager-specific controls */}
-                        </div>
-                    );
-                })}
+                        );
+                    })}
             </div>
         </div>
     );

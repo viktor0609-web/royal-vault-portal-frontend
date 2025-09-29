@@ -56,41 +56,51 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-3">
-        {participants.map((p) => {
-          // Determine role for display
-          const displayName = p.local ? "You (Admin)" : (p.name);
+        {participants
+          .sort((a, b) => {
+            // Sort order: Admin, Guest, Users
+            const getRoleOrder = (participant: any) => {
+              if (participant.permissions?.canAdmin) return 0; // Admin first
+              if (participant.name.includes("Guest")) return 1; // Guest second
+              return 2; // Users last
+            };
+            return getRoleOrder(a) - getRoleOrder(b);
+          })
+          .map((p) => {
+            // Determine role for display
+            const displayName = p.local ? "You (Admin)" : (p.name);
 
-          return (
-            <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
-              <div className="flex items-center gap-2">
-                <span className="font-medium">{displayName}</span>
-                {p.audio ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
-                {p.video ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
-                {raisedHands.has(p.id) && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="p-0 h-auto w-auto"
-                    onClick={() => role === "Admin" && !p.local && lowerParticipantHand(p.id)}
-                    disabled={role != "Admin" || p.local}
-                  >
-                    <Hand size={16} className="text-blue-500" />
-                  </Button>
+            return (
+              <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 rounded-md">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{displayName}</span>
+                  {p.audio ? <Mic size={16} className="text-green-500" /> : <MicOff size={16} className="text-red-500" />}
+                  {p.video ? <Video size={16} className="text-green-500" /> : <VideoOff size={16} className="text-red-500" />}
+                  {raisedHands.has(p.id) && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="p-0 h-auto w-auto"
+                      onClick={() => role === "Admin" && !p.local && lowerParticipantHand(p.id)}
+                      disabled={role != "Admin" || p.local}
+                    >
+                      <Hand size={16} className="text-blue-500" />
+                    </Button>
+                  )}
+                </div>
+                {role === "Admin" && p.name.includes("(User)") && (
+                  <div className="flex gap-1">
+                    <Button size="sm" onClick={() => toggleParticipantAudioPermission(p.id)} variant="secondary" className="bg-opacity-50 p-1 h-auto w-auto">
+                      {p.permissions?.canSend === true ? <Mic size={16} /> : <MicOff size={16} />}
+                    </Button>
+                    <Button size="sm" onClick={() => ejectParticipant(p.id)} variant="destructive" className="bg-opacity-50 p-1 h-auto w-auto">
+                      Eject
+                    </Button>
+                  </div>
                 )}
               </div>
-              {role === "Admin" && p.name.includes("(User)") && (
-                <div className="flex gap-1">
-                  <Button size="sm" onClick={() => toggleParticipantAudioPermission(p.id)} variant="secondary" className="bg-opacity-50 p-1 h-auto w-auto">
-                    {p.permissions?.canSend === true ? <Mic size={16} /> : <MicOff size={16} />}
-                  </Button>
-                  <Button size="sm" onClick={() => ejectParticipant(p.id)} variant="destructive" className="bg-opacity-50 p-1 h-auto w-auto">
-                    Eject
-                  </Button>
-                </div>
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </div>
   );

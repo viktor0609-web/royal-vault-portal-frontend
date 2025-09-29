@@ -331,6 +331,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       try {
         const pObj = await dailyRoom.participants();
+        console.log("Raw Daily.co participant objects:", pObj);
         const pList = Object.values(pObj).map((participant: any) => ({
           id: participant.session_id,
           name: participant.user_name,
@@ -340,6 +341,9 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
           screenVideoTrack: participant.tracks?.screenVideo?.persistentTrack,
           permissions: participant.permissions,
           raisedHand: participant.userData?.raisedHand || false, // Get raisedHand from userData
+          // Add Daily.co participant properties for audio/video state
+          audio: participant.audio,
+          video: participant.video,
         }));
         setParticipants(pList);
 
@@ -448,7 +452,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const toggleParticipantAudio = async (sessionId: string) => {
-    if (!dailyRoom) return;
+    if (!dailyRoom || !joined) return;
     try {
       const pObj = await dailyRoom.participants();
       const participant = pObj[sessionId];
@@ -462,7 +466,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const toggleParticipantAudioPermission = async (sessionId: string) => {
-    if (!dailyRoom) return;
+    if (!dailyRoom || !joined) return;
     try {
       const pObj = await dailyRoom.participants();
       const participant = pObj[sessionId];
@@ -490,7 +494,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const raiseHand = async () => {
-    if (!dailyRoom) return;
+    if (!dailyRoom || !joined) return;
     try {
       await dailyRoom.setUserData({
         raisedHand: true,
@@ -502,7 +506,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const lowerHand = async () => {
-    if (!dailyRoom) return;
+    if (!dailyRoom || !joined) return;
     try {
       await dailyRoom.setUserData({
         raisedHand: false,
@@ -514,7 +518,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const lowerParticipantHand = async (sessionId: string) => {
-    if (!dailyRoom) return;
+    if (!dailyRoom || !joined) return;
     try {
       // Send an app message to the participant to instruct them to lower their hand
       dailyRoom.sendAppMessage({ type: 'lower-hand' }, sessionId);
@@ -532,7 +536,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
 
   const startScreenshare = async () => {
-    if (!dailyRoom) return;
+    if (!dailyRoom || !joined) return;
     try {
 
       await dailyRoom.startScreenShare();
@@ -543,7 +547,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
 
   const stopScreenshare = async () => {
-    if (!dailyRoom) return;
+    if (!dailyRoom || !joined) return;
     try {
       await dailyRoom.stopScreenShare();
       setIsScreensharing(false);
@@ -556,13 +560,21 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const toggleCamera = () => {
     const willTurnOn = isCameraOff; // if currently off, we want to turn ON
-    if (dailyRoom) {
+
+    // Check if dailyRoom exists and is not destroyed
+    if (dailyRoom && joined) {
       try {
         dailyRoom.setLocalVideo(willTurnOn);
       } catch (e) {
         console.warn('setLocalVideo error', e);
+        // If the room is destroyed, don't update the state
+        if (e.message && e.message.includes('destroy')) {
+          return;
+        }
       }
     }
+
+    // Always update local stream and state for preview functionality
     if (localStream) {
       localStream.getVideoTracks().forEach((t) => (t.enabled = willTurnOn));
     }
@@ -571,13 +583,21 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const toggleMicrophone = () => {
     const willTurnOn = isMicrophoneMuted; // if currently muted, we want to turn ON
-    if (dailyRoom) {
+
+    // Check if dailyRoom exists and is not destroyed
+    if (dailyRoom && joined) {
       try {
         dailyRoom.setLocalAudio(willTurnOn);
       } catch (e) {
         console.warn('setLocalAudio error', e);
+        // If the room is destroyed, don't update the state
+        if (e.message && e.message.includes('destroy')) {
+          return;
+        }
       }
     }
+
+    // Always update local stream and state for preview functionality
     if (localStream) {
       localStream.getAudioTracks().forEach((t) => (t.enabled = willTurnOn));
     }

@@ -87,21 +87,6 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                       <Hand size={16} className="text-blue-500" />
                     </Button>
                   )}
-                  {p.name.includes("(User)") && (
-                    <span className={`text-xs px-2 py-1 rounded ${p.permissions?.canSend === true
-                      ? 'text-green-400 bg-green-900'
-                      : raisedHands.has(p.id)
-                        ? 'text-yellow-400 bg-yellow-900'
-                        : 'text-red-400 bg-red-900'
-                      }`}>
-                      {p.permissions?.canSend === true
-                        ? 'Audio Enabled'
-                        : raisedHands.has(p.id)
-                          ? 'Hand Raised'
-                          : 'Audio Disabled'
-                      }
-                    </span>
-                  )}
                 </div>
                 {role === "Admin" && p.name.includes("(User)") && (
                   <div className="flex gap-1">

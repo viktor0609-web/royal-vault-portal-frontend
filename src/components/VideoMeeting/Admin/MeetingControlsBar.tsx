@@ -29,11 +29,9 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
     isScreensharing,
     startScreenshare,
     stopScreenshare,
-    raisedHands,
     dailyRoom,
   } = useDailyMeeting();
 
-  const raisedHandsCount = raisedHands.size;
 
   if (!joined) return null;
 
@@ -75,14 +73,8 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
             >
               {isMicrophoneMuted ? <MicOff size={24} /> : <Mic size={24} />}
             </Button>
-            <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto relative">
+            <Button variant="secondary" onClick={togglePeoplePanel} className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-3 h-auto w-auto">
               <Users size={24} />
-              {raisedHandsCount > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full transform translate-x-1/2 -translate-y-1/2">
-                  {raisedHandsCount}
-                  <span className="sr-only">users with raised hands</span>
-                </span>
-              )}
             </Button>
             <Button
               variant="secondary"

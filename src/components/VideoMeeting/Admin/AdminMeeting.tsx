@@ -3,7 +3,7 @@ import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
-import { Mic, MicOff, Hand } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
 import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment, useMemo } from "react";
@@ -22,7 +22,6 @@ export const AdminMeeting = () => {
         isLoading,
         isScreensharing,
         screenshareParticipantId,
-        raisedHands,
     } = useDailyMeeting();
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
@@ -30,10 +29,6 @@ export const AdminMeeting = () => {
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
     const hasAttemptedJoin = useRef<boolean>(false);
-    const [animatedRaisedHands, setAnimatedRaisedHands] = useState<Set<string>>(
-        new Set()
-    );
-    const animationTimeouts = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
     const videoContainerRef = useRef<HTMLDivElement>(null);
     // Audio refs
@@ -84,51 +79,6 @@ export const AdminMeeting = () => {
         });
     }, [participants]);
 
-    // Handle raised hands animation
-    useEffect(() => {
-        const currentRaisedIds = Array.from(raisedHands);
-        const currentlyAnimatedIds = Array.from(animatedRaisedHands);
-
-        currentRaisedIds.forEach((participantId) => {
-            if (
-                !animatedRaisedHands.has(participantId) &&
-                !animationTimeouts.current.has(participantId)
-            ) {
-                setAnimatedRaisedHands((prev) => new Set(prev).add(participantId));
-                const timeoutId = setTimeout(() => {
-                    setAnimatedRaisedHands((prev) => {
-                        const newSet = new Set(prev);
-                        newSet.delete(participantId);
-                        return newSet;
-                    });
-                    animationTimeouts.current.delete(participantId);
-                }, 5000);
-                animationTimeouts.current.set(participantId, timeoutId);
-            }
-        });
-
-        currentlyAnimatedIds.forEach((participantId) => {
-            if (!raisedHands.has(participantId)) {
-                const timeoutId = animationTimeouts.current.get(participantId);
-                if (timeoutId) {
-                    clearTimeout(timeoutId);
-                    animationTimeouts.current.delete(participantId);
-                }
-                setAnimatedRaisedHands((prev) => {
-                    const newSet = new Set(prev);
-                    newSet.delete(participantId);
-                    return newSet;
-                });
-            }
-        });
-
-        return () => {
-            animationTimeouts.current.forEach((timeoutId) =>
-                clearTimeout(timeoutId)
-            );
-            animationTimeouts.current.clear();
-        };
-    }, [raisedHands]);
 
 
     const toggleFullscreen = async () => {
@@ -234,12 +184,6 @@ export const AdminMeeting = () => {
                                     />
                                 )}
 
-                                {/* Raised hand animation */}
-                                {animatedRaisedHands.size > 0 && (
-                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500 rounded-full p-3 animate-bounce transition-opacity duration-500 ease-out">
-                                        <Hand size={32} className="text-white" />
-                                    </div>
-                                )}
 
                             </div>
 

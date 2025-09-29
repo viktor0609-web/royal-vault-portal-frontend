@@ -12,8 +12,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
     const { participants } = useDailyMeeting();
 
     // Get video tracks for thumbnails - Guest sees Admin and Guest only
-    const adminVideoTrack = participants.find(p => p.permissions.canAdmin)?.videoTrack;
-    const guestVideoTrack = participants.find(p => !p.local && !p.permissions.canAdmin)?.videoTrack;
+    const adminVideoTrack = participants.find(p => p.name.includes("Admin"))?.videoTrack;
+    const guestVideoTrack = participants.find(p => p.name.includes("Guest"))?.videoTrack;
 
     // Get main video track to avoid duplication
     const mainVideoTrack = guestVideoTrack || adminVideoTrack;

@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import DailyIframe, { DailyCall } from '@daily-co/daily-js';
+import DailyIframe, { DailyCall, DailyParticipant } from '@daily-co/daily-js';
 
 type BackgroundFilterType = 'none' | 'blur' | 'image';
 
@@ -325,9 +325,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       console.log("updateParticipants called");
 
       try {
-        const pObj = await dailyRoom.participants();
-        console.log("Raw Daily.co participant objects:", pObj);
-        const pList = Object.values(pObj).map((participant: any) => ({
+        const pObj = dailyRoom.participants();
+        const pList = Object.values(pObj).map((participant: DailyParticipant) => ({
           id: participant.session_id,
           name: participant.user_name,
           local: participant.local,

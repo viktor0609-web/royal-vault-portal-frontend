@@ -27,7 +27,7 @@ export const VideoPlayer = React.memo(({
 
     // If no track and we should show avatar, display the avatar
     if (!track && showAvatarWhenOff && participantName) {
-        const avatarSize = thumbnail ? 'sm' : 'lg';
+        const avatarSize = thumbnail ? 'sm' : 'xl';
         return (
             <div className="w-full h-full flex items-center justify-center bg-gray-800">
                 <CameraOffAvatar

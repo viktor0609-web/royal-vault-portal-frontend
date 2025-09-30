@@ -115,7 +115,7 @@ export const PreJoinScreen: React.FC = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg space-y-1 sm:space-y-4 mb-4 sm:mb-1">
+      <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg space-y-2 sm:space-y-4 mb-4 sm:mb-1">
         <div className="flex  sm:flex-row items-start items-center gap-2">
           <Video className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-1 sm:mt-0" />
           <Select value={selectedCamera} onValueChange={setSelectedCamera}>
@@ -167,7 +167,7 @@ export const PreJoinScreen: React.FC = () => {
 
       <Button
         onClick={() => role === "Admin" ? joinMeetingAsAdmin() : joinMeetingAsGuest()}
-        className="w-full max-w-[150px] sm:max-w-[200px] bg-green-500 hover:bg-green-600 text-sm sm:text-base"
+        className="w-full max-w-[150px] sm:max-w-[200px] bg-green-500 hover:bg-green-600 text-sm sm:text-base mt-0 sm:mt-3"
         disabled={!localStream || !userName}
       >
         Join

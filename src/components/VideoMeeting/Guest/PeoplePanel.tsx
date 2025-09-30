@@ -31,20 +31,32 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
             <div className="mb-3 sm:mb-4 space-y-2">
                 <h3 className="text-xs sm:text-sm font-semibold text-gray-300">Video Thumbnails</h3>
                 <div className="grid grid-cols-1 @[320px]/panel:grid-cols-2 @[480px]/panel:grid-cols-1 gap-2">
-                    {/* Admin video - only show if not in main video and video is enabled */}
-                    {adminVideoTrack && adminVideoTrack !== mainVideoTrack && participants.find(p => p.permissions.canAdmin)?.video && (
+                    {/* Admin video - only show if not in main video */}
+                    {adminVideoTrack && adminVideoTrack !== mainVideoTrack && (
                         <div className="relative bg-gray-800 rounded-lg overflow-hidden h-16 sm:h-20 aspect-video">
-                            <VideoPlayer track={adminVideoTrack} type="camera" thumbnail={true} />
+                            <VideoPlayer
+                                track={participants.find(p => p.permissions.canAdmin)?.video ? adminVideoTrack : null}
+                                type="camera"
+                                thumbnail={true}
+                                participantName={participants.find(p => p.permissions.canAdmin)?.name || "Admin"}
+                                showAvatarWhenOff={true}
+                            />
                             <div className="absolute bottom-1 left-1 text-white bg-black bg-opacity-50 px-1 py-0.5 rounded text-xs">
                                 Admin
                             </div>
                         </div>
                     )}
 
-                    {/* Guest video - only show if not in main video and video is enabled */}
-                    {guestVideoTrack && guestVideoTrack !== mainVideoTrack && participants.find(p => !p.local && !p.permissions.canAdmin)?.video && (
+                    {/* Guest video - only show if not in main video */}
+                    {guestVideoTrack && guestVideoTrack !== mainVideoTrack && (
                         <div className="relative bg-gray-800 rounded-lg overflow-hidden h-16 sm:h-20 aspect-video">
-                            <VideoPlayer track={guestVideoTrack} type="camera" thumbnail={true} />
+                            <VideoPlayer
+                                track={participants.find(p => !p.local && !p.permissions.canAdmin)?.video ? guestVideoTrack : null}
+                                type="camera"
+                                thumbnail={true}
+                                participantName={participants.find(p => !p.local && !p.permissions.canAdmin)?.name || "Guest"}
+                                showAvatarWhenOff={true}
+                            />
                             <div className="absolute bottom-1 left-1 text-white bg-black bg-opacity-50 px-1 py-0.5 rounded text-xs">
                                 Guest
                             </div>

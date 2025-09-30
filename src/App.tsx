@@ -108,9 +108,12 @@ const App = () => (
 
                   {/* Guest webinar route - no authentication required */}
                   <Route path="/webinar_guest" element={<GuestMeeting />} />
-
                   <Route path="/webinar_admin" element={<AdminMeeting />} />
                   <Route path="/webinar_user" element={<UserMeeting />} />
+
+                  <Route path="/royal-tv/:slug/guest" element={<GuestMeeting />} />
+                  <Route path="/royal-tv/:slug/admin" element={<AdminMeeting />} />
+                  <Route path="/royal-tv/:slug/user" element={<UserMeeting />} />
 
                   {/* YouTube OAuth Callback */}
                   <Route path="/auth/youtube/callback" element={<YouTubeCallback />} />

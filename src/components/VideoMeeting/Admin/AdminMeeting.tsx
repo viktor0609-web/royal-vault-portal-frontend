@@ -209,7 +209,7 @@ export const AdminMeeting = () => {
 
                 {joined && showPeoplePanel && (
                     <div className="fixed inset-0 z-50 sm:relative sm:inset-auto">
-                        <div className="w-full h-full sm:w-auto sm:h-auto">
+                        <div className="w-full h-full sm:w-auto h-auto">
                             <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
                         </div>
                     </div>

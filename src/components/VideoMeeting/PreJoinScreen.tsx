@@ -47,12 +47,12 @@ export const PreJoinScreen: React.FC = () => {
 
   if (!permissionRequested) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full p-4 bg-gray-100 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">Join Meeting</h2>
-        <p className="text-center text-gray-700 mb-4">
+      <div className="flex flex-col items-center justify-center h-full w-full p-1 sm:p-4 bg-gray-100 rounded-lg shadow-lg">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center">Join Meeting</h2>
+        <p className="text-center text-gray-700 mb-4 text-sm sm:text-base px-1 sm:px-4">
           Please allow access to your microphone and camera to join the meeting.
         </p>
-        <Button onClick={requestPermissions} className="w-[200px] bg-blue-500 hover:bg-blue-600">
+        <Button onClick={requestPermissions} className="w-full max-w-[200px] bg-blue-500 hover:bg-blue-600">
           Request Permissions
         </Button>
       </div>
@@ -61,9 +61,9 @@ export const PreJoinScreen: React.FC = () => {
 
   if (permissionRequested && (!hasMicPermission && !hasCamPermission)) {
     return (
-      <div className="flex flex-col items-center justify-center h-full w-full p-4 bg-gray-100 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4 text-red-600">Permissions Denied</h2>
-        <p className="text-center text-gray-700">
+      <div className="flex flex-col items-center justify-center h-full w-full p-1 sm:p-4 bg-gray-100 rounded-lg shadow-lg">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 text-red-600 text-center">Permissions Denied</h2>
+        <p className="text-center text-gray-700 text-sm sm:text-base px-1 sm:px-4">
           Microphone and camera access were denied. Please enable them in your browser settings or click the button below to request permissions again.
         </p>
       </div>
@@ -71,18 +71,18 @@ export const PreJoinScreen: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full p-4 bg-gray-100 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-4">Ready to join?</h2>
+    <div className="flex flex-col items-center justify-center h-full w-full p-1 sm:p-4 bg-gray-100 rounded-lg shadow-lg">
+      <h2 className="text-xl sm:text-2xl font-bold mb-4 text-center">Ready to join?</h2>
 
       <input
         type="text"
         placeholder="Enter your name"
         value={userName}
         onChange={(e) => setUserName(e.target.value)}
-        className="w-[640px] p-2 border rounded-md text-black mb-4"
+        className="w-full max-w-sm sm:max-w-md p-2 sm:p-3 border rounded-md text-black mb-4 text-sm sm:text-base"
       />
 
-      <div className="relative w-[640px] h-[360px] bg-black rounded-lg overflow-hidden mb-4">
+      <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-lg aspect-video bg-black rounded-lg overflow-hidden mb-4">
         {localStream ? (
           <video
             ref={localVideoRef}
@@ -92,24 +92,34 @@ export const PreJoinScreen: React.FC = () => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-white">Camera Off</div>
+          <div className="w-full h-full flex items-center justify-center text-white text-sm sm:text-base">Camera Off</div>
         )}
 
-        <div className="absolute bottom-2 left-2 flex gap-2">
-          <Button variant="secondary" size="icon" onClick={toggleMicrophone}>
-            {isMicrophoneMuted ? <MicOff /> : <Mic />}
+        <div className="absolute bottom-2 left-2 flex gap-1 sm:gap-2">
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={toggleMicrophone}
+            className="h-8 w-8 sm:h-10 sm:w-10"
+          >
+            {isMicrophoneMuted ? <MicOff className="h-3 w-3 sm:h-4 sm:w-4" /> : <Mic className="h-3 w-3 sm:h-4 sm:w-4" />}
           </Button>
-          <Button variant="secondary" size="icon" onClick={toggleCamera}>
-            {isCameraOff ? <VideoOff /> : <Video />}
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={toggleCamera}
+            className="h-8 w-8 sm:h-10 sm:w-10"
+          >
+            {isCameraOff ? <VideoOff className="h-3 w-3 sm:h-4 sm:w-4" /> : <Video className="h-3 w-3 sm:h-4 sm:w-4" />}
           </Button>
         </div>
       </div>
 
-      <div className="w-[640px] space-y-4 mb-6">
-        <div className="flex items-center gap-2">
-          <Video className="h-5 w-5" />
+      <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg space-y-1 sm:space-y-1 mb-4 sm:mb-1">
+        <div className="flex  sm:flex-row items-start items-center gap-2">
+          <Video className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-1 sm:mt-0" />
           <Select value={selectedCamera} onValueChange={setSelectedCamera}>
-            <SelectTrigger className="flex-1">
+            <SelectTrigger className="w-full text-sm sm:text-base">
               <SelectValue placeholder="Select a camera" />
             </SelectTrigger>
             <SelectContent>
@@ -122,10 +132,10 @@ export const PreJoinScreen: React.FC = () => {
           </Select>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Mic className="h-5 w-5" />
+        <div className="flex sm:flex-row items-start items-center gap-2">
+          <Mic className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-1 sm:mt-0" />
           <Select value={selectedMicrophone} onValueChange={setSelectedMicrophone}>
-            <SelectTrigger className="flex-1">
+            <SelectTrigger className="w-full text-sm sm:text-base">
               <SelectValue placeholder="Select a microphone" />
             </SelectTrigger>
             <SelectContent>
@@ -138,10 +148,10 @@ export const PreJoinScreen: React.FC = () => {
           </Select>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Volume2 className="h-5 w-5" />
+        <div className="flex sm:flex-row items-start items-center gap-2">
+          <Volume2 className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-1 sm:mt-0" />
           <Select value={selectedSpeaker} onValueChange={setSelectedSpeaker}>
-            <SelectTrigger className="flex-1">
+            <SelectTrigger className="w-full text-sm sm:text-base">
               <SelectValue placeholder="Select a speaker" />
             </SelectTrigger>
             <SelectContent>
@@ -157,7 +167,7 @@ export const PreJoinScreen: React.FC = () => {
 
       <Button
         onClick={() => role === "Admin" ? joinMeetingAsAdmin() : joinMeetingAsGuest()}
-        className="w-[150px] bg-green-500 hover:bg-green-600"
+        className="w-full max-w-[150px] sm:max-w-[200px] bg-green-500 hover:bg-green-600 text-sm sm:text-base"
         disabled={!localStream || !userName}
       >
         Join

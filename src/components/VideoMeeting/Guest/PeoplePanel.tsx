@@ -19,7 +19,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
     const mainVideoTrack = guestVideoTrack || adminVideoTrack;
 
     return (
-        <div className="w-full sm:w-80 lg:w-96 bg-gray-900 text-white p-3 sm:p-4 flex flex-col h-full max-h-[80vh] sm:max-h-none @container/panel">
+        <div className="w-full sm:w-80 lg:w-96 bg-gray-900 text-white p-3 sm:p-4 flex flex-col h-full @container/panel">
             <div className="flex justify-between items-center mb-3 sm:mb-4">
                 <h2 className="text-lg sm:text-xl font-bold">Participants ({participants.length})</h2>
                 <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 sm:h-10 sm:w-10">

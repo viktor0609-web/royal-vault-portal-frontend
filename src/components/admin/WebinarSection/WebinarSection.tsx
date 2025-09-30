@@ -477,14 +477,6 @@ export function WebinarSection() {
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handlebtnClick('reg', webinar)}
-                                className="text-xs px-2 py-1"
-                            >
-                                Reg
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="sm"
                                 onClick={() => handlebtnClick('web', webinar)}
                                 className="text-xs px-2 py-1"
                             >

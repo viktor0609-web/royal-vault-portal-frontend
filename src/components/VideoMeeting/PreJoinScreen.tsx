@@ -115,7 +115,7 @@ export const PreJoinScreen: React.FC = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg space-y-1 sm:space-y-1 mb-4 sm:mb-1">
+      <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg space-y-1 sm:space-y-4 mb-4 sm:mb-1">
         <div className="flex  sm:flex-row items-start items-center gap-2">
           <Video className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-1 sm:mt-0" />
           <Select value={selectedCamera} onValueChange={setSelectedCamera}>

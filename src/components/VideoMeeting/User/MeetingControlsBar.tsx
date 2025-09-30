@@ -104,17 +104,6 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
 
             <Button
               variant="secondary"
-              onClick={() => {
-                // Simple hand button - you can add your own logic here
-                console.log('Hand button clicked');
-              }}
-              className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 transition-all duration-200"
-            >
-              <Hand size={20} className="sm:w-6 sm:h-6" />
-            </Button>
-
-            <Button
-              variant="secondary"
               onClick={toggleChatBox}
               className={`rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 ${showChatBox ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white relative transition-all duration-200`}
             >
@@ -135,23 +124,16 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
               {isFullscreen ? <Minimize size={20} className="sm:w-6 sm:h-6" /> : <Maximize size={20} className="sm:w-6 sm:h-6" />}
             </Button>
 
-            {!isScreensharing ? (
-              <Button
-                variant="secondary"
-                onClick={startScreenshare}
-                className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 transition-all duration-200"
-              >
-                <MonitorPlay size={20} className="sm:w-6 sm:h-6" />
-              </Button>
-            ) : (
-              <Button
-                variant="secondary"
-                onClick={stopScreenshare}
-                className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 transition-all duration-200"
-              >
-                <MonitorPlay size={20} className="sm:w-6 sm:h-6" />
-              </Button>
-            )}
+            <Button
+              variant="secondary"
+              onClick={() => {
+                // Simple hand button - you can add your own logic here
+                console.log('Hand button clicked');
+              }}
+              className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 transition-all duration-200"
+            >
+              <Hand size={20} className="sm:w-6 sm:h-6" />
+            </Button>
 
             <BackgroundFilterModal>
               <Button

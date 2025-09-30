@@ -6,6 +6,7 @@ import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useAuthDialog } from "@/context/AuthDialogContext";
+import { useNavigate } from "react-router-dom";
 
 const filterTabs = [
   { label: "UPCOMING" },
@@ -22,6 +23,7 @@ interface Webinar {
   streamType: string;
   status: string;
   portalDisplay: string;
+  slug: string;
   attendees?: Array<{
     user: string;
     attendanceStatus: string;
@@ -40,6 +42,7 @@ export function WebinarsSection() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { openDialog } = useAuthDialog();
+  const navigate = useNavigate();
 
 
   const fetchWebinars = useCallback(async () => {
@@ -174,12 +177,23 @@ export function WebinarsSection() {
       return;
     }
 
-    // Live video functionality has been removed
-    toast({
-      title: "Live Video Unavailable",
-      description: "Live video meetings are currently not available. Please check back later.",
-      variant: "destructive",
-    });
+    // Check if user is logged in
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to access the live webinar",
+        variant: "destructive",
+      });
+      openDialog("login");
+      return;
+    }
+
+    // Determine user role and redirect to appropriate meeting page
+    if (user.role === 'admin') {
+      navigate(`/royal-tv/${webinar.slug}/admin`);
+    } else {
+      navigate(`/royal-tv/${webinar.slug}/user`);
+    }
   };
 
   const changeFilter = (index: number) => {

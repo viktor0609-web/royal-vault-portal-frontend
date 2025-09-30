@@ -334,7 +334,7 @@ export function WebinarsSection() {
                   <h3 className="text-lg font-semibold text-royal-dark-gray mb-2 group-hover:text-royal-blue transition-colors duration-75">
                     {webinar.name}
                   </h3>
-                  <div className="flex items-center gap-2 min-[700px]:gap-4 text-sm text-royal-gray">
+                  <div className="flex items-center gap-2 min-[700px]:gap-4 text-xs min-[700px]:text-sm text-royal-gray">
                     <span className="group-hover:text-royal-dark-gray transition-colors duration-75">
                       {formatDate(webinar.date)} @ {formatTime(webinar.date)}
                     </span>
@@ -342,7 +342,7 @@ export function WebinarsSection() {
                       {webinar.streamType}
                     </span>
                     {isRegistered && (
-                      <span className="px-2 py-1 bg-green-100 text-green-600 rounded text-xs font-medium">
+                      <span className="px-2 py-1 bg-green-100 text-green-600 rounded text-xs font-medium hidden sm:inline">
                         Registered
                       </span>
                     )}

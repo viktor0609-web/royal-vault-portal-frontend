@@ -3,7 +3,7 @@ import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
-import { Mic, MicOff } from "lucide-react";
+import { Mic, MicOff, X } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
 import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment, useMemo } from "react";
@@ -208,12 +208,27 @@ export const AdminMeeting = () => {
                 </div>
 
                 {joined && showPeoplePanel && (
-                    <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
+                    <div className="fixed inset-0 z-50 sm:relative sm:inset-auto">
+                        <div className="w-full h-full sm:w-auto sm:h-auto">
+                            <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
+                        </div>
+                    </div>
                 )}
 
                 {joined && showChatBox && (
-                    <div className="flex border-l bg-gray-900 text-white">
-                        <div className="w-80 p-4 flex flex-col">
+                    <div className="fixed inset-0 z-50 sm:relative sm:inset-auto flex border-l bg-gray-900 text-white">
+                        <div className="w-full sm:w-80 p-4 flex flex-col">
+                            {/* Mobile close button */}
+                            <div className="flex justify-end mb-2 sm:hidden">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setShowChatBox(false)}
+                                    className="h-8 w-8 text-white hover:bg-gray-700"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
                             <ChatBox
                                 isVisible={showChatBox}
                                 onUnreadCountChange={setChatUnreadCount}
@@ -226,8 +241,14 @@ export const AdminMeeting = () => {
 
             <MeetingControlsBar
                 position="bottom"
-                togglePeoplePanel={() => setShowPeoplePanel((prev) => !prev)}
-                toggleChatBox={() => setShowChatBox((prev) => !prev)}
+                togglePeoplePanel={() => {
+                    setShowPeoplePanel((prev) => !prev);
+                    if (showChatBox) setShowChatBox(false);
+                }}
+                toggleChatBox={() => {
+                    setShowChatBox((prev) => !prev);
+                    if (showPeoplePanel) setShowPeoplePanel(false);
+                }}
                 showChatBox={showChatBox}
                 toggleFullscreen={toggleFullscreen}
                 isFullscreen={isFullscreen}

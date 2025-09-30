@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DailyCall } from '@daily-co/daily-js';
 import { useDailyMeeting } from "../../context/DailyMeetingContext";
+import { Smile } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -20,8 +21,70 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastVisibleMessageId = useRef<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Popular emojis for the picker
+  const popularEmojis = [
+    '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃',
+    '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙',
+    '😋', '😛', '😜', '🤪', '😝', '🤑', '🤗', '🤭', '🤫', '🤔',
+    '🤐', '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥',
+    '😌', '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮',
+    '🤧', '🥵', '🥶', '🥴', '😵', '🤯', '🤠', '🥳', '😎', '🤓',
+    '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔',
+    '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️',
+    '👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉',
+    '👆', '🖕', '👇', '☝️', '👋', '🤚', '🖐️', '✋', '🖖', '👏',
+    '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾',
+    '🦿', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🦷', '🦴', '👀',
+    '👁️', '👅', '👄', '💋', '🩸', '👶', '🧒', '👦', '👧', '🧑',
+    '👨', '👩', '🧓', '👴', '👵', '👱', '👨‍🦱', '👩‍🦱', '👨‍🦰', '👩‍🦰',
+    '👨‍🦳', '👩‍🦳', '👨‍🦲', '👩‍🦲', '🧔', '👵', '👲', '🧕', '👳', '👳‍♂️',
+    '👳‍♀️', '👮', '👮‍♂️', '👮‍♀️', '👷', '👷‍♂️', '👷‍♀️', '💂', '💂‍♂️', '💂‍♀️',
+    '🕵️', '🕵️‍♂️', '🕵️‍♀️', '👩‍⚕️', '👨‍⚕️', '👩‍🌾', '👨‍🌾', '👩‍🍳', '👨‍🍳', '👩‍🎓',
+    '👨‍🎓', '👩‍🎤', '👨‍🎤', '👩‍🏫', '👨‍🏫', '👩‍🏭', '👨‍🏭', '👩‍💻', '👨‍💻', '👩‍💼',
+    '👨‍💼', '👩‍🔧', '👨‍🔧', '👩‍🔬', '👨‍🔬', '👩‍🎨', '👨‍🎨', '👩‍🚒', '👨‍🚒', '👩‍✈️',
+    '👨‍✈️', '👩‍🚀', '👨‍🚀', '👩‍⚖️', '👨‍⚖️', '👰', '🤵', '👸', '🤴', '🦸',
+    '🦸‍♂️', '🦸‍♀️', '🦹', '🦹‍♂️', '🦹‍♀️', '🤶', '🎅', '🧙', '🧙‍♂️', '🧙‍♀️',
+    '🧚', '🧚‍♂️', '🧚‍♀️', '🧛', '🧛‍♂️', '🧛‍♀️', '🧜', '🧜‍♂️', '🧜‍♀️', '🧝',
+    '🧝‍♂️', '🧝‍♀️', '🧞', '🧞‍♂️', '🧞‍♀️', '🧟', '🧟‍♂️', '🧟‍♀️', '🙍', '🙍‍♂️',
+    '🙍‍♀️', '🙎', '🙎‍♂️', '🙎‍♀️', '🙅', '🙅‍♂️', '🙅‍♀️', '🙆', '🙆‍♂️', '🙆‍♀️',
+    '💁', '💁‍♂️', '💁‍♀️', '🙋', '🙋‍♂️', '🙋‍♀️', '🙇', '🙇‍♂️', '🙇‍♀️', '🤦',
+    '🤦‍♂️', '🤦‍♀️', '🤷', '🤷‍♂️', '🤷‍♀️', '💆', '💆‍♂️', '💆‍♀️', '💇', '💇‍♂️',
+    '💇‍♀️', '🚶', '🚶‍♂️', '🚶‍♀️', '🏃', '🏃‍♂️', '🏃‍♀️', '💃', '🕺', '🕴️',
+    '👯', '👯‍♂️', '👯‍♀️', '🧖', '🧖‍♂️', '🧖‍♀️', '🧘', '🧘‍♂️', '🧘‍♀️', '🛀',
+    '🛌', '👭', '👫', '👬', '💏', '💑', '👪', '🗣️', '👤', '👥',
+    '🫂', '👋', '🤚', '🖐️', '✋', '🖖', '👏', '🙌', '👐', '🤲',
+    '🤝', '🙏', '✍️', '💅', '🤳', '💪', '🦾', '🦿', '🦵', '🦶',
+    '👂', '🦻', '👃', '🧠', '🦷', '🦴', '👀', '👁️', '👅', '👄',
+    '💋', '🩸', '🦵', '🦶', '👂', '🦻', '👃', '🧠', '🦷', '🦴',
+    '👀', '👁️', '👅', '👄', '💋', '🩸', '🦵', '🦶', '👂', '🦻',
+    '👃', '🧠', '🦷', '🦴', '👀', '👁️', '👅', '👄', '💋', '🩸'
+  ];
+
+  // Handle emoji selection
+  const handleEmojiSelect = (emoji: string) => {
+    setInput(prev => prev + emoji);
+    setShowEmojiPicker(false);
+    inputRef.current?.focus();
+  };
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showEmojiPicker && !(event.target as Element).closest('.emoji-picker-container')) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showEmojiPicker]);
 
   // Load messages from localStorage on component mount
   useEffect(() => {
@@ -181,14 +244,40 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
       </div>
 
       <div className="flex space-x-2">
-        <input
-          type="text"
-          className="flex-1 border rounded text-black px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="Type a message..."
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={handleKeyPress}
-        />
+        <div className="flex-1 relative">
+          <input
+            ref={inputRef}
+            type="text"
+            className="w-full border rounded text-black px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Type a message..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyPress}
+          />
+          {showEmojiPicker && (
+            <div className="emoji-picker-container absolute bottom-full left-0 mb-2 bg-white border rounded-lg shadow-lg p-3 max-h-48 overflow-y-auto z-10 w-80">
+              <div className="grid grid-cols-8 gap-1">
+                {popularEmojis.map((emoji, index) => (
+                  <button
+                    key={index}
+                    className="text-lg hover:bg-gray-100 rounded p-1 transition-colors"
+                    onClick={() => handleEmojiSelect(emoji)}
+                    title={emoji}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <button
+          className="bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600 transition-colors"
+          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+          title="Add emoji"
+        >
+          <Smile size={16} />
+        </button>
         <button
           className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
           onClick={sendMessage}

@@ -1,7 +1,22 @@
 import React, { useRef, useEffect } from "react";
+import { CameraOffAvatar } from "./CameraOffAvatar";
+
+interface VideoPlayerProps {
+    track: MediaStreamTrack | null;
+    type?: "screen" | "camera";
+    thumbnail?: boolean;
+    participantName?: string;
+    showAvatarWhenOff?: boolean;
+}
 
 // 🔹 VideoPlayer Component (memoized to avoid re-renders)
-export const VideoPlayer = React.memo(({ track, type, thumbnail }: { track: MediaStreamTrack | null, type?: "screen" | "camera", thumbnail?: boolean }) => {
+export const VideoPlayer = React.memo(({
+    track,
+    type,
+    thumbnail,
+    participantName,
+    showAvatarWhenOff = false
+}: VideoPlayerProps) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
@@ -9,6 +24,19 @@ export const VideoPlayer = React.memo(({ track, type, thumbnail }: { track: Medi
             videoRef.current.srcObject = new MediaStream([track]);
         }
     }, [track]);
+
+    // If no track and we should show avatar, display the avatar
+    if (!track && showAvatarWhenOff && participantName) {
+        const avatarSize = thumbnail ? 'sm' : 'lg';
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                <CameraOffAvatar
+                    name={participantName}
+                    size={avatarSize}
+                />
+            </div>
+        );
+    }
 
     if (!track) return null;
 

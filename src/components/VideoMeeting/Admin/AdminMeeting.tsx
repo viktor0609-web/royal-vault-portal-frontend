@@ -155,9 +155,17 @@ export const AdminMeeting = () => {
                                 )}
 
                                 {/* Main video when no screenshare */}
-                                {!screenshareTrack && mainVideoTrack && (
+                                {!screenshareTrack && (
                                     <>
-                                        <VideoPlayer track={mainVideoTrack} type="camera" />
+                                        <VideoPlayer
+                                            track={mainVideoTrack}
+                                            type="camera"
+                                            participantName={guestVideoTrack
+                                                ? participants.find(p => p.name.includes("Guest"))?.name || "Guest"
+                                                : participants.find(p => p.local)?.name || "Admin"
+                                            }
+                                            showAvatarWhenOff={true}
+                                        />
                                         {/* Name label for main video */}
                                         <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
                                             {guestVideoTrack

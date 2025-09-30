@@ -18,8 +18,8 @@ export const CameraOffAvatar: React.FC<CameraOffAvatarProps> = ({
     const sizeClasses = {
         sm: 'w-8 h-8 text-sm',
         md: 'w-12 h-12 text-lg',
-        lg: 'w-16 h-16 text-xl',
-        xl: 'w-20 h-20 text-2xl'
+        lg: 'w-24 h-24 text-4xl',
+        xl: 'w-32 h-32 text-5xl'
     };
 
     // Generate a consistent background color based on the name

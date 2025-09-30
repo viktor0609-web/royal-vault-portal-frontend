@@ -122,7 +122,7 @@ export const GuestMeeting = () => {
                                 {!screenshareTrack && (
                                     <>
                                         <VideoPlayer
-                                            track={mainVideoTrack}
+                                            track={participants.find(p => p.local)?.video ? mainVideoTrack : null}
                                             type="camera"
                                             participantName={participants.find(p => p.local)?.name || "Guest"}
                                             showAvatarWhenOff={true}

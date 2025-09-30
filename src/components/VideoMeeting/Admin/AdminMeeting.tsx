@@ -158,7 +158,10 @@ export const AdminMeeting = () => {
                                 {!screenshareTrack && (
                                     <>
                                         <VideoPlayer
-                                            track={mainVideoTrack}
+                                            track={guestVideoTrack
+                                                ? (participants.find(p => p.name.includes("Guest"))?.video ? guestVideoTrack : null)
+                                                : (participants.find(p => p.local)?.video ? mainVideoTrack : null)
+                                            }
                                             type="camera"
                                             participantName={guestVideoTrack
                                                 ? participants.find(p => p.name.includes("Guest"))?.name || "Guest"

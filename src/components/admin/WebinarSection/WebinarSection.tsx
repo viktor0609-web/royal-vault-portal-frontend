@@ -146,43 +146,16 @@ export function WebinarSection() {
                     await handleDeleteWebinar(item!._id);
                     break;
                 }
-                case 'reg': {
-                    // Make API request to get webinar details for registration
-                    const response = await webinarApi.getWebinarById(item!._id, 'full');
-                    const webinarData = response.data.webinar;
-
-                    // Open registration page with webinar data
-                    const registrationUrl = `/registration?title=${encodeURIComponent(webinarData.name)}&id=${webinarData._id}&date=${encodeURIComponent(webinarData.date)}`;
-                    window.open(registrationUrl, '_blank');
-
-                    toast({
-                        title: "Registration Page",
-                        description: "Opening registration page for webinar",
-                    });
-                    break;
-                }
                 case 'web': {
-                    toast({
-                        title: "Live Video Unavailable",
-                        description: "Live video meetings are currently not available.",
-                        variant: "destructive",
-                    });
+                    navigate(`/royal-tv/${item!.slug}/user`);
                     break;
                 }
                 case 'host': {
-                    toast({
-                        title: "Live Video Unavailable",
-                        description: "Live video meetings are currently not available.",
-                        variant: "destructive",
-                    });
+                    navigate(`/royal-tv/${item!.slug}/admin`);
                     break;
                 }
                 case 'guest': {
-                    toast({
-                        title: "Live Video Unavailable",
-                        description: "Live video meetings are currently not available.",
-                        variant: "destructive",
-                    });
+                    navigate(`/royal-tv/${item!.slug}/guest`);
                     break;
                 }
                 case 'stats': {
@@ -361,13 +334,6 @@ export function WebinarSection() {
                                             disabled={actionLoading === 'edit'}
                                         >
                                             {actionLoading === 'edit' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Edit'}
-                                        </Button>
-                                        <Button
-                                            className="w-16"
-                                            onClick={() => handlebtnClick('reg', webinar)}
-                                            disabled={actionLoading === 'reg'}
-                                        >
-                                            {actionLoading === 'reg' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reg'}
                                         </Button>
                                         <Button
                                             className="w-16"

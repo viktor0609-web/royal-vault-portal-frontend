@@ -32,7 +32,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                 <h3 className="text-xs sm:text-sm font-semibold text-gray-300">Video Thumbnails</h3>
                 <div className="grid grid-cols-1 @[320px]/panel:grid-cols-2 @[480px]/panel:grid-cols-1 gap-2">
                     {/* Admin video - only show if not in main video */}
-                    {adminVideoTrack && adminVideoTrack !== mainVideoTrack && (
+                    {(
                         <div className="relative bg-gray-800 rounded-lg overflow-hidden h-16 sm:h-20 aspect-video">
                             <VideoPlayer
                                 track={participants.find(p => p.permissions.canAdmin)?.video ? adminVideoTrack : null}

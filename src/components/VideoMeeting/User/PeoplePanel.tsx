@@ -65,7 +65,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
           )}
 
           {/* User video - only show if not in main video */}
-          {userVideoTrack && userVideoTrack !== mainVideoTrack && (
+          {(
             <div className="relative bg-gray-800 rounded-lg overflow-hidden h-16 sm:h-20 aspect-video">
               <VideoPlayer
                 track={participants.find(p => p.local && !p.permissions.canAdmin)?.video ? userVideoTrack : null}

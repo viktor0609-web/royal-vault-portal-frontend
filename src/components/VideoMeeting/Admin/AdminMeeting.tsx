@@ -179,11 +179,6 @@ export const AdminMeeting = () => {
                                     </>
                                 )}
 
-                                {/* Fallback */}
-                                {!screenshareTrack && !mainVideoTrack && (
-                                    <div className="text-white text-xl">No active video.</div>
-                                )}
-
 
                                 {/* Main participant audio */}
                                 {participants[0]?.audioTrack && (

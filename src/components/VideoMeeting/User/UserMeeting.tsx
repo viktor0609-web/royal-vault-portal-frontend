@@ -147,12 +147,6 @@ export const UserMeeting = () => {
                                     </>
                                 )}
 
-                                {/* Fallback */}
-                                {!screenshareTrack && !mainVideoTrack && (
-                                    <div className="text-white text-xl">No active video.</div>
-                                )}
-
-
                             </div>
 
                             {/* Remote participants audio */}

@@ -87,6 +87,12 @@ class YouTubeAPI {
         if (storedToken && tokenExpiry && Date.now() < parseInt(tokenExpiry)) {
             this.accessToken = storedToken;
             console.log('✅ Loaded valid stored YouTube token');
+            try {
+                // Best-effort: set token for gapi if available
+                window.gapi?.client?.setToken?.({ access_token: storedToken });
+            } catch {
+                // no-op
+            }
         } else if (storedToken) {
             // Token is expired, clear it
             localStorage.removeItem('youtube_access_token');
@@ -219,7 +225,7 @@ class YouTubeAPI {
     // Redirect-based authentication flow
     private authenticateWithRedirect(): boolean {
         const redirectUri = window.location.origin + '/auth/youtube/callback';
-        const scope = 'https://www.googleapis.com/auth/youtube.upload';
+        const scope = 'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly';
         const state = Math.random().toString(36).substring(2, 15);
 
         // Debug: Log the redirect URI being used
@@ -322,6 +328,13 @@ class YouTubeAPI {
                 localStorage.setItem('youtube_access_token', tokenData.access_token);
                 localStorage.setItem('youtube_token_expiry', expiryTime.toString());
 
+                // Best-effort: set token for gapi if available
+                try {
+                    window.gapi?.client?.setToken?.({ access_token: tokenData.access_token });
+                } catch {
+                    // no-op
+                }
+
                 // Clean up
                 sessionStorage.removeItem('youtube_oauth_state');
 
@@ -387,9 +400,9 @@ class YouTubeAPI {
         }
 
         // Check file size (YouTube limit is 128GB, but we'll set a reasonable limit)
-        const maxSize = 2 * 1024 * 1024 * 1024; // 2GB
+        const maxSize = 5 * 1024 * 1024 * 1024; // 5GB
         if (file.size > maxSize) {
-            throw new Error(`File too large: ${(file.size / 1024 / 1024 / 1024).toFixed(2)}GB. Maximum size: 2GB`);
+            throw new Error(`File too large: ${(file.size / 1024 / 1024 / 1024).toFixed(2)}GB. Maximum size: 5GB`);
         }
 
         // Check minimum file size
@@ -406,13 +419,25 @@ class YouTubeAPI {
                 await this.initialize();
             }
 
-            // Check if user has YouTube upload permissions
-            const response = await window.gapi.client.youtube.channels.list({
-                part: 'contentDetails',
-                mine: true
+            if (!this.accessToken) {
+                throw new Error('No access token available to verify YouTube permissions');
+            }
+
+            // Use direct HTTP request with Bearer token to verify channel access
+            const resp = await fetch('https://www.googleapis.com/youtube/v3/channels?part=contentDetails&mine=true', {
+                headers: {
+                    Authorization: `Bearer ${this.accessToken}`,
+                },
             });
 
-            if (!response.result.items || response.result.items.length === 0) {
+            if (!resp.ok) {
+                const errText = await resp.text();
+                console.error('Channel verification failed:', resp.status, errText);
+                throw new Error('Failed to verify YouTube permissions');
+            }
+
+            const data = await resp.json();
+            if (!data.items || data.items.length === 0) {
                 throw new Error('No YouTube channel found. Please ensure you have a YouTube channel.');
             }
 

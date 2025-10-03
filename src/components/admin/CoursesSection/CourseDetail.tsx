@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
 import { LectureModal } from "./LectureModal";
+import { VideoPlayerModal } from "./VideoPlayerModal";
 import { useToast } from "@/hooks/use-toast";
 import { courseApi } from "@/lib/api";
 
@@ -64,6 +65,9 @@ export function CourseDetail() {
   const [lectures, setLectures] = useState<Lecture[]>([]);
   const [isLectureModalOpen, setIsLectureModalOpen] = useState(false);
   const [editingLecture, setEditingLecture] = useState<Lecture | null>(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [selectedVideoUrl, setSelectedVideoUrl] = useState<string>("");
+  const [selectedVideoTitle, setSelectedVideoTitle] = useState<string>("");
 
   const handleAddLecture = () => {
     setEditingLecture(null);
@@ -111,6 +115,18 @@ export function CourseDetail() {
         });
       }
     }
+  };
+
+  const handleViewVideo = (videoUrl: string, title: string) => {
+    setSelectedVideoUrl(videoUrl);
+    setSelectedVideoTitle(title);
+    setIsVideoModalOpen(true);
+  };
+
+  const handleCloseVideoModal = () => {
+    setIsVideoModalOpen(false);
+    setSelectedVideoUrl("");
+    setSelectedVideoTitle("");
   };
 
 
@@ -254,14 +270,13 @@ export function CourseDetail() {
                   <TableCell className="max-w-xs truncate">{lecture.description}</TableCell>
                   <TableCell>
                     {lecture.videoUrl ? (
-                      <a
-                        href={lecture.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm"
+                      <button
+                        onClick={() => handleViewVideo(lecture.videoUrl, lecture.title)}
+                        className="text-blue-600 hover:underline text-sm flex items-center gap-1"
                       >
+                        <PlayIcon className="h-3 w-3" />
                         View Video
-                      </a>
+                      </button>
                     ) : 'N/A'}
                   </TableCell>
                   <TableCell>{lecture.createdBy?.name || 'N/A'}</TableCell>
@@ -343,15 +358,13 @@ export function CourseDetail() {
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1">
                     {lecture.videoUrl ? (
-                      <a
-                        href={lecture.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => handleViewVideo(lecture.videoUrl, lecture.title)}
                         className="text-blue-600 hover:underline flex items-center gap-1"
                       >
                         <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                         <span>Video</span>
-                      </a>
+                      </button>
                     ) : (
                       <span className="flex items-center gap-1">
                         <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -374,6 +387,13 @@ export function CourseDetail() {
         editingLecture={editingLecture}
         onLectureSaved={handleLectureSaved}
         courseId={courseId}
+      />
+
+      <VideoPlayerModal
+        isOpen={isVideoModalOpen}
+        onClose={handleCloseVideoModal}
+        videoUrl={selectedVideoUrl}
+        title={selectedVideoTitle}
       />
     </div>
   );

@@ -40,6 +40,7 @@ interface Lecture {
     title: string;
     description: string;
     content: string;
+    videoUrl: string;
     youtubeUrl?: string;
     youtubeVideoId?: string;
     relatedFiles?: RelatedFile[];
@@ -53,7 +54,7 @@ interface Lecture {
 
 interface RelatedFile {
     name: string;
-    uploadedUrl: string;
+    uploadedUrl?: string;
     file?: File;
 }
 

@@ -212,10 +212,6 @@ export function CourseDetail() {
             <div className="flex-1">
               <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray mb-2">{course.title}</h1>
               <p className="text-royal-gray mb-3 text-xs sm:text-sm lg:text-base">{course.description}</p>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm text-royal-gray">
-                <span className="font-medium">Course Group:</span>
-                <span className="px-2 py-1 bg-royal-light-gray rounded-md w-fit text-xs">{course.courseGroup?.title}</span>
-              </div>
             </div>
           </div>
         </div>
@@ -318,7 +314,7 @@ export function CourseDetail() {
         <div className="flex justify-end">
           <Button onClick={handleAddLecture} className="flex items-center gap-2">
             <PlusIcon className="h-4 w-4" />
-            Create Lecture
+            Create
           </Button>
         </div>
 

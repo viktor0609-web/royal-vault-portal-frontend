@@ -147,8 +147,10 @@ export function CourseDetailSection() {
   const handleFileDownload = (file: { name: string; uploadedUrl: string }) => {
     if (file.uploadedUrl) {
       // Create a temporary link element to trigger download
+      console.log(file.uploadedUrl);
+
       const link = document.createElement('a');
-      link.href = file.uploadedUrl;
+      link.href = import.meta.env.VITE_BACKEND_URL + file.uploadedUrl;
       link.download = file.name;
       link.target = '_blank';
       document.body.appendChild(link);

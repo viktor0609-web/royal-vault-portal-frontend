@@ -184,7 +184,7 @@ export function DealsSection() {
                 <div className="flex justify-end">
                     <Button onClick={() => handlebtnClick('create')} className="flex items-center gap-2">
                         <PlusIcon className="h-4 w-4" />
-                        Create Deal
+                        Create
                     </Button>
                 </div>
 

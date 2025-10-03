@@ -184,21 +184,19 @@ export function CourseGroupDetail() {
 
     return (
         <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3 gap-2 sm:gap-4">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate('/admin/courses')}
-                        className="flex items-center gap-1 w-fit text-xs sm:text-sm"
-                    >
-                        <ArrowLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span>Back</span>
-                    </Button>
-                    <div>
-                        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">{courseGroup.title}</h1>
-                        <p className="text-royal-gray text-xs sm:text-sm lg:text-base">{courseGroup.description}</p>
-                    </div>
+            {/* Header */}
+            <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6">
+                <div className="text-2xl sm:text-4xl">🎓</div>
+                <div className="flex-1 min-w-0">
+                    <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2 truncate">{courseGroup.title}</h1>
+                    <p className="text-xs sm:text-base text-royal-gray line-clamp-2">{courseGroup.description}</p>
+                </div>
+                <div
+                    className="cursor-pointer p-1.5 sm:p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-75 hover:scale-102 flex-shrink-0"
+                    onClick={() => navigate('/admin/courses')}
+                    title="Back to Courses"
+                >
+                    <ArrowLeftIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray hover:text-royal-blue transition-colors duration-75" />
                 </div>
             </div>
 

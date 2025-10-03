@@ -215,7 +215,7 @@ export function CoursesSection() {
         <div className="flex justify-end">
           <Button onClick={handleAddCourseGroup} className="flex items-center gap-2">
             <PlusIcon className="h-4 w-4" />
-            Create Course Group
+            Create
           </Button>
         </div>
 
@@ -228,20 +228,12 @@ export function CoursesSection() {
         ) : (
           courseGroups.map((group) => (
             <div key={group._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
-              <div className="flex items-start justify-between mb-2">
+              <div className="flex items-start justify-between mb-2" onClick={() => handleViewGroup(group._id)}>
                 <div className="flex-1">
                   <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">{group.title}</h3>
                   <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{group.description}</p>
                 </div>
                 <div className="flex gap-1 ml-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewGroup(group._id)}
-                    className="h-7 w-7 p-0"
-                  >
-                    <EyeIcon className="h-3 w-3" />
-                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

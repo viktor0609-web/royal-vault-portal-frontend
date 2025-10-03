@@ -111,7 +111,7 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-                <div className="text-white text-xl">Loading webinar details...</div>
+                <div className="text-white text-sm sm:text-xl">Loading webinar details...</div>
             </div>
         );
     }
@@ -132,30 +132,30 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
             {/* Main Content */}
             <div className="relative z-10 flex flex-col min-h-screen w-full">
                 {/* Header */}
-                <div className="text-center pt-8 md:pt-16 pb-4 md:pb-8 px-4">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-white mb-4 md:mb-8">
+                <div className="text-center pt-6 sm:pt-8 md:pt-16 pb-3 sm:pb-4 md:pb-8 px-3 sm:px-4">
+                    <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 md:mb-8 leading-tight">
                         {webinar?.name || webinarTitle || 'Office Hours with Elite Staff'}
                     </h1>
                 </div>
 
                 {/* Registration Form */}
-                <div className="flex justify-center px-2 sm:px-4 mb-4 md:mb-8">
-                    <div className="bg-white rounded-lg shadow-2xl p-4 sm:p-6 md:p-8 w-full max-w-md">
+                <div className="flex justify-center px-3 sm:px-4 mb-3 sm:mb-4 md:mb-8">
+                    <div className="bg-white rounded-lg shadow-2xl p-3 sm:p-4 md:p-6 lg:p-8 w-full max-w-sm sm:max-w-md">
                         {registrationSuccess ? (
                             <div className="text-center">
-                                <div className="mb-4">
-                                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="mb-3 sm:mb-4">
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                                        <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                         </svg>
                                     </div>
-                                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-green-600 mb-2">
+                                    <h2 className="text-base sm:text-lg md:text-xl font-bold text-green-600 mb-2">
                                         Registration Successful!
                                     </h2>
-                                    <p className="text-sm sm:text-base text-gray-600 mb-4">
+                                    <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
                                         You have successfully registered for the webinar. We'll send you a confirmation email shortly.
                                     </p>
-                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4">
                                         <p className="text-xs sm:text-sm text-blue-800">
                                             <strong>Next Steps:</strong><br />
                                             • Check your email for confirmation<br />
@@ -165,7 +165,7 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
                                     </div>
                                     <Button
                                         onClick={() => setRegistrationSuccess(false)}
-                                        className="w-full h-10 sm:h-12 bg-gray-600 hover:bg-gray-700 text-white font-bold text-sm sm:text-base rounded-lg"
+                                        className="w-full h-8 sm:h-10 bg-gray-600 hover:bg-gray-700 text-white font-bold text-xs sm:text-sm rounded-lg"
                                     >
                                         Register Another Email
                                     </Button>
@@ -173,24 +173,24 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
                             </div>
                         ) : (
                             <>
-                                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-black mb-4 md:mb-6 text-center">
+                                <h2 className="text-base sm:text-lg md:text-xl font-bold text-black mb-3 sm:mb-4 md:mb-6 text-center">
                                     REGISTER FOR THE WEBINAR
                                 </h2>
-                                <form onSubmit={handleRegistration} className="space-y-3 md:space-y-4">
+                                <form onSubmit={handleRegistration} className="space-y-2 sm:space-y-3 md:space-y-4">
                                     <div>
                                         <Input
                                             type="email"
                                             placeholder="Email"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full h-10 sm:h-12 text-base sm:text-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            className="w-full h-8 sm:h-10 text-xs sm:text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                             required
                                         />
                                     </div>
                                     <Button
                                         type="submit"
                                         disabled={submitting}
-                                        className="w-full h-10 sm:h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm sm:text-base md:text-lg rounded-lg"
+                                        className="w-full h-8 sm:h-10 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-lg"
                                     >
                                         {submitting ? 'Registering...' : 'Register'}
                                     </Button>

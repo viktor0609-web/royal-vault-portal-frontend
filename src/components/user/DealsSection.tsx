@@ -210,40 +210,40 @@ export function DealsSection() {
   };
 
   return (
-    <div className="flex-1 p-2">
-      <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-        <TagIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
+    <div className="flex-1 p-2 sm:p-4">
+      <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+        <TagIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
         <div>
-          <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">DEALS</h1>
-          <p className="text-royal-gray">
+          <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">DEALS</h1>
+          <p className="text-xs sm:text-base text-royal-gray">
             Explore our network of asset backed businesses.
           </p>
         </div>
       </div>
 
       {/* Desktop Filters - Hidden on mobile */}
-      <div className="hidden min-[800px]:block bg-white p-3 rounded-lg border border-royal-light-gray mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-1 sm:gap-4">
+      <div className="hidden min-[800px]:block bg-white p-2 sm:p-3 rounded-lg border border-royal-light-gray mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-4">
           {renderFilters()}
         </div>
       </div>
 
       {/* Mobile Filter Button - Only visible on mobile */}
-      <div className="min-[800px]:hidden mb-4">
+      <div className="min-[800px]:hidden mb-3 sm:mb-4">
         <Dialog open={showFilterModal} onOpenChange={setShowFilterModal}>
           <DialogTrigger asChild>
             <Button
               variant="outline"
-              className="w-full flex items-center gap-2 bg-white border-royal-light-gray"
+              className="w-full flex items-center gap-2 bg-white border-royal-light-gray text-xs sm:text-sm"
             >
-              <FilterIcon className="h-4 w-4" />
+              <FilterIcon className="h-3 w-3 sm:h-4 sm:w-4" />
               Filter Deals
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <FilterIcon className="h-5 w-5" />
+              <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
+                <FilterIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                 Filter Deals
               </DialogTitle>
             </DialogHeader>
@@ -254,7 +254,7 @@ export function DealsSection() {
               <Button
                 variant="outline"
                 onClick={() => setShowFilterModal(false)}
-                className="flex-1"
+                className="flex-1 text-xs sm:text-sm"
               >
                 Close
               </Button>
@@ -270,7 +270,7 @@ export function DealsSection() {
                   });
                   setShowFilterModal(false);
                 }}
-                className="flex-1"
+                className="flex-1 text-xs sm:text-sm"
               >
                 Clear All
               </Button>
@@ -279,13 +279,13 @@ export function DealsSection() {
         </Dialog>
       </div>
 
-      <div className="relative h-[660px]">
+      <div className="relative h-[500px] sm:h-[660px]">
         <div className="rounded-lg ">
-          <div className="h-full overflow-y-auto  mb-2 ">
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-6 mb-12">
+          <div className="h-full overflow-y-auto mb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
               {loading ? (
-                <div className="col-span-full flex justify-center items-center h-32">
-                  <div className="text-royal-gray">Loading deals...</div>
+                <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
+                  <div className="text-sm sm:text-base text-royal-gray">Loading deals...</div>
                 </div>
               ) : deals.length > 0 ? (
                 deals?.map((item, index) => (
@@ -294,7 +294,7 @@ export function DealsSection() {
                     to={item.url}
                     className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
                   >
-                    <div className="relative h-64 w-full">
+                    <div className="relative h-48 sm:h-64 w-full">
                       <img
                         src={import.meta.env.VITE_BACKEND_URL + item.image}
                         className="w-full h-full object-cover"
@@ -307,14 +307,14 @@ export function DealsSection() {
                             "linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(0,0,0,0.8))"
                         }}
                       />
-                      <h3 className="absolute bottom-8 text-xl left-2 text-white font-bold z-10 uppercase">
+                      <h3 className="absolute bottom-6 sm:bottom-8 text-sm sm:text-xl left-2 text-white font-bold z-10 uppercase line-clamp-2">
                         {item.name}
                       </h3>
-                      <div className="text-xs pl-3 left-0 right-0 rounded-md absolute bottom-0 m-3 bg-card uppercase">
+                      <div className="text-xs pl-2 sm:pl-3 left-0 right-0 rounded-md absolute bottom-0 m-2 sm:m-3 bg-card uppercase">
                         {formatArrayData(item.type)}
                       </div>
                     </div>
-                    <div className="text-sm text-royal-gray p-6">
+                    <div className="text-xs sm:text-sm text-royal-gray p-3 sm:p-6">
                       <p className="leading-relaxed">
                         <span className="font-bold">Source: </span>
                         {item.source?.name}
@@ -339,8 +339,8 @@ export function DealsSection() {
                   </Link>
                 ))
               ) : (
-                <div className="col-span-full flex justify-center items-center h-32">
-                  <div className="text-royal-gray">
+                <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
+                  <div className="text-sm sm:text-base text-royal-gray">
                     No deals found matching your filters.
                   </div>
                 </div>
@@ -349,19 +349,19 @@ export function DealsSection() {
           </div>
         </div>
         {!user && (
-          <div className="absolute inset-0 flex items-center justify-center  bg-black/50 backdrop-blur z-20">
-            <div className="text-center text-white max-w-3xl px-4">
-              <h2 className="text-4xl font-bold mb-6 leading-tight">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur z-20">
+            <div className="text-center text-white max-w-3xl px-3 sm:px-4">
+              <h2 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 leading-tight">
                 Access high performance investments in real estate, oil & gas,
                 machinery, and more.
               </h2>
-              <p className="text-xl mb-8 opacity-90">
+              <p className="text-sm sm:text-xl mb-6 sm:mb-8 opacity-90">
                 Discover exclusive investment opportunities from our curated
                 network of vetted partners.
               </p>
               <Button
                 onClick={() => setShowSalesModal(true)}
-                className="bg-primary hover:bg-royal-blue-dark text-white px-8 py-3 text-lg font-bold"
+                className="bg-primary hover:bg-royal-blue-dark text-white px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg font-bold"
               >
                 TALK TO SALES
               </Button>

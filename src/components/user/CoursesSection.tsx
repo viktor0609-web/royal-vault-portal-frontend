@@ -117,15 +117,15 @@ export function CoursesSection() {
     return (
       <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
         <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-          <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
+          <GraduationCapIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
           <div>
-            <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">COURSES</h1>
-            <p className="text-royal-gray">
+            <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">COURSES</h1>
+            <p className="text-xs sm:text-base text-royal-gray">
               Learn everything you need to know to optimize your asset protection and tax structure.
             </p>
           </div>
         </div>
-        <div className="text-center py-8">Loading courses...</div>
+        <div className="text-center py-4 sm:py-8 text-sm sm:text-base">Loading courses...</div>
       </div>
     );
   }
@@ -134,45 +134,45 @@ export function CoursesSection() {
     return (
       <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
         <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-          <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
+          <GraduationCapIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
           <div>
-            <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">COURSES</h1>
-            <p className="text-royal-gray">
+            <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">COURSES</h1>
+            <p className="text-xs sm:text-base text-royal-gray">
               Learn everything you need to know to optimize your asset protection and tax structure.
             </p>
           </div>
         </div>
-        <div className="text-center py-8 text-red-500">{error}</div>
+        <div className="text-center py-4 sm:py-8 text-sm sm:text-base text-red-500">{error}</div>
       </div>
     );
   }
 
   return (
     <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-300">
-      <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-        <GraduationCapIcon className="h-12 w-12 text-royal-gray hidden min-[700px]:block" />
+      <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+        <GraduationCapIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
         <div>
-          <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">COURSES</h1>
-          <p className="text-royal-gray">
+          <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">COURSES</h1>
+          <p className="text-xs sm:text-base text-royal-gray">
             Learn everything you need to know to optimize your asset protection and tax structure.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-3 sm:gap-6 mb-8 sm:mb-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-12">
         {displayCategories.map((category, index) => (
           <Link
             key={category.id}
             to={`/course-groups/${category.id}`}
             className="text-center p-3 sm:p-6 bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
           >
-            <div className="flex justify-center mb-4">
-              <category.icon className="h-16 w-16 text-royal-gray" />
+            <div className="flex justify-center mb-3 sm:mb-4">
+              <category.icon className="h-12 w-12 sm:h-16 sm:w-16 text-royal-gray" />
             </div>
-            <h3 className="text-lg font-bold text-royal-dark-gray mb-2">
+            <h3 className="text-sm sm:text-lg font-bold text-royal-dark-gray mb-2 line-clamp-2">
               {category.title}
             </h3>
-            <p className="text-sm text-royal-gray leading-relaxed">
+            <p className="text-xs sm:text-sm text-royal-gray leading-relaxed line-clamp-3">
               {category.description}
             </p>
           </Link>

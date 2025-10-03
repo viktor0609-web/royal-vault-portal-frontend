@@ -386,14 +386,6 @@ export function WebinarSection() {
 
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden space-y-4">
-                {/* Add Button for Mobile */}
-                <div className="flex justify-end">
-                    <Button onClick={() => handlebtnClick('create', null)} className="flex items-center gap-2">
-                        <VideoIcon className="h-4 w-4" />
-                        Create Webinar
-                    </Button>
-                </div>
-
                 {webinars.map((webinar) => (
                     <div key={webinar._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
                         <div className="flex items-start justify-between mb-2">
@@ -423,16 +415,6 @@ export function WebinarSection() {
                                     disabled={actionLoading === 'edit'}
                                 >
                                     {actionLoading === 'edit' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Edit className="h-3 w-3" />}
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handlebtnClick('stats', webinar)}
-                                    className="h-7 w-7 p-0"
-                                    title="Stats"
-                                    disabled={actionLoading === 'stats'}
-                                >
-                                    {actionLoading === 'stats' ? <Loader2 className="h-3 w-3 animate-spin" /> : <BarChart3 className="h-3 w-3" />}
                                 </Button>
                                 <Button
                                     variant="outline"

@@ -74,13 +74,13 @@ export function WelcomeSection() {
   };
 
   return (
-    <div className="flex-1 p-2 sm:p-2 animate-in fade-in duration-100">
-      <div className="flex gap-2 sm:gap-4 items-center bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-8">
-        <HandIcon className="hidden sm:block h-12 w-12 text-royal-gray" />
+    <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
+      <div className="flex gap-2 sm:gap-4 items-center bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-3 sm:mb-8">
+        <HandIcon className="hidden sm:block h-8 w-8 sm:h-12 sm:w-12 text-royal-gray" />
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">WELCOME</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">WELCOME</h1>
 
-          <p className="text-royal-gray">
+          <p className="text-xs sm:text-base text-royal-gray">
             Join thousands of investors nationwide and access free live coaching, video training, chats, & more.
           </p>
         </div>
@@ -95,22 +95,22 @@ export function WelcomeSection() {
                      transition-all duration-75 ease-in-out cursor-pointer group"
             onClick={() => handleAction(item.action, index)}
           >
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
               <div
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 group-hover:scale-102 flex-shrink-0 cursor-pointer ${completedItems[index]
+                className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 group-hover:scale-102 flex-shrink-0 cursor-pointer ${completedItems[index]
                   ? "bg-primary border-primary group-hover:bg-royal-blue-dark group-hover:border-royal-blue-dark"
                   : "border-royal-light-gray group-hover:border-royal-blue/10"
                   }`}
                 onClick={(e) => handleCheckboxClick(index, e)}
               >
-                {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 group-hover:scale-102" />}
+                {completedItems[index] && <CheckCircleIcon className="h-3 w-3 sm:h-4 sm:w-4 text-white transition-transform duration-75 group-hover:scale-102" />}
               </div>
-              <span className="text-royal-dark-gray font-normal transition-colors duration-75 group-hover:text-royal-blue">{item.title}</span>
+              <span className="text-xs sm:text-base text-royal-dark-gray font-normal transition-colors duration-75 group-hover:text-royal-blue line-clamp-2">{item.title}</span>
             </div>
             {/* Desktop Button */}
             <Button
               onClick={() => handleAction(item.action, index)}
-              className="hidden sm:flex bg-primary hover:bg-royal-blue-dark text-white px-6 transition-all duration-75 
+              className="hidden sm:flex bg-primary hover:bg-royal-blue-dark text-white px-4 sm:px-6 py-2 text-xs sm:text-sm transition-all duration-75 
                        group-hover:scale-101 group-hover:shadow-sm"
             >
               {item.action}
@@ -119,11 +119,11 @@ export function WelcomeSection() {
             {/* Mobile Arrow Button */}
             <Button
               onClick={() => handleAction(item.action, index)}
-              className="sm:hidden bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full transition-all duration-75 
-                       group-hover:scale-101 group-hover:shadow-sm flex items-center justify-center !rounded-full"
+              className="sm:hidden bg-primary hover:bg-royal-blue-dark text-white w-8 h-8 sm:w-10 sm:h-10 p-0 rounded-full transition-all duration-75 
+                       group-hover:scale-101 group-hover:shadow-sm flex items-center justify-center !rounded-full flex-shrink-0"
               style={{ aspectRatio: '1/1' }}
             >
-              <ArrowRightIcon className="h-4 w-4" />
+              <ArrowRightIcon className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
         ))}
@@ -133,8 +133,8 @@ export function WelcomeSection() {
       <Dialog open={showVideoModal} onOpenChange={setShowVideoModal}>
         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <VideoIcon className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <VideoIcon className="h-4 w-4 sm:h-5 sm:w-5" />
               Overview Video
             </DialogTitle>
           </DialogHeader>

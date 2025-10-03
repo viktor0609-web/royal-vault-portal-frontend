@@ -226,7 +226,7 @@ export function CourseDetailSection() {
   if (loading) {
     return (
       <div className="p-2 sm:p-4 animate-in fade-in duration-100">
-        <div className="text-center py-8">Loading course...</div>
+        <div className="text-center py-4 sm:py-8 text-sm sm:text-base">Loading course...</div>
       </div>
     );
   }
@@ -234,7 +234,7 @@ export function CourseDetailSection() {
   if (error) {
     return (
       <div className="p-2 sm:p-4 animate-in fade-in duration-100">
-        <div className="text-center py-8 text-red-500">{error}</div>
+        <div className="text-center py-4 sm:py-8 text-sm sm:text-base text-red-500">{error}</div>
       </div>
     );
   }
@@ -242,10 +242,10 @@ export function CourseDetailSection() {
   if (!course) {
     return (
       <div className="p-2 sm:p-4 animate-in fade-in duration-100">
-        <div className="text-center py-8">
-          <h2 className="text-xl font-semibold text-royal-dark-gray mb-2">Course Not Found</h2>
-          <p className="text-royal-gray mb-4">The requested course could not be found.</p>
-          <Button onClick={() => navigate('/courses')} variant="outline">
+        <div className="text-center py-4 sm:py-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-royal-dark-gray mb-2">Course Not Found</h2>
+          <p className="text-sm sm:text-base text-royal-gray mb-3 sm:mb-4">The requested course could not be found.</p>
+          <Button onClick={() => navigate('/courses')} variant="outline" className="text-xs sm:text-sm">
             Back to Courses
           </Button>
         </div>
@@ -258,11 +258,11 @@ export function CourseDetailSection() {
   if (lectures.length === 0) {
     return (
       <div className="p-2 sm:p-4 animate-in fade-in duration-100">
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">📚</div>
-          <h3 className="text-xl font-semibold text-royal-dark-gray mb-2">No Lectures Available</h3>
-          <p className="text-royal-gray mb-4">This course doesn't have any lectures yet.</p>
-          <Button onClick={() => navigate(`/course-groups/${course.courseGroup._id}`)} variant="outline">
+        <div className="text-center py-6 sm:py-12">
+          <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📚</div>
+          <h3 className="text-lg sm:text-xl font-semibold text-royal-dark-gray mb-2">No Lectures Available</h3>
+          <p className="text-sm sm:text-base text-royal-gray mb-3 sm:mb-4">This course doesn't have any lectures yet.</p>
+          <Button onClick={() => navigate(`/course-groups/${course.courseGroup._id}`)} variant="outline" className="text-xs sm:text-sm">
             Back to Course Group
           </Button>
         </div>
@@ -446,23 +446,23 @@ export function CourseDetailSection() {
       `}</style>
       <div className="p-2 sm:p-4 animate-in fade-in duration-100">
         {/* Header - Desktop only */}
-        <div className="hidden min-[1024px]:flex items-center gap-4 mb-6">
-          <div className="w-full flex items-center justify-between bg-white p-6 rounded-lg border border-royal-light-gray">
-            <div className="flex items-center gap-4">
-              <PlayIcon className="h-6 w-6 text-royal-gray" />
-              <div>
-                <h1 className="text-2xl font-bold text-royal-dark-gray mb-2">{course.title}</h1>
-                <p className="text-royal-gray">
+        <div className="hidden min-[1024px]:flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <div className="w-full flex items-center justify-between bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+              <PlayIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2 truncate">{course.title}</h1>
+                <p className="text-xs sm:text-base text-royal-gray line-clamp-2">
                   {course.description}
                 </p>
               </div>
             </div>
             <div
-              className="cursor-pointer p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-75 hover:scale-102"
+              className="cursor-pointer p-1.5 sm:p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-75 hover:scale-102 flex-shrink-0"
               onClick={() => navigate(`/course-groups/${course.courseGroup._id}`)}
               title="Back to Course Group"
             >
-              <ArrowLeftIcon className="h-6 w-6 text-royal-gray hover:text-royal-blue transition-colors duration-75" />
+              <ArrowLeftIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray hover:text-royal-blue transition-colors duration-75" />
             </div>
           </div>
         </div>
@@ -487,13 +487,13 @@ export function CourseDetailSection() {
                 {/* Content Area */}
                 <div className="flex-1 flex flex-col">
                   {/* Header */}
-                  <div className="w-full flex items-center justify-between p-2 sm:p-4 bg-white rounded-lg border border-royal-light-gray mb-4 sm:mb-6">
-                    <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray line-clamp-1">
+                  <div className="w-full flex items-center justify-between p-2 sm:p-4 bg-white rounded-lg border border-royal-light-gray mb-3 sm:mb-6">
+                    <h1 className="text-sm sm:text-lg font-bold text-royal-dark-gray line-clamp-1 min-w-0 flex-1 mr-2">
                       {lectures[currentItem]?.title || 'No lecture selected'}
                     </h1>
                     {/* Completion Status Checkbox */}
                     <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                      className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
                         } ${completedItems[currentItem]
                           ? "bg-primary border-primary"
                           : "border-royal-light-gray"
@@ -501,7 +501,7 @@ export function CourseDetailSection() {
                       onClick={(e) => handleCheckboxClick(currentItem, e)}
                       title={user ? 'Mark as complete' : 'Login required to track progress'}
                     >
-                      {completedItems[currentItem] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75" />}
+                      {completedItems[currentItem] && <CheckCircleIcon className="h-3 w-3 sm:h-4 sm:w-4 text-white transition-transform duration-75" />}
                     </div>
                   </div>
 
@@ -524,9 +524,9 @@ export function CourseDetailSection() {
 
                   {/* Lecture Description */}
                   {lectures[currentItem]?.description && (
-                    <div className="bg-white rounded-lg border border-royal-light-gray p-4 mb-4">
-                      <h3 className="text-lg font-semibold text-royal-dark-gray mb-3">Description</h3>
-                      <p className="text-royal-gray text-sm leading-relaxed">
+                    <div className="bg-white rounded-lg border border-royal-light-gray p-3 sm:p-4 mb-3 sm:mb-4">
+                      <h3 className="text-sm sm:text-lg font-semibold text-royal-dark-gray mb-2 sm:mb-3">Description</h3>
+                      <p className="text-royal-gray text-xs sm:text-sm leading-relaxed">
                         {lectures[currentItem].description}
                       </p>
                     </div>
@@ -534,15 +534,15 @@ export function CourseDetailSection() {
 
                   {/* Lecture Content */}
                   {lectures[currentItem]?.content && (
-                    <div className="bg-white rounded-lg border border-royal-light-gray p-4 mb-4">
+                    <div className="bg-white rounded-lg border border-royal-light-gray p-3 sm:p-4 mb-3 sm:mb-4">
                       <div
                         className="lecture-content max-w-none text-royal-gray leading-relaxed"
                         dangerouslySetInnerHTML={{
                           __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
                         }}
                         style={{
-                          fontSize: '14px',
-                          lineHeight: '1.6'
+                          fontSize: '12px',
+                          lineHeight: '1.5'
                         }}
                       />
                     </div>
@@ -550,23 +550,23 @@ export function CourseDetailSection() {
 
                   {/* Related Files Section */}
                   {lectures[currentItem]?.relatedFiles && lectures[currentItem].relatedFiles.length > 0 && (
-                    <div className="bg-white rounded-lg border border-royal-light-gray p-4">
-                      <h3 className="text-lg font-semibold text-royal-dark-gray mb-3 flex items-center gap-2">
-                        <FileIcon className="h-5 w-5" />
+                    <div className="bg-white rounded-lg border border-royal-light-gray p-3 sm:p-4">
+                      <h3 className="text-sm sm:text-lg font-semibold text-royal-dark-gray mb-2 sm:mb-3 flex items-center gap-2">
+                        <FileIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                         Related Files
                       </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {lectures[currentItem].relatedFiles.map((file, fileIndex) => (
                           <div
                             key={fileIndex}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
+                            className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
                           >
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <span className="text-2xl flex-shrink-0">
+                            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                              <span className="text-lg sm:text-2xl flex-shrink-0">
                                 {getFileIcon(file.name)}
                               </span>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-royal-dark-gray truncate">
+                                <p className="text-xs sm:text-sm font-medium text-royal-dark-gray truncate">
                                   {file.name}
                                 </p>
                                 <p className="text-xs text-royal-gray">
@@ -578,10 +578,10 @@ export function CourseDetailSection() {
                               size="sm"
                               variant="outline"
                               onClick={() => handleFileDownload(file)}
-                              className="flex-shrink-0 ml-2"
+                              className="flex-shrink-0 ml-2 text-xs sm:text-sm"
                             >
-                              <DownloadIcon className="h-4 w-4 mr-1" />
-                              Download
+                              <DownloadIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="hidden sm:inline">Download</span>
                             </Button>
                           </div>
                         ))}

@@ -154,46 +154,48 @@ export function ProfileSection() {
     };
 
     return (
-        <div className="flex-1 p-1 min-[700px]:p-4 animate-in fade-in duration-100">
-            <div className="flex gap-2 min-[700px]:gap-4 items-center bg-white p-2 min-[700px]:p-6 rounded-lg border border-royal-light-gray mb-2 min-[700px]:mb-4">
-                <UserIcon className="h-8 w-8 min-[700px]:h-12 min-[700px]:w-12 text-royal-gray hidden min-[700px]:block" />
+        <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
+            <div className="flex gap-2 sm:gap-4 items-center bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-3 sm:mb-4">
+                <UserIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
                 <div>
-                    <h1 className="text-xl min-[700px]:text-2xl font-bold text-royal-dark-gray mb-1 min-[700px]:mb-2">PROFILE</h1>
-                    <p className="text-royal-gray text-sm min-[700px]:text-base">
+                    <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">PROFILE</h1>
+                    <p className="text-xs sm:text-base text-royal-gray">
                         Manage your personal information and account settings.
                     </p>
                 </div>
             </div>
 
             <Tabs value="personal" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-3 min-[700px]:mb-6">
-                    <TabsTrigger value="personal" className="flex items-center gap-1 min-[700px]:gap-2 py-2 min-[700px]:py-3">
-                        <UserIcon className="h-4 w-4" />
-                        <span className="hidden min-[700px]:inline">Personal Information</span>
+                <TabsList className="grid w-full grid-cols-2 mb-3 sm:mb-6">
+                    <TabsTrigger value="personal" className="flex items-center gap-1 sm:gap-2 py-2 sm:py-3 text-xs sm:text-sm">
+                        <UserIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Personal Information</span>
+                        <span className="sm:hidden">Personal</span>
                     </TabsTrigger>
                     <TabsTrigger
                         value="meetings"
                         disabled
-                        className="flex items-center gap-1 min-[700px]:gap-2 py-2 min-[700px]:py-3 opacity-50 cursor-not-allowed"
+                        className="flex items-center gap-1 sm:gap-2 py-2 sm:py-3 opacity-50 cursor-not-allowed text-xs sm:text-sm"
                     >
-                        <VideoIcon className="h-4 w-4" />
-                        <span className="hidden min-[700px]:inline">Meetings</span>
+                        <VideoIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline">Meetings</span>
+                        <span className="sm:hidden">Meetings</span>
                     </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="personal" className="space-y-2 min-[700px]:space-y-6">
+                <TabsContent value="personal" className="space-y-2 sm:space-y-6">
                     {/* Mobile: Compact View */}
-                    <div className="min-[700px]:hidden space-y-2">
+                    <div className="sm:hidden space-y-2">
                         {/* Basic Info Card */}
                         <Card className="hover:shadow-sm transition-shadow duration-75">
-                            <CardHeader className="pb-2 px-3 min-[700px]:px-6">
-                                <CardTitle className="flex items-center gap-2 text-black text-sm min-[700px]:text-base">
-                                    <UserIcon className="h-3 w-3 min-[700px]:h-4 min-[700px]:w-4 text-royal-blue" />
+                            <CardHeader className="pb-2 px-3">
+                                <CardTitle className="flex items-center gap-2 text-black text-xs sm:text-base">
+                                    <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 text-royal-blue" />
                                     Basic Information
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-2 px-3 min-[700px]:px-6">
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
+                            <CardContent className="space-y-2 px-3">
+                                <div className="grid grid-cols-1 gap-2">
                                     <div className="space-y-1">
                                         <Label htmlFor="firstName" className="text-black text-xs">First Name</Label>
                                         <Input
@@ -201,7 +203,7 @@ export function ProfileSection() {
                                             value={userData.firstName}
                                             onChange={(e) => handleInputChange('firstName', e.target.value)}
                                             disabled={!isEditing}
-                                            className="transition-all duration-75 text-black text-sm h-8"
+                                            className="transition-all duration-75 text-black text-xs h-7 sm:h-8"
                                         />
                                     </div>
                                     <div className="space-y-1">

@@ -35,11 +35,11 @@ const navigationItems = [
 ];
 
 const bottomItemsForGuest = [
-  { title: "FAQ", icon: HelpCircleIcon, action: null },
+  // { title: "FAQ", icon: HelpCircleIcon, action: null },
   { title: "Log In", icon: LogInIcon, action: 'login' },
 ];
 const bottomItemsForUser = [
-  { title: "FAQ", icon: HelpCircleIcon, action: null },
+  // { title: "FAQ", icon: HelpCircleIcon, action: null },
   { title: "Profile", icon: UserIcon, path: "/profile" },
   { title: "Log Out", icon: LogOutIcon, action: 'logout' },
 ];

@@ -32,8 +32,7 @@ interface Lecture {
   title: string;
   description?: string;
   content?: string;
-  youtubeUrl?: string;
-  youtubeVideoId?: string;
+  videoUrl?: string;
   relatedFiles: {
     name: string;
     uploadedUrl: string;
@@ -509,8 +508,7 @@ export function CourseDetailSection() {
                   <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-4">
                     <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
                       <VideoPlayer
-                        youtubeUrl={lectures[currentItem]?.youtubeUrl}
-                        youtubeVideoId={lectures[currentItem]?.youtubeVideoId}
+                        videoUrl={lectures[currentItem]?.videoUrl}
                         className="w-full h-full"
                         onEnded={() => {
                           // Auto-mark as complete when video ends (only for authenticated users)
@@ -747,8 +745,7 @@ export function CourseDetailSection() {
                 <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-6">
                   <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
                     <VideoPlayer
-                      youtubeUrl={lectures[currentItem]?.youtubeUrl}
-                      youtubeVideoId={lectures[currentItem]?.youtubeVideoId}
+                      videoUrl={lectures[currentItem]?.videoUrl}
                       className="w-full h-full"
                       onEnded={() => {
                         // Auto-mark as complete when video ends (only for authenticated users)

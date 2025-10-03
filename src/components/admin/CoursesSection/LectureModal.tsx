@@ -8,32 +8,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import { FileUploadWithProgress } from "@/components/ui/file-upload-with-progress";
-import { YouTubeUpload } from "@/components/ui/YouTubeUpload";
-import { courseApi, imageApi, fileApi } from "@/lib/api";
+import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { PlusIcon, Trash2, X } from "lucide-react";
-
-// Utility function for YouTube video ID extraction
-const extractYouTubeVideoId = (url: string): string | null => {
-    if (!url) return null;
-
-    const patterns = [
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-        /youtube\.com\/v\/([^&\n?#]+)/,
-        /youtube\.com\/watch\?.*v=([^&\n?#]+)/
-    ];
-
-    for (const pattern of patterns) {
-        const match = url.match(pattern);
-        if (match) return match[1];
-    }
-
-    return null;
-};
+import { PlusIcon, Trash2 } from "lucide-react";
 
 interface Lecture {
     _id: string;
@@ -41,8 +21,6 @@ interface Lecture {
     description: string;
     content: string;
     videoUrl: string;
-    youtubeUrl?: string;
-    youtubeVideoId?: string;
     relatedFiles?: RelatedFile[];
     createdBy: {
         _id: string;
@@ -71,8 +49,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         title: "",
         description: "",
         content: "",
-        youtubeUrl: "",
-        youtubeVideoId: ""
+        videoUrl: ""
     });
     const [relatedFiles, setRelatedFiles] = useState<RelatedFile[]>([]);
     const [newRelatedFile, setNewRelatedFile] = useState({ name: "", file: null as File | null, uploadedUrl: "" });
@@ -86,8 +63,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 title: editingLecture.title || "",
                 description: editingLecture.description || "",
                 content: editingLecture.content || "",
-                youtubeUrl: editingLecture.youtubeUrl || "",
-                youtubeVideoId: editingLecture.youtubeVideoId || ""
+                videoUrl: editingLecture.videoUrl || ""
             });
             setRelatedFiles(editingLecture.relatedFiles || []);
         } else {
@@ -95,8 +71,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 title: "",
                 description: "",
                 content: "",
-                youtubeUrl: "",
-                youtubeVideoId: ""
+                videoUrl: ""
             });
             setRelatedFiles([]);
         }
@@ -109,10 +84,6 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         setError(null);
 
         try {
-            // Video is completely optional - no validation required
-
-            // Files are now uploaded immediately when selected, so we just need to prepare the data
-            // Remove _id from relatedFiles as it's not needed for backend
             const cleanedRelatedFiles = relatedFiles.map(file => ({
                 name: file.name,
                 uploadedUrl: file.uploadedUrl || ""
@@ -123,14 +94,6 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 relatedFiles: cleanedRelatedFiles,
                 courseId: courseId
             };
-
-            console.log('Final lecture data being sent:', lectureData);
-            console.log('Related files count:', cleanedRelatedFiles.length);
-            console.log('Related files array:', cleanedRelatedFiles);
-
-
-
-
 
             let response;
             if (editingLecture) {
@@ -145,22 +108,6 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                     title: "Success",
                     description: "Lecture created successfully",
                 });
-
-                // If we have YouTube video data and this is a new lecture, save it to backend
-                if (formData.youtubeUrl && formData.youtubeVideoId) {
-                    try {
-                        await courseApi.saveYouTubeVideo(response.data._id, {
-                            youtubeUrl: formData.youtubeUrl,
-                            title: formData.title,
-                            description: formData.description,
-                            videoId: formData.youtubeVideoId
-                        });
-                        console.log('✅ YouTube video data saved to backend for new lecture');
-                    } catch (error) {
-                        console.error('❌ Failed to save YouTube video data to backend:', error);
-                        // Don't show error to user as the lecture was created successfully
-                    }
-                }
             }
             onLectureSaved(response.data, !!editingLecture);
             closeDialog();
@@ -178,17 +125,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
     };
 
     const handleInputChange = (field: string, value: string) => {
-        if (field === 'youtubeUrl') {
-            const youtubeVideoId = extractYouTubeVideoId(value);
-
-            setFormData(prev => ({
-                ...prev,
-                [field]: value,
-                youtubeVideoId: youtubeVideoId || ''
-            }));
-        } else {
-            setFormData(prev => ({ ...prev, [field]: value }));
-        }
+        setFormData(prev => ({ ...prev, [field]: value }));
     };
 
     const handleAddRelatedFile = () => {
@@ -197,12 +134,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 name: newRelatedFile.name || "",
                 uploadedUrl: newRelatedFile.uploadedUrl
             };
-            setRelatedFiles(prev => {
-                const updated = [...prev, newFile];
-                console.log('Added related file:', newFile);
-                console.log('Updated related files:', updated);
-                return updated;
-            });
+            setRelatedFiles(prev => [...prev, newFile]);
             setNewRelatedFile({ name: "", file: null, uploadedUrl: "" });
         }
     };
@@ -220,7 +152,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
 
     return (
         <Dialog open={isOpen} onOpenChange={closeDialog}>
-            <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-6 space-y-1">
                 <DialogTitle className="text-xl font-semibold">
                     {editingLecture ? "Edit Lecture" : "Create Lecture"}
                 </DialogTitle>
@@ -228,7 +160,8 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                     {editingLecture ? "Update the lecture details and content below." : "Fill in the details to create a new lecture for this course."}
                 </DialogDescription>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Name Section */}
+
+                    {/* Title Section */}
                     <div>
                         <Label htmlFor="title" className="text-royal-dark-gray font-bold text-base">
                             Name
@@ -237,8 +170,8 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                             id="title"
                             value={formData.title}
                             onChange={(e) => handleInputChange("title", e.target.value)}
-                            className="mt-2 bg-gray-50 border-gray-200 rounded-lg"
-                            placeholder="What are the best practices around structuring entities with partners?"
+                            className="mt-1 bg-gray-50 border-gray-200 rounded-lg"
+                            placeholder="Lecture title..."
                             required
                         />
                     </div>
@@ -248,41 +181,29 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                         <Label className="text-royal-dark-gray font-bold text-base">
                             Content
                         </Label>
-                        <div className="mt-2">
+                        <div className="mt-2 mb-4">
                             <RichTextEditor
                                 value={formData.content}
                                 onChange={(value) => handleInputChange("content", value)}
-                                className="bg-white rounded-lg border border-gray-200"
-                                style={{ height: '200px' }}
+                                className="bg-white rounded-lg border border-gray-200 min-h-[200px]"
                                 placeholder="Enter lecture content here..."
                             />
                         </div>
                     </div>
 
-                    {/* Video Section */}
+                    {/* Video URL Section */}
                     <div>
-                        <Label className="text-royal-dark-gray font-bold text-base">
-                            Video <span className="text-gray-500 font-normal">(Upload to YouTube)</span>
+                        <Label htmlFor="videoUrl" className="text-royal-dark-gray font-bold text-base">
+                            Video URL <span className="text-gray-500 font-normal">(Optional)</span>
                         </Label>
-
-                        <div className="mt-2">
-                            <YouTubeUpload
-                                onVideoUploaded={(videoId, videoUrl, title) => {
-                                    setFormData(prev => ({
-                                        ...prev,
-                                        youtubeVideoId: videoId,
-                                        youtubeUrl: videoUrl
-                                    }));
-                                    toast({
-                                        title: "Video uploaded to YouTube",
-                                        description: `"${title}" has been uploaded successfully`,
-                                    });
-                                }}
-                                className="w-full"
-                                lectureId={editingLecture?._id} // Pass lecture ID to save video to backend
-                                autoSave={!!editingLecture?._id} // Only auto-save if editing existing lecture
-                            />
-                        </div>
+                        <Input
+                            id="videoUrl"
+                            type="url"
+                            value={formData.videoUrl}
+                            onChange={(e) => handleInputChange('videoUrl', e.target.value)}
+                            placeholder="https://example.com/video.mp4"
+                            className="mt-2"
+                        />
                     </div>
 
                     {/* Related Files Section */}
@@ -290,8 +211,8 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                         <Label className="text-royal-dark-gray font-bold text-base">
                             Related Files/Resources <span className="text-gray-500 font-normal">(Optional - Upload files only)</span>
                         </Label>
-                        <div className="mt-2 bg-white border border-gray-200 rounded-lg overflow-hidden">
-                            <Table>
+                        <div className="mt-2 bg-white border border-gray-200 rounded-lg overflow-hidden overflow-x-auto">
+                            <Table className="min-w-full">
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead className="w-1/3">Name (Optional)</TableHead>
@@ -307,17 +228,15 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                                 Uploaded File
                                             </TableCell>
                                             <TableCell>
-                                                <div className="flex gap-1">
-                                                    <Button
-                                                        type="button"
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => handleRemoveRelatedFile(index)}
-                                                        className="h-8 px-2"
-                                                    >
-                                                        <Trash2 className="h-3 w-3" />
-                                                    </Button>
-                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => handleRemoveRelatedFile(index)}
+                                                    className="h-8 px-2"
+                                                >
+                                                    <Trash2 className="h-3 w-3" />
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -335,7 +254,6 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                                 key="related-file-upload"
                                                 id="related-file-upload"
                                                 onFileUploaded={(fileUrl, fileName) => {
-                                                    console.log('Related file uploaded:', fileUrl, fileName);
                                                     setNewRelatedFile(prev => ({
                                                         ...prev,
                                                         name: prev.name || fileName,

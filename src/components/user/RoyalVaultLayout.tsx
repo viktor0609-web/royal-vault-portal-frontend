@@ -1,8 +1,9 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { RoyalVaultSidebar } from "./RoyalVaultSidebar";
 import { UserBreadcrumb } from "@/components/ui/user-breadcrumb";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { courseApi } from "@/lib/api";
 
 interface RoyalVaultLayoutProps {
   children: ReactNode;
@@ -10,6 +11,63 @@ interface RoyalVaultLayoutProps {
 
 export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
   const location = useLocation();
+  const params = useParams();
+  const [breadcrumbData, setBreadcrumbData] = useState<{
+    courseName?: string;
+    groupName?: string;
+    courseGroupId?: string;
+  }>({});
+  const [breadcrumbLoading, setBreadcrumbLoading] = useState(false);
+
+  // Fetch breadcrumb data based on current route
+  useEffect(() => {
+    const fetchBreadcrumbData = async () => {
+      const pathParts = location.pathname.split('/').filter(Boolean);
+
+      // Clear previous breadcrumb data
+      setBreadcrumbData({});
+      setBreadcrumbLoading(true);
+
+      try {
+        // Fetch course name and group info if we're in a course detail page
+        if (pathParts[0] === 'courses' && pathParts[1]) {
+          const courseResponse = await courseApi.getCourseById(pathParts[1], 'basic');
+          const groupId = courseResponse.data.courseGroup._id;
+
+          // Also fetch the group name
+          let groupName = 'Group';
+          try {
+            const groupResponse = await courseApi.getCourseGroupById(groupId);
+            groupName = groupResponse.data.title;
+          } catch (error) {
+            console.warn('Failed to fetch group name for breadcrumb:', error);
+          }
+
+          setBreadcrumbData(prev => ({
+            ...prev,
+            courseName: courseResponse.data.title,
+            courseGroupId: groupId,
+            groupName: groupName
+          }));
+        }
+
+        // Fetch group name if we're in a course group page
+        if (pathParts[0] === 'course-groups' && pathParts[1]) {
+          const groupResponse = await courseApi.getCourseGroupById(pathParts[1]);
+          setBreadcrumbData(prev => ({
+            ...prev,
+            groupName: groupResponse.data.title
+          }));
+        }
+      } catch (error) {
+        console.warn('Failed to fetch breadcrumb data:', error);
+      } finally {
+        setBreadcrumbLoading(false);
+      }
+    };
+
+    fetchBreadcrumbData();
+  }, [location.pathname]);
 
   // Generate breadcrumbs for user pages
   const getBreadcrumbs = () => {
@@ -24,12 +82,23 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
       } else if (pathParts[0] === 'courses') {
         breadcrumbs.push({ label: 'Courses', path: '/courses' });
         if (pathParts[1]) {
-          breadcrumbs.push({ label: 'Course Details', isActive: true });
+          // If we have course group info, show the group in the breadcrumb
+          if (breadcrumbData.courseGroupId && breadcrumbData.groupName) {
+            breadcrumbs.push({
+              label: breadcrumbData.groupName,
+              path: `/course-groups/${breadcrumbData.courseGroupId}`
+            });
+          }
+          // Show actual course name instead of generic "Course Details"
+          const courseName = breadcrumbData.courseName || 'Course Details';
+          breadcrumbs.push({ label: courseName, isActive: true });
         }
       } else if (pathParts[0] === 'course-groups') {
-        breadcrumbs.push({ label: 'Course Groups', path: '/courses' });
+        breadcrumbs.push({ label: 'Courses', path: '/courses' });
         if (pathParts[1]) {
-          breadcrumbs.push({ label: 'Group Details', isActive: true });
+          // Show actual group name instead of generic "Group Details"
+          const groupName = breadcrumbData.groupName || 'Group Details';
+          breadcrumbs.push({ label: groupName, isActive: true });
         }
       } else if (pathParts[0] === 'deals') {
         breadcrumbs.push({ label: 'Deals', path: '/deals', isActive: true });
@@ -65,7 +134,7 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
 
           {/* Breadcrumb Navigation */}
           {breadcrumbs.length > 1 && (
-            <div className="px-4 py-3 bg-white border-b border-royal-light-gray shadow-sm">
+            <div className="px-2 sm:px-4 py-2 sm:py-3 bg-white border-b border-royal-light-gray shadow-sm overflow-x-auto">
               <UserBreadcrumb items={breadcrumbs} />
             </div>
           )}

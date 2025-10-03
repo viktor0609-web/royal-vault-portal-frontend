@@ -27,17 +27,19 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
         </div>
 
         <AdminSidebar />
-        <SidebarInset className="flex-1">
+        <SidebarInset className="flex-1 min-w-0 max-w-full overflow-hidden">
           <div className="md:hidden h-20"></div> {/* Spacer for mobile header */}
 
           {/* Breadcrumb Navigation */}
           {breadcrumbs.length > 1 && (
-            <div className="px-2 sm:px-4 py-2 sm:py-3 bg-white border-b border-royal-light-gray shadow-sm">
+            <div className="px-2 sm:px-4 py-2 sm:py-3 bg-white border-b border-royal-light-gray shadow-sm min-w-0">
               <Breadcrumb items={breadcrumbs} />
             </div>
           )}
 
-          {children}
+          <div className="min-w-0 max-w-full overflow-hidden">
+            {children}
+          </div>
         </SidebarInset>
       </div>
     </SidebarProvider>

@@ -227,7 +227,7 @@ export function WebinarSection() {
 
     if (loading) {
         return (
-            <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col animate-in fade-in duration-100">
+            <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0">
                 <div className="flex gap-2 items-center bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
                     <VideoIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray hidden sm:block" />
                     <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">Webinars</h1>
@@ -241,7 +241,7 @@ export function WebinarSection() {
 
     if (error) {
         return (
-            <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col animate-in fade-in duration-100">
+            <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0">
                 <div className="flex gap-2 items-center bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
                     <VideoIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray hidden sm:block" />
                     <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">Webinars</h1>
@@ -257,31 +257,31 @@ export function WebinarSection() {
     }
 
     return (
-        <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col animate-in fade-in duration-100">
-            <div className="flex gap-2 items-center justify-between bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-                <div className="flex gap-2 items-center">
+        <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 items-start sm:items-center justify-between bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3 min-w-0">
+                <div className="flex gap-2 items-center min-w-0 flex-1">
                     <VideoIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray hidden sm:block" />
-                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">Webinars</h1>
+                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase truncate">Webinars</h1>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2 w-full sm:w-auto">
                     <Button
                         onClick={fetchWebinars}
                         variant="outline"
                         size="sm"
                         disabled={loading}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 flex-1 sm:flex-none"
                     >
-                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                        Refresh
+                        <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${loading ? 'animate-spin' : ''}`} />
+                        <span className="hidden sm:inline">Refresh</span>
                     </Button>
                     <Button
                         onClick={() => handlebtnClick('create')}
                         size="sm"
                         disabled={actionLoading === 'create'}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 flex-1 sm:flex-none"
                     >
-                        {actionLoading === 'create' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Calendar className="h-4 w-4" />}
-                        Create
+                        {actionLoading === 'create' ? <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" /> : <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />}
+                        <span className="hidden sm:inline">Create</span>
                     </Button>
                 </div>
             </div>
@@ -385,32 +385,32 @@ export function WebinarSection() {
             </div>
 
             {/* Mobile/Tablet Card View */}
-            <div className="lg:hidden space-y-4">
+            <div className="lg:hidden space-y-3 sm:space-y-4 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
                 {webinars.map((webinar) => (
-                    <div key={webinar._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
-                        <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                                <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">{webinar.name}</h3>
-                                <div className="flex items-center gap-2 text-xs sm:text-sm text-royal-gray mb-2">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${webinar.status === 'Scheduled' ? 'bg-blue-100 text-blue-800' :
+                    <div key={webinar._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm min-w-0">
+                        <div className="flex items-start justify-between mb-2 min-w-0">
+                            <div className="flex-1 min-w-0 mr-2">
+                                <h3 className="font-semibold text-royal-dark-gray text-sm sm:text-base mb-1 line-clamp-2">{webinar.name}</h3>
+                                <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-royal-gray mb-2 flex-wrap">
+                                    <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium whitespace-nowrap ${webinar.status === 'Scheduled' ? 'bg-blue-100 text-blue-800' :
                                         webinar.status === 'In Progress' ? 'bg-green-100 text-green-800' :
                                             webinar.status === 'Ended' ? 'bg-gray-100 text-gray-800' :
                                                 'bg-yellow-100 text-yellow-800'
                                         }`}>
                                         {webinar.status}
                                     </span>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${webinar.portalDisplay === 'Yes' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium whitespace-nowrap ${webinar.portalDisplay === 'Yes' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                         }`}>
                                         {webinar.portalDisplay === 'Yes' ? 'Visible' : 'Hidden'}
                                     </span>
                                 </div>
                             </div>
-                            <div className="flex gap-1 ml-2">
+                            <div className="flex gap-1 ml-2 flex-shrink-0">
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() => handlebtnClick('edit', webinar)}
-                                    className="h-7 w-7 p-0"
+                                    className="h-6 w-6 sm:h-7 sm:w-7 p-0"
                                     title="Edit"
                                     disabled={actionLoading === 'edit'}
                                 >
@@ -420,7 +420,7 @@ export function WebinarSection() {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => handlebtnClick('delete', webinar)}
-                                    className="h-7 w-7 p-0 bg-red-500 hover:bg-red-600"
+                                    className="h-6 w-6 sm:h-7 sm:w-7 p-0 bg-red-500 hover:bg-red-600"
                                     title="Delete"
                                     disabled={actionLoading === 'delete'}
                                 >
@@ -429,38 +429,38 @@ export function WebinarSection() {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray mb-2">
-                            <div className="flex items-center gap-3">
-                                <span className="flex items-center gap-1">
-                                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                                    {formatDate(webinar.date)}
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray mb-2 min-w-0">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                <span className="flex items-center gap-1 min-w-0">
+                                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                                    <span className="truncate">{formatDate(webinar.date)}</span>
                                 </span>
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray mb-2">
-                            <div className="flex items-center gap-3">
-                                <span className="flex items-center gap-1">
-                                    <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray mb-2 min-w-0">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-wrap">
+                                <span className="flex items-center gap-1 whitespace-nowrap">
+                                    <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                                     {getRegistrantsCount(webinar.attendees)} registrants
                                 </span>
-                                <span className="flex items-center gap-1">
-                                    <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span className="flex items-center gap-1 whitespace-nowrap">
+                                    <UserCheck className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                                     {getAttendeesCount(webinar.attendees)} attendees
                                 </span>
-                                <span className="flex items-center gap-1">
-                                    <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+                                <span className="flex items-center gap-1 whitespace-nowrap">
+                                    <Eye className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                                     {getReWatchCount(webinar.attendees)} re-watch
                                 </span>
                             </div>
                         </div>
 
-                        <div className="flex gap-1 flex-wrap">
+                        <div className="flex gap-1 flex-wrap min-w-0">
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handlebtnClick('web', webinar)}
-                                className="text-xs px-2 py-1"
+                                className="text-xs px-2 py-1 h-7 flex-shrink-0"
                             >
                                 Web
                             </Button>
@@ -468,7 +468,7 @@ export function WebinarSection() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handlebtnClick('host', webinar)}
-                                className="text-xs px-2 py-1"
+                                className="text-xs px-2 py-1 h-7 flex-shrink-0"
                             >
                                 Host
                             </Button>
@@ -476,7 +476,7 @@ export function WebinarSection() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handlebtnClick('guest', webinar)}
-                                className="text-xs px-2 py-1"
+                                className="text-xs px-2 py-1 h-7 flex-shrink-0"
                             >
                                 Guest
                             </Button>
@@ -484,7 +484,7 @@ export function WebinarSection() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handlebtnClick('recs', webinar)}
-                                className="text-xs px-2 py-1"
+                                className="text-xs px-2 py-1 h-7 flex-shrink-0"
                             >
                                 Recs
                             </Button>

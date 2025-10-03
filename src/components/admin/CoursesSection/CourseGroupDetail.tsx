@@ -193,7 +193,7 @@ export function CourseGroupDetail() {
                         className="flex items-center gap-1 w-fit text-xs sm:text-sm"
                     >
                         <ArrowLeftIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">Back</span>
+                        <span>Back</span>
                     </Button>
                     <div>
                         <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">{courseGroup.title}</h1>
@@ -221,7 +221,7 @@ export function CourseGroupDetail() {
                             <TableHead className="w-32 min-w-32 text-right">
                                 <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={handleAddCourse}>
                                     <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                                    <span className="hidden sm:inline">Create</span>
+                                    <span>Create</span>
                                     <span className="sm:hidden">+</span>
                                 </Button>
                             </TableHead>
@@ -327,7 +327,7 @@ export function CourseGroupDetail() {
                                         <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                                         {course.lectures?.length || 0} lectures
                                     </span>
-                                    <span className="hidden sm:inline">{course.createdBy?.name || 'N/A'}</span>
+                                    <span>{course.createdBy?.name || 'N/A'}</span>
                                 </div>
                                 <span className="text-xs">{course.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'N/A'}</span>
                             </div>

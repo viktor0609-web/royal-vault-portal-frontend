@@ -118,7 +118,7 @@ export function CoursesSection() {
   return (
     <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
       <div className="flex gap-2 items-center bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-        <GraduationCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray hidden sm:block" />
+        <GraduationCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray" />
         <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">Course Groups</h1>
       </div>
 

@@ -260,7 +260,7 @@ export function WebinarSection() {
         <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 items-start sm:items-center justify-between bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3 min-w-0">
                 <div className="flex gap-2 items-center min-w-0 flex-1">
-                    <VideoIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray hidden sm:block" />
+                    <VideoIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray" />
                     <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase truncate">Webinars</h1>
                 </div>
                 <div className="flex gap-1 sm:gap-2 w-full sm:w-auto">
@@ -272,7 +272,7 @@ export function WebinarSection() {
                         className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 flex-1 sm:flex-none"
                     >
                         <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 ${loading ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">Refresh</span>
+                        <span>Refresh</span>
                     </Button>
                     <Button
                         onClick={() => handlebtnClick('create')}
@@ -281,7 +281,7 @@ export function WebinarSection() {
                         className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2 flex-1 sm:flex-none"
                     >
                         {actionLoading === 'create' ? <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" /> : <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />}
-                        <span className="hidden sm:inline">Create</span>
+                        <span>Create</span>
                     </Button>
                 </div>
             </div>

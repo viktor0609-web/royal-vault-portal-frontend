@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { ArrowLeftIcon, PlusIcon, Edit, Trash2, EyeIcon, PlayIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
 import { LectureModal } from "./LectureModal";
 import { useToast } from "@/hooks/use-toast";
 import { courseApi } from "@/lib/api";
@@ -14,7 +14,6 @@ interface Lecture {
   description: string;
   content: string;
   videoUrl: string;
-  videoFile?: string;
   relatedFiles?: Array<{
     name: string;
     url: string;
@@ -114,9 +113,6 @@ export function CourseDetail() {
     }
   };
 
-  const handleViewLecture = (lectureId: string) => {
-    navigate(`/admin/courses/groups/${groupId}/courses/${courseId}/lectures/${lectureId}`);
-  };
 
   const fetchCourse = async () => {
     if (!courseId) return;
@@ -264,16 +260,7 @@ export function CourseDetail() {
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline text-sm"
                       >
-                        View Video (URL)
-                      </a>
-                    ) : lecture.videoFile ? (
-                      <a
-                        href={import.meta.env.VITE_BACKEND_URL + lecture.videoFile}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-green-600 hover:underline text-sm"
-                      >
-                        View Video (File)
+                        View Video
                       </a>
                     ) : 'N/A'}
                   </TableCell>
@@ -328,12 +315,7 @@ export function CourseDetail() {
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
                   <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">
-                    <button
-                      onClick={() => handleViewLecture(lecture._id)}
-                      className="text-left hover:text-royal-blue transition-colors cursor-pointer"
-                    >
-                      {lecture.title}
-                    </button>
+                    {lecture.title}
                   </h3>
                   <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{lecture.description}</p>
                 </div>
@@ -368,19 +350,7 @@ export function CourseDetail() {
                         className="text-blue-600 hover:underline flex items-center gap-1"
                       >
                         <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">Video URL</span>
-                        <span className="sm:hidden">URL</span>
-                      </a>
-                    ) : lecture.videoFile ? (
-                      <a
-                        href={import.meta.env.VITE_BACKEND_URL + lecture.videoFile}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-green-600 hover:underline flex items-center gap-1"
-                      >
-                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <span className="hidden sm:inline">Video File</span>
-                        <span className="sm:hidden">File</span>
+                        <span>Video</span>
                       </a>
                     ) : (
                       <span className="flex items-center gap-1">

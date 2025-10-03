@@ -23,7 +23,6 @@ import { WebinarSection as AdminWebinar } from "./components/admin/WebinarSectio
 import { CoursesSection as AdminCourses } from "./components/admin/CoursesSection/CoursesSection";
 import { CourseGroupDetail } from "./components/admin/CoursesSection/CourseGroupDetail";
 import { CourseDetail } from "./components/admin/CoursesSection/CourseDetail";
-import { LectureDetail } from "./components/admin/CoursesSection/LectureDetail";
 import { StatsSection as AdminStats } from "./components/admin/StatsSection";
 
 
@@ -37,9 +36,6 @@ import { SetPassword } from "./components/auth/SettingPasswordPage";
 import { ReSettingPasswordPage } from "./components/auth/ReSettingPasswordPage";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/AuthContext";
-import YouTubeCallback from "./pages/YouTubeCallback";
-import { YouTubeTestPlayer } from "./components/ui/YouTubeTestPlayer";
-import YouTubeTest from "./pages/YouTubeTest";
 
 import { VideoMeeting as AdminMeeting } from "./components/VideoMeeting/Admin/VideoMeeting";
 import { VideoMeeting as UserMeeting } from "./components/VideoMeeting/User/VideoMeeting";
@@ -101,7 +97,6 @@ const App = () => (
                     <Route path="/admin/courses" element={<AdminRoute><AdminLayout><AdminCourses /></AdminLayout></AdminRoute>} />
                     <Route path="/admin/courses/groups/:groupId" element={<AdminRoute><AdminLayout><CourseGroupDetail /></AdminLayout></AdminRoute>} />
                     <Route path="/admin/courses/groups/:groupId/courses/:courseId" element={<AdminRoute><AdminLayout><CourseDetail /></AdminLayout></AdminRoute>} />
-                    <Route path="/admin/courses/groups/:groupId/courses/:courseId/lectures/:lectureId" element={<AdminRoute><AdminLayout><LectureDetail /></AdminLayout></AdminRoute>} />
 
 
                     <Route path="/verify/:token" element={<SetPassword />} />
@@ -112,14 +107,6 @@ const App = () => (
                     <Route path="/royal-tv/:slug/admin" element={<AdminMeeting />} />
                     <Route path="/royal-tv/:slug/user" element={<UserMeeting />} />
 
-                    {/* YouTube OAuth Callback */}
-                    <Route path="/auth/youtube/callback" element={<YouTubeCallback />} />
-
-                    {/* YouTube Player Test Route */}
-                    <Route path="/test-youtube" element={<YouTubeTestPlayer />} />
-
-                    {/* YouTube API Test Route */}
-                    <Route path="/youtube-test" element={<YouTubeTest />} />
 
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />

@@ -1,9 +1,7 @@
 import React from 'react';
-import { YouTubeVideoPlayer } from './YouTubeVideoPlayer';
 
 interface VideoPlayerProps {
-    youtubeUrl?: string;
-    youtubeVideoId?: string;
+    videoUrl?: string;
     className?: string;
     onEnded?: () => void;
     onPlay?: () => void;
@@ -12,26 +10,29 @@ interface VideoPlayerProps {
 }
 
 export function VideoPlayer({
-    youtubeUrl,
-    youtubeVideoId,
+    videoUrl,
     className = "w-full h-full",
     onEnded,
     onPlay,
     onPause,
     onTimeUpdate
 }: VideoPlayerProps) {
-    // Only support YouTube videos
-    if (youtubeUrl || youtubeVideoId) {
+    // Support regular video URLs
+    if (videoUrl) {
         return (
-            <YouTubeVideoPlayer
-                youtubeUrl={youtubeUrl}
-                youtubeVideoId={youtubeVideoId}
+            <video
                 className={className}
+                controls
                 onEnded={onEnded}
                 onPlay={onPlay}
                 onPause={onPause}
-                onTimeUpdate={onTimeUpdate}
-            />
+                onTimeUpdate={(e) => onTimeUpdate?.(e.currentTarget.currentTime)}
+            >
+                <source src={videoUrl} type="video/mp4" />
+                <source src={videoUrl} type="video/webm" />
+                <source src={videoUrl} type="video/ogg" />
+                Your browser does not support the video tag.
+            </video>
         );
     }
 
@@ -40,7 +41,7 @@ export function VideoPlayer({
         <div className={`${className} flex items-center justify-center bg-gray-100 rounded-lg`}>
             <div className="text-center text-gray-500">
                 <div className="text-4xl mb-2">📹</div>
-                <p>No YouTube video available</p>
+                <p>No video available</p>
             </div>
         </div>
     );

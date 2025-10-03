@@ -12,6 +12,7 @@ interface Course {
     _id: string;
     title: string;
     description: string;
+    courseGroup: string;
     lectures: Lecture[];
     createdBy: {
         _id: string;
@@ -284,7 +285,7 @@ export function CourseGroupDetail() {
                 <div className="flex justify-end">
                     <Button onClick={handleAddCourse} className="flex items-center gap-2">
                         <PlusIcon className="h-4 w-4" />
-                        Create Course
+                        Create
                     </Button>
                 </div>
 

@@ -31,6 +31,12 @@ interface Course {
   description: string;
   courseGroup: string;
   lectures: any[];
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
 }
 
 interface CourseModalProps {

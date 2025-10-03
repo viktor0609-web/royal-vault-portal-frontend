@@ -522,27 +522,12 @@ export function CourseDetailSection() {
                     </div>
                   </div>
 
-                  {/* Lecture Description */}
-                  {lectures[currentItem]?.description && (
-                    <div className="bg-white rounded-lg border border-royal-light-gray p-3 sm:p-4 mb-3 sm:mb-4">
-                      <h3 className="text-sm sm:text-lg font-semibold text-royal-dark-gray mb-2 sm:mb-3">Description</h3>
-                      <p className="text-royal-gray text-xs sm:text-sm leading-relaxed">
-                        {lectures[currentItem].description}
-                      </p>
-                    </div>
-                  )}
-
                   {/* Lecture Content */}
                   {lectures[currentItem]?.content && (
-                    <div className="bg-white rounded-lg border border-royal-light-gray p-3 sm:p-4 mb-3 sm:mb-4">
+                    <div className="bg-white rounded-lg border p-3">
                       <div
-                        className="lecture-content max-w-none text-royal-gray leading-relaxed"
                         dangerouslySetInnerHTML={{
                           __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
-                        }}
-                        style={{
-                          fontSize: '12px',
-                          lineHeight: '1.5'
                         }}
                       />
                     </div>
@@ -769,17 +754,11 @@ export function CourseDetailSection() {
                   </div>
                 )}
 
-                {/* Lecture Content */}
                 {lectures[currentItem]?.content && (
-                  <div className="bg-white rounded-lg border border-royal-light-gray p-6 mb-6">
+                  <div className="bg-white rounded-lg border p-3">
                     <div
-                      className="lecture-content max-w-none text-royal-gray leading-relaxed"
                       dangerouslySetInnerHTML={{
                         __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
-                      }}
-                      style={{
-                        fontSize: '14px',
-                        lineHeight: '1.6'
                       }}
                     />
                   </div>

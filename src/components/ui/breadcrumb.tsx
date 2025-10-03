@@ -15,29 +15,28 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items, className }: BreadcrumbProps) {
   return (
-    <nav className={cn("flex items-center space-x-0.5 text-xs sm:text-sm overflow-x-auto", className)}>
+    <nav className={cn("flex items-center space-x-0.5 sm:space-x-1 text-xs sm:text-sm min-w-0", className)}>
       <Link
         to="/admin"
-        className="flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-1 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded transition-all duration-200 whitespace-nowrap"
+        className="flex items-center gap-1 px-1 sm:px-2 py-1 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded-md transition-all duration-200"
       >
         <HomeIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-        <span className="font-medium hidden sm:inline">Admin</span>
-        <span className="font-medium sm:hidden">A</span>
+        <span className="font-medium text-xs sm:text-sm">Admin</span>
       </Link>
 
       {items.slice(1).map((item, index) => (
         <div key={index} className="flex items-center">
-          <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 mx-1 sm:mx-2 text-royal-light-gray flex-shrink-0" />
+          <ChevronRightIcon className="h-3 w-3 sm:h-4 sm:w-4 mx-1 sm:mx-2 text-royal-light-gray" />
           {item.path && !item.isActive ? (
             <Link
               to={item.path}
-              className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded transition-all duration-200 font-medium whitespace-nowrap text-xs sm:text-sm"
+              className="px-1 sm:px-2 py-1 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded-md transition-all duration-200 font-medium text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[150px] md:max-w-none"
             >
               {item.label}
             </Link>
           ) : (
             <span className={cn(
-              "px-1.5 py-0.5 sm:px-2 sm:py-1 rounded font-medium whitespace-nowrap text-xs sm:text-sm",
+              "px-1 sm:px-2 py-1 rounded-md font-medium text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[150px] md:max-w-none",
               item.isActive
                 ? "text-royal-dark-gray bg-royal-light-gray"
                 : "text-royal-gray"

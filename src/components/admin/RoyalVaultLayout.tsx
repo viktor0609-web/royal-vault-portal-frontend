@@ -31,9 +31,16 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
           <div className="md:hidden h-20"></div> {/* Spacer for mobile header */}
 
           {/* Breadcrumb Navigation */}
-          {breadcrumbs.length > 1 && (
+          {(breadcrumbs.length > 1 || loading) && (
             <div className="px-2 sm:px-4 py-2 sm:py-3 bg-white border-b border-royal-light-gray shadow-sm min-w-0">
-              <Breadcrumb items={breadcrumbs} />
+              {loading && breadcrumbs.length <= 1 ? (
+                <div className="flex items-center space-x-1 text-xs sm:text-sm text-royal-gray">
+                  <div className="animate-spin h-3 w-3 sm:h-4 sm:w-4 border-2 border-royal-light-gray border-t-royal-blue rounded-full"></div>
+                  <span>Loading...</span>
+                </div>
+              ) : (
+                <Breadcrumb items={breadcrumbs} />
+              )}
             </div>
           )}
 

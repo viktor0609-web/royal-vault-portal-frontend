@@ -87,31 +87,34 @@ export function useBreadcrumbs() {
             if (pathParts[1] === 'courses') {
                 breadcrumbs.push({ label: 'Courses', path: '/admin/courses' });
 
-                // Handle course groups
+                // Handle course groups - only show if we have the actual name
                 if (pathParts[2] === 'groups' && pathParts[3]) {
-                    const groupLabel = breadcrumbData.groupName || 'Group';
-                    breadcrumbs.push({
-                        label: groupLabel,
-                        path: `/admin/courses/groups/${pathParts[3]}`,
-                        isActive: pathParts.length === 4
-                    });
-
-                    // Handle courses within groups
-                    if (pathParts[4] === 'courses' && pathParts[5]) {
-                        const courseLabel = breadcrumbData.courseName || 'Course';
+                    if (breadcrumbData.groupName) {
                         breadcrumbs.push({
-                            label: courseLabel,
-                            path: `/admin/courses/groups/${pathParts[3]}/courses/${pathParts[5]}`,
-                            isActive: pathParts.length === 6
+                            label: breadcrumbData.groupName,
+                            path: `/admin/courses/groups/${pathParts[3]}`,
+                            isActive: pathParts.length === 4
                         });
+                    }
 
-                        // Handle lectures within courses
-                        if (pathParts[6] === 'lectures' && pathParts[7]) {
-                            const lectureLabel = breadcrumbData.lectureName || 'Lecture';
+                    // Handle courses within groups - only show if we have the actual name
+                    if (pathParts[4] === 'courses' && pathParts[5]) {
+                        if (breadcrumbData.courseName) {
                             breadcrumbs.push({
-                                label: lectureLabel,
-                                isActive: true
+                                label: breadcrumbData.courseName,
+                                path: `/admin/courses/groups/${pathParts[3]}/courses/${pathParts[5]}`,
+                                isActive: pathParts.length === 6
                             });
+                        }
+
+                        // Handle lectures within courses - only show if we have the actual name
+                        if (pathParts[6] === 'lectures' && pathParts[7]) {
+                            if (breadcrumbData.lectureName) {
+                                breadcrumbs.push({
+                                    label: breadcrumbData.lectureName,
+                                    isActive: true
+                                });
+                            }
                         }
                     }
                 }

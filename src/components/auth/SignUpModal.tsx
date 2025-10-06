@@ -75,6 +75,8 @@ export function SignUp() {
     try {
       const response = await api.post("/api/auth/register", {
         username: `${formData.firstName} ${formData.lastName}`,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
         role: "user",

@@ -2,35 +2,58 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { webinarApi } from "@/lib/api";
+import { format } from "date-fns";
 
 export function WebinarRegistrationPage() {
     const [countdown, setCountdown] = useState({
-        days: 1,
-        hours: 15,
-        minutes: 15,
-        seconds: 15
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0
     });
     const [email, setEmail] = useState("");
     const [isRegistered, setIsRegistered] = useState(false);
+    const [webinar, setWebinar] = useState(null);
+    const [formattedDate, setFormattedDate] = useState("");
+
+    const params = new URLSearchParams(new URL(window.location.href).search);
+    const webinarId = params.get('id');
+
+
+    useEffect(() => {
+        const fetchWebinar = async () => {
+            const response = await webinarApi.getWebinarById(webinarId, 'basic');
+            setWebinar(response.data.webinar);
+            setFormattedDate(format(new Date(response.data.webinar.date), "EEEE MMMM do, h:mma"));
+        };
+        fetchWebinar();
+    }, []);
+
+
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCountdown(prev => {
-                if (prev.seconds > 0) {
-                    return { ...prev, seconds: prev.seconds - 1 };
-                } else if (prev.minutes > 0) {
-                    return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-                } else if (prev.hours > 0) {
-                    return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-                } else if (prev.days > 0) {
-                    return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
-                }
-                return prev;
-            });
+            const now = new Date();
+            const eventDate = new Date(webinar?.date);
+            const diff = eventDate.getTime() - now.getTime();
+
+            if (diff <= 0) {
+                clearInterval(interval);
+                setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            setCountdown({ days, hours, minutes, seconds });
         }, 1000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [webinar?.date]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -43,7 +66,7 @@ export function WebinarRegistrationPage() {
                 {/* Header Section */}
                 <div className="text-center py-2 sm:py-4 flex-shrink-0">
                     <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white px-4" style={{ fontFamily: 'Arial, sans-serif' }}>
-                        Office Hours with Elite Staff
+                        {webinar?.line1}
                     </h1>
                 </div>
 
@@ -103,7 +126,7 @@ export function WebinarRegistrationPage() {
                         {/* Webinar Date and Time */}
                         <div className="text-center px-4">
                             <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 md:mb-8" style={{ color: '#f1c40f', fontFamily: 'Arial, sans-serif' }}>
-                                Wednesday October 8th, 2:00am
+                                {formattedDate}
                             </div>
 
                             {/* Countdown Timer */}

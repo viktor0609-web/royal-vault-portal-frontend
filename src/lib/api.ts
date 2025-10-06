@@ -120,6 +120,7 @@ export const dealApi = {
     api.get('/api/deals/filter', { params: { ...filters, fields } }),
 };
 
+
 // Options API functions for dropdowns
 export const optionsApi = {
   // Get all categories

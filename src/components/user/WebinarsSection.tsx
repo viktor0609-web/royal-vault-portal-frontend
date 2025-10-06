@@ -36,7 +36,6 @@ export function WebinarsSection() {
   const [webinars, setWebinars] = useState<Webinar[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [registering, setRegistering] = useState<string | null>(null);
   const [unregistering, setUnregistering] = useState<string | null>(null);
   const [registeredWebinars, setRegisteredWebinars] = useState<Set<string>>(new Set());
   const { toast } = useToast();
@@ -85,44 +84,10 @@ export function WebinarsSection() {
     }
   }, [user, fetchWebinars]);
 
-  const handleRegister = async (webinar: Webinar) => {
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to register for webinars",
-        variant: "destructive",
-      });
-      // Open login dialog
-      openDialog("login");
-      return;
-    }
-
-    setRegistering(webinar._id);
-    try {
-      // Register using user's ID (comes from JWT token)
-      await webinarApi.registerForWebinar(webinar._id);
-
-      // Immediately update local state to show registered status
-      setRegisteredWebinars(prev => new Set([...prev, webinar._id]));
-
-      toast({
-        title: "Success!",
-        description: "You have successfully registered for the webinar",
-      });
-
-      // Force refresh webinars to update registration status immediately
-      setTimeout(async () => {
-        await fetchWebinars();
-      }, 500);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to register for webinar",
-        variant: "destructive",
-      });
-    } finally {
-      setRegistering(null);
-    }
+  const handleRegister = (webinar: Webinar) => {
+    // Navigate to registration page with webinar details
+    const registrationUrl = `/webinar-register?id=${webinar._id}&title=${encodeURIComponent(webinar.name)}&date=${encodeURIComponent(webinar.date)}`;
+    navigate(registrationUrl);
   };
 
   const handleUnregister = async (webinar: Webinar) => {
@@ -310,9 +275,8 @@ export function WebinarsSection() {
         <div className="space-y-2">
           {getFilteredWebinars.map((webinar, index) => {
             const isRegistered = isUserRegistered(webinar);
-            const isRegistering = registering === webinar._id;
             const isUnregistering = unregistering === webinar._id;
-            const isProcessing = isRegistering || isUnregistering;
+            const isProcessing = isUnregistering;
 
             return (
               <div
@@ -390,7 +354,7 @@ export function WebinarsSection() {
                         disabled={isProcessing}
                         className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
                       >
-                        {isRegistering ? 'Registering...' : 'Register'}
+                        Register
                       </Button>
                     )
                   ) : (
@@ -453,15 +417,11 @@ export function WebinarsSection() {
                               className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
                               style={{ aspectRatio: '1/1' }}
                             >
-                              {isRegistering ? (
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              ) : (
-                                <CheckCircleIcon className="h-4 w-4" />
-                              )}
+                              <CheckCircleIcon className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-                            {isRegistering ? 'Registering...' : 'Register for Webinar'}
+                            Register for Webinar
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>

@@ -81,7 +81,7 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
 
         setSubmitting(true);
         try {
-            await webinarApi.registerForWebinar(webinarId, { email });
+            await webinarApi.registerForWebinar(webinarId);
             setRegistrationSuccess(true);
             setEmail('');
         } catch (error: any) {
@@ -123,7 +123,7 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
                 <div
                     className="w-full h-2/3 bg-cover bg-center bg-no-repeat"
                     style={{
-                        backgroundImage: `url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`
+                        backgroundImage: `url('/imgs/webinar_register_bg.webp')`
                     }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
@@ -134,7 +134,7 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
                 {/* Header */}
                 <div className="text-center pt-6 sm:pt-8 md:pt-16 pb-3 sm:pb-4 md:pb-8 px-3 sm:px-4">
                     <h1 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl font-bold text-white mb-3 sm:mb-4 md:mb-8 leading-tight">
-                        {webinar?.name || webinarTitle || 'Office Hours with Elite Staff'}
+                        Office Hours with Elite Staff
                     </h1>
                 </div>
 
@@ -180,7 +180,7 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
                                     <div>
                                         <Input
                                             type="email"
-                                            placeholder="Email"
+                                            placeholder="liz@royallegalsolutions.com"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             className="w-full h-8 sm:h-10 text-xs sm:text-sm border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -192,7 +192,7 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
                                         disabled={submitting}
                                         className="w-full h-8 sm:h-10 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-lg"
                                     >
-                                        {submitting ? 'Registering...' : 'Register'}
+                                        {submitting ? 'Registering...' : 'Yes! I Want To Reserve My Seat Now'}
                                     </Button>
                                 </form>
                             </>
@@ -201,34 +201,36 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
                 </div>
 
                 {/* Countdown Timer */}
-                <div className="text-center mb-8 md:mb-16 w-full px-4">
-                    <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-yellow-400 mb-4 md:mb-8">
-                        {webinar?.date ? formatDate(webinar.date) : 'Wednesday October 29th, 2:00am'}
+                <div
+                    className="text-center mb-8 md:mb-16 w-full px-4 py-4 sm:py-6"
+                >
+                    <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-yellow-100 mb-4 md:mb-8">
+                        Wednesday October 8th, 2:00am
                     </div>
                     <div className="flex justify-center space-x-2 sm:space-x-4 md:space-x-8">
                         <div className="text-center">
                             <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 md:mb-2">
                                 {timeLeft.days.toString().padStart(2, '0')}
                             </div>
-                            <div className="text-xs sm:text-sm text-gray-300">Days</div>
+                            <div className="text-xs sm:text-sm text-white">Days</div>
                         </div>
                         <div className="text-center">
                             <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 md:mb-2">
                                 {timeLeft.hours.toString().padStart(2, '0')}
                             </div>
-                            <div className="text-xs sm:text-sm text-gray-300">Hours</div>
+                            <div className="text-xs sm:text-sm text-white">Hours</div>
                         </div>
                         <div className="text-center">
                             <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 md:mb-2">
                                 {timeLeft.minutes.toString().padStart(2, '0')}
                             </div>
-                            <div className="text-xs sm:text-sm text-gray-300">Minutes</div>
+                            <div className="text-xs sm:text-sm text-white">Minutes</div>
                         </div>
                         <div className="text-center">
                             <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-1 md:mb-2">
                                 {timeLeft.seconds.toString().padStart(2, '0')}
                             </div>
-                            <div className="text-xs sm:text-sm text-gray-300">Seconds</div>
+                            <div className="text-xs sm:text-sm text-white">Seconds</div>
                         </div>
                     </div>
                 </div>
@@ -237,8 +239,11 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
                 <div className="w-full bg-gray-800 text-white py-6 md:py-12 px-2 md:px-4 mt-auto">
                     <div className="w-full text-center">
                         {/* Logo */}
-                        <div className="mb-3 md:mb-6">
-                            <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-1 md:mb-2">ROYAL LEGAL SOLUTIONS</div>
+                        <div className="mb-3 md:mb-6 flex items-center justify-center">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center mr-2 sm:mr-3">
+                                <span className="text-gray-800 font-bold text-lg sm:text-xl">W</span>
+                            </div>
+                            <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">ROYAL LEGAL SOLUTIONS</div>
                         </div>
 
                         {/* Copyright */}
@@ -256,15 +261,14 @@ export function WebinarRegistrationPage({ }: WebinarRegistrationPageProps) {
                         {/* Legal Disclaimers */}
                         <div className="text-xs text-gray-400 w-full space-y-2 md:space-y-3">
                             <p>
-                                Royal Legal Solutions is a tax and law firm. We do not offer "get rich quick" schemes or
-                                promise unrealistic returns. Our services are designed to provide educational information
-                                and legal guidance to help you make informed decisions about your financial future.
+                                Royal Legal Solutions is a tax and law firm with licensed CPAs, attorneys, and paralegals.
+                                We do not offer investment opportunities, "get rich quick" schemes, or "gray or black hat tax savings tactics."
+                                Our services are designed to provide educational information and legal guidance to help you make informed decisions about your financial future.
                             </p>
                             <p>
-                                The information provided on this website is for informational purposes only and does not
-                                constitute legal advice. No attorney-client relationship is created by viewing this website
-                                or registering for our webinars. Please consult with a qualified attorney for specific
-                                legal advice regarding your situation.
+                                The information provided on this website is for informational purposes only and does not constitute legal advice.
+                                No attorney-client relationship is created by viewing this website or registering for our webinars.
+                                Please consult with a qualified attorney for specific legal advice regarding your situation.
                             </p>
                         </div>
                     </div>

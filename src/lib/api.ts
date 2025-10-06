@@ -261,7 +261,7 @@ export const webinarApi = {
 
   getPublicWebinarById: (webinarId: string) => api.get(`/api/webinars/public/${webinarId}`),
 
-  registerForWebinar: (webinarId: string) => api.post(`/api/webinars/${webinarId}/register`),
+  registerForWebinar: (webinarId: string, email: string) => api.post(`/api/webinars/${webinarId}/register`, { email }),
 
   unregisterFromWebinar: (webinarId: string) => api.delete(`/api/webinars/${webinarId}/unregister`),
 

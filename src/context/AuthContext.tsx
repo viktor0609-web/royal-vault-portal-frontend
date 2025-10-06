@@ -2,13 +2,17 @@
 import { createContext, useEffect, useState, ReactNode, useContext } from "react";
 import { api } from "@/lib/api";
 
-// Define shape of user data (adjust fields based on your API response)
+// Define shape of user data (MongoDB only - for AuthContext)
 export interface User {
     _id: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
-    role?: "user" | "admin";
-    // add more fields if your backend returns them
+    phone: string;
+    role: "user" | "admin";
+    isVerified: boolean;
+    createdAt: string;
+    updatedAt: string;
 }
 
 // Define context value shape
@@ -52,7 +56,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const fetchProfile = async (): Promise<void> => {
         try {
-            const { data } = await api.get<User>("/api/auth/profile");
+            const { data } = await api.get<User>("/api/auth/user");
             setUser(data);
         } catch {
             setUser(null);

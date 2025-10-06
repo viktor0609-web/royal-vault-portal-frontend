@@ -1,47 +1,48 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserIcon, MailIcon, PhoneIcon, MapPinIcon, CalendarIcon, SaveIcon, LockIcon, EyeIcon, EyeOffIcon, VideoIcon, ClockIcon, CheckCircleIcon } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { UserIcon, MailIcon, PhoneIcon, MapPinIcon, CalendarIcon, VideoIcon, ClockIcon, CheckCircleIcon, LoaderIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api";
+
+interface ProfileData {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    role: string;
+    isVerified: boolean;
+    createdAt: string;
+    updatedAt: string;
+    // HubSpot properties
+    firstname?: string;
+    lastname?: string;
+    company?: string;
+    country?: string;
+    state?: string;
+    city?: string;
+    zip?: string;
+    address?: string;
+    lifecyclestage?: string;
+    hs_lead_status?: string;
+    createdate?: string;
+    lastmodifieddate?: string;
+    website?: string;
+    industry?: string;
+    jobtitle?: string;
+    annualrevenue?: string;
+    numberofemployees?: string;
+}
 
 export function ProfileSection() {
-    const { toast } = useToast();
     const { user } = useAuth();
+    const [profileData, setProfileData] = useState<ProfileData | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Mock user data - in real app this would come from context/API
-    const [userData, setUserData] = useState({
-        firstName: "John",
-        lastName: "Doe",
-        email: "john.doe@example.com",
-        phone: "+1 (555) 123-4567",
-        address: "123 Main Street",
-        city: "New York",
-        state: "NY",
-        zip: "10001",
-        dateOfBirth: "1990-01-01",
-        company: "Royal Vault Investments",
-        jobTitle: "Investor"
-    });
-
-    // Password management state
-    const [passwordData, setPasswordData] = useState({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
-    });
-
-    const [showPasswords, setShowPasswords] = useState({
-        current: false,
-        new: false,
-        confirm: false
-    });
-
-    // Mock meeting logs data
+    // Mock meeting logs data (keeping for now as it's not related to profile editing)
     const [meetingLogs] = useState([
         {
             id: 1,
@@ -59,99 +60,70 @@ export function ProfileSection() {
         }
     ]);
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [isEditingPassword, setIsEditingPassword] = useState(false);
-    const [activeTab, setActiveTab] = useState("personal");
+    // Fetch profile data from backend (with HubSpot integration)
+    useEffect(() => {
+        const fetchProfileData = async () => {
+            try {
+                setLoading(true);
+                const { data } = await api.get('/api/auth/profile'); // This endpoint includes HubSpot data
+                setProfileData(data);
+            } catch (err) {
+                console.error('Error fetching profile:', err);
+                setError('Failed to load profile data');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const handleInputChange = (field: string, value: string) => {
-        setUserData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
-    const handlePasswordChange = (field: string, value: string) => {
-        setPasswordData(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
-    const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
-        setShowPasswords(prev => ({
-            ...prev,
-            [field]: !prev[field]
-        }));
-    };
-
-    const handleSave = () => {
-        // In real app, this would save to API
-        toast({
-            title: "Profile Updated",
-            description: "Your personal information has been saved successfully.",
-        });
-        setIsEditing(false);
-    };
-
-    const handleCancel = () => {
-        // Reset to original data
-        setUserData({
-            firstName: "John",
-            lastName: "Doe",
-            email: "john.doe@example.com",
-            phone: "+1 (555) 123-4567",
-            address: "123 Main Street",
-            city: "New York",
-            state: "NY",
-            zip: "10001",
-            dateOfBirth: "1990-01-01",
-            company: "Royal Vault Investments",
-            jobTitle: "Investor"
-        });
-        setIsEditing(false);
-    };
-
-    const handlePasswordSave = () => {
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            toast({
-                title: "Password Mismatch",
-                description: "New password and confirm password do not match.",
-                variant: "destructive"
-            });
-            return;
+        if (user) {
+            fetchProfileData();
         }
+    }, [user]);
 
-        if (passwordData.newPassword.length < 8) {
-            toast({
-                title: "Password Too Short",
-                description: "Password must be at least 8 characters long.",
-                variant: "destructive"
-            });
-            return;
-        }
+    if (loading) {
+        return (
+            <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
+                <div className="flex items-center justify-center h-64">
+                    <div className="flex items-center gap-2">
+                        <LoaderIcon className="h-6 w-6 animate-spin text-royal-gray" />
+                        <span className="text-royal-gray">Loading profile...</span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
-        // In real app, this would save to API
-        toast({
-            title: "Password Updated",
-            description: "Your password has been changed successfully.",
-        });
+    if (error) {
+        return (
+            <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                        <p className="text-red-500 mb-2">{error}</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="text-royal-blue hover:underline"
+                        >
+                            Try again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
-        setPasswordData({
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: ""
-        });
-        setIsEditingPassword(false);
-    };
+    if (!profileData) {
+        return (
+            <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
+                <div className="flex items-center justify-center h-64">
+                    <p className="text-royal-gray">No profile data available</p>
+                </div>
+            </div>
+        );
+    }
 
-    const handlePasswordCancel = () => {
-        setPasswordData({
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: ""
-        });
-        setIsEditingPassword(false);
-    };
+    // Use HubSpot data if available, otherwise fall back to database data
+    const displayName = profileData.firstname || profileData.firstName;
+    const displayLastName = profileData.lastname || profileData.lastName;
 
     return (
         <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
@@ -160,7 +132,7 @@ export function ProfileSection() {
                 <div>
                     <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">PROFILE</h1>
                     <p className="text-xs sm:text-base text-royal-gray">
-                        Manage your personal information and account settings.
+                        View your personal information and account details.
                     </p>
                 </div>
             </div>
@@ -185,490 +157,236 @@ export function ProfileSection() {
 
                 <TabsContent value="personal" className="space-y-2 sm:space-y-6">
                     {/* Mobile: Compact View */}
-                    <div className="sm:hidden space-y-2">
-                        {/* Basic Info Card */}
-                        <Card className="hover:shadow-sm transition-shadow duration-75">
-                            <CardHeader className="pb-2 px-3">
-                                <CardTitle className="flex items-center gap-2 text-black text-xs sm:text-base">
-                                    <UserIcon className="h-3 w-3 sm:h-4 sm:w-4 text-royal-blue" />
+                    <div className="block sm:hidden space-y-3">
+                        <Card className="border-royal-light-gray">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-sm font-semibold text-royal-dark-gray flex items-center gap-2">
+                                    <UserIcon className="h-4 w-4" />
                                     Basic Information
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-2 px-3">
-                                <div className="grid grid-cols-1 gap-2">
-                                    <div className="space-y-1">
-                                        <Label htmlFor="firstName" className="text-black text-xs">First Name</Label>
-                                        <Input
-                                            id="firstName"
-                                            value={userData.firstName}
-                                            onChange={(e) => handleInputChange('firstName', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black text-xs h-7 sm:h-8"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label htmlFor="lastName" className="text-black text-xs">Last Name</Label>
-                                        <Input
-                                            id="lastName"
-                                            value={userData.lastName}
-                                            onChange={(e) => handleInputChange('lastName', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black text-sm h-8"
-                                        />
+                            <CardContent className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <MailIcon className="h-4 w-4 text-royal-gray" />
+                                    <div>
+                                        <p className="text-xs text-royal-gray">Email</p>
+                                        <p className="text-sm font-medium text-royal-dark-gray">{profileData.email}</p>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
-                                    <div className="space-y-1">
-                                        <Label htmlFor="email" className="text-black text-xs">Email</Label>
-                                        <div className="relative">
-                                            <MailIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-royal-gray" />
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                value={userData.email}
-                                                onChange={(e) => handleInputChange('email', e.target.value)}
-                                                disabled={!isEditing}
-                                                className="pl-7 transition-all duration-75 text-black text-sm h-8"
-                                            />
+                                <div className="flex items-center gap-2">
+                                    <PhoneIcon className="h-4 w-4 text-royal-gray" />
+                                    <div>
+                                        <p className="text-xs text-royal-gray">Phone</p>
+                                        <p className="text-sm font-medium text-royal-dark-gray">{profileData.phone}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <UserIcon className="h-4 w-4 text-royal-gray" />
+                                    <div>
+                                        <p className="text-xs text-royal-gray">Name</p>
+                                        <p className="text-sm font-medium text-royal-dark-gray">{displayName} {displayLastName}</p>
+                                    </div>
+                                </div>
+                                {profileData.company && (
+                                    <div className="flex items-center gap-2">
+                                        <MapPinIcon className="h-4 w-4 text-royal-gray" />
+                                        <div>
+                                            <p className="text-xs text-royal-gray">Company</p>
+                                            <p className="text-sm font-medium text-royal-dark-gray">{profileData.company}</p>
                                         </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <Label htmlFor="phone" className="text-black text-xs">Phone</Label>
-                                        <div className="relative">
-                                            <PhoneIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-royal-gray" />
-                                            <Input
-                                                id="phone"
-                                                type="tel"
-                                                value={userData.phone}
-                                                onChange={(e) => handleInputChange('phone', e.target.value)}
-                                                disabled={!isEditing}
-                                                className="pl-7 transition-all duration-75 text-black text-sm h-8"
-                                            />
+                                )}
+                                {profileData.jobtitle && (
+                                    <div className="flex items-center gap-2">
+                                        <UserIcon className="h-4 w-4 text-royal-gray" />
+                                        <div>
+                                            <p className="text-xs text-royal-gray">Job Title</p>
+                                            <p className="text-sm font-medium text-royal-dark-gray">{profileData.jobtitle}</p>
                                         </div>
                                     </div>
+                                )}
+                                <div className="flex items-center gap-2">
+                                    <Badge variant={profileData.isVerified ? "default" : "secondary"} className="text-xs">
+                                        {profileData.isVerified ? "Verified" : "Unverified"}
+                                    </Badge>
                                 </div>
                             </CardContent>
                         </Card>
 
-                        {/* Additional Info Card */}
-                        <Card className="hover:shadow-sm transition-shadow duration-75">
-                            <CardHeader className="pb-2 px-3 min-[700px]:px-6">
-                                <CardTitle className="flex items-center gap-2 text-black text-sm min-[700px]:text-base">
-                                    <UserIcon className="h-3 w-3 min-[700px]:h-4 min-[700px]:w-4 text-royal-blue" />
-                                    Additional Information
+                        <Card className="border-royal-light-gray">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-sm font-semibold text-royal-dark-gray flex items-center gap-2">
+                                    <CalendarIcon className="h-4 w-4" />
+                                    Account Details
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-2 px-3 min-[700px]:px-6">
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
-                                    <div className="space-y-1">
-                                        <Label htmlFor="company" className="text-black text-xs">Company</Label>
-                                        <Input
-                                            id="company"
-                                            value={userData.company}
-                                            onChange={(e) => handleInputChange('company', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black text-sm h-8"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label htmlFor="jobTitle" className="text-black text-xs">Job Title</Label>
-                                        <Input
-                                            id="jobTitle"
-                                            value={userData.jobTitle}
-                                            onChange={(e) => handleInputChange('jobTitle', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black text-sm h-8"
-                                        />
+                            <CardContent className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <UserIcon className="h-4 w-4 text-royal-gray" />
+                                    <div>
+                                        <p className="text-xs text-royal-gray">Role</p>
+                                        <p className="text-sm font-medium text-royal-dark-gray capitalize">{profileData.role}</p>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
-                                    <div className="space-y-1">
-                                        <Label htmlFor="dateOfBirth" className="text-black text-xs">Date of Birth</Label>
-                                        <div className="relative">
-                                            <CalendarIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-royal-gray" />
-                                            <Input
-                                                id="dateOfBirth"
-                                                type="date"
-                                                value={userData.dateOfBirth}
-                                                onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                                                disabled={!isEditing}
-                                                className="pl-7 transition-all duration-75 text-black text-sm h-8"
-                                            />
-                                        </div>
+                                <div className="flex items-center gap-2">
+                                    <CalendarIcon className="h-4 w-4 text-royal-gray" />
+                                    <div>
+                                        <p className="text-xs text-royal-gray">Member Since</p>
+                                        <p className="text-sm font-medium text-royal-dark-gray">
+                                            {new Date(profileData.createdAt).toLocaleDateString()}
+                                        </p>
                                     </div>
-                                    <div className="space-y-1">
-                                        <Label htmlFor="address" className="text-black text-xs">Address</Label>
-                                        <div className="relative">
-                                            <MapPinIcon className="absolute left-2 top-2 h-3 w-3 text-royal-gray" />
-                                            <Input
-                                                id="address"
-                                                placeholder="123 Main Street"
-                                                value={userData.address}
-                                                onChange={(e) => handleInputChange('address', e.target.value)}
-                                                disabled={!isEditing}
-                                                className="pl-7 transition-all duration-75 text-black text-sm h-8"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
-                                    <div className="space-y-1">
-                                        <Label htmlFor="city" className="text-black text-xs">City</Label>
-                                        <Input
-                                            id="city"
-                                            value={userData.city}
-                                            onChange={(e) => handleInputChange('city', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black text-sm h-8"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label htmlFor="state" className="text-black text-xs">State</Label>
-                                        <Input
-                                            id="state"
-                                            value={userData.state}
-                                            onChange={(e) => handleInputChange('state', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black text-sm h-8"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-2">
-                                    <div className="space-y-1">
-                                        <Label htmlFor="zip" className="text-black text-xs">ZIP Code</Label>
-                                        <Input
-                                            id="zip"
-                                            value={userData.zip}
-                                            onChange={(e) => handleInputChange('zip', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black text-sm h-8"
-                                        />
-                                    </div>
-                                    <div></div>
                                 </div>
                             </CardContent>
                         </Card>
                     </div>
 
                     {/* Desktop: Full View */}
-                    <div className="hidden min-[700px]:block space-y-6">
-                        {/* Personal Information Card */}
-                        <Card className="hover:shadow-sm transition-shadow duration-75">
+                    <div className="hidden sm:block space-y-6">
+                        <Card className="border-royal-light-gray">
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-black">
-                                    <UserIcon className="h-5 w-5 text-royal-blue" />
+                                <CardTitle className="text-lg font-semibold text-royal-dark-gray flex items-center gap-2">
+                                    <UserIcon className="h-5 w-5" />
                                     Personal Information
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
+                            <CardContent className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <Label htmlFor="firstName" className="text-black">First Name</Label>
-                                        <Input
-                                            id="firstName"
-                                            value={userData.firstName}
-                                            onChange={(e) => handleInputChange('firstName', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="lastName" className="text-black">Last Name</Label>
-                                        <Input
-                                            id="lastName"
-                                            value={userData.lastName}
-                                            onChange={(e) => handleInputChange('lastName', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email" className="text-black">Email Address</Label>
-                                        <div className="relative">
-                                            <MailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                value={userData.email}
-                                                onChange={(e) => handleInputChange('email', e.target.value)}
-                                                disabled={!isEditing}
-                                                className="pl-10 transition-all duration-75 text-black"
-                                            />
+                                        <label className="text-sm font-medium text-royal-gray">First Name</label>
+                                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                                            <UserIcon className="h-4 w-4 text-royal-gray" />
+                                            <span className="text-royal-dark-gray">{displayName}</span>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="phone" className="text-black">Phone Number</Label>
-                                        <div className="relative">
-                                            <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
-                                            <Input
-                                                id="phone"
-                                                type="tel"
-                                                value={userData.phone}
-                                                onChange={(e) => handleInputChange('phone', e.target.value)}
-                                                disabled={!isEditing}
-                                                className="pl-10 transition-all duration-75 text-black"
-                                            />
+                                        <label className="text-sm font-medium text-royal-gray">Last Name</label>
+                                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                                            <UserIcon className="h-4 w-4 text-royal-gray" />
+                                            <span className="text-royal-dark-gray">{displayLastName}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-royal-gray">Email Address</label>
+                                    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                                        <MailIcon className="h-4 w-4 text-royal-gray" />
+                                        <span className="text-royal-dark-gray">{profileData.email}</span>
+                                        <Badge variant={profileData.isVerified ? "default" : "secondary"} className="ml-auto">
+                                            {profileData.isVerified ? "Verified" : "Unverified"}
+                                        </Badge>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-royal-gray">Phone Number</label>
+                                    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                                        <PhoneIcon className="h-4 w-4 text-royal-gray" />
+                                        <span className="text-royal-dark-gray">{profileData.phone}</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-royal-gray">Account Role</label>
+                                    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                                        <UserIcon className="h-4 w-4 text-royal-gray" />
+                                        <span className="text-royal-dark-gray capitalize">{profileData.role}</span>
+                                    </div>
+                                </div>
+
+                                {profileData.company && (
                                     <div className="space-y-2">
-                                        <Label htmlFor="address" className="text-black">Address</Label>
-                                        <div className="relative">
-                                            <MapPinIcon className="absolute left-3 top-3 h-4 w-4 text-royal-gray" />
-                                            <Input
-                                                id="address"
-                                                placeholder="123 Main Street"
-                                                value={userData.address}
-                                                onChange={(e) => handleInputChange('address', e.target.value)}
-                                                disabled={!isEditing}
-                                                className="pl-10 transition-all duration-75 text-black"
-                                            />
+                                        <label className="text-sm font-medium text-royal-gray">Company</label>
+                                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                                            <MapPinIcon className="h-4 w-4 text-royal-gray" />
+                                            <span className="text-royal-dark-gray">{profileData.company}</span>
                                         </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="city" className="text-black">City</Label>
-                                        <Input
-                                            id="city"
-                                            value={userData.city}
-                                            onChange={(e) => handleInputChange('city', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black"
-                                        />
-                                    </div>
-                                </div>
+                                )}
 
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
+                                {profileData.jobtitle && (
                                     <div className="space-y-2">
-                                        <Label htmlFor="state" className="text-black">State</Label>
-                                        <Input
-                                            id="state"
-                                            value={userData.state}
-                                            onChange={(e) => handleInputChange('state', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="zip" className="text-black">ZIP Code</Label>
-                                        <Input
-                                            id="zip"
-                                            value={userData.zip}
-                                            onChange={(e) => handleInputChange('zip', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="dateOfBirth" className="text-black">Date of Birth</Label>
-                                        <div className="relative">
-                                            <CalendarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
-                                            <Input
-                                                id="dateOfBirth"
-                                                type="date"
-                                                value={userData.dateOfBirth}
-                                                onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                                                disabled={!isEditing}
-                                                className="pl-10 transition-all duration-75 text-black"
-                                            />
+                                        <label className="text-sm font-medium text-royal-gray">Job Title</label>
+                                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                                            <UserIcon className="h-4 w-4 text-royal-gray" />
+                                            <span className="text-royal-dark-gray">{profileData.jobtitle}</span>
                                         </div>
                                     </div>
-                                    <div></div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                )}
 
-                        {/* Professional Information Card */}
-                        <Card className="hover:shadow-sm transition-shadow duration-75">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-black">
-                                    <UserIcon className="h-5 w-5 text-royal-blue" />
-                                    Professional Information
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 min-[700px]:grid-cols-2 gap-3 min-[700px]:gap-4">
+                                {(profileData.city || profileData.state || profileData.country) && (
                                     <div className="space-y-2">
-                                        <Label htmlFor="company" className="text-black">Company</Label>
-                                        <Input
-                                            id="company"
-                                            value={userData.company}
-                                            onChange={(e) => handleInputChange('company', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black"
-                                        />
+                                        <label className="text-sm font-medium text-royal-gray">Location</label>
+                                        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                                            <MapPinIcon className="h-4 w-4 text-royal-gray" />
+                                            <span className="text-royal-dark-gray">
+                                                {[profileData.city, profileData.state, profileData.country].filter(Boolean).join(', ')}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="jobTitle" className="text-black">Job Title</Label>
-                                        <Input
-                                            id="jobTitle"
-                                            value={userData.jobTitle}
-                                            onChange={(e) => handleInputChange('jobTitle', e.target.value)}
-                                            disabled={!isEditing}
-                                            className="transition-all duration-75 text-black"
-                                        />
+                                )}
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-royal-gray">Member Since</label>
+                                    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
+                                        <CalendarIcon className="h-4 w-4 text-royal-gray" />
+                                        <span className="text-royal-dark-gray">
+                                            {new Date(profileData.createdAt).toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
+                                        </span>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
                     </div>
+                </TabsContent>
 
-                    {/* Password Management Card */}
-                    <Card className="hover:shadow-sm transition-shadow duration-75">
-                        <CardHeader className="pb-2 px-3 min-[700px]:px-6 min-[700px]:pb-6">
-                            <CardTitle className="flex items-center gap-2 text-black text-sm min-[700px]:text-lg">
-                                <LockIcon className="h-3 w-3 min-[700px]:h-5 min-[700px]:w-5 text-royal-blue" />
-                                Password Management
+                <TabsContent value="meetings" className="space-y-2 sm:space-y-6">
+                    <Card className="border-royal-light-gray">
+                        <CardHeader>
+                            <CardTitle className="text-lg font-semibold text-royal-dark-gray flex items-center gap-2">
+                                <VideoIcon className="h-5 w-5" />
+                                Meeting History
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-2 px-3 min-[700px]:px-6 min-[700px]:space-y-4">
-                            {!isEditingPassword ? (
-                                <div className="flex flex-col min-[700px]:flex-row items-start min-[700px]:items-center justify-between gap-2">
-                                    <div>
-                                        <p className="text-black font-medium text-xs min-[700px]:text-base">Password</p>
-                                        <p className="text-royal-gray text-xs min-[700px]:text-sm">Last changed 30 days ago</p>
-                                    </div>
-                                    <Button
-                                        onClick={() => setIsEditingPassword(true)}
-                                        variant="outline"
-                                        className="border-royal-light-gray text-royal-gray hover:bg-royal-light-gray transition-all duration-75 hover:scale-101 w-full min-[700px]:w-auto text-xs h-8 min-[700px]:h-10"
-                                    >
-                                        Change Password
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="space-y-2 min-[700px]:space-y-4">
-                                    <div className="space-y-1 min-[700px]:space-y-2">
-                                        <Label htmlFor="currentPassword" className="text-black text-xs min-[700px]:text-base">Current Password</Label>
-                                        <div className="relative">
-                                            <Input
-                                                id="currentPassword"
-                                                type={showPasswords.current ? "text" : "password"}
-                                                value={passwordData.currentPassword}
-                                                onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-                                                className="pr-10 transition-all duration-75 text-black text-sm h-8 min-[700px]:h-10"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                className="absolute right-0 top-0 h-full px-2 min-[700px]:px-3 py-2 hover:bg-transparent"
-                                                onClick={() => togglePasswordVisibility('current')}
-                                            >
-                                                {showPasswords.current ? <EyeOffIcon className="h-3 w-3 min-[700px]:h-4 min-[700px]:w-4" /> : <EyeIcon className="h-3 w-3 min-[700px]:h-4 min-[700px]:w-4" />}
-                                            </Button>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {meetingLogs.map((meeting) => (
+                                    <div key={meeting.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-royal-blue/10 rounded-lg">
+                                                <VideoIcon className="h-4 w-4 text-royal-blue" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-medium text-royal-dark-gray">{meeting.title}</h3>
+                                                <div className="flex items-center gap-4 text-sm text-royal-gray">
+                                                    <span className="flex items-center gap-1">
+                                                        <CalendarIcon className="h-3 w-3" />
+                                                        {meeting.date}
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <ClockIcon className="h-3 w-3" />
+                                                        {meeting.time}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="default" className="bg-green-100 text-green-800">
+                                                <CheckCircleIcon className="h-3 w-3 mr-1" />
+                                                Completed
+                                            </Badge>
                                         </div>
                                     </div>
-                                    <div className="space-y-1 min-[700px]:space-y-2">
-                                        <Label htmlFor="newPassword" className="text-black text-xs min-[700px]:text-base">New Password</Label>
-                                        <div className="relative">
-                                            <Input
-                                                id="newPassword"
-                                                type={showPasswords.new ? "text" : "password"}
-                                                value={passwordData.newPassword}
-                                                onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-                                                className="pr-10 transition-all duration-75 text-black text-sm h-8 min-[700px]:h-10"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                className="absolute right-0 top-0 h-full px-2 min-[700px]:px-3 py-2 hover:bg-transparent"
-                                                onClick={() => togglePasswordVisibility('new')}
-                                            >
-                                                {showPasswords.new ? <EyeOffIcon className="h-3 w-3 min-[700px]:h-4 min-[700px]:w-4" /> : <EyeIcon className="h-3 w-3 min-[700px]:h-4 min-[700px]:w-4" />}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1 min-[700px]:space-y-2">
-                                        <Label htmlFor="confirmPassword" className="text-black text-xs min-[700px]:text-base">Confirm New Password</Label>
-                                        <div className="relative">
-                                            <Input
-                                                id="confirmPassword"
-                                                type={showPasswords.confirm ? "text" : "password"}
-                                                value={passwordData.confirmPassword}
-                                                onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-                                                className="pr-10 transition-all duration-75 text-black text-sm h-8 min-[700px]:h-10"
-                                            />
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                className="absolute right-0 top-0 h-full px-2 min-[700px]:px-3 py-2 hover:bg-transparent"
-                                                onClick={() => togglePasswordVisibility('confirm')}
-                                            >
-                                                {showPasswords.confirm ? <EyeOffIcon className="h-3 w-3 min-[700px]:h-4 min-[700px]:w-4" /> : <EyeIcon className="h-3 w-3 min-[700px]:h-4 min-[700px]:w-4" />}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col min-[700px]:flex-row gap-2 min-[700px]:gap-3 justify-end">
-                                        <Button
-                                            variant="outline"
-                                            onClick={handlePasswordCancel}
-                                            className="border-royal-light-gray text-royal-gray hover:bg-royal-light-gray transition-all duration-75 hover:scale-101 w-full min-[700px]:w-auto text-xs h-8 min-[700px]:h-10"
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            onClick={handlePasswordSave}
-                                            className="bg-primary hover:bg-royal-blue-dark text-white px-6 transition-all duration-75 hover:scale-101 hover:shadow-sm w-full min-[700px]:w-auto text-xs h-8 min-[700px]:h-10"
-                                        >
-                                            <LockIcon className="h-3 w-3 min-[700px]:h-4 min-[700px]:w-4 mr-2" />
-                                            Update Password
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
+                                ))}
+                            </div>
                         </CardContent>
                     </Card>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col min-[700px]:flex-row gap-2 min-[700px]:gap-3 justify-end">
-                        {!isEditing ? (
-                            <Button
-                                onClick={() => setIsEditing(true)}
-                                className="bg-primary hover:bg-royal-blue-dark text-white px-6 transition-all duration-75 hover:scale-101 hover:shadow-sm text-xs h-8 min-[700px]:h-10 w-full min-[700px]:w-auto"
-                            >
-                                Edit Profile
-                            </Button>
-                        ) : (
-                            <>
-                                <Button
-                                    variant="outline"
-                                    onClick={handleCancel}
-                                    className="border-royal-light-gray text-royal-gray hover:bg-royal-light-gray transition-all duration-75 hover:scale-101 text-xs h-8 min-[700px]:h-10 w-full min-[700px]:w-auto"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={handleSave}
-                                    className="bg-primary hover:bg-royal-blue-dark text-white px-6 transition-all duration-75 hover:scale-101 hover:shadow-sm text-xs h-8 min-[700px]:h-10 w-full min-[700px]:w-auto"
-                                >
-                                    <SaveIcon className="h-3 w-3 min-[700px]:h-4 min-[700px]:w-4 mr-2" />
-                                    Save Changes
-                                </Button>
-                            </>
-                        )}
-                    </div>
                 </TabsContent>
-
-                <TabsContent value="meetings" className="space-y-2 min-[700px]:space-y-6">
-                    <div className="text-center py-8">
-                        <VideoIcon className="h-12 w-12 text-royal-gray mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-black mb-2">Meetings Tab Disabled</h3>
-                        <p className="text-royal-gray text-sm">
-                            This feature is currently unavailable.
-                        </p>
-                    </div>
-                </TabsContent>
-
             </Tabs>
         </div>
     );

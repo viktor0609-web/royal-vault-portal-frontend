@@ -14,7 +14,6 @@ import { DealsSection } from "./components/user/DealsSection";
 import { CourseDetailSection } from "./components/user/CourseDetailSection";
 import { CourseGroupDetailSection } from "./components/user/CourseGroupDetailSection";
 import { ProfileSection } from "./components/user/ProfileSection";
-import { WebinarRegistration } from "./components/user/WebinarRegistration";
 import { WebinarRegistrationPage } from "./components/user/WebinarRegistrationPage";
 
 //For Admin

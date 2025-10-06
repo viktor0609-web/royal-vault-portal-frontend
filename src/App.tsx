@@ -15,6 +15,7 @@ import { CourseDetailSection } from "./components/user/CourseDetailSection";
 import { CourseGroupDetailSection } from "./components/user/CourseGroupDetailSection";
 import { ProfileSection } from "./components/user/ProfileSection";
 import { WebinarRegistration } from "./components/user/WebinarRegistration";
+import { WebinarRegistrationPage } from "./components/user/WebinarRegistrationPage";
 
 //For Admin
 import { RoyalVaultLayout as AdminLayout } from "./components/admin/RoyalVaultLayout";
@@ -87,6 +88,7 @@ const App = () => (
                     <Route path="/course-groups/:groupId" element={<RoyalVaultLayout><CourseGroupDetailSection /></RoyalVaultLayout>} />
                     <Route path="/courses/:courseId" element={<RoyalVaultLayout><CourseDetailSection /></RoyalVaultLayout>} />
                     <Route path="/deals" element={<RoyalVaultLayout><DealsSection /></RoyalVaultLayout>} />
+                    <Route path="/webinar-register" element={<WebinarRegistrationPage />} />
                     <Route path="/profile" element={<UserRoute><RoyalVaultLayout><ProfileSection /></RoyalVaultLayout></UserRoute>} />
 
                     {/* Admin Routes */}

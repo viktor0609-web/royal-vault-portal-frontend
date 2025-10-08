@@ -13,6 +13,7 @@ import {
   HomeIcon
 } from "lucide-react";
 import { courseApi } from "@/lib/api";
+import { markChecklistItemCompleted, CHECKLIST_ITEMS } from "@/utils/checklistUtils";
 
 
 interface CourseGroup {
@@ -88,6 +89,9 @@ export function CoursesSection() {
   const location = useLocation();
 
   useEffect(() => {
+    // Mark "Get tax, legal, & investing resources" as completed when CoursesSection is visited
+    markChecklistItemCompleted(CHECKLIST_ITEMS.GET_RESOURCES);
+
     const fetchCourseGroups = async () => {
       try {
         setLoading(true);

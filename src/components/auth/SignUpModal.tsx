@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
+import { markChecklistItemCompleted, CHECKLIST_ITEMS } from "@/utils/checklistUtils";
 
 export function SignUp() {
   const { activeDialog, openDialog, closeDialog } = useAuthDialog();
@@ -89,6 +90,9 @@ export function SignUp() {
         localStorage.setItem("accessToken", response.data.accessToken);
         localStorage.setItem("refreshToken", response.data.refreshToken);
         await fetchProfile();
+
+        // Mark "Set your password" as completed in checklist
+        markChecklistItemCompleted(CHECKLIST_ITEMS.SET_PASSWORD);
       }
 
       setSuccess(response.data.message);

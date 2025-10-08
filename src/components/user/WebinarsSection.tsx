@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import { useNavigate } from "react-router-dom";
+import { markChecklistItemCompleted, CHECKLIST_ITEMS } from "@/utils/checklistUtils";
 
 const filterTabs = [
   { label: "UPCOMING" },
@@ -43,6 +44,11 @@ export function WebinarsSection() {
   const { openDialog } = useAuthDialog();
   const navigate = useNavigate();
 
+
+  // Mark "Join a live webinar" as completed when WebinarsSection is visited
+  useEffect(() => {
+    markChecklistItemCompleted(CHECKLIST_ITEMS.JOIN_WEBINAR);
+  }, []);
 
   const fetchWebinars = useCallback(async () => {
     try {

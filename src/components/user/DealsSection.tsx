@@ -351,7 +351,8 @@ export function DealsSection() {
         </div>
 
         {/* Overlay for non-logged-in users */}
-        {!user && (
+
+        {!user?.elite_client && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur z-20">
             <div className="text-center text-white max-w-3xl px-3 sm:px-4">
               <h2 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 leading-tight">

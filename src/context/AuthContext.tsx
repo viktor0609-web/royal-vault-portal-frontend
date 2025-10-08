@@ -10,6 +10,7 @@ export interface User {
     email: string;
     phone: string;
     role: "user" | "admin";
+    elite_client?: boolean;
     isVerified: boolean;
     createdAt: string;
     updatedAt: string;

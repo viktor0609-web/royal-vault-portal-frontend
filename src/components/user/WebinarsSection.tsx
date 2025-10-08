@@ -91,9 +91,9 @@ export function WebinarsSection() {
   }, [user, fetchWebinars]);
 
   const handleRegister = (webinar: Webinar) => {
-    // Navigate to registration page with webinar details
+    // Open registration page in new window/tab with webinar details
     const registrationUrl = `/webinar-register?id=${webinar._id}&title=${encodeURIComponent(webinar.name)}&date=${encodeURIComponent(webinar.date)}`;
-    navigate(registrationUrl);
+    window.open(registrationUrl, '_blank');
   };
 
   const handleUnregister = async (webinar: Webinar) => {

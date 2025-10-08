@@ -10,12 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthDialog } from "@/context/AuthDialogContext";
+import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 
 export function ReSettingPasswordPage() {
     const { token } = useParams<{ token: string }>();
     const navigate = useNavigate();
     const { openDialog } = useAuthDialog();
+    const { fetchProfile } = useAuth();
 
     const [formData, setFormData] = useState({
         password: "",
@@ -68,14 +70,20 @@ export function ReSettingPasswordPage() {
                 password: formData.password,
             });
 
+            // If password reset includes tokens, store them and log in user
+            if (response.data.accessToken && response.data.refreshToken) {
+                localStorage.setItem("accessToken", response.data.accessToken);
+                localStorage.setItem("refreshToken", response.data.refreshToken);
+                await fetchProfile();
+            }
+
             setSuccess(response.data.message);
             setErrors({});
             setDisabled(true); // Disable inputs and button
 
-            // After 2 seconds, navigate to home page and open Sign In dialog
+            // After 2 seconds, navigate to home page (user is already logged in)
             setTimeout(() => {
                 navigate("/");
-                openDialog("login");
             }, 2000);
         } catch (err: any) {
             if (err.response?.data?.message) {

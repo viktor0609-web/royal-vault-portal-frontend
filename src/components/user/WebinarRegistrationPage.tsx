@@ -98,7 +98,7 @@ export function WebinarRegistrationPage() {
                                     <form onSubmit={handleSubmit}>
                                         <Input
                                             type="email"
-                                            placeholder="liz@royallegalsolutions.com"
+                                            placeholder="name@email.com"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             className="w-full mb-3 sm:mb-4 h-10 sm:h-12 text-sm sm:text-base md:text-lg text-center"
@@ -174,13 +174,7 @@ export function WebinarRegistrationPage() {
                     <div className="text-center px-4">
                         {/* Logo */}
                         <div className="mb-2 sm:mb-4">
-                            <img src="/imgs/logo.svg" alt="Royal Legal Solutions" className="h-8 sm:h-10 md:h-12 mx-auto mb-1 sm:mb-2 filter invert" />
-                            <div className="text-white text-sm sm:text-base md:text-lg lg:text-xl font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>
-                                ROYAL LEGAL
-                            </div>
-                            <div className="text-white text-xs sm:text-sm" style={{ fontFamily: 'Arial, sans-serif' }}>
-                                SOLUTIONS
-                            </div>
+                            <img src="https://0d88b5ddee68dce2495b6ffe5bae4d92.cdn.bubble.io/cdn-cgi/image/w=128,h=76,f=auto,dpr=1,fit=contain/f1737898584978x223029051240563500/RLS%20Shield%20Logo.png" alt="Royal Legal Solutions" className="h-8 sm:h-14 md:h-18 mx-auto mb-1 sm:mb-2" />
                         </div>
 
                         {/* Copyright */}

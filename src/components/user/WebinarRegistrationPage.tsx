@@ -67,7 +67,7 @@ export function WebinarRegistrationPage() {
                 {/* Header Section */}
                 <div className="text-center py-4 sm:py-6 md:py-8 flex-shrink-0">
                     {/* Wealth Brief & Investor Roundtable */}
-                    <div className="text-lg sm:text-xl md:text-2xl font-medium mb-2" style={{ color: '#87CEEB', fontFamily: 'Arial, sans-serif' }}>
+                    <div className="text-lg sm:text-xl md:text-2xl font-medium mb-2" style={{ color: '#dbf7ff', fontFamily: 'Arial, sans-serif' }}>
                         {webinar?.line2}
                     </div>
 
@@ -77,7 +77,7 @@ export function WebinarRegistrationPage() {
                     </h1>
 
                     {/* Subtitle */}
-                    <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium" style={{ color: '#87CEEB', fontFamily: 'Arial, sans-serif' }}>
+                    <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium" style={{ color: '#dbf7ff', fontFamily: 'Arial, sans-serif' }}>
                         {webinar?.line3}
                     </div>
                 </div>

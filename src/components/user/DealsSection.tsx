@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components//ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { TagIcon, FilterIcon, XIcon } from "lucide-react";
+import { TagIcon, FilterIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { optionsApi, dealApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -43,8 +48,6 @@ interface Deal {
 
 export function DealsSection() {
   const { user } = useAuth();
-  console.log("user", user);
-
   const [showSalesModal, setShowSalesModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -67,7 +70,7 @@ export function DealsSection() {
     sources: null
   });
 
-  // Fetch filter options only once on component mount
+  // Fetch filter options once
   useEffect(() => {
     const fetchFilterOptions = async () => {
       try {
@@ -107,11 +110,10 @@ export function DealsSection() {
     fetchFilterOptions();
   }, []);
 
-  // Fetch deals with current filters - OPTIMIZED
+  // Fetch deals
   const fetchDeals = async (filters = selectedFilters) => {
     try {
       setLoading(true);
-
       const filterParams: any = {};
 
       if (filters.categories) filterParams.categoryId = filters.categories;
@@ -121,11 +123,10 @@ export function DealsSection() {
       if (filters.requirements) filterParams.requirementId = filters.requirements;
       if (filters.sources) filterParams.sourceId = filters.sources;
 
-      // Use 'basic' fields for list view to improve performance
       const response =
         Object.keys(filterParams).length > 0
-          ? await dealApi.filterDeals(filterParams, 'basic')
-          : await dealApi.getAllDeals('basic');
+          ? await dealApi.filterDeals(filterParams, "basic")
+          : await dealApi.getAllDeals("basic");
 
       setDeals(response.data.deals || []);
     } catch (error) {
@@ -136,99 +137,98 @@ export function DealsSection() {
     }
   };
 
-  // Fetch deals on component mount and when filters change
+  // Update deals when filters change
   useEffect(() => {
     fetchDeals();
   }, [selectedFilters]);
 
+  // Load HubSpot script dynamically when modal opens
+  useEffect(() => {
+    if (showSalesModal) {
+      const script = document.createElement("script");
+      script.src = "https://static.hsappstatic.net/MeetingsEmbed/ex/MeetingsEmbedCode.js";
+      script.type = "text/javascript";
+      document.body.appendChild(script);
+      return () => {
+        document.body.removeChild(script);
+      };
+    }
+  }, [showSalesModal]);
+
   // Handle filter changes
   const handleFilterChange = (filterType: string, value: string | null) => {
-    const newFilters = {
-      ...selectedFilters,
-      [filterType]: value
-    };
-    setSelectedFilters(newFilters);
+    setSelectedFilters({ ...selectedFilters, [filterType]: value });
   };
 
-  // Fixed version of formatArrayData
   const formatArrayData = (data: any) => {
     if (!data) return "";
-    if (Array.isArray(data)) {
-      return data.map((item: any) => item?.name).join(", ");
-    }
-    if (typeof data === "object" && data?.name) {
-      return data.name;
-    }
+    if (Array.isArray(data)) return data.map((item) => item?.name).join(", ");
+    if (typeof data === "object" && data?.name) return data.name;
     return String(data);
   };
 
-  // Render filter components
-  const renderFilters = () => {
-    return filterConfig?.map((config) => {
+  const renderFilters = () =>
+    filterConfig.map((config) => {
       const options = filterOptions[config.key] || [];
       return (
         <div key={config.key}>
-          <div className="text-royal-gray mb-1 font-bold">
-            {config.key}
-          </div>
-          <div>
-            <Select
-              value={
-                selectedFilters[config.key as keyof typeof selectedFilters] ||
-                "all"
-              }
-              onValueChange={(value) =>
-                handleFilterChange(config.key, value === "all" ? null : value)
-              }
-            >
-              <SelectTrigger className="border-royal-light-gray">
-                <SelectValue placeholder={config.placeholder} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                {filterOptionsLoading ? (
-                  <SelectItem value="loading" disabled>
-                    Loading...
+          <div className="text-royal-gray mb-1 font-bold">{config.key}</div>
+          <Select
+            value={
+              selectedFilters[config.key as keyof typeof selectedFilters] || "all"
+            }
+            onValueChange={(value) =>
+              handleFilterChange(config.key, value === "all" ? null : value)
+            }
+          >
+            <SelectTrigger className="border-royal-light-gray">
+              <SelectValue placeholder={config.placeholder} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              {filterOptionsLoading ? (
+                <SelectItem value="loading" disabled>
+                  Loading...
+                </SelectItem>
+              ) : options.length > 0 ? (
+                options.map((option, index) => (
+                  <SelectItem key={index} value={option._id}>
+                    {option.name}
                   </SelectItem>
-                ) : options.length > 0 ? (
-                  options?.map((option, index) => (
-                    <SelectItem key={index} value={option._id}>
-                      {option.name}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="no-options" disabled>
-                    No options available
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
+                ))
+              ) : (
+                <SelectItem value="no-options" disabled>
+                  No options available
+                </SelectItem>
+              )}
+            </SelectContent>
+          </Select>
         </div>
       );
     });
-  };
 
   return (
     <div className="flex-1 p-2 sm:p-4">
       <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
         <TagIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
         <div>
-          <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">DEALS</h1>
+          <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">
+            DEALS
+          </h1>
           <p className="text-xs sm:text-base text-royal-gray">
             Explore our network of asset backed businesses.
           </p>
         </div>
       </div>
 
-      {/* Desktop Filters - Hidden on mobile */}
+      {/* Desktop Filters */}
       <div className="hidden min-[800px]:block bg-white p-2 sm:p-3 rounded-lg border border-royal-light-gray mb-6 sm:mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-4">
           {renderFilters()}
         </div>
       </div>
 
-      {/* Mobile Filter Button - Only visible on mobile */}
+      {/* Mobile Filters */}
       <div className="min-[800px]:hidden mb-3 sm:mb-4">
         <Dialog open={showFilterModal} onOpenChange={setShowFilterModal}>
           <DialogTrigger asChild>
@@ -247,9 +247,7 @@ export function DealsSection() {
                 Filter Deals
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-1 py-1">
-              {renderFilters()}
-            </div>
+            <div className="space-y-1 py-1">{renderFilters()}</div>
             <div className="flex gap-1 pt-2 border-t">
               <Button
                 variant="outline"
@@ -279,16 +277,19 @@ export function DealsSection() {
         </Dialog>
       </div>
 
+      {/* Deals Grid */}
       <div className="relative h-[500px] sm:h-[660px]">
-        <div className="rounded-lg ">
+        <div className="rounded-lg">
           <div className="h-full overflow-y-auto mb-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
               {loading ? (
                 <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
-                  <div className="text-sm sm:text-base text-royal-gray">Loading deals...</div>
+                  <div className="text-sm sm:text-base text-royal-gray">
+                    Loading deals...
+                  </div>
                 </div>
               ) : deals.length > 0 ? (
-                deals?.map((item, index) => (
+                deals.map((item, index) => (
                   <Link
                     key={index}
                     to={item.url}
@@ -348,6 +349,8 @@ export function DealsSection() {
             </div>
           </div>
         </div>
+
+        {/* Overlay for non-logged-in users */}
         {!user && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur z-20">
             <div className="text-center text-white max-w-3xl px-3 sm:px-4">
@@ -368,6 +371,16 @@ export function DealsSection() {
             </div>
           </div>
         )}
+
+        {/* HubSpot "Talk to Sales" Modal */}
+        <Dialog open={showSalesModal} onOpenChange={setShowSalesModal}>
+          <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-bold">Talk to Sales</DialogTitle>
+            </DialogHeader>
+            <div className="meetings-iframe-container" data-src="https://meetings.hubspot.com/meet-rls/sales-demo-free?embed=true"></div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

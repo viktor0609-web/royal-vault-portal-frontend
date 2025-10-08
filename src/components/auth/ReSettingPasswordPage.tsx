@@ -120,6 +120,7 @@ export function ReSettingPasswordPage() {
                             value={formData.password}
                             onChange={(e) => handleInputChange("password", e.target.value)}
                             className="mt-1"
+                            autoComplete="new-password"
                             required
                             disabled={disabled}
                         />
@@ -137,6 +138,7 @@ export function ReSettingPasswordPage() {
                             value={formData.confirmPassword}
                             onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                             className="mt-1"
+                            autoComplete="new-password"
                             required
                             disabled={disabled}
                         />

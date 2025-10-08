@@ -65,10 +65,21 @@ export function WebinarRegistrationPage() {
         <div className="w-full min-h-screen" style={{ backgroundColor: '#282a2e' }}>
             <div className="min-h-screen flex flex-col">
                 {/* Header Section */}
-                <div className="text-center py-2 sm:py-4 flex-shrink-0">
-                    <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white px-4" style={{ fontFamily: 'Arial, sans-serif' }}>
+                <div className="text-center py-4 sm:py-6 md:py-8 flex-shrink-0">
+                    {/* Wealth Brief & Investor Roundtable */}
+                    <div className="text-lg sm:text-xl md:text-2xl font-medium mb-2" style={{ color: '#87CEEB', fontFamily: 'Arial, sans-serif' }}>
+                        {webinar?.line2}
+                    </div>
+
+                    {/* Main Title - LIVE Investing Coaching Session */}
+                    <h1 className="text-2xl sm:text-2xl md:text-3xl lg:text-5xl xl:text-4xl font-bold text-white px-4 mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>
                         {webinar?.line1}
                     </h1>
+
+                    {/* Subtitle */}
+                    <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium" style={{ color: '#87CEEB', fontFamily: 'Arial, sans-serif' }}>
+                        {webinar?.line3}
+                    </div>
                 </div>
 
                 {/* Main Content Section with Background Image */}
@@ -80,8 +91,10 @@ export function WebinarRegistrationPage() {
                         backgroundSize: '100% 100%'
                     }}
                 >
+                    {/* Dark Overlay */}
+                    <div className="absolute inset-0 bg-black bg-opacity-40"></div>
                     {/* Content Container with Max Width */}
-                    <div className="w-full max-w-6xl mx-auto px-2 sm:px-4">
+                    <div className="relative z-10 w-full max-w-6xl mx-auto px-2 sm:px-4">
                         {/* Registration Form */}
                         <div className="flex justify-center mb-4 sm:mb-8">
                             <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8 max-w-sm sm:max-w-md w-full mx-2">
@@ -133,7 +146,7 @@ export function WebinarRegistrationPage() {
                             {/* Countdown Timer */}
                             <div className="flex justify-center space-x-2 sm:space-x-4 md:space-x-6 lg:space-x-8">
                                 <div className="text-center">
-                                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: '#f1c40f', fontFamily: 'Arial, sans-serif' }}>
+                                    <div className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>
                                         {countdown.days}
                                     </div>
                                     <div className="text-white text-xs sm:text-sm md:text-base lg:text-lg" style={{ fontFamily: 'Arial, sans-serif' }}>
@@ -141,7 +154,7 @@ export function WebinarRegistrationPage() {
                                     </div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: '#f1c40f', fontFamily: 'Arial, sans-serif' }}>
+                                    <div className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>
                                         {countdown.hours}
                                     </div>
                                     <div className="text-white text-xs sm:text-sm md:text-base lg:text-lg" style={{ fontFamily: 'Arial, sans-serif' }}>
@@ -149,7 +162,7 @@ export function WebinarRegistrationPage() {
                                     </div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: '#f1c40f', fontFamily: 'Arial, sans-serif' }}>
+                                    <div className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>
                                         {countdown.minutes}
                                     </div>
                                     <div className="text-white text-xs sm:text-sm md:text-base lg:text-lg" style={{ fontFamily: 'Arial, sans-serif' }}>
@@ -157,7 +170,7 @@ export function WebinarRegistrationPage() {
                                     </div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold" style={{ color: '#f1c40f', fontFamily: 'Arial, sans-serif' }}>
+                                    <div className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>
                                         {countdown.seconds}
                                     </div>
                                     <div className="text-white text-xs sm:text-sm md:text-base lg:text-lg" style={{ fontFamily: 'Arial, sans-serif' }}>

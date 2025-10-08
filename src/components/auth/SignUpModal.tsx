@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthDialog } from "@/context/AuthDialogContext";
+import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 
 export function SignUp() {
   const { activeDialog, openDialog, closeDialog } = useAuthDialog();
+  const { fetchProfile } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -82,10 +84,22 @@ export function SignUp() {
         role: "user",
       });
 
+      // If registration includes tokens, store them and log in user
+      if (response.data.accessToken && response.data.refreshToken) {
+        localStorage.setItem("accessToken", response.data.accessToken);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+        await fetchProfile();
+      }
+
       setSuccess(response.data.message);
       setErrors({});
 
       setFormData({ email: "", firstName: "", lastName: "", phone: "" });
+
+      // Close dialog after successful registration and login
+      setTimeout(() => {
+        closeDialog();
+      }, 1000);
 
     } catch (err: any) {
       if (err.response?.data?.message) {

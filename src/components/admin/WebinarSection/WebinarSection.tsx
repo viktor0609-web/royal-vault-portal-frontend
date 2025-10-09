@@ -158,21 +158,6 @@ export function WebinarSection() {
                     navigate(`/royal-tv/${item!.slug}/guest`);
                     break;
                 }
-                case 'stats': {
-                    // Make API request to get webinar attendees for stats
-                    const response = await webinarApi.getWebinarAttendees(item!._id);
-                    const attendeesData = response.data.attendees;
-
-                    // Navigate to stats page with webinar and attendees data
-                    const statsUrl = `/admin/webinar_stats?title=${encodeURIComponent(item!.name)}&id=${item!._id}&attendees=${encodeURIComponent(JSON.stringify(attendeesData))}`;
-                    navigate(statsUrl);
-
-                    toast({
-                        title: "Webinar Stats",
-                        description: "Loading webinar statistics",
-                    });
-                    break;
-                }
                 case 'recs': {
                     // Make API request to get webinar details for recordings
                     const response = await webinarApi.getWebinarById(item!._id, 'full');
@@ -355,13 +340,6 @@ export function WebinarSection() {
                                             disabled={actionLoading === 'guest'}
                                         >
                                             {actionLoading === 'guest' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Guest'}
-                                        </Button>
-                                        <Button
-                                            className="w-16"
-                                            onClick={() => handlebtnClick('stats', webinar)}
-                                            disabled={actionLoading === 'stats'}
-                                        >
-                                            {actionLoading === 'stats' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Stats'}
                                         </Button>
                                         <Button
                                             className="w-16"

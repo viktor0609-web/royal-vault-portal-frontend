@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { UserIcon, MailIcon, PhoneIcon, EditIcon, SaveIcon, XIcon, LoaderIcon, MapPinIcon } from "lucide-react";
+import { UserIcon, MailIcon, PhoneIcon, EditIcon, SaveIcon, XIcon, LoaderIcon, MapPinIcon, AxeIcon, StepForwardIcon } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,7 +17,7 @@ interface ProfileEditFormProps {
         email: string;
         phone: string;
         utms?: string;
-        lifecycleStage?: string;
+        lifecyclestage?: string;
         address?: string;   //street address
         city?: string;
         state?: string;
@@ -34,7 +34,7 @@ export function ProfileEditForm({ profileData, onProfileUpdate, onCancel }: Prof
         email: profileData.email || '',
         phone: profileData.phone || '',
         utms: profileData.utms || '',
-        lifecycleStage: profileData.lifecycleStage || 'Lead',
+        lifecyclestage: profileData.lifecyclestage || 'Lead',
         street: profileData.address || '',
         city: profileData.city || '',
         state: profileData.state || '',
@@ -206,8 +206,19 @@ export function ProfileEditForm({ profileData, onProfileUpdate, onCancel }: Prof
                             <Label htmlFor="lifecycleStage" className="text-sm font-medium text-royal-gray">
                                 Lifecycle Stage
                             </Label>
-                            <Select
-                                value={formData.lifecycleStage}
+                            <div className="relative">
+                                <StepForwardIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
+                                <Input
+                                    id="lifecyclestage"
+                                    disabled
+                                    value={formData.lifecyclestage}
+                                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                                    className={`pl-10 ${errors.phone ? 'border-red-500' : ''}`}
+                                    placeholder="Enter your phone number"
+                                />
+                            </div>
+                            {/* <Select
+                                value={formData.lifecyclestage}
                                 onValueChange={(value) => handleInputChange('lifecycleStage', value)}
                             >
                                 <SelectTrigger>
@@ -221,7 +232,7 @@ export function ProfileEditForm({ profileData, onProfileUpdate, onCancel }: Prof
                                     <SelectItem value="Customer">Customer</SelectItem>
                                     <SelectItem value="Evangelist">Evangelist</SelectItem>
                                 </SelectContent>
-                            </Select>
+                            </Select> */}
                             <p className="text-xs text-royal-gray">
                                 New users default to "Lead". This will not overwrite existing lifecycle stages further down the funnel.
                             </p>

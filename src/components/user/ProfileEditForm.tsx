@@ -18,10 +18,10 @@ interface ProfileEditFormProps {
         phone: string;
         utms?: string;
         lifecycleStage?: string;
-        street?: string;
+        address?: string;   //street address
         city?: string;
         state?: string;
-        postal?: string;
+        zip?: string;
     };
     onProfileUpdate: (updatedData: any) => void;
     onCancel: () => void;
@@ -35,10 +35,10 @@ export function ProfileEditForm({ profileData, onProfileUpdate, onCancel }: Prof
         phone: profileData.phone || '',
         utms: profileData.utms || '',
         lifecycleStage: profileData.lifecycleStage || 'Lead',
-        street: profileData.street || '',
+        street: profileData.address || '',
         city: profileData.city || '',
         state: profileData.state || '',
-        postal: profileData.postal || ''
+        postal: profileData.zip || ''
     });
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -116,7 +116,8 @@ export function ProfileEditForm({ profileData, onProfileUpdate, onCancel }: Prof
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Basic Information - Two fields per row */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="firstName" className="text-sm font-medium text-royal-gray">
                                 First Name *
@@ -158,85 +159,90 @@ export function ProfileEditForm({ profileData, onProfileUpdate, onCancel }: Prof
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="email" className="text-sm font-medium text-royal-gray">
-                            Email Address *
-                        </Label>
-                        <div className="relative">
-                            <MailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
-                            <Input
-                                id="email"
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => handleInputChange('email', e.target.value)}
-                                className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
-                                placeholder="Enter your email address"
-                            />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="email" className="text-sm font-medium text-royal-gray">
+                                Email Address *
+                            </Label>
+                            <div className="relative">
+                                <MailIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => handleInputChange('email', e.target.value)}
+                                    className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                                    placeholder="Enter your email address"
+                                />
+                            </div>
+                            {errors.email && (
+                                <p className="text-sm text-red-500">{errors.email}</p>
+                            )}
                         </div>
-                        {errors.email && (
-                            <p className="text-sm text-red-500">{errors.email}</p>
-                        )}
-                    </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="phone" className="text-sm font-medium text-royal-gray">
-                            Phone Number *
-                        </Label>
-                        <div className="relative">
-                            <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
-                            <Input
-                                id="phone"
-                                type="tel"
-                                value={formData.phone}
-                                onChange={(e) => handleInputChange('phone', e.target.value)}
-                                className={`pl-10 ${errors.phone ? 'border-red-500' : ''}`}
-                                placeholder="Enter your phone number"
-                            />
+                        <div className="space-y-2">
+                            <Label htmlFor="phone" className="text-sm font-medium text-royal-gray">
+                                Phone Number *
+                            </Label>
+                            <div className="relative">
+                                <PhoneIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
+                                <Input
+                                    id="phone"
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                                    className={`pl-10 ${errors.phone ? 'border-red-500' : ''}`}
+                                    placeholder="Enter your phone number"
+                                />
+                            </div>
+                            {errors.phone && (
+                                <p className="text-sm text-red-500">{errors.phone}</p>
+                            )}
                         </div>
-                        {errors.phone && (
-                            <p className="text-sm text-red-500">{errors.phone}</p>
-                        )}
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="utms" className="text-sm font-medium text-royal-gray">
-                            UTM Parameters
-                        </Label>
-                        <Textarea
-                            id="utms"
-                            value={formData.utms}
-                            onChange={(e) => handleInputChange('utms', e.target.value)}
-                            className="min-h-[80px]"
-                            placeholder="Enter UTM parameters (optional)"
-                        />
-                        <p className="text-xs text-royal-gray">
-                            UTM parameters help track the source of your registration (e.g., utm_source=google&utm_medium=cpc)
-                        </p>
-                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="lifecycleStage" className="text-sm font-medium text-royal-gray">
+                                Lifecycle Stage
+                            </Label>
+                            <Select
+                                value={formData.lifecycleStage}
+                                onValueChange={(value) => handleInputChange('lifecycleStage', value)}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select lifecycle stage" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Lead">Lead</SelectItem>
+                                    <SelectItem value="Marketing Qualified Lead">Marketing Qualified Lead</SelectItem>
+                                    <SelectItem value="Sales Qualified Lead">Sales Qualified Lead</SelectItem>
+                                    <SelectItem value="Opportunity">Opportunity</SelectItem>
+                                    <SelectItem value="Customer">Customer</SelectItem>
+                                    <SelectItem value="Evangelist">Evangelist</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-royal-gray">
+                                New users default to "Lead". This will not overwrite existing lifecycle stages further down the funnel.
+                            </p>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="utms" className="text-sm font-medium text-royal-gray">
+                                UTM Parameters
+                            </Label>
+                            <Textarea
+                                id="utms"
+                                value={formData.utms}
+                                onChange={(e) => handleInputChange('utms', e.target.value)}
+                                className="min-h-[80px]"
+                                placeholder="Enter UTM parameters (optional)"
+                            />
+                            <p className="text-xs text-royal-gray">
+                                UTM parameters help track the source of your registration
+                            </p>
+                        </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="lifecycleStage" className="text-sm font-medium text-royal-gray">
-                            Lifecycle Stage
-                        </Label>
-                        <Select
-                            value={formData.lifecycleStage}
-                            onValueChange={(value) => handleInputChange('lifecycleStage', value)}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select lifecycle stage" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Lead">Lead</SelectItem>
-                                <SelectItem value="Marketing Qualified Lead">Marketing Qualified Lead</SelectItem>
-                                <SelectItem value="Sales Qualified Lead">Sales Qualified Lead</SelectItem>
-                                <SelectItem value="Opportunity">Opportunity</SelectItem>
-                                <SelectItem value="Customer">Customer</SelectItem>
-                                <SelectItem value="Evangelist">Evangelist</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <p className="text-xs text-royal-gray">
-                            New users default to "Lead". This will not overwrite existing lifecycle stages further down the funnel.
-                        </p>
+
                     </div>
 
                     {/* Address Section */}
@@ -245,25 +251,7 @@ export function ProfileEditForm({ profileData, onProfileUpdate, onCancel }: Prof
                             <MapPinIcon className="h-5 w-5 text-royal-gray" />
                             <h3 className="text-lg font-semibold text-royal-dark-gray">Address Information</h3>
                         </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="street" className="text-sm font-medium text-royal-gray">
-                                Street Address
-                            </Label>
-                            <div className="relative">
-                                <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
-                                <Input
-                                    id="street"
-                                    type="text"
-                                    value={formData.street}
-                                    onChange={(e) => handleInputChange('street', e.target.value)}
-                                    className="pl-10"
-                                    placeholder="Enter your street address"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label htmlFor="city" className="text-sm font-medium text-royal-gray">
                                     City
@@ -291,18 +279,38 @@ export function ProfileEditForm({ profileData, onProfileUpdate, onCancel }: Prof
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="postal" className="text-sm font-medium text-royal-gray">
-                                Postal Code
-                            </Label>
-                            <Input
-                                id="postal"
-                                type="text"
-                                value={formData.postal}
-                                onChange={(e) => handleInputChange('postal', e.target.value)}
-                                placeholder="Enter your postal code"
-                            />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                            <div className="space-y-2">
+                                <Label htmlFor="street" className="text-sm font-medium text-royal-gray">
+                                    Street Address
+                                </Label>
+                                <div className="relative">
+                                    <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
+                                    <Input
+                                        id="street"
+                                        type="text"
+                                        value={formData.street}
+                                        onChange={(e) => handleInputChange('street', e.target.value)}
+                                        className="pl-10"
+                                        placeholder="Enter your street address"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="postal" className="text-sm font-medium text-royal-gray">
+                                    Postal Code
+                                </Label>
+                                <Input
+                                    id="postal"
+                                    type="text"
+                                    value={formData.postal}
+                                    onChange={(e) => handleInputChange('postal', e.target.value)}
+                                    placeholder="Enter your postal code"
+                                />
+                            </div>
                         </div>
+
                     </div>
 
                     <div className="flex items-center gap-3 pt-4">

@@ -26,8 +26,6 @@ interface ProfileData {
     state?: string;
     postal?: string;
     // HubSpot properties
-    firstname?: string;
-    lastname?: string;
     company?: string;
     country?: string;
     hubspot_state?: string;
@@ -133,8 +131,8 @@ export function ProfileSection() {
     }
 
     // Use HubSpot data if available, otherwise fall back to database data
-    const displayName = profileData.firstname || profileData.firstName;
-    const displayLastName = profileData.lastname || profileData.lastName;
+    const displayName = profileData.firstName;
+    const displayLastName = profileData.lastName;
 
     // Address data - prioritize local form data, fallback to HubSpot
     const addressData = {
@@ -220,14 +218,14 @@ export function ProfileSection() {
                                             <UserIcon className="h-4 w-4 text-royal-gray" />
                                             <div>
                                                 <p className="text-xs text-royal-gray">First Name</p>
-                                                <p className="text-sm font-medium text-royal-dark-gray">{displayName}</p>
+                                                <p className="text-sm font-medium text-royal-dark-gray">{profileData.firstName}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <UserIcon className="h-4 w-4 text-royal-gray" />
                                             <div>
                                                 <p className="text-xs text-royal-gray">Last Name</p>
-                                                <p className="text-sm font-medium text-royal-dark-gray">{displayLastName}</p>
+                                                <p className="text-sm font-medium text-royal-dark-gray">{profileData.lastName}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">

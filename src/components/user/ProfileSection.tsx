@@ -138,6 +138,7 @@ export function ProfileSection() {
 
     // Address data - prioritize local form data, fallback to HubSpot
     const addressData = {
+        country: profileData.country || profileData.country,
         street: profileData.street || profileData.address,
         city: profileData.city || profileData.city,
         state: profileData.state || profileData.state,
@@ -258,7 +259,7 @@ export function ProfileSection() {
                                             <div className="flex items-center gap-2">
                                                 <MapPinIcon className="h-4 w-4 text-royal-gray" />
                                                 <div>
-                                                    <p className="text-xs text-royal-gray">Address</p>
+                                                    <p className="text-xs text-royal-gray">Street Address</p>
                                                     <p className="text-sm font-medium text-royal-dark-gray">
                                                         {[addressData.street, addressData.city, addressData.state, addressData.postal].filter(Boolean).join(', ') || 'No address provided'}
                                                     </p>
@@ -341,7 +342,7 @@ export function ProfileSection() {
                                             <div className="flex items-center gap-2">
                                                 <MapPinIcon className="h-4 w-4 text-royal-gray" />
                                                 <div>
-                                                    <p className="text-xs text-royal-gray">Address</p>
+                                                    <p className="text-xs text-royal-gray">Street Address</p>
                                                     <p className="text-sm font-medium text-royal-dark-gray">
                                                         {[profileData.street, profileData.city, profileData.state, profileData.postal].filter(Boolean).join(', ') || 'No address provided'}
                                                     </p>
@@ -459,13 +460,13 @@ export function ProfileSection() {
                                             </div>
                                         )}
 
-                                        {(addressData.street || addressData.city || addressData.state || addressData.postal) && (
+                                        {(addressData.street || addressData.city || addressData.state || addressData.postal || addressData.country) && (
                                             <div className="space-y-2">
-                                                <label className="text-sm font-medium text-royal-gray">Address</label>
+                                                <label className="text-sm font-medium text-royal-gray">Street Address</label>
                                                 <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
                                                     <MapPinIcon className="h-4 w-4 text-royal-gray" />
                                                     <span className="text-royal-dark-gray">
-                                                        {[addressData.street, addressData.city, addressData.state, addressData.postal].filter(Boolean).join(', ') || 'No address provided'}
+                                                        {[addressData.street, addressData.city, addressData.state, addressData.country, addressData.postal].filter(Boolean).join(', ') || 'No address provided'}
                                                     </span>
                                                 </div>
                                             </div>
@@ -549,16 +550,6 @@ export function ProfileSection() {
                                             </div>
                                         )}
 
-                                        {profileData.country && (
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-royal-gray">Country</label>
-                                                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
-                                                    <MapPinIcon className="h-4 w-4 text-royal-gray" />
-                                                    <span className="text-royal-dark-gray">{profileData.country}</span>
-                                                </div>
-                                            </div>
-                                        )}
-
                                         {(profileData.city || profileData.state || profileData.country) && !(profileData.street || profileData.city || profileData.state || profileData.postal) && (
                                             <div className="space-y-2">
                                                 <label className="text-sm font-medium text-royal-gray">Location</label>
@@ -576,7 +567,7 @@ export function ProfileSection() {
                                             <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border">
                                                 <CalendarIcon className="h-4 w-4 text-royal-gray" />
                                                 <span className="text-royal-dark-gray">
-                                                    {new Date(profileData.createdAt).toLocaleDateString('en-US', {
+                                                    {new Date(profileData.createdate).toLocaleDateString('en-US', {
                                                         year: 'numeric',
                                                         month: 'long',
                                                         day: 'numeric'

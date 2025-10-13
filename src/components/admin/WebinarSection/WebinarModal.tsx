@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { webinarApi } from "@/lib/api";
+import { webinarApi, api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 // Form field configuration with required/optional indicators
@@ -132,8 +132,7 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
 
   const fetchPromotionalSmsLists = async () => {
     try {
-      const response = await fetch('/api/promotional-sms-lists');
-      const data = await response.json();
+      const { data } = await api.get('/api/promotional-sms-lists');
       setPromotionalSmsLists(data.lists || []);
     } catch (error) {
       console.error('Error fetching promotional SMS lists:', error);

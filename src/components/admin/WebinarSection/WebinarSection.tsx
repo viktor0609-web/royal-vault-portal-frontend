@@ -5,7 +5,7 @@ import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableC
 import { ReceiptRussianRuble, VideoIcon, Users, Eye, Edit, BarChart3, Calendar, UserCheck, Trash2, Loader2, RefreshCw } from "lucide-react";
 import { WebinarModal } from "./WebinarModal";
 import { RecsModal } from "./RecsModal";
-import { webinarApi } from "@/lib/api";
+import { webinarApi, api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
 interface Webinar {
@@ -107,8 +107,7 @@ export function WebinarSection() {
                 case 'create': {
                     // Make API request to get promotional SMS lists for the modal
                     try {
-                        const response = await fetch('/api/promotional-sms-lists');
-                        const data = await response.json();
+                        const { data } = await api.get('/api/promotional-sms-lists');
 
                         setEditingWebinar(null);
                         setOpen(true);

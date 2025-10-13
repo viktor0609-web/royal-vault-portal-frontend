@@ -138,9 +138,9 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
       console.error('Error fetching promotional SMS lists:', error);
       // Fallback to mock data if API fails
       setPromotionalSmsLists([
-        { _id: '1', name: 'General List' },
-        { _id: '2', name: 'VIP List' },
-        { _id: '3', name: 'Premium List' }
+        { listId: '1', name: 'General List' },
+        { listId: '2', name: 'VIP List' },
+        { listId: '3', name: 'Premium List' }
       ]);
     }
   };
@@ -238,7 +238,7 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
                       <SelectContent>
                         {fieldOptions && fieldOptions.length > 0 ? (
                           fieldOptions.map((option) => (
-                            <SelectItem key={option._id || option.id || option} value={option._id || option.id || option}>
+                            <SelectItem key={option.listId} value={option.listId}>
                               {option.name || option}
                             </SelectItem>
                           ))

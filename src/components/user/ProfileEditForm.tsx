@@ -201,61 +201,6 @@ export function ProfileEditForm({ profileData, onProfileUpdate, onCancel }: Prof
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="lifecycleStage" className="text-sm font-medium text-royal-gray">
-                                Lifecycle Stage
-                            </Label>
-                            <div className="relative">
-                                <StepForwardIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
-                                <Input
-                                    id="lifecyclestage"
-                                    disabled
-                                    value={formData.lifecyclestage}
-                                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                                    className={`pl-10 ${errors.phone ? 'border-red-500' : ''}`}
-                                    placeholder="Enter your phone number"
-                                />
-                            </div>
-                            {/* <Select
-                                value={formData.lifecyclestage}
-                                onValueChange={(value) => handleInputChange('lifecycleStage', value)}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select lifecycle stage" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="Lead">Lead</SelectItem>
-                                    <SelectItem value="Marketing Qualified Lead">Marketing Qualified Lead</SelectItem>
-                                    <SelectItem value="Sales Qualified Lead">Sales Qualified Lead</SelectItem>
-                                    <SelectItem value="Opportunity">Opportunity</SelectItem>
-                                    <SelectItem value="Customer">Customer</SelectItem>
-                                    <SelectItem value="Evangelist">Evangelist</SelectItem>
-                                </SelectContent>
-                            </Select> */}
-                            <p className="text-xs text-royal-gray">
-                                New users default to "Lead". This will not overwrite existing lifecycle stages further down the funnel.
-                            </p>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="utms" className="text-sm font-medium text-royal-gray">
-                                UTM Parameters
-                            </Label>
-                            <Textarea
-                                id="utms"
-                                value={formData.utms}
-                                onChange={(e) => handleInputChange('utms', e.target.value)}
-                                className="min-h-[80px]"
-                                placeholder="Enter UTM parameters (optional)"
-                            />
-                            <p className="text-xs text-royal-gray">
-                                UTM parameters help track the source of your registration
-                            </p>
-                        </div>
-
-
-                    </div>
-
                     {/* Address Section */}
                     <div className="space-y-4 pt-4 border-t border-royal-light-gray">
                         <div className="flex items-center gap-2">

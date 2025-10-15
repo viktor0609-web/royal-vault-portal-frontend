@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { webinarApi, api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { Search, X } from "lucide-react";
 
 // Form field configuration with required/optional indicators
 const formFields = [
@@ -64,9 +65,13 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
   });
 
   const [promotionalSmsLists, setPromotionalSmsLists] = useState([]);
+  const [filteredPromotionalSmsLists, setFilteredPromotionalSmsLists] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Fetch promotional SMS lists when modal opens
   useEffect(() => {
@@ -74,6 +79,23 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
       fetchPromotionalSmsLists();
     }
   }, [isOpen]);
+
+  // Handle click outside to close search dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setIsSearchOpen(false);
+      }
+    };
+
+    if (isSearchOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isSearchOpen]);
 
   // Populate form when editing
   useEffect(() => {
@@ -133,16 +155,40 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
   const fetchPromotionalSmsLists = async () => {
     try {
       const { data } = await api.get('/api/promotional-sms-lists');
-      setPromotionalSmsLists(data.lists || []);
+      const lists = data.lists || [];
+      setPromotionalSmsLists(lists);
+      setFilteredPromotionalSmsLists(lists);
     } catch (error) {
       console.error('Error fetching promotional SMS lists:', error);
       // Fallback to mock data if API fails
-      setPromotionalSmsLists([
+      const mockData = [
         { listId: '1', name: 'General List' },
         { listId: '2', name: 'VIP List' },
         { listId: '3', name: 'Premium List' }
-      ]);
+      ];
+      setPromotionalSmsLists(mockData);
+      setFilteredPromotionalSmsLists(mockData);
     }
+  };
+
+  // Filter promotional SMS lists based on search query
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim() === '') {
+      setFilteredPromotionalSmsLists(promotionalSmsLists);
+    } else {
+      const filtered = promotionalSmsLists.filter((list: any) =>
+        list.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredPromotionalSmsLists(filtered);
+    }
+  };
+
+  // Clear search and reset to all lists
+  const clearSearch = () => {
+    setSearchQuery('');
+    setFilteredPromotionalSmsLists(promotionalSmsLists);
+    setIsSearchOpen(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -199,7 +245,93 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
         <form onSubmit={handleSubmit} className="space-y-4">
           {formFields.map((item, index) => {
             const isRequired = item.required;
-            const fieldOptions = item.id === 'proSmsList' ? promotionalSmsLists : item.options;
+            const fieldOptions = item.id === 'proSmsList' ? filteredPromotionalSmsLists : item.options;
+
+            // Special case for Promotional SMS List with search functionality
+            if (item.id === 'proSmsList') {
+              return (
+                <div key={`div${index}`}>
+                  <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
+                    {item.title}
+                    {isRequired && <span className="text-red-500 ml-1">*</span>}
+                    {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
+                  </Label>
+                  <div className="relative mt-1" ref={searchRef}>
+                    <div className="relative">
+                      <Input
+                        type="text"
+                        placeholder="Search promotional SMS lists..."
+                        value={searchQuery}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        onFocus={() => setIsSearchOpen(true)}
+                        className="pr-10"
+                      />
+                      <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    </div>
+
+                    {isSearchOpen && (
+                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {filteredPromotionalSmsLists.length > 0 ? (
+                          filteredPromotionalSmsLists.map((list: any) => (
+                            <div
+                              key={list.listId || list._id}
+                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                              onClick={() => {
+                                handleInputChange(item.id, list.listId || list._id);
+                                setIsSearchOpen(false);
+                                setSearchQuery(list.name);
+                              }}
+                            >
+                              <div className="font-medium text-gray-900">{list.name}</div>
+                              {list.description && (
+                                <div className="text-sm text-gray-500">{list.description}</div>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="px-3 py-2 text-gray-500 text-center">
+                            No promotional SMS lists found
+                          </div>
+                        )}
+
+                        {searchQuery && (
+                          <div className="px-3 py-2 border-t border-gray-200">
+                            <button
+                              type="button"
+                              onClick={clearSearch}
+                              className="flex items-center text-sm text-gray-500 hover:text-gray-700"
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Clear search
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {formData[item.id] && (
+                      <div className="mt-2 flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md">
+                        <span className="text-sm text-gray-700">
+                          Selected: {promotionalSmsLists.find((list: any) =>
+                            (list.listId || list._id) === formData[item.id]
+                          )?.name || 'Unknown'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleInputChange(item.id, '');
+                            setSearchQuery('');
+                          }}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            }
 
             switch (item.type) {
               case 'input':

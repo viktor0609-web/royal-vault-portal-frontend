@@ -297,7 +297,7 @@ export function DealsSection() {
                   >
                     <div className="relative h-48 sm:h-64 w-full">
                       <img
-                        src={import.meta.env.VITE_BACKEND_URL + item.image}
+                        src={item.image}
                         className="w-full h-full object-cover"
                         alt={item.name}
                       />

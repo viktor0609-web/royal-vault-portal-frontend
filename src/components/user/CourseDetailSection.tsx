@@ -150,7 +150,7 @@ export function CourseDetailSection() {
       console.log(file.uploadedUrl);
 
       const link = document.createElement('a');
-      link.href = import.meta.env.VITE_BACKEND_URL + file.uploadedUrl;
+      link.href = file.uploadedUrl;
       link.download = file.name;
       link.target = '_blank';
       document.body.appendChild(link);

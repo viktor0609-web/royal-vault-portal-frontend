@@ -163,7 +163,7 @@ export function CoursesSection() {
               </TableRow>
             ) : (
               courseGroups.map((group) => (
-                <TableRow key={group._id}>
+                <TableRow key={group._id} onClick={() => handleViewGroup(group._id)}>
                   <TableCell className="font-medium">{group.title}</TableCell>
                   <TableCell className="max-w-xs truncate">{group.description}</TableCell>
                   <TableCell>
@@ -176,14 +176,6 @@ export function CoursesSection() {
                   </TableCell>
                   <TableCell className="w-40 min-w-40">
                     <div className="flex gap-2 justify-end">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleViewGroup(group._id)}
-                        title="View Details"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </Button>
                       <Button
                         size="sm"
                         variant="outline"

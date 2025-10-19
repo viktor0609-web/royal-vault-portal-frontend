@@ -234,7 +234,7 @@ export function CourseGroupDetail() {
                             </TableRow>
                         ) : (
                             courses.map((course) => (
-                                <TableRow key={course._id}>
+                                <TableRow key={course._id} onClick={() => handleViewCourse(course._id)}>
                                     <TableCell className="font-medium">{course.title}</TableCell>
                                     <TableCell className="max-w-xs truncate">{course.description}</TableCell>
                                     <TableCell>{course.lectures?.length || 0}</TableCell>
@@ -244,14 +244,6 @@ export function CourseGroupDetail() {
                                     </TableCell>
                                     <TableCell className="w-40 min-w-40">
                                         <div className="flex gap-2 justify-end">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() => handleViewCourse(course._id)}
-                                                title="View Details"
-                                            >
-                                                <EyeIcon className="h-4 w-4" />
-                                            </Button>
                                             <Button
                                                 size="sm"
                                                 variant="outline"

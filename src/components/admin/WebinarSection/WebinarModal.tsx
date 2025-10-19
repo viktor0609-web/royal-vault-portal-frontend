@@ -369,11 +369,18 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
                       </SelectTrigger>
                       <SelectContent>
                         {fieldOptions && fieldOptions.length > 0 ? (
-                          fieldOptions.map((option) => (
-                            <SelectItem key={option.listId} value={option.listId}>
-                              {option.name || option}
-                            </SelectItem>
-                          ))
+                          fieldOptions.map((option, optionIndex) => {
+                            // Handle both string options and object options
+                            const optionValue = typeof option === 'string' ? option : (option.listId || option._id || option);
+                            const optionLabel = typeof option === 'string' ? option : (option.name || option);
+                            const optionKey = typeof option === 'string' ? option : (option.listId || option._id || optionIndex);
+
+                            return (
+                              <SelectItem key={optionKey} value={optionValue}>
+                                {optionLabel}
+                              </SelectItem>
+                            );
+                          })
                         ) : (
                           <SelectItem value="placeholder">No options available</SelectItem>
                         )}

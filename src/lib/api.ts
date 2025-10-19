@@ -234,7 +234,7 @@ export const webinarApi = {
   },
 
   getWebinarById: (webinarId: string, fields: 'basic' | 'detailed' | 'full' = 'full') =>
-    api.get(`/api/webinars/admin/${webinarId}?fields=${fields}`),
+    api.get(`/api/webinars/user/${webinarId}?fields=${fields}`),
 
   createWebinar: (webinarData: any) => api.post('/api/webinars/admin', webinarData),
 

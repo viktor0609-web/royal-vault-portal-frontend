@@ -59,8 +59,12 @@ export function WebinarRegistrationPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await webinarApi.registerForWebinar(webinarId, email);
-        setIsRegistered(true);
+        if (user) {
+            await webinarApi.registerForWebinar(webinarId, email);
+            setIsRegistered(true);
+        } else {
+            const result = await webinarApi.isValidEmailAddress(email);
+        }
     };
 
     return (

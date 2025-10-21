@@ -263,6 +263,8 @@ export const webinarApi = {
 
   registerForWebinar: (webinarId: string, email: string) => api.post(`/api/webinars/${webinarId}/register`, { email }),
 
+  isValidEmailAddress: (email: string) => api.post(`/api/webinars/isValidEmailAddress`, { email }),
+
   unregisterFromWebinar: (webinarId: string) => api.delete(`/api/webinars/${webinarId}/unregister`),
 
   markAsAttended: (webinarId: string) => api.post(`/api/webinars/${webinarId}/attend`),

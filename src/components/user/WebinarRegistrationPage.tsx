@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { webinarApi } from "@/lib/api";
 import { format } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
+import { useAuthDialog } from "@/context/AuthDialogContext";
 
 export function WebinarRegistrationPage() {
     const [countdown, setCountdown] = useState({
@@ -18,6 +19,7 @@ export function WebinarRegistrationPage() {
     const [webinar, setWebinar] = useState(null);
     const [formattedDate, setFormattedDate] = useState("");
     const { user } = useAuth();
+    const { openDialog } = useAuthDialog();
 
     const params = new URLSearchParams(new URL(window.location.href).search);
     const webinarId = params.get('id');
@@ -64,6 +66,12 @@ export function WebinarRegistrationPage() {
             setIsRegistered(true);
         } else {
             const result = await webinarApi.isValidEmailAddress(email);
+            if (result.data.exist) {
+                openDialog("login")
+            }
+            else {
+                openDialog('signup')
+            }
         }
     };
 

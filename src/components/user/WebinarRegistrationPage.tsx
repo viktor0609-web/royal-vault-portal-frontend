@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { webinarApi } from "@/lib/api";
 import { format } from "date-fns";
+import { useAuth } from "@/context/AuthContext";
 
 export function WebinarRegistrationPage() {
     const [countdown, setCountdown] = useState({
@@ -16,6 +17,7 @@ export function WebinarRegistrationPage() {
     const [isRegistered, setIsRegistered] = useState(false);
     const [webinar, setWebinar] = useState(null);
     const [formattedDate, setFormattedDate] = useState("");
+    const { user } = useAuth();
 
     const params = new URLSearchParams(new URL(window.location.href).search);
     const webinarId = params.get('id');
@@ -109,19 +111,23 @@ export function WebinarRegistrationPage() {
                                     </div>
                                 ) : (
                                     <form onSubmit={handleSubmit}>
-                                        <Input
-                                            type="email"
-                                            placeholder="name@email.com"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            className="w-full mb-3 sm:mb-4 h-10 sm:h-12 text-sm sm:text-base md:text-lg text-center"
-                                            style={{
-                                                backgroundColor: '#f0f8ff',
-                                                borderColor: '#d1d5db',
-                                                fontFamily: 'Arial, sans-serif'
-                                            }}
-                                            required
-                                        />
+                                        {!user &&
+
+                                            <Input
+                                                type="email"
+                                                placeholder="name@email.com"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                className="w-full mb-3 sm:mb-4 h-10 sm:h-12 text-sm sm:text-base md:text-lg text-center"
+                                                style={{
+                                                    backgroundColor: '#f0f8ff',
+                                                    borderColor: '#d1d5db',
+                                                    fontFamily: 'Arial, sans-serif'
+                                                }}
+                                                required
+                                            />
+                                        }
+
                                         <Button
                                             type="submit"
                                             className="w-full h-10 sm:h-12 text-xs sm:text-sm md:text-base font-bold text-white rounded-md"

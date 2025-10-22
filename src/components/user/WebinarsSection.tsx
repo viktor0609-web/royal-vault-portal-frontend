@@ -267,185 +267,187 @@ export function WebinarsSection() {
             const isProcessing = isUnregistering;
 
             return (
-              // <div
-              //   key={webinar._id}
-              //   onClick={() => {
-              //     if (filterIndex === 0) {
-              //       // For upcoming webinars, only registered users can access live webinar
-              //       if (isRegistered) {
-              //         handleJoinWebinar(webinar);
-              //       } else {
-              //         // Prevent navigation and show message
-              //         toast({
-              //           title: "Registration Required",
-              //           description: "Please register for this webinar to access the live session",
-              //           variant: "destructive",
-              //         });
-              //         return; // Prevent any further action
-              //       }
-              //     } else if (filterIndex === 1) {
-              //       // For replays, anyone can access
-              //       handleJoinWebinar(webinar);
-              //     } else if (filterIndex === 2) {
-              //       // For watched webinars, anyone can access
-              //       handleJoinWebinar(webinar);
-              //     }
-              //   }}
-              //   className={`flex items-center justify-between p-3 sm:p-6 bg-sidebar rounded-lg border border-royal-light-gray transition-all duration-75 ease-in-out group ${filterIndex === 0 && !isRegistered
-              //     ? 'cursor-not-allowed opacity-75 hover:opacity-100'
-              //     : 'cursor-pointer hover:shadow-sm hover:scale-[1.005] hover:border-royal-blue/10'
-              //     }`}
-              // >
-              //   <div className="flex-1 min-w-0">
-              //     <h3 className="text-sm sm:text-lg font-semibold text-royal-dark-gray mb-1 sm:mb-2 group-hover:text-royal-blue transition-colors duration-75 line-clamp-2">
-              //       {webinar.name}
-              //     </h3>
-              //     <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-royal-gray flex-wrap">
-              //       <span className="group-hover:text-royal-dark-gray transition-colors duration-75">
-              //         {formatDate(webinar.date)} @ {formatTime(webinar.date)}
-              //       </span>
-              //       <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-primary/10 text-primary rounded text-xs font-medium group-hover:bg-primary/20 group-hover:scale-102 transition-all duration-75">
-              //         {webinar.streamType}
-              //       </span>
-              //       {isRegistered && (
-              //         <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 text-green-600 rounded text-xs font-medium">
-              //           Registered
-              //         </span>
-              //       )}
-              //     </div>
-              //   </div>
+              <div
+                key={webinar._id}
+                onClick={() => {
+                  if (filterIndex === 0) {
+                    // For upcoming webinars, only registered users can access live webinar
+                    if (isRegistered) {
+                      handleJoinWebinar(webinar);
+                    } else {
+                      // Prevent navigation and show message
+                      toast({
+                        title: "Registration Required",
+                        description: "Please register for this webinar to access the live session",
+                        variant: "destructive",
+                      });
+                      return; // Prevent any further action
+                    }
+                  } else if (filterIndex === 1) {
+                    // For replays, anyone can access
+                    handleJoinWebinar(webinar);
+                  } else if (filterIndex === 2) {
+                    // For watched webinars, anyone can access
+                    handleJoinWebinar(webinar);
+                  }
+                }}
+                className={`flex items-center justify-between p-3 sm:p-6 bg-sidebar rounded-lg border border-royal-light-gray transition-all duration-75 ease-in-out group ${filterIndex === 0 && !isRegistered
+                  ? 'cursor-not-allowed opacity-75 hover:opacity-100'
+                  : 'cursor-pointer hover:shadow-sm hover:scale-[1.005] hover:border-royal-blue/10'
+                  }`}
+              >
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm sm:text-lg font-semibold text-royal-dark-gray mb-1 sm:mb-2 group-hover:text-royal-blue transition-colors duration-75 line-clamp-2">
+                    {webinar.name}
+                  </h3>
+                  <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-royal-gray flex-wrap">
+                    <span className="group-hover:text-royal-dark-gray transition-colors duration-75">
+                      {formatDate(webinar.date)} @ {formatTime(webinar.date)}
+                    </span>
+                    <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-primary/10 text-primary rounded text-xs font-medium group-hover:bg-primary/20 group-hover:scale-102 transition-all duration-75">
+                      {webinar.streamType}
+                    </span>
+                    {isRegistered && (
+                      <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 text-green-600 rounded text-xs font-medium">
+                        Registered
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-              //   {/* Desktop Buttons */}
-              //   <div className="hidden min-[700px]:flex gap-2">
-              //     {filterIndex === 0 ? (
-              //       // For upcoming webinars
-              //       isRegistered ? (
-              //         // If registered, show unregister button
-              //         <Button
-              //           onClick={(e) => {
-              //             e.stopPropagation();
-              //             handleUnregister(webinar);
-              //           }}
-              //           disabled={isProcessing}
-              //           variant="outline"
-              //           className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 transition-all duration-75"
-              //         >
-              //           {isUnregistering ? 'Canceling...' : 'Cancel Register'}
-              //         </Button>
-              //       ) : (
-              //         // If not registered, show register button
-              //         <Button
-              //           onClick={(e) => {
-              //             e.stopPropagation();
-              //             handleRegister(webinar);
-              //           }}
-              //           disabled={isProcessing}
-              //           className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
-              //         >
-              //           Register
-              //         </Button>
-              //       )
-              //     ) : (
-              //       // For replays and watched webinars
-              //       <Button
-              //         onClick={(e) => {
-              //           e.stopPropagation();
-              //           handleJoinWebinar(webinar);
-              //         }}
-              //         disabled={isProcessing}
-              //         className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
-              //       >
-              //         {filterIndex === 1 ? 'Re-watch' : 'View Details'}
-              //       </Button>
-              //     )}
-              //   </div>
+                {/* Desktop Buttons */}
+                <div className="hidden min-[700px]:flex gap-2">
+                  {filterIndex === 0 ? (
+                    // For upcoming webinars
+                    isRegistered ? (
+                      // If registered, show unregister button
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUnregister(webinar);
+                        }}
+                        disabled={isProcessing}
+                        variant="outline"
+                        className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 transition-all duration-75"
+                      >
+                        {isUnregistering ? 'Canceling...' : 'Cancel Register'}
+                      </Button>
+                    ) : (
+                      // If not registered, show register button
+                      <Button
+                      // onClick={(e) => {
+                      //   e.stopPropagation();
+                      //   handleRegister(webinar);
+                      // }}
+                      // disabled={isProcessing}
+                      // className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
+                      >
+                        <a href={"https://app.royallegalsolutions.com/royal-tv/mm-10-22-25/user"} target="_blank" rel="noopener noreferrer">
+                          Register
+                        </a>
+                      </Button>
+                    )
+                  ) : (
+                    // For replays and watched webinars
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinWebinar(webinar);
+                      }}
+                      disabled={isProcessing}
+                      className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
+                    >
+                      {filterIndex === 1 ? 'Re-watch' : 'View Details'}
+                    </Button>
+                  )}
+                </div>
 
-              //   {/* Mobile Action Buttons */}
-              //   <div className="min-[700px]:hidden flex gap-2">
-              //     {filterIndex === 0 ? (
-              //       // For upcoming webinars
-              //       isRegistered ? (
-              //         // If registered, show unregister button
-              //         <TooltipProvider>
-              //           <Tooltip>
-              //             <TooltipTrigger asChild>
-              //               <Button
-              //                 onClick={(e) => {
-              //                   e.stopPropagation();
-              //                   handleUnregister(webinar);
-              //                 }}
-              //                 disabled={isProcessing}
-              //                 variant="outline"
-              //                 className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 w-10 h-10 p-0 rounded-full flex items-center justify-center"
-              //                 style={{ aspectRatio: '1/1' }}
-              //               >
-              //                 {isUnregistering ? (
-              //                   <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-              //                 ) : (
-              //                   <CheckCircleIcon className="h-4 w-4" />
-              //                 )}
-              //               </Button>
-              //             </TooltipTrigger>
-              //             <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-              //               {isUnregistering ? 'Canceling...' : 'Cancel Register'}
-              //             </TooltipContent>
-              //           </Tooltip>
-              //         </TooltipProvider>
-              //       ) : (
-              //         // If not registered, show register button
-              //         <TooltipProvider>
-              //           <Tooltip>
-              //             <TooltipTrigger asChild>
-              //               <Button
-              //                 onClick={(e) => {
-              //                   e.stopPropagation();
-              //                   handleRegister(webinar);
-              //                 }}
-              //                 disabled={isProcessing}
-              //                 className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
-              //                 style={{ aspectRatio: '1/1' }}
-              //               >
-              //                 <CheckCircleIcon className="h-4 w-4" />
-              //               </Button>
-              //             </TooltipTrigger>
-              //             <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-              //               Register for Webinar
-              //             </TooltipContent>
-              //           </Tooltip>
-              //         </TooltipProvider>
-              //       )
-              //     ) : (
-              //       // For replays and watched webinars
-              //       <TooltipProvider>
-              //         <Tooltip>
-              //           <TooltipTrigger asChild>
-              //             <Button
-              //               onClick={(e) => {
-              //                 e.stopPropagation();
-              //                 handleJoinWebinar(webinar);
-              //               }}
-              //               disabled={isProcessing}
-              //               className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
-              //               style={{ aspectRatio: '1/1' }}
-              //             >
-              //               {filterIndex === 1 ? (
-              //                 <PlayIcon className="h-4 w-4" />
-              //               ) : (
-              //                 <EyeIcon className="h-4 w-4" />
-              //               )}
-              //             </Button>
-              //           </TooltipTrigger>
-              //           <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-              //             {filterIndex === 1 ? 'Watch Replay' : 'View Details'}
-              //           </TooltipContent>
-              //         </Tooltip>
-              //       </TooltipProvider>
-              //     )}
-              //   </div>
-              // </div>
-              <a href="https://app.royallegalsolutions.com/royal-tv/we-2025-10-22/user" target="_blank" rel="noopener noreferrer">
-                Go to Webinar
-              </a>
+                {/* Mobile Action Buttons */}
+                <div className="min-[700px]:hidden flex gap-2">
+                  {filterIndex === 0 ? (
+                    // For upcoming webinars
+                    isRegistered ? (
+                      // If registered, show unregister button
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUnregister(webinar);
+                              }}
+                              disabled={isProcessing}
+                              variant="outline"
+                              className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 w-10 h-10 p-0 rounded-full flex items-center justify-center"
+                              style={{ aspectRatio: '1/1' }}
+                            >
+                              {isUnregistering ? (
+                                <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <CheckCircleIcon className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
+                            {isUnregistering ? 'Canceling...' : 'Cancel Register'}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
+                      // If not registered, show register button
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRegister(webinar);
+                              }}
+                              disabled={isProcessing}
+                              className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
+                              style={{ aspectRatio: '1/1' }}
+                            >
+                              <CheckCircleIcon className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
+                            Register for Webinar
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )
+                  ) : (
+                    // For replays and watched webinars
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleJoinWebinar(webinar);
+                            }}
+                            disabled={isProcessing}
+                            className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
+                            style={{ aspectRatio: '1/1' }}
+                          >
+                            {filterIndex === 1 ? (
+                              <PlayIcon className="h-4 w-4" />
+                            ) : (
+                              <EyeIcon className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
+                          {filterIndex === 1 ? 'Watch Replay' : 'View Details'}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+              </div>
+              // <a href="https://app.royallegalsolutions.com/royal-tv/we-2025-10-22/user" target="_blank" rel="noopener noreferrer">
+              //   Go to Webinar
+              // </a>
             );
           })}
 

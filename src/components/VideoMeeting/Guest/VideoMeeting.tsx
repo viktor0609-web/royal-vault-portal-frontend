@@ -14,7 +14,7 @@ export const VideoMeeting = () => {
                 <div className="flex gap-2 sm:gap-4 items-center min-w-0">
                     <BoxSelectIcon className="h-6 w-6 sm:h-10 sm:w-10 text-royal-gray flex-shrink-0" />
                     <h1 className="text-sm sm:text-lg md:text-2xl font-bold text-royal-dark-gray uppercase truncate">
-                        Elite Coaching 09-30-25
+                        Mindset Mastery 10-22-25
                     </h1>
                 </div>
             </header>

@@ -108,7 +108,7 @@ export function DealsSection() {
                             <TableHead className="w-48 min-w-48">Deal</TableHead>
                             <TableHead className="w-32 min-w-32">Source</TableHead>
                             <TableHead className="w-32 min-w-32">Categories</TableHead>
-                            <TableHead className="w-32 min-w-32">Subcategories</TableHead>
+                            <TableHead className="w-32 min-w-32">Sub-Categories</TableHead>
                             <TableHead className="w-32 min-w-32">Types</TableHead>
                             <TableHead className="w-32 min-w-32">Strategies</TableHead>
                             <TableHead className="w-32 min-w-32">Requirements</TableHead>
@@ -231,7 +231,7 @@ export function DealsSection() {
                                     <span className="text-xs text-royal-dark-gray">{formatArrayData(deal.category) || 'N/A'}</span>
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-xs font-medium text-royal-gray">Subcategories:</span>
+                                    <span className="text-xs font-medium text-royal-gray">Sub-Categories:</span>
                                     <span className="text-xs text-royal-dark-gray">{formatArrayData(deal.subCategory) || 'N/A'}</span>
                                 </div>
                                 <div className="flex flex-col gap-1">

@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import { useNavigate } from "react-router-dom";
 import { markChecklistItemCompleted, CHECKLIST_ITEMS } from "@/utils/checklistUtils";
+import { formatDate, formatTime } from "@/utils/dateUtils";
 
 const filterTabs = [
   { label: "UPCOMING" },
@@ -197,25 +198,6 @@ export function WebinarsSection() {
         return [];
     }
   }, [webinars, filterIndex, user]);
-
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'numeric',
-      day: 'numeric',
-    });
-  };
-
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  };
 
   const isUserRegistered = (webinar: Webinar) => {
     if (!user || !user._id) return false;

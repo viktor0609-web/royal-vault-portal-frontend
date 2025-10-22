@@ -156,6 +156,9 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
       }
 
       // Transform formData to match backend expectations
+      // Note: No date fields here - createdAt/updatedAt are automatically handled by MongoDB in UTC
+      // MongoDB's timestamps feature ensures all dates are stored in UTC
+      // When editing, we don't send/receive date fields to avoid double-conversion
       const dealData = {
         name: formData.name,
         url: formData.url,

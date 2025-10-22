@@ -12,6 +12,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { webinarApi, api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Search, X } from "lucide-react";
+import { formatDateForInput, convertLocalToUTC } from "@/utils/dateUtils";
 
 // Form field configuration with required/optional indicators
 const formFields = [
@@ -100,13 +101,6 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
   // Populate form when editing
   useEffect(() => {
     if (editingWebinar) {
-      // Format date for datetime-local input
-      const formatDateForInput = (dateString: string) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toISOString().slice(0, 16);
-      };
-
       setFormData({
         streamType: editingWebinar.streamType || "",
         date: formatDateForInput(editingWebinar.date),
@@ -197,10 +191,10 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
     setError(null);
 
     try {
-      // Prepare data for submission - convert date to proper format
+      // Prepare data for submission - convert local datetime to UTC for MongoDB
       const submitData = {
         ...formData,
-        date: formData.date ? new Date(formData.date).toISOString() : null
+        date: convertLocalToUTC(formData.date)
       };
 
       let response;
@@ -418,7 +412,7 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
                     <input
                       type="datetime-local"
                       id={item.id}
-                      value={formData[item.id] ? new Date(formData[item.id]).toISOString().slice(0, 16) : ''}
+                      value={formData[item.id] || ''}
                       onChange={(e) => handleInputChange(item.id, e.target.value)}
                       className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required={isRequired}

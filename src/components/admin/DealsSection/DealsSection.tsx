@@ -6,6 +6,7 @@ import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableC
 import { TagIcon, Trash2, Edit, PlusIcon, ExternalLinkIcon } from "lucide-react";
 import { CreateDealModal } from "./CreateDealModal";
 import { dealApi } from "@/lib/api";
+import { formatDate, formatDateTime } from "@/utils/dateUtils";
 
 interface Deal {
     _id: string;
@@ -113,6 +114,7 @@ export function DealsSection() {
                             <TableHead className="w-32 min-w-32">Strategies</TableHead>
                             <TableHead className="w-32 min-w-32">Requirements</TableHead>
                             <TableHead className="w-32 min-w-32">URL</TableHead>
+                            <TableHead className="w-32 min-w-32">Created</TableHead>
                             <TableHead className="w-32 min-w-32 text-right">
                                 <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={() => handlebtnClick('create')}>Create</Button>
                             </TableHead>
@@ -121,13 +123,13 @@ export function DealsSection() {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={9} className="text-center py-8">
+                                <TableCell colSpan={10} className="text-center py-8">
                                     Loading deals...
                                 </TableCell>
                             </TableRow>
                         ) : deals.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={9} className="text-center py-8">
+                                <TableCell colSpan={10} className="text-center py-8">
                                     No deals found. Create your first deal!
                                 </TableCell>
                             </TableRow>
@@ -153,6 +155,7 @@ export function DealsSection() {
                                             </a>
                                         ) : 'N/A'}
                                     </TableCell>
+                                    <TableCell className="text-sm text-royal-gray">{formatDate(deal.createdAt)}</TableCell>
                                     <TableCell className="w-40 min-w-40">
                                         <div className="flex gap-2 justify-end">
                                             <Button
@@ -268,7 +271,7 @@ export function DealsSection() {
                                         <span className="text-royal-gray">No URL</span>
                                     )}
                                 </div>
-                                <span className="text-xs">{deal.createdAt ? new Date(deal.createdAt).toLocaleDateString() : 'N/A'}</span>
+                                <span className="text-xs">{formatDate(deal.createdAt)}</span>
                             </div>
                         </div>
                     ))

@@ -106,7 +106,7 @@ export function DealsSection() {
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-48 min-w-48">Deal</TableHead>
-                            <TableHead className="w-32 min-w-32">Source</TableHead>
+                            <TableHead className="w-32 min-w-32">Sources</TableHead>
                             <TableHead className="w-32 min-w-32">Categories</TableHead>
                             <TableHead className="w-32 min-w-32">Sub-Categories</TableHead>
                             <TableHead className="w-32 min-w-32">Types</TableHead>

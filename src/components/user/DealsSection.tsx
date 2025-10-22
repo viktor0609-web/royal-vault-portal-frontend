@@ -19,7 +19,7 @@ const filterConfig = [
   { key: "types", label: "Types", placeholder: "Types" },
   { key: "strategies", label: "Strategies", placeholder: "Strategies" },
   { key: "requirements", label: "Requirements", placeholder: "Requirements" },
-  { key: "sources", label: "Source", placeholder: "Source" },
+  { key: "sources", label: "Sources", placeholder: "Sources" },
 ];
 
 interface FilterOptions {
@@ -172,7 +172,7 @@ export function DealsSection() {
       const options = filterOptions[config.key] || [];
       return (
         <div key={config.key}>
-          <div className="text-royal-gray mb-1 font-bold">{config.key}</div>
+          <div className="text-royal-gray mb-1 font-bold">{config.label}</div>
           <Select
             value={
               selectedFilters[config.key as keyof typeof selectedFilters] || "all"

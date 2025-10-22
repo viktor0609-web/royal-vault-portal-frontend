@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { OutageBanner } from "@/components/ui/OutageBanner";
 
 //For Client
 import { RoyalVaultLayout } from "./components/user/RoyalVaultLayout";
@@ -73,7 +74,8 @@ const App = () => (
         <AuthProvider>
           <AuthDialogProvider>
             <DailyMeetingProvider>
-
+              {/* AWS Outage Banner - appears at top of all pages */}
+              <OutageBanner />
 
               <Toaster />
               <Sonner />

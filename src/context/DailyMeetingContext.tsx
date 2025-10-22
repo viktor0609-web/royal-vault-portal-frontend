@@ -185,16 +185,28 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     try {
       let currentDailyRoom = dailyRoom;
-      if (!currentDailyRoom) {
-        currentDailyRoom = DailyIframe.createCallObject({
-          url: roomUrl,
-          userName: userName + ' (' + role + ')' || 'undefined (' + role + ')', // Pass userName here
-          // pass device IDs as sources if selected
-          videoSource: selectedCamera || undefined,
-          audioSource: selectedMicrophone || undefined,
-        });
-        setDailyRoom(currentDailyRoom);
+
+      // CRITICAL FIX: Destroy any existing Daily call object to prevent duplicates
+      if (currentDailyRoom) {
+        try {
+          console.log("Destroying existing Daily call object before creating new one");
+          await currentDailyRoom.destroy();
+          currentDailyRoom = null;
+          setDailyRoom(null);
+        } catch (err) {
+          console.warn("Error destroying existing call object:", err);
+        }
       }
+
+      // Create new call object
+      currentDailyRoom = DailyIframe.createCallObject({
+        url: roomUrl,
+        userName: userName + ' (' + role + ')' || 'undefined (' + role + ')', // Pass userName here
+        // pass device IDs as sources if selected
+        videoSource: selectedCamera || undefined,
+        audioSource: selectedMicrophone || undefined,
+      });
+      setDailyRoom(currentDailyRoom);
 
       const token = await getAdminToken(roomName);
       // join the call
@@ -215,22 +227,34 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
   const joinMeetingAsGuest = async () => {
-    console.log("join as user");
+    console.log("join as user/guest");
     setIsLoading(true);
     // stop preview to avoid duplicate tracks when joining
     stopLocalPreview();
     try {
       let currentDailyRoom = dailyRoom;
-      if (!currentDailyRoom) {
-        currentDailyRoom = DailyIframe.createCallObject({
-          url: roomUrl,
-          userName: userName + " (" + role + ")" || 'undefined (' + role + ')', // Pass userName here
-          // pass device IDs as sources if selected
-          videoSource: selectedCamera || undefined,
-          audioSource: selectedMicrophone || undefined,
-        });
-        setDailyRoom(currentDailyRoom);
+
+      // CRITICAL FIX: Destroy any existing Daily call object to prevent duplicates
+      if (currentDailyRoom) {
+        try {
+          console.log("Destroying existing Daily call object before creating new one");
+          await currentDailyRoom.destroy();
+          currentDailyRoom = null;
+          setDailyRoom(null);
+        } catch (err) {
+          console.warn("Error destroying existing call object:", err);
+        }
       }
+
+      // Create new call object
+      currentDailyRoom = DailyIframe.createCallObject({
+        url: roomUrl,
+        userName: userName + " (" + role + ")" || 'undefined (' + role + ')', // Pass userName here
+        // pass device IDs as sources if selected
+        videoSource: selectedCamera || undefined,
+        audioSource: selectedMicrophone || undefined,
+      });
+      setDailyRoom(currentDailyRoom);
 
       // join the call
       await currentDailyRoom.join({
@@ -250,12 +274,18 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   };
   const leaveRoom = () => {
     if (dailyRoom) {
-      dailyRoom.leave();
-      dailyRoom.destroy();
-      setJoined(false);
-      setDailyRoom(null);
-      setParticipants([]);
-      stopLocalPreview();
+      try {
+        console.log("Leaving and destroying Daily call object");
+        dailyRoom.leave();
+        dailyRoom.destroy();
+      } catch (err) {
+        console.warn("Error during leaveRoom:", err);
+      } finally {
+        setJoined(false);
+        setDailyRoom(null);
+        setParticipants([]);
+        stopLocalPreview();
+      }
     }
   };
 
@@ -314,6 +344,16 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return () => {
       navigator.mediaDevices.removeEventListener('devicechange', enumerateDevices);
       stopLocalPreview();
+
+      // Cleanup: Destroy Daily call object when provider unmounts
+      if (dailyRoom) {
+        try {
+          console.log("Provider unmounting - destroying Daily call object");
+          dailyRoom.destroy();
+        } catch (err) {
+          console.warn("Error destroying Daily call object on unmount:", err);
+        }
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -389,18 +429,20 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     dailyRoom.on('app-message', handleAppMessage);
 
     return () => {
-      dailyRoom.off('joined-meeting', updateParticipants);
-      dailyRoom.off('participant-joined', updateParticipants);
-      dailyRoom.off('participant-updated', updateParticipants);
-      dailyRoom.off('participant-left', updateParticipants);
-      dailyRoom.off('track-started', updateParticipants);
-      dailyRoom.off('track-stopped', updateParticipants);
-      dailyRoom.off('app-message', handleAppMessage);
       try {
-        dailyRoom.destroy();
+        dailyRoom.off('joined-meeting', updateParticipants);
+        dailyRoom.off('participant-joined', updateParticipants);
+        dailyRoom.off('participant-updated', updateParticipants);
+        dailyRoom.off('participant-left', updateParticipants);
+        dailyRoom.off('track-started', updateParticipants);
+        dailyRoom.off('track-stopped', updateParticipants);
+        dailyRoom.off('app-message', handleAppMessage);
       } catch (e) {
-        // ignore
+        console.warn("Error removing event listeners:", e);
       }
+
+      // Note: We don't destroy here because it's handled by leaveRoom()
+      // and the join functions. This prevents double-destroy errors.
     };
   }, [dailyRoom]);
 

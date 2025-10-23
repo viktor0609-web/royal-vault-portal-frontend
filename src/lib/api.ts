@@ -261,6 +261,8 @@ export const webinarApi = {
 
   getPublicWebinarById: (webinarId: string) => api.get(`/api/webinars/public/${webinarId}`),
 
+  getPublicWebinarBySlug: (slug: string) => api.get(`/api/webinars/public/${slug}`),
+
   registerForWebinar: (webinarId: string, email: string) => api.post(`/api/webinars/${webinarId}/register`, { email }),
 
   isValidEmailAddress: (email: string) => api.post(`/api/webinars/isValidEmailAddress`, { email }),

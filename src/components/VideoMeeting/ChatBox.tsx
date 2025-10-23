@@ -33,6 +33,41 @@ const linkifyText = (text: string) => {
   });
 };
 
+// Generate a consistent color for a username based on hash
+const getUserColor = (username: string): string => {
+  const colors = [
+    '#E53E3E', // red
+    '#DD6B20', // orange
+    '#D69E2E', // yellow
+    '#38A169', // green
+    '#319795', // teal
+    '#3182CE', // blue
+    '#5A67D8', // indigo
+    '#805AD5', // purple
+    '#D53F8C', // pink
+    '#E91E63', // rose
+    '#00897B', // cyan
+    '#7CB342', // lime
+  ];
+
+  // Simple hash function
+  let hash = 0;
+  for (let i = 0; i < username.length; i++) {
+    hash = username.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  return colors[Math.abs(hash) % colors.length];
+};
+
+// Get user initials from name
+const getUserInitials = (username: string): string => {
+  const words = username.trim().split(/\s+/);
+  if (words.length === 1) {
+    return words[0].substring(0, 2).toUpperCase();
+  }
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+};
+
 interface ChatBoxProps {
   isVisible?: boolean;
   onUnreadCountChange?: (count: number) => void;
@@ -256,16 +291,34 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
       {/* Messages Area - Simple list style */}
       <div className="flex-1 overflow-y-auto px-4 py-3">
         {messages.map(msg => {
+          const userColor = getUserColor(msg.sender);
+          const userInitials = getUserInitials(msg.sender);
+
           return (
             <div
               key={msg.id}
               className="mb-3 animate-in fade-in duration-200"
             >
-              {/* Sender Name and Timestamp */}
-              <div className="flex items-baseline gap-2 mb-0.5">
-                <span className="text-sm font-semibold text-gray-900">
+              {/* Sender Info with Avatar */}
+              <div className="flex items-center gap-2 mb-1">
+                {/* Circular Avatar with Initials */}
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                  style={{ backgroundColor: userColor }}
+                  title={msg.sender}
+                >
+                  {userInitials}
+                </div>
+
+                {/* Name with matching color */}
+                <span
+                  className="text-sm font-semibold"
+                  style={{ color: userColor }}
+                >
                   {msg.sender}
                 </span>
+
+                {/* Timestamp */}
                 <span className="text-xs text-gray-500">
                   {new Date(msg.timestamp).toLocaleTimeString([], {
                     hour: '2-digit',
@@ -274,8 +327,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
                 </span>
               </div>
 
-              {/* Message Text */}
-              <p className="text-sm text-black break-words" style={{ lineHeight: '1.25em' }}>
+              {/* Message Text - slightly indented to align with avatar */}
+              <p className="text-sm text-black break-words ml-8" style={{ lineHeight: '1.25em' }}>
                 {linkifyText(msg.text)}
               </p>
             </div>

@@ -65,7 +65,16 @@ const getUserInitials = (username: string): string => {
   if (words.length === 1) {
     return words[0].substring(0, 2).toUpperCase();
   }
-  return (words[0][0]);
+  return (words[0][0].toUpperCase());
+};
+
+// Clean display name by removing "(User)" role but keeping Admin/Guest
+const getDisplayName = (username: string): string => {
+  // Remove "(User)" or "- User" or any variation
+  return username
+    .replace(/\s*\(User\)\s*/gi, '')
+    .replace(/\s*-\s*User\s*/gi, '')
+    .trim();
 };
 
 interface ChatBoxProps {
@@ -293,6 +302,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
         {messages.map(msg => {
           const userColor = getUserColor(msg.sender);
           const userInitials = getUserInitials(msg.sender);
+          const displayName = getDisplayName(msg.sender);
 
           return (
             <div
@@ -305,7 +315,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                   style={{ backgroundColor: userColor }}
-                  title={msg.sender}
+                  title={displayName}
                 >
                   {userInitials}
                 </div>
@@ -315,7 +325,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
                   className="text-sm font-semibold"
                   style={{ color: userColor }}
                 >
-                  {msg.sender}
+                  {displayName}
                 </span>
 
                 {/* Timestamp */}

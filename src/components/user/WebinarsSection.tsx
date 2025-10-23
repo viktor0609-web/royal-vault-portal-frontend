@@ -345,7 +345,7 @@ export function WebinarsSection() {
                       // disabled={isProcessing}
                       // className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
                       >
-                        <a href={"https://app.royallegalsolutions.com/royal-tv/mm-10-22-25/user"} target="_blank" rel="noopener noreferrer">
+                        <a href={`https://app.royallegalsolutions.com/royal-tv/${webinar.slug}/user`} target="_blank" rel="noopener noreferrer">
                           Register
                         </a>
                       </Button>
@@ -402,15 +402,19 @@ export function WebinarsSection() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRegister(webinar);
-                              }}
-                              disabled={isProcessing}
-                              className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
-                              style={{ aspectRatio: '1/1' }}
+                            // onClick={(e) => {
+                            //   e.stopPropagation();
+                            //   handleRegister(webinar);
+                            // }}
+                            // disabled={isProcessing}
+                            // className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
+                            // style={{ aspectRatio: '1/1' }}
                             >
-                              <CheckCircleIcon className="h-4 w-4" />
+                              {/* <CheckCircleIcon className="h-4 w-4" /> */}
+                              <a href={"https://app.royallegalsolutions.com/royal-tv/mm-10-22-25/user"} target="_blank" rel="noopener noreferrer">
+                                <CheckCircleIcon className="h-4 w-4" />
+                              </a>
+
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">

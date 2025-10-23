@@ -11,7 +11,7 @@ interface Message {
 }
 
 // Helper function to convert URLs in text to clickable links
-const linkifyText = (text: string) => {
+const linkifyText = (text: string, isOwnMessage: boolean = false) => {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const parts = text.split(urlRegex);
 
@@ -23,7 +23,10 @@ const linkifyText = (text: string) => {
           href={part}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-800 underline"
+          className={`underline ${isOwnMessage
+            ? 'text-blue-100 hover:text-white'
+            : 'text-blue-600 hover:text-blue-800'
+            }`}
         >
           {part}
         </a>
@@ -31,41 +34,6 @@ const linkifyText = (text: string) => {
     }
     return <span key={index}>{part}</span>;
   });
-};
-
-// Generate a consistent color for a username based on hash
-const getUserColor = (username: string): string => {
-  const colors = [
-    '#E53E3E', // red
-    '#DD6B20', // orange
-    '#D69E2E', // yellow
-    '#38A169', // green
-    '#319795', // teal
-    '#3182CE', // blue
-    '#5A67D8', // indigo
-    '#805AD5', // purple
-    '#D53F8C', // pink
-    '#E91E63', // rose
-    '#00897B', // cyan
-    '#7CB342', // lime
-  ];
-
-  // Simple hash function
-  let hash = 0;
-  for (let i = 0; i < username.length; i++) {
-    hash = username.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  return colors[Math.abs(hash) % colors.length];
-};
-
-// Get user initials from name
-const getUserInitials = (username: string): string => {
-  const words = username.trim().split(/\s+/);
-  if (words.length === 1) {
-    return words[0].substring(0, 2).toUpperCase();
-  }
-  return (words[0][0].toUpperCase());
 };
 
 // Clean display name by removing "(User)" role but keeping Admin/Guest
@@ -284,7 +252,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden">
       {/* Header with clear button for admin */}
-      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200">
+      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 bg-gray-50">
         <h3 className="text-base font-semibold text-gray-800">Live Chat</h3>
         {isAdmin && (
           <button
@@ -297,50 +265,62 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
         )}
       </div>
 
-      {/* Messages Area - Simple list style */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      {/* Messages Area - WhatsApp style */}
+      <div
+        className="flex-1 overflow-y-auto px-3 py-2 relative"
+        style={{
+          backgroundColor: '#efeae2',
+          backgroundImage: `
+            linear-gradient(45deg, rgba(0,0,0,.02) 25%, transparent 25%),
+            linear-gradient(-45deg, rgba(0,0,0,.02) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, rgba(0,0,0,.02) 75%),
+            linear-gradient(-45deg, transparent 75%, rgba(0,0,0,.02) 75%)
+          `,
+          backgroundSize: '20px 20px',
+          backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
+        }}
+      >
         {messages.map(msg => {
-          const userColor = getUserColor(msg.sender);
-          const userInitials = getUserInitials(msg.sender);
           const displayName = getDisplayName(msg.sender);
+          const isOwnMessage = msg.sender === (dailyRoom?.participants().local.user_name || "Guest");
 
           return (
             <div
               key={msg.id}
-              className="mb-3 animate-in fade-in duration-200"
+              className={`flex mb-2 animate-in fade-in duration-200 ${isOwnMessage ? 'justify-end' : 'justify-start'
+                }`}
             >
-              {/* Sender Info with Avatar */}
-              <div className="flex items-center gap-2 mb-1">
-                {/* Circular Avatar with Initials */}
+              <div className={`max-w-[75%] ${isOwnMessage ? 'items-end' : 'items-start'}`}>
+                {/* Sender name - only show for other people's messages */}
+                {!isOwnMessage && (
+                  <div className="text-xs font-semibold text-gray-700 mb-1 px-1">
+                    {displayName}
+                  </div>
+                )}
+
+                {/* Message bubble */}
                 <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                  style={{ backgroundColor: userColor }}
-                  title={displayName}
+                  className={`rounded-lg px-3 py-2 shadow-md ${isOwnMessage
+                    ? 'bg-blue-500 text-white rounded-br-none'
+                    : 'bg-white text-black rounded-bl-none border border-gray-200'
+                    }`}
                 >
-                  {userInitials}
+                  {/* Message text */}
+                  <p className={`break-words ${isOwnMessage ? 'text-sm' : 'text-[15px] font-normal'
+                    }`} style={{ lineHeight: '1.5' }}>
+                    {linkifyText(msg.text, isOwnMessage)}
+                  </p>
+
+                  {/* Timestamp at bottom right of bubble */}
+                  <div className={`text-[10px] mt-1 text-right ${isOwnMessage ? 'text-blue-100' : 'text-gray-600'
+                    }`}>
+                    {new Date(msg.timestamp).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
                 </div>
-
-                {/* Name with matching color */}
-                <span
-                  className="text-sm font-semibold"
-                  style={{ color: userColor }}
-                >
-                  {displayName}
-                </span>
-
-                {/* Timestamp */}
-                <span className="text-xs text-gray-500">
-                  {new Date(msg.timestamp).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
-                </span>
               </div>
-
-              {/* Message Text - slightly indented to align with avatar */}
-              <p className="text-sm text-black break-words ml-8" style={{ lineHeight: '1.25em' }}>
-                {linkifyText(msg.text)}
-              </p>
             </div>
           );
         })}
@@ -348,14 +328,22 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
       </div>
 
       {/* Input Area */}
-      <div className="px-4 py-3 border-t border-gray-200">
+      <div className="px-3 py-3 border-t border-gray-200 bg-white">
         <div className="flex items-center gap-2">
+          <button
+            className="bg-gray-100 text-gray-700 p-2 rounded-full hover:bg-gray-200 transition-colors flex-shrink-0"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            title="Add emoji"
+          >
+            <Smile size={20} />
+          </button>
+
           <div className="flex-1 relative">
             <input
               ref={inputRef}
               type="text"
-              className="w-full border border-gray-300 rounded-md text-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-              placeholder="Type a message..."
+              className="w-full border border-gray-300 rounded-full text-gray-900 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+              placeholder="Type a message"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
@@ -377,18 +365,15 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
               </div>
             )}
           </div>
+
           <button
-            className="bg-gray-100 text-gray-700 p-2 rounded-md hover:bg-gray-200 transition-colors"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            title="Add emoji"
-          >
-            <Smile size={18} />
-          </button>
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors font-medium text-sm"
+            className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors font-medium flex-shrink-0"
             onClick={sendMessage}
+            title="Send message"
           >
-            Send
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+            </svg>
           </button>
         </div>
       </div>

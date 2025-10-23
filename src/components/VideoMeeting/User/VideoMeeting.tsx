@@ -50,7 +50,7 @@ export const VideoMeeting = () => {
           <h1 className="text-sm sm:text-lg md:text-2xl font-bold text-royal-dark-gray uppercase truncate">
             {loading ? "Loading..." : (
               <>
-                {webinar?.name || "Webinar"} {format(new Date(webinar.date), "MM-dd-yy")}
+                {webinar?.name || "Webinar"} {format(new Date(webinar?.date), "MM-dd-yy")}
               </>
             )}
           </h1>

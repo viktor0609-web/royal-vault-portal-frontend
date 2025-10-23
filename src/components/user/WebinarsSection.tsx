@@ -26,6 +26,9 @@ interface Webinar {
   status: string;
   portalDisplay: string;
   slug: string;
+  line1: string;
+  line2: string;
+  line3: string;
   attendees?: Array<{
     user: string;
     attendanceStatus: string;
@@ -298,7 +301,7 @@ export function WebinarsSection() {
               >
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm sm:text-lg font-semibold text-royal-dark-gray mb-1 sm:mb-2 group-hover:text-royal-blue transition-colors duration-75 line-clamp-2">
-                    {webinar.name}
+                    {webinar.line1}
                   </h3>
                   <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-royal-gray flex-wrap">
                     <span className="group-hover:text-royal-dark-gray transition-colors duration-75">

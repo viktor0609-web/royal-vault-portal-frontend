@@ -145,16 +145,20 @@ export function WebinarSection() {
                     await handleDeleteWebinar(item!._id);
                     break;
                 }
+                case 'register': {
+                    window.open(`/webinar-register?id=${item!._id}&title=${encodeURIComponent(item!.name)}&date=${encodeURIComponent(item!.date)}`, "_blank");
+                    break;
+                }
                 case 'web': {
-                    navigate(`/royal-tv/${item!.slug}/user`);
+                    window.open(`/royal-tv/${item!.slug}/user`, "_blank");
                     break;
                 }
                 case 'host': {
-                    navigate(`/royal-tv/${item!.slug}/admin`);
+                    window.open(`/royal-tv/${item!.slug}/admin`, "_blank");
                     break;
                 }
                 case 'guest': {
-                    navigate(`/royal-tv/${item!.slug}/guest`);
+                    window.open(`/royal-tv/${item!.slug}/guest`, "_blank");
                     break;
                 }
                 case 'recs': {
@@ -321,6 +325,13 @@ export function WebinarSection() {
                                         </Button>
                                         <Button
                                             className="w-16"
+                                            onClick={() => handlebtnClick('register', webinar)}
+                                            disabled={actionLoading === 'register'}
+                                        >
+                                            {actionLoading === 'register' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Register'}
+                                        </Button>
+                                        <Button
+                                            className="w-16"
                                             onClick={() => handlebtnClick('web', webinar)}
                                             disabled={actionLoading === 'web'}
                                         >
@@ -433,6 +444,14 @@ export function WebinarSection() {
                         </div>
 
                         <div className="flex gap-1 flex-wrap min-w-0">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlebtnClick('register', webinar)}
+                                className="text-xs px-2 py-1 h-7 flex-shrink-0"
+                            >
+                                Register
+                            </Button>
                             <Button
                                 variant="outline"
                                 size="sm"

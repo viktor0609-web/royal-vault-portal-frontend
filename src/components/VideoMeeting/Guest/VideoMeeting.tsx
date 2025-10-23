@@ -1,11 +1,45 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { BoxSelectIcon, UserIcon } from "lucide-react";
 import { Button } from "../../ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui/select";
 import { GuestMeeting } from "./GuestMeeting";
+import { webinarApi } from "@/lib/api";
+import { format } from "date-fns";
+
+interface Webinar {
+    _id: string;
+    name: string;
+    slug: string;
+    line1: string;
+    line2?: string;
+    line3?: string;
+    date: string;
+    streamType: string;
+    status: string;
+}
 
 export const VideoMeeting = () => {
+    const { slug } = useParams<{ slug: string }>();
+    const [webinar, setWebinar] = useState<Webinar | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchWebinar = async () => {
+            if (!slug) return;
+            try {
+                setLoading(true);
+                const response = await webinarApi.getPublicWebinarBySlug(slug);
+                setWebinar(response.data.webinar);
+            } catch (error) {
+                console.error("Error fetching webinar:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchWebinar();
+    }, [slug]);
 
     return (
         <div className="h-dvh w-screen flex flex-col overflow-hidden @container">
@@ -14,7 +48,11 @@ export const VideoMeeting = () => {
                 <div className="flex gap-2 sm:gap-4 items-center min-w-0">
                     <BoxSelectIcon className="h-6 w-6 sm:h-10 sm:w-10 text-royal-gray flex-shrink-0" />
                     <h1 className="text-sm sm:text-lg md:text-2xl font-bold text-royal-dark-gray uppercase truncate">
-                        Mindset Mastery 10-22-25
+                        {loading ? "Loading..." : (
+                            <>
+                                {webinar?.name || "Webinar"} {format(new Date(webinar.date), "MM-dd-yy")}
+                            </>
+                        )}
                     </h1>
                 </div>
             </header>

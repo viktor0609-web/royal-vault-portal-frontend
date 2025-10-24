@@ -223,7 +223,7 @@ export const AdminMeeting = () => {
 
                 {joined && showChatBox && (
                     <div className="fixed inset-0 z-50 sm:relative sm:inset-auto flex border-l bg-gray-900 text-white">
-                        <div className="w-full sm:w-80 p-4 flex flex-col">
+                        <div className="w-full sm:w-80 lg:w-96 p-4 flex flex-col">
                             {/* Mobile close button */}
                             <div className="flex justify-end mb-2 sm:hidden">
                                 <Button

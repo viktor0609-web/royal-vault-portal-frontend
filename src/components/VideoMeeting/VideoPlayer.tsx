@@ -29,7 +29,7 @@ export const VideoPlayer = React.memo(({
     if (!track && showAvatarWhenOff && participantName) {
         const avatarSize = thumbnail ? 'sm' : 'xl';
         return (
-            <div className="w-full h-full aspect-video flex items-center justify-center bg-gray-800">
+            <div className="w-full h-full flex items-center justify-center">
                 <CameraOffAvatar
                     name={participantName}
                     size={avatarSize}

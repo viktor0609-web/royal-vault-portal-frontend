@@ -345,7 +345,7 @@ export function WebinarsSection() {
                       // disabled={isProcessing}
                       // className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
                       >
-                        <a href={`https://app.royallegalsolutions.com/royal-tv/${webinar.slug}/user`} target="_blank" rel="noopener noreferrer">
+                        <a href={`/royal-tv/${webinar.slug}/user`} target="_blank" rel="noopener noreferrer">
                           Register
                         </a>
                       </Button>
@@ -411,7 +411,7 @@ export function WebinarsSection() {
                             // style={{ aspectRatio: '1/1' }}
                             >
                               {/* <CheckCircleIcon className="h-4 w-4" /> */}
-                              <a href={"https://app.royallegalsolutions.com/royal-tv/mm-10-22-25/user"} target="_blank" rel="noopener noreferrer">
+                              <a href={`/royal-tv/${webinar.slug}/user`} target="_blank" rel="noopener noreferrer">
                                 <CheckCircleIcon className="h-4 w-4" />
                               </a>
 

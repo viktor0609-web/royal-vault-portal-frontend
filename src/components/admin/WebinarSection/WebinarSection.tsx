@@ -2,11 +2,17 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
-import { ReceiptRussianRuble, VideoIcon, Users, Eye, Edit, BarChart3, Calendar, UserCheck, Trash2, Loader2, RefreshCw } from "lucide-react";
+import { ReceiptRussianRuble, VideoIcon, Users, Eye, Edit, BarChart3, Calendar, UserCheck, Trash2, Loader2, RefreshCw, Menu, MoreVertical } from "lucide-react";
 import { WebinarModal } from "./WebinarModal";
 import { RecsModal } from "./RecsModal";
 import { webinarApi, api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Webinar {
     _id: string;
@@ -276,27 +282,27 @@ export function WebinarSection() {
 
             {/* Desktop Table View */}
             <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <Table className="w-full min-w-[1000px] text-sm">
+                <Table className="w-full">
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-48 min-w-48">Webinar</TableHead>
-                            <TableHead className="w-32 min-w-32">Status</TableHead>
-                            <TableHead className="w-32 min-w-32">PortalDisplay</TableHead>
-                            <TableHead className="w-32 min-w-32">Date EST</TableHead>
-                            <TableHead className="w-32 min-w-32">Registrants</TableHead>
-                            <TableHead className="w-32 min-w-32">Attendees</TableHead>
-                            <TableHead className="w-32 min-w-32">Re-Watch</TableHead>
-                            <TableHead className="w-32 min-w-32 text-right">
-
+                            <TableHead className="px-1 py-1.5 text-sm font-semibold">Webinar</TableHead>
+                            <TableHead className="px-1 py-1.5 w-24 text-sm font-semibold">Status</TableHead>
+                            <TableHead className="px-1 py-1.5 w-28 text-sm font-semibold">Portal</TableHead>
+                            <TableHead className="px-1 py-1.5 w-32 text-sm font-semibold">Date EST</TableHead>
+                            <TableHead className="px-1 py-1.5 w-20 text-center text-sm font-semibold">Reg.</TableHead>
+                            <TableHead className="px-1 py-1.5 w-20 text-center text-sm font-semibold">Att.</TableHead>
+                            <TableHead className="px-1 py-1.5 w-20 text-center text-sm font-semibold">Watch</TableHead>
+                            <TableHead className="px-1 py-1.5 text-right whitespace-nowrap text-sm font-semibold">
+                                Actions
                             </TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {webinars.map((webinar) => (
                             <TableRow key={webinar._id}>
-                                <TableCell>{webinar.name}</TableCell>
-                                <TableCell>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${webinar.status === 'Scheduled' ? 'bg-blue-100 text-blue-800' :
+                                <TableCell className="px-1 py-1.5 max-w-[200px] truncate text-sm font-medium">{webinar.name}</TableCell>
+                                <TableCell className="px-1 py-1.5">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${webinar.status === 'Scheduled' ? 'bg-blue-100 text-blue-800' :
                                         webinar.status === 'In Progress' ? 'bg-green-100 text-green-800' :
                                             webinar.status === 'Ended' ? 'bg-gray-100 text-gray-800' :
                                                 'bg-yellow-100 text-yellow-800'
@@ -304,65 +310,132 @@ export function WebinarSection() {
                                         {webinar.status}
                                     </span>
                                 </TableCell>
-                                <TableCell>
-                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${webinar.portalDisplay === 'Yes' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                <TableCell className="px-1 py-1.5">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${webinar.portalDisplay === 'Yes' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                                         }`}>
                                         {webinar.portalDisplay}
                                     </span>
                                 </TableCell>
-                                <TableCell>{formatDate(webinar.date)}</TableCell>
-                                <TableCell>{getRegistrantsCount(webinar.attendees)}</TableCell>
-                                <TableCell>{getAttendeesCount(webinar.attendees)}</TableCell>
-                                <TableCell>{getReWatchCount(webinar.attendees)}</TableCell>
-                                <TableCell className="w-96 min-w-96">
-                                    <div className="flex gap-1 justify-end">
+                                <TableCell className="px-1 py-1.5 text-sm whitespace-nowrap">{formatDate(webinar.date)}</TableCell>
+                                <TableCell className="px-1 py-1.5 text-center text-sm">{getRegistrantsCount(webinar.attendees)}</TableCell>
+                                <TableCell className="px-1 py-1.5 text-center text-sm">{getAttendeesCount(webinar.attendees)}</TableCell>
+                                <TableCell className="px-1 py-1.5 text-center text-sm">{getReWatchCount(webinar.attendees)}</TableCell>
+                                <TableCell className="px-1 py-1.5">
+                                    {/* Full buttons for xl screens and above */}
+                                    <div className="hidden xl:flex gap-1 justify-end flex-nowrap">
                                         <Button
-                                            className="w-16"
+                                            size="sm"
+                                            className="h-8 px-3 text-sm"
                                             onClick={() => handlebtnClick('edit', webinar)}
                                             disabled={actionLoading === 'edit'}
                                         >
                                             {actionLoading === 'edit' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Edit'}
                                         </Button>
                                         <Button
-                                            className="w-16"
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-8 px-3 text-sm"
                                             onClick={() => handlebtnClick('register', webinar)}
                                             disabled={actionLoading === 'register'}
                                         >
-                                            {actionLoading === 'register' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Register'}
+                                            {actionLoading === 'register' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reg'}
                                         </Button>
                                         <Button
-                                            className="w-16"
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-8 px-3 text-sm"
                                             onClick={() => handlebtnClick('web', webinar)}
                                             disabled={actionLoading === 'web'}
                                         >
                                             {actionLoading === 'web' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Web'}
                                         </Button>
                                         <Button
-                                            className="w-16"
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-8 px-3 text-sm"
                                             onClick={() => handlebtnClick('host', webinar)}
                                             disabled={actionLoading === 'host'}
                                         >
                                             {actionLoading === 'host' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Host'}
                                         </Button>
                                         <Button
-                                            className="w-16"
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-8 px-3 text-sm"
                                             onClick={() => handlebtnClick('guest', webinar)}
                                             disabled={actionLoading === 'guest'}
                                         >
                                             {actionLoading === 'guest' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Guest'}
                                         </Button>
                                         <Button
-                                            className="w-16"
+                                            size="sm"
+                                            className="h-8 px-3 text-sm"
                                             onClick={() => handlebtnClick('recs', webinar)}
                                             disabled={actionLoading === 'recs'}
                                         >
                                             {actionLoading === 'recs' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recs'}
                                         </Button>
                                         <Button
-                                            className="w-16 bg-red-500 hover:bg-red-600"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600"
                                             onClick={() => handlebtnClick('delete', webinar)}
+                                            disabled={actionLoading === 'delete'}
                                         >
-                                            <Trash2 className="h-4 w-4" />
+                                            {actionLoading === 'delete' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                        </Button>
+                                    </div>
+
+                                    {/* Compact dropdown for lg screens */}
+                                    <div className="flex xl:hidden gap-1 justify-end">
+                                        <Button
+                                            size="sm"
+                                            className="h-8 px-3 text-sm"
+                                            onClick={() => handlebtnClick('edit', webinar)}
+                                            disabled={actionLoading === 'edit'}
+                                        >
+                                            {actionLoading === 'edit' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Edit'}
+                                        </Button>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-8 w-8 p-0"
+                                                    disabled={actionLoading !== null}
+                                                >
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => handlebtnClick('register', webinar)}>
+                                                    Register
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handlebtnClick('web', webinar)}>
+                                                    Web
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handlebtnClick('host', webinar)}>
+                                                    Host
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handlebtnClick('guest', webinar)}>
+                                                    Guest
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                        <Button
+                                            size="sm"
+                                            className="h-8 px-3 text-sm"
+                                            onClick={() => handlebtnClick('recs', webinar)}
+                                            disabled={actionLoading === 'recs'}
+                                        >
+                                            {actionLoading === 'recs' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recs'}
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600"
+                                            onClick={() => handlebtnClick('delete', webinar)}
+                                            disabled={actionLoading === 'delete'}
+                                        >
+                                            {actionLoading === 'delete' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                         </Button>
                                     </div>
                                 </TableCell>

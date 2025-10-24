@@ -114,7 +114,7 @@ export const UserMeeting = () => {
                 <div
                     ref={videoContainerRef}
                     id="daily-video-container"
-                    className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full relative aspect-video @[480px]/meeting:aspect-[16/9] ${joined ? "" : "p-2 sm:p-4"}`}
+                    className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full ${joined ? "" : "p-2 sm:p-4"}`}
                 >
                     {joined && (
                         <div className="h-full flex flex-col min-h-0 max-w-full">

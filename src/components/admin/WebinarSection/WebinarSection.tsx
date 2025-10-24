@@ -325,7 +325,7 @@ export function WebinarSection() {
                                     <div className="hidden xl:flex gap-1 justify-end flex-nowrap">
                                         <Button
                                             size="sm"
-                                            className="h-8 px-3 text-sm"
+                                            className="h-8 px-3 text-sm bg-blue-600 hover:bg-blue-700 text-white"
                                             onClick={() => handlebtnClick('edit', webinar)}
                                             disabled={actionLoading === 'edit'}
                                         >
@@ -333,8 +333,7 @@ export function WebinarSection() {
                                         </Button>
                                         <Button
                                             size="sm"
-                                            variant="outline"
-                                            className="h-8 px-3 text-sm"
+                                            className="h-8 px-3 text-sm bg-emerald-600 hover:bg-emerald-700 text-white"
                                             onClick={() => handlebtnClick('register', webinar)}
                                             disabled={actionLoading === 'register'}
                                         >
@@ -342,8 +341,7 @@ export function WebinarSection() {
                                         </Button>
                                         <Button
                                             size="sm"
-                                            variant="outline"
-                                            className="h-8 px-3 text-sm"
+                                            className="h-8 px-3 text-sm bg-purple-600 hover:bg-purple-700 text-white"
                                             onClick={() => handlebtnClick('web', webinar)}
                                             disabled={actionLoading === 'web'}
                                         >
@@ -351,8 +349,7 @@ export function WebinarSection() {
                                         </Button>
                                         <Button
                                             size="sm"
-                                            variant="outline"
-                                            className="h-8 px-3 text-sm"
+                                            className="h-8 px-3 text-sm bg-amber-600 hover:bg-amber-700 text-white"
                                             onClick={() => handlebtnClick('host', webinar)}
                                             disabled={actionLoading === 'host'}
                                         >
@@ -360,8 +357,7 @@ export function WebinarSection() {
                                         </Button>
                                         <Button
                                             size="sm"
-                                            variant="outline"
-                                            className="h-8 px-3 text-sm"
+                                            className="h-8 px-3 text-sm bg-teal-600 hover:bg-teal-700 text-white"
                                             onClick={() => handlebtnClick('guest', webinar)}
                                             disabled={actionLoading === 'guest'}
                                         >
@@ -369,7 +365,7 @@ export function WebinarSection() {
                                         </Button>
                                         <Button
                                             size="sm"
-                                            className="h-8 px-3 text-sm"
+                                            className="h-8 px-3 text-sm bg-indigo-600 hover:bg-indigo-700 text-white"
                                             onClick={() => handlebtnClick('recs', webinar)}
                                             disabled={actionLoading === 'recs'}
                                         >
@@ -377,7 +373,7 @@ export function WebinarSection() {
                                         </Button>
                                         <Button
                                             size="sm"
-                                            className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600"
+                                            className="h-8 w-8 p-0 bg-red-600 hover:bg-red-700 text-white"
                                             onClick={() => handlebtnClick('delete', webinar)}
                                             disabled={actionLoading === 'delete'}
                                         >
@@ -389,7 +385,7 @@ export function WebinarSection() {
                                     <div className="flex xl:hidden gap-1 justify-end">
                                         <Button
                                             size="sm"
-                                            className="h-8 px-3 text-sm"
+                                            className="h-8 px-3 text-sm bg-blue-600 hover:bg-blue-700 text-white"
                                             onClick={() => handlebtnClick('edit', webinar)}
                                             disabled={actionLoading === 'edit'}
                                         >
@@ -400,30 +396,30 @@ export function WebinarSection() {
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
-                                                    className="h-8 w-8 p-0"
+                                                    className="h-8 w-8 p-0 border-slate-300 hover:bg-slate-100"
                                                     disabled={actionLoading !== null}
                                                 >
                                                     <MoreVertical className="h-4 w-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handlebtnClick('register', webinar)}>
-                                                    Register
+                                            <DropdownMenuContent align="end" className="w-36">
+                                                <DropdownMenuItem onClick={() => handlebtnClick('register', webinar)} className="cursor-pointer">
+                                                    <span className="text-emerald-700 font-medium">Register</span>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handlebtnClick('web', webinar)}>
-                                                    Web
+                                                <DropdownMenuItem onClick={() => handlebtnClick('web', webinar)} className="cursor-pointer">
+                                                    <span className="text-purple-700 font-medium">Web</span>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handlebtnClick('host', webinar)}>
-                                                    Host
+                                                <DropdownMenuItem onClick={() => handlebtnClick('host', webinar)} className="cursor-pointer">
+                                                    <span className="text-amber-700 font-medium">Host</span>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => handlebtnClick('guest', webinar)}>
-                                                    Guest
+                                                <DropdownMenuItem onClick={() => handlebtnClick('guest', webinar)} className="cursor-pointer">
+                                                    <span className="text-teal-700 font-medium">Guest</span>
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                         <Button
                                             size="sm"
-                                            className="h-8 px-3 text-sm"
+                                            className="h-8 px-3 text-sm bg-indigo-600 hover:bg-indigo-700 text-white"
                                             onClick={() => handlebtnClick('recs', webinar)}
                                             disabled={actionLoading === 'recs'}
                                         >
@@ -431,7 +427,7 @@ export function WebinarSection() {
                                         </Button>
                                         <Button
                                             size="sm"
-                                            className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600"
+                                            className="h-8 w-8 p-0 bg-red-600 hover:bg-red-700 text-white"
                                             onClick={() => handlebtnClick('delete', webinar)}
                                             disabled={actionLoading === 'delete'}
                                         >

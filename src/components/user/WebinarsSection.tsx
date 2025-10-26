@@ -183,13 +183,11 @@ export function WebinarsSection() {
     switch (filterIndex) {
       case 0: // UPCOMING
         return currentWebinars.filter(webinar => {
-          const webinarDate = new Date(webinar.date);
-          return webinarDate > now && webinar.status !== 'Ended';
+          return webinar.status !== 'Ended';
         });
       case 1: // REPLAYS
         return currentWebinars.filter(webinar => {
-          const webinarDate = new Date(webinar.date);
-          return webinarDate <= now || webinar.status === 'Ended';
+          return webinar.status === 'Ended';
         });
       case 2: // WATCHED
         return currentWebinars.filter(webinar => {
@@ -274,18 +272,7 @@ export function WebinarsSection() {
                 key={webinar._id}
                 onClick={() => {
                   if (filterIndex === 0) {
-                    // For upcoming webinars, only registered users can access live webinar
-                    if (isRegistered) {
-                      handleJoinWebinar(webinar);
-                    } else {
-                      // Prevent navigation and show message
-                      toast({
-                        title: "Registration Required",
-                        description: "Please register for this webinar to access the live session",
-                        variant: "destructive",
-                      });
-                      return; // Prevent any further action
-                    }
+                    handleRegister(webinar);
                   } else if (filterIndex === 1) {
                     // For replays, anyone can access
                     handleJoinWebinar(webinar);
@@ -294,10 +281,7 @@ export function WebinarsSection() {
                     handleJoinWebinar(webinar);
                   }
                 }}
-                className={`flex items-center justify-between p-3 sm:p-6 bg-sidebar rounded-lg border border-royal-light-gray transition-all duration-75 ease-in-out group ${filterIndex === 0 && !isRegistered
-                  ? 'cursor-not-allowed opacity-75 hover:opacity-100'
-                  : 'cursor-pointer hover:shadow-sm hover:scale-[1.005] hover:border-royal-blue/10'
-                  }`}
+                className={`flex items-center justify-between p-3 sm:p-6 bg-sidebar rounded-lg border border-royal-light-gray transition-all duration-75 ease-in-out group cursor-pointer hover:shadow-sm hover:scale-[1.005] hover:border-royal-blue/10`}
               >
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm sm:text-lg font-semibold text-royal-dark-gray mb-1 sm:mb-2 group-hover:text-royal-blue transition-colors duration-75 line-clamp-2">
@@ -402,18 +386,18 @@ export function WebinarsSection() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
-                            // onClick={(e) => {
-                            //   e.stopPropagation();
-                            //   handleRegister(webinar);
-                            // }}
-                            // disabled={isProcessing}
-                            // className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
-                            // style={{ aspectRatio: '1/1' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRegister(webinar);
+                              }}
+                              disabled={isProcessing}
+                              className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
+                              style={{ aspectRatio: '1/1' }}
                             >
                               {/* <CheckCircleIcon className="h-4 w-4" /> */}
-                              <a href={`/royal-tv/${webinar.slug}/user`} target="_blank" rel="noopener noreferrer">
+                              {/* <a href={`/royal-tv/${webinar.slug}/user`} target="_blank" rel="noopener noreferrer">
                                 <CheckCircleIcon className="h-4 w-4" />
-                              </a>
+                              </a> */}
 
                             </Button>
                           </TooltipTrigger>

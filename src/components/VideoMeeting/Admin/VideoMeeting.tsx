@@ -1,12 +1,14 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { BoxSelectIcon, UserIcon } from "lucide-react";
 import { AdminMeeting } from "./AdminMeeting";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui/select";
+import { Button } from "../../ui/button";
 import { webinarApi } from "@/lib/api";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface Webinar {
   _id: string;
@@ -24,6 +26,9 @@ export const VideoMeeting = () => {
   const { slug } = useParams<{ slug: string }>();
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ending, setEnding] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchWebinar = async () => {
@@ -41,6 +46,37 @@ export const VideoMeeting = () => {
     fetchWebinar();
   }, [slug]);
 
+  const handleEndWebinar = async () => {
+    if (!webinar) return;
+
+    if (!confirm("Are you sure you want to end this webinar? This will close the meeting for all participants.")) {
+      return;
+    }
+
+    try {
+      setEnding(true);
+      await webinarApi.endWebinar(webinar._id);
+      toast({
+        title: "Webinar Ended",
+        description: "The webinar has been successfully ended.",
+      });
+
+      // Redirect to admin dashboard after a short delay
+      setTimeout(() => {
+        navigate("/admin");
+      }, 2000);
+    } catch (error) {
+      console.error("Error ending webinar:", error);
+      toast({
+        title: "Error",
+        description: "Failed to end the webinar. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setEnding(false);
+    }
+  };
+
   return (
     <div className="h-dvh w-screen flex flex-col overflow-hidden @container">
       {/* Header - Responsive with mobile-first approach */}
@@ -55,6 +91,16 @@ export const VideoMeeting = () => {
             )}
           </h1>
         </div>
+        <div className="flex gap-2 items-center">
+          <Button
+            onClick={handleEndWebinar}
+            disabled={ending || loading || webinar?.status === 'Ended'}
+            variant="destructive"
+            className="bg-red-600 hover:bg-red-700"
+          >
+            {ending ? "Ending..." : "End Webinar"}
+          </Button>
+        </div>
       </header>
 
 
@@ -62,7 +108,16 @@ export const VideoMeeting = () => {
       <main className="flex-1 min-h-0 grid grid-rows-1 grid-cols-1 @[768px]:grid-cols-[1fr_320px] @[1024px]:grid-cols-[1fr_400px] gap-0">
         {/* Video / Room Area - Responsive container */}
         <section className="p-2 sm:p-4 flex flex-col min-h-0 @container/video">
-          <AdminMeeting />
+          {webinar?.status === 'Ended' ? (
+            <div className="flex flex-1 items-center justify-center bg-gray-800 text-white rounded-lg">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold mb-2">Webinar Has Ended</h2>
+                <p className="text-gray-400">This webinar has been closed by the admin.</p>
+              </div>
+            </div>
+          ) : (
+            <AdminMeeting />
+          )}
         </section>
       </main>
     </div>

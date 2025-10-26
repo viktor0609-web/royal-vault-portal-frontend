@@ -394,7 +394,7 @@ export function WebinarsSection() {
                               className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
                               style={{ aspectRatio: '1/1' }}
                             >
-                              {/* <CheckCircleIcon className="h-4 w-4" /> */}
+                              <CheckCircleIcon className="h-4 w-4" />
                               {/* <a href={`/royal-tv/${webinar.slug}/user`} target="_blank" rel="noopener noreferrer">
                                 <CheckCircleIcon className="h-4 w-4" />
                               </a> */}

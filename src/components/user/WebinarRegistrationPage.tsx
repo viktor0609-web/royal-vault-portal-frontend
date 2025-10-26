@@ -60,7 +60,7 @@ export function WebinarRegistrationPage() {
                 setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
                 console.log(isRegistered, diff);
 
-                if (isRegistered) {
+                if (isRegistered && user.role === 'user') {
                     navigate(`/royal-tv/${webinar?.slug}/user`);
                 }
                 return;

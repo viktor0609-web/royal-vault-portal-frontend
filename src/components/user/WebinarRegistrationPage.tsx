@@ -8,6 +8,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { register } from "module";
+import { log } from "console";
 
 export function WebinarRegistrationPage() {
     const [countdown, setCountdown] = useState({
@@ -37,6 +39,14 @@ export function WebinarRegistrationPage() {
         fetchWebinar();
     }, []);
 
+    useEffect(() => {
+        const checkRegistration = async () => {
+            const response = await webinarApi.getWebinarAttendees(webinarId);
+            setIsRegistered(response.data.attendees.some(attendee => attendee.user === user?._id));
+
+        };
+        checkRegistration();
+    }, [webinar, user]);
 
 
     useEffect(() => {
@@ -48,7 +58,11 @@ export function WebinarRegistrationPage() {
             if (diff <= 0) {
                 clearInterval(interval);
                 setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-                navigate(`/royal-tv/${webinar?.slug}/user`);
+                console.log(isRegistered, diff);
+
+                if (isRegistered) {
+                    navigate(`/royal-tv/${webinar?.slug}/user`);
+                }
                 return;
             }
 
@@ -61,7 +75,7 @@ export function WebinarRegistrationPage() {
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [webinar?.date]);
+    }, [webinar?.date, isRegistered]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

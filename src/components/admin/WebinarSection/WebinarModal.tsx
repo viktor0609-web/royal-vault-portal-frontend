@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { webinarApi, api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { Search, X } from "lucide-react";
+import { Search, X, Plus, Trash2 } from "lucide-react";
 import { formatDateForInput, convertLocalToUTC } from "@/utils/dateUtils";
 
 // Form field configuration with required/optional indicators
@@ -71,6 +71,9 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [ctas, setCtas] = useState<Array<{ label: string; link: string }>>([]);
+  const [ctaLabel, setCtaLabel] = useState('');
+  const [ctaLink, setCtaLink] = useState('');
   const { toast } = useToast();
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -121,6 +124,7 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
         attendOverwrite: editingWebinar.attendOverwrite || "",
         recording: editingWebinar.recording || "",
       });
+      setCtas(editingWebinar.ctas || []);
     } else {
       // Reset form for new webinar
       setFormData({
@@ -143,6 +147,7 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
         attendOverwrite: "",
         recording: "",
       });
+      setCtas([]);
     }
   }, [editingWebinar, isOpen]);
 
@@ -194,7 +199,8 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
       // Prepare data for submission - convert local datetime to UTC for MongoDB
       const submitData = {
         ...formData,
-        date: convertLocalToUTC(formData.date)
+        date: convertLocalToUTC(formData.date),
+        ctas: ctas.filter(cta => cta.label.trim() !== '' && cta.link.trim() !== '')
       };
 
       let response;
@@ -228,6 +234,25 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const addCta = () => {
+    if (ctaLabel.trim() === '' || ctaLink.trim() === '') {
+      toast({
+        title: "Validation Error",
+        description: "Both label and link are required for CTA",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCtas([...ctas, { label: ctaLabel.trim(), link: ctaLink.trim() }]);
+    setCtaLabel('');
+    setCtaLink('');
+  };
+
+  const removeCta = (index: number) => {
+    setCtas(ctas.filter((_, i) => i !== index));
   };
 
   return (
@@ -442,6 +467,77 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
                 )
             }
           })}
+
+          {/* Call to Action Section */}
+          <div className="border-t pt-4">
+            <Label className="text-royal-dark-gray font-medium text-base mb-3 block">
+              Call to Action Buttons
+            </Label>
+
+            {/* Input fields for new CTA */}
+            <div className="space-y-3 mb-4 p-3 border rounded-md bg-gray-50">
+              <div>
+                <Label htmlFor="new-cta-label" className="text-sm text-gray-600">
+                  Button Label
+                </Label>
+                <Input
+                  id="new-cta-label"
+                  placeholder="e.g., Register Now, Learn More"
+                  value={ctaLabel}
+                  onChange={(e) => setCtaLabel(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="new-cta-link" className="text-sm text-gray-600">
+                  Link URL
+                </Label>
+                <Input
+                  id="new-cta-link"
+                  placeholder="https://example.com"
+                  value={ctaLink}
+                  onChange={(e) => setCtaLink(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              <Button
+                type="button"
+                onClick={addCta}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 w-full"
+              >
+                <Plus className="h-4 w-4" />
+                Add CTA
+              </Button>
+            </div>
+
+            {/* List of added CTAs */}
+            {ctas.length === 0 ? (
+              <div className="text-sm text-gray-500 text-center py-4 border border-dashed rounded-md">
+                No CTAs added yet. Fill in the label and link above, then click "Add CTA".
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label className="text-sm text-gray-600">Added CTAs:</Label>
+                {ctas.map((cta, index) => (
+                  <div key={index} className="flex items-start justify-between border rounded-md p-3 bg-white">
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">{cta.label}</div>
+                      <div className="text-sm text-gray-500 break-all">{cta.link}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeCta(index)}
+                      className="ml-2 text-red-500 hover:text-red-700 flex-shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {error && (
             <div className="text-red-500 text-sm">{error}</div>

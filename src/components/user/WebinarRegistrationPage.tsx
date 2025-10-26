@@ -63,6 +63,7 @@ export function WebinarRegistrationPage() {
                 if (isRegistered && user.role === 'user') {
                     navigate(`/royal-tv/${webinar?.slug}/user`);
                 }
+
                 return;
             }
 

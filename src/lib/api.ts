@@ -250,6 +250,8 @@ export const webinarApi = {
   markUserAsMissed: (webinarId: string, userId: string) =>
     api.post(`/api/webinars/admin/${webinarId}/user/${userId}/missed`),
 
+  endWebinar: (webinarId: string) => api.post(`/api/webinars/admin/${webinarId}/end`),
+
   // Public/User functions
   getPublicWebinars: (fields: 'basic' | 'detailed' | 'full' = 'basic', filters?: { status?: string; streamType?: string }) => {
     const params = new URLSearchParams();

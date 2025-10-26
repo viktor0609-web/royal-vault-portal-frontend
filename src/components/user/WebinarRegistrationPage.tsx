@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export function WebinarRegistrationPage() {
     const [countdown, setCountdown] = useState({
@@ -21,6 +22,7 @@ export function WebinarRegistrationPage() {
     const [formattedDate, setFormattedDate] = useState("");
     const { user } = useAuth();
     const { openDialog } = useAuthDialog();
+    const navigate = useNavigate();
 
     const params = new URLSearchParams(new URL(window.location.href).search);
     const webinarId = params.get('id');
@@ -46,6 +48,7 @@ export function WebinarRegistrationPage() {
             if (diff <= 0) {
                 clearInterval(interval);
                 setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+                navigate(`/royal-tv/${webinar?.slug}/user`);
                 return;
             }
 

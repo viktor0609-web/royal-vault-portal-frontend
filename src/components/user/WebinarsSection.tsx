@@ -338,12 +338,12 @@ export function WebinarsSection() {
                     ) : (
                       // If not registered, show register button
                       <Button
-                      // onClick={(e) => {
-                      //   e.stopPropagation();
-                      //   handleRegister(webinar);
-                      // }}
-                      // disabled={isProcessing}
-                      // className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRegister(webinar);
+                        }}
+                        disabled={isProcessing}
+                        className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
                       >
                         <a href={`/royal-tv/${webinar.slug}/user`} target="_blank" rel="noopener noreferrer">
                           Register

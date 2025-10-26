@@ -6,6 +6,7 @@ import { webinarApi } from "@/lib/api";
 import { format } from "date-fns";
 import { useAuth } from "@/context/AuthContext";
 import { useAuthDialog } from "@/context/AuthDialogContext";
+import { toast } from "@/hooks/use-toast";
 
 export function WebinarRegistrationPage() {
     const [countdown, setCountdown] = useState({
@@ -62,8 +63,22 @@ export function WebinarRegistrationPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (user) {
-            await webinarApi.registerForWebinar(webinarId, email);
-            setIsRegistered(true);
+            try {
+                await webinarApi.registerForWebinar(webinarId, email);
+                setIsRegistered(true);
+                toast({
+                    title: "Success!",
+                    description: "You have successfully registered for the webinar",
+                });
+            } catch (error) {
+                console.log(error);
+                toast({
+                    title: "Error",
+                    description: error.response?.data?.message || "Failed to register for the webinar",
+                    variant: "destructive",
+                });
+            }
+
         } else {
             const result = await webinarApi.isValidEmailAddress(email);
             if (result.data.exist) {

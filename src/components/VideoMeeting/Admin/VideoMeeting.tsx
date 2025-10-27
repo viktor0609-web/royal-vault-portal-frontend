@@ -27,6 +27,7 @@ export const VideoMeeting = () => {
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [loading, setLoading] = useState(true);
   const [ending, setEnding] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -45,6 +46,32 @@ export const VideoMeeting = () => {
     };
     fetchWebinar();
   }, [slug]);
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (!webinar) return;
+
+    try {
+      setUpdatingStatus(true);
+      await webinarApi.updateWebinar(webinar._id, { status: newStatus });
+
+      // Update local state
+      setWebinar({ ...webinar, status: newStatus });
+
+      toast({
+        title: "Status Updated",
+        description: `Webinar status changed to ${newStatus}`,
+      });
+    } catch (error) {
+      console.error("Error updating webinar status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update webinar status. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   const handleEndWebinar = async () => {
     if (!webinar) return;
@@ -91,12 +118,33 @@ export const VideoMeeting = () => {
             )}
           </h1>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-2 sm:gap-3 items-center flex-wrap sm:flex-nowrap">
+          {/* Status Dropdown */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Status:</span>
+            <Select
+              value={webinar?.status || "Scheduled"}
+              onValueChange={handleStatusChange}
+              disabled={updatingStatus || loading || webinar?.status === 'Ended'}
+            >
+              <SelectTrigger className="w-[130px] sm:w-[140px] h-9 sm:h-10 text-xs sm:text-sm">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Scheduled">Scheduled</SelectItem>
+                <SelectItem value="Waiting">Waiting</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Ended">Ended</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* End Webinar Button */}
           <Button
             onClick={handleEndWebinar}
             disabled={ending || loading || webinar?.status === 'Ended'}
             variant="destructive"
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-red-600 hover:bg-red-700 h-9 sm:h-10 text-xs sm:text-sm"
           >
             {ending ? "Ending..." : "End Webinar"}
           </Button>

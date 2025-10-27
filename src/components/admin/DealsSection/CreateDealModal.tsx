@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { dealApi, optionsApi, imageApi } from "@/lib/api";
 
 
@@ -28,7 +29,6 @@ const singleSelectFields = [
 const inputFields = [
   { title: 'Name', id: 'name', placeholder: 'The "New-Rich" Loophole To Pay 0-10% In Tax(Legally|)', type: 'input' },
   { title: 'URL', id: 'url', placeholder: 'www.dealwebsite.com', type: 'input' },
-  { title: 'Image', id: 'image', placeholder: 'Image', type: 'file' },
 ];
 
 interface CreateDealModalProps {
@@ -52,6 +52,9 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageInputType, setImageInputType] = useState<"file" | "url">("file");
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
   const [options, setOptions] = useState({
     categories: [],
@@ -72,6 +75,22 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
     }
   }, [isOpen]);
 
+  // Handle image file preview URL lifecycle
+  useEffect(() => {
+    // Create new preview URL if there's a file
+    if (imageFile) {
+      const previewUrl = URL.createObjectURL(imageFile);
+      setImagePreviewUrl(previewUrl);
+
+      // Cleanup function to revoke the URL when the effect runs again or component unmounts
+      return () => {
+        URL.revokeObjectURL(previewUrl);
+      };
+    } else {
+      setImagePreviewUrl(null);
+    }
+  }, [imageFile]);
+
   // Populate form when editing
   useEffect(() => {
     if (editingDeal) {
@@ -86,7 +105,16 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         image: editingDeal.image || "",
         source: editingDeal.source?._id || "",
       });
+      // Reset image file (blob URL cleanup happens automatically via useEffect)
       setImageFile(null);
+      setImageUrl("");
+      // Detect if existing image is a URL or file path
+      if (editingDeal.image && (editingDeal.image.startsWith('http://') || editingDeal.image.startsWith('https://'))) {
+        setImageInputType("url");
+        setImageUrl(editingDeal.image);
+      } else {
+        setImageInputType("file");
+      }
     } else {
       // Reset form for new deal
       setFormData({
@@ -100,7 +128,10 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         image: "",
         source: "",
       });
+      // Reset image file (blob URL cleanup happens automatically via useEffect)
       setImageFile(null);
+      setImageUrl("");
+      setImageInputType("file");
     }
   }, [editingDeal, isOpen]);
 
@@ -148,11 +179,15 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
     try {
       setLoading(true);
 
-      let imageUrl = formData.image;
+      let finalImageUrl = formData.image;
 
-      // Upload image if a new file is selected
-      if (imageFile) {
-        imageUrl = await uploadImage(imageFile);
+      // Determine which image source to use
+      if (imageInputType === "url" && imageUrl.trim()) {
+        // Use the URL input
+        finalImageUrl = imageUrl.trim();
+      } else if (imageInputType === "file" && imageFile) {
+        // Upload image file if a new file is selected
+        finalImageUrl = await uploadImage(imageFile);
       }
 
       // Transform formData to match backend expectations
@@ -162,7 +197,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
       const dealData = {
         name: formData.name,
         url: formData.url,
-        image: imageUrl,
+        image: finalImageUrl,
         categoryIds: formData.categories,
         subCategoryIds: formData.subCategories,
         typeIds: formData.types,
@@ -236,53 +271,100 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
               <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
                 {item.title}
               </Label>
-              {item.type === 'file' ? (
-                <div className="mt-1">
-                  {editingDeal && formData.image && (
-                    <div className="mb-3">
-                      <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
-                      <div className="relative inline-block">
-                        <img
-                          src={import.meta.env.VITE_BACKEND_URL + formData.image}
-                          alt="Current deal image"
-                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                        />
-                      </div>
-                    </div>
-                  )}
-                  <Input
-                    id={item.id}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="mb-2"
-                  />
-                  {imageFile && (
-                    <div className="mt-2">
-                      <Label className="text-sm text-gray-600 mb-2 block">New Image Preview:</Label>
-                      <div className="relative inline-block">
-                        <img
-                          src={URL.createObjectURL(imageFile)}
-                          alt="New image preview"
-                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Input
-                  id={item.id}
-                  placeholder={item.placeholder}
-                  value={formData[item.id as keyof typeof formData] as string}
-                  onChange={(e) => handleInputChange(item.id, e.target.value)}
-                  className="mt-1"
-                  required
-                  type="text"
-                />
-              )}
+              <Input
+                id={item.id}
+                placeholder={item.placeholder}
+                value={formData[item.id as keyof typeof formData] as string}
+                onChange={(e) => handleInputChange(item.id, e.target.value)}
+                className="mt-1"
+                type="text"
+              />
             </div>
           ))}
+
+          {/* Image Field with Tabs */}
+          <div>
+            <Label className="text-royal-dark-gray font-medium">Image</Label>
+            <Tabs
+              value={imageInputType}
+              onValueChange={(value) => setImageInputType(value as "file" | "url")}
+              className="mt-1"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="file">Upload File</TabsTrigger>
+                <TabsTrigger value="url">Use URL</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="file" className="space-y-2">
+                {editingDeal && formData.image && !formData.image.startsWith('http') && (
+                  <div className="mb-3">
+                    <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
+                    <div className="relative inline-block">
+                      <img
+                        src={import.meta.env.VITE_BACKEND_URL + formData.image}
+                        alt="Current deal image"
+                        className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                      />
+                    </div>
+                  </div>
+                )}
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="mb-2"
+                />
+                {imagePreviewUrl && (
+                  <div className="mt-2">
+                    <Label className="text-sm text-gray-600 mb-2 block">New Image Preview:</Label>
+                    <div className="relative inline-block">
+                      <img
+                        src={imagePreviewUrl}
+                        alt="New image preview"
+                        className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                      />
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="url" className="space-y-2">
+                {editingDeal && formData.image && formData.image.startsWith('http') && (
+                  <div className="mb-3">
+                    <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
+                    <div className="relative inline-block">
+                      <img
+                        src={formData.image}
+                        alt="Current deal image"
+                        className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                      />
+                    </div>
+                  </div>
+                )}
+                <Input
+                  placeholder="https://example.com/image.jpg"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  type="url"
+                />
+                {imageUrl && (
+                  <div className="mt-2">
+                    <Label className="text-sm text-gray-600 mb-2 block">Image Preview:</Label>
+                    <div className="relative inline-block">
+                      <img
+                        src={imageUrl}
+                        alt="Image preview"
+                        className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </div>
 
           {/* Multi-Select Fields */}
           {multiSelectFields.map((item) => {

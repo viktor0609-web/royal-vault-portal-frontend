@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -54,19 +56,28 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<any>(null);
   const { toast } = useToast();
+
+  // Track unsaved changes
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges(initialFormData, formData);
 
   useEffect(() => {
     if (editingCourse) {
-      setFormData({
+      const initialData = {
         title: editingCourse.title || "",
         description: editingCourse.description || "",
-      });
+      };
+      setFormData(initialData);
+      setInitialFormData(initialData);
     } else {
-      setFormData({
+      const emptyData = {
         title: "",
         description: "",
-      });
+      };
+      setFormData(emptyData);
+      setInitialFormData(emptyData);
     }
   }, [editingCourse, isOpen, courseGroupId]);
 
@@ -90,6 +101,7 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
           description: "Course created successfully",
         });
       }
+      resetChanges(); // Reset unsaved changes flag
       onCourseSaved(response.data, !!editingCourse);
       closeDialog();
     } catch (err: any) {
@@ -109,53 +121,81 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      if (hasUnsavedChanges) {
+        setShowCloseConfirmation(true);
+      } else {
+        closeDialog();
+      }
+    }
+  };
+
+  const confirmClose = () => {
+    setShowCloseConfirmation(false);
+    closeDialog();
+  };
+
+  const cancelClose = () => {
+    setShowCloseConfirmation(false);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={closeDialog}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogTitle className="text-xl font-semibold">
-          {editingCourse ? "Edit Course" : "Create Course"}
-        </DialogTitle>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="title" className="text-royal-dark-gray font-medium">
-              Title
-            </Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-              className="mt-1"
-              required
-            />
-          </div>
+    <>
+      <Dialog open={isOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogTitle className="text-xl font-semibold">
+            {editingCourse ? "Edit Course" : "Create Course"}
+          </DialogTitle>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="title" className="text-royal-dark-gray font-medium">
+                Title
+              </Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => handleInputChange("title", e.target.value)}
+                className="mt-1"
+                required
+              />
+            </div>
 
-          <div>
-            <Label htmlFor="description" className="text-royal-dark-gray font-medium">
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-              className="mt-1"
-              rows={3}
-              required
-            />
-          </div>
+            <div>
+              <Label htmlFor="description" className="text-royal-dark-gray font-medium">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => handleInputChange("description", e.target.value)}
+                className="mt-1"
+                rows={3}
+                required
+              />
+            </div>
 
-          {error && (
-            <div className="text-red-500 text-sm">{error}</div>
-          )}
+            {error && (
+              <div className="text-red-500 text-sm">{error}</div>
+            )}
 
-          <Button
-            type="submit"
-            className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
-            disabled={loading}
-          >
-            {loading ? "Saving..." : editingCourse ? "Update" : "Create"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <Button
+              type="submit"
+              className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
+              disabled={loading}
+            >
+              {loading ? "Saving..." : editingCourse ? "Update" : "Create"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <UnsavedChangesDialog
+        open={showCloseConfirmation}
+        onOpenChange={setShowCloseConfirmation}
+        onConfirm={confirmClose}
+        onCancel={cancelClose}
+      />
+    </>
   );
 }

@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { webinarApi, api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Search, X, Plus, Trash2 } from "lucide-react";
@@ -74,8 +76,15 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
   const [ctas, setCtas] = useState<Array<{ label: string; link: string }>>([]);
   const [ctaLabel, setCtaLabel] = useState('');
   const [ctaLink, setCtaLink] = useState('');
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<any>(null);
+  const [initialCtas, setInitialCtas] = useState<Array<{ label: string; link: string }>>([]);
   const { toast } = useToast();
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Track unsaved changes with custom hook
+  const ctasChanged = JSON.stringify(ctas) !== JSON.stringify(initialCtas);
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges(initialFormData, formData, ctasChanged);
 
   // Fetch promotional SMS lists when modal opens
   useEffect(() => {
@@ -104,7 +113,7 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
   // Populate form when editing
   useEffect(() => {
     if (editingWebinar) {
-      setFormData({
+      const initialData = {
         streamType: editingWebinar.streamType || "",
         date: formatDateForInput(editingWebinar.date),
         name: editingWebinar.name || "",
@@ -123,11 +132,15 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
         proSmsTime: editingWebinar.proSmsTime || "",
         attendOverwrite: editingWebinar.attendOverwrite || "",
         recording: editingWebinar.recording || "",
-      });
-      setCtas(editingWebinar.ctas || []);
+      };
+      const initialCtasData = editingWebinar.ctas || [];
+      setFormData(initialData);
+      setInitialFormData(initialData);
+      setCtas(initialCtasData);
+      setInitialCtas(initialCtasData);
     } else {
       // Reset form for new webinar
-      setFormData({
+      const emptyData = {
         streamType: "",
         date: "",
         name: "",
@@ -146,8 +159,11 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
         proSmsTime: "",
         attendOverwrite: "",
         recording: "",
-      });
+      };
+      setFormData(emptyData);
+      setInitialFormData(emptyData);
       setCtas([]);
+      setInitialCtas([]);
     }
   }, [editingWebinar, isOpen]);
 
@@ -217,6 +233,7 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
           description: "Webinar created successfully",
         });
       }
+      resetChanges(); // Reset unsaved changes flag after successful save
       onWebinarSaved?.(response.data.webinar, !!editingWebinar);
       closeDialog();
     } catch (err: any) {
@@ -255,303 +272,334 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
     setCtas(ctas.filter((_, i) => i !== index));
   };
 
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      // User is trying to close the dialog
+      if (hasUnsavedChanges) {
+        // Show confirmation dialog
+        setShowCloseConfirmation(true);
+      } else {
+        // No changes, close directly
+        closeDialog();
+      }
+    }
+  };
+
+  const confirmClose = () => {
+    setShowCloseConfirmation(false);
+    closeDialog();
+  };
+
+  const cancelClose = () => {
+    setShowCloseConfirmation(false);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={closeDialog}>
-      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-auto">
-        <DialogTitle className="text-xl font-semibold mb-4">
-          {editingWebinar ? "Edit Webinar" : "Create Webinar"}
-        </DialogTitle>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {formFields.map((item, index) => {
-            const isRequired = item.required;
-            const fieldOptions = item.id === 'proSmsList' ? filteredPromotionalSmsLists : item.options;
+    <>
+      <Dialog open={isOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-auto">
+          <DialogTitle className="text-xl font-semibold mb-4">
+            {editingWebinar ? "Edit Webinar" : "Create Webinar"}
+          </DialogTitle>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {formFields.map((item, index) => {
+              const isRequired = item.required;
+              const fieldOptions = item.id === 'proSmsList' ? filteredPromotionalSmsLists : item.options;
 
-            // Special case for Promotional SMS List with search functionality
-            if (item.id === 'proSmsList') {
-              return (
-                <div key={`div${index}`}>
-                  <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
-                    {item.title}
-                    {isRequired && <span className="text-red-500 ml-1">*</span>}
-                    {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
-                  </Label>
-                  <div className="relative mt-1" ref={searchRef}>
-                    <div className="relative">
-                      <Input
-                        type="text"
-                        placeholder="Search promotional SMS lists..."
-                        value={searchQuery}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                        onFocus={() => setIsSearchOpen(true)}
-                        className="pr-10"
-                      />
-                      <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    </div>
+              // Special case for Promotional SMS List with search functionality
+              if (item.id === 'proSmsList') {
+                return (
+                  <div key={`div${index}`}>
+                    <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
+                      {item.title}
+                      {isRequired && <span className="text-red-500 ml-1">*</span>}
+                      {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
+                    </Label>
+                    <div className="relative mt-1" ref={searchRef}>
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="Search promotional SMS lists..."
+                          value={searchQuery}
+                          onChange={(e) => handleSearchChange(e.target.value)}
+                          onFocus={() => setIsSearchOpen(true)}
+                          className="pr-10"
+                        />
+                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      </div>
 
-                    {isSearchOpen && (
-                      <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                        {filteredPromotionalSmsLists.length > 0 ? (
-                          filteredPromotionalSmsLists.map((list: any) => (
-                            <div
-                              key={list.listId || list._id}
-                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                              onClick={() => {
-                                handleInputChange(item.id, list.listId || list._id);
-                                setIsSearchOpen(false);
-                                setSearchQuery(list.name);
-                              }}
-                            >
-                              <div className="font-medium text-gray-900">{list.name}</div>
-                              {list.description && (
-                                <div className="text-sm text-gray-500">{list.description}</div>
-                              )}
+                      {isSearchOpen && (
+                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {filteredPromotionalSmsLists.length > 0 ? (
+                            filteredPromotionalSmsLists.map((list: any) => (
+                              <div
+                                key={list.listId || list._id}
+                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                onClick={() => {
+                                  handleInputChange(item.id, list.listId || list._id);
+                                  setIsSearchOpen(false);
+                                  setSearchQuery(list.name);
+                                }}
+                              >
+                                <div className="font-medium text-gray-900">{list.name}</div>
+                                {list.description && (
+                                  <div className="text-sm text-gray-500">{list.description}</div>
+                                )}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="px-3 py-2 text-gray-500 text-center">
+                              No promotional SMS lists found
                             </div>
-                          ))
-                        ) : (
-                          <div className="px-3 py-2 text-gray-500 text-center">
-                            No promotional SMS lists found
-                          </div>
-                        )}
+                          )}
 
-                        {searchQuery && (
-                          <div className="px-3 py-2 border-t border-gray-200">
-                            <button
-                              type="button"
-                              onClick={clearSearch}
-                              className="flex items-center text-sm text-gray-500 hover:text-gray-700"
-                            >
-                              <X className="h-4 w-4 mr-1" />
-                              Clear search
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                          {searchQuery && (
+                            <div className="px-3 py-2 border-t border-gray-200">
+                              <button
+                                type="button"
+                                onClick={clearSearch}
+                                className="flex items-center text-sm text-gray-500 hover:text-gray-700"
+                              >
+                                <X className="h-4 w-4 mr-1" />
+                                Clear search
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
 
-                    {formData[item.id] && (
-                      <div className="mt-2 flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md">
-                        <span className="text-sm text-gray-700">
-                          Selected: {promotionalSmsLists.find((list: any) =>
-                            (list.listId || list._id) === formData[item.id]
-                          )?.name || 'Unknown'}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleInputChange(item.id, '');
-                            setSearchQuery('');
-                          }}
-                          className="text-gray-400 hover:text-gray-600"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    )}
+                      {formData[item.id] && (
+                        <div className="mt-2 flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md">
+                          <span className="text-sm text-gray-700">
+                            Selected: {promotionalSmsLists.find((list: any) =>
+                              (list.listId || list._id) === formData[item.id]
+                            )?.name || 'Unknown'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleInputChange(item.id, '');
+                              setSearchQuery('');
+                            }}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                );
+              }
+
+              switch (item.type) {
+                case 'input':
+                  return (
+                    <div key={`div${index}`}>
+                      <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
+                        {item.title}
+                        {isRequired && <span className="text-red-500 ml-1">*</span>}
+                        {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
+                      </Label>
+                      <Input
+                        id={item.id}
+                        placeholder={item.placeholder}
+                        value={formData[item.id]}
+                        onChange={(e) => handleInputChange(item.id, e.target.value)}
+                        className="mt-1"
+                        required={isRequired}
+                      />
+                    </div>
+                  )
+                case 'select':
+                  return (
+                    <div key={`div${index}`}>
+                      <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
+                        {item.title}
+                        {isRequired && <span className="text-red-500 ml-1">*</span>}
+                        {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
+                      </Label>
+                      <Select
+                        value={formData[item.id]}
+                        onValueChange={(value) => handleInputChange(item.id, value)}
+                      >
+                        <SelectTrigger className="border-royal-light-gray">
+                          <SelectValue placeholder={item.placeholder} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {fieldOptions && fieldOptions.length > 0 ? (
+                            fieldOptions.map((option, optionIndex) => {
+                              // Handle both string options and object options
+                              const optionValue = typeof option === 'string' ? option : (option.listId || option._id || option);
+                              const optionLabel = typeof option === 'string' ? option : (option.name || option);
+                              const optionKey = typeof option === 'string' ? option : (option.listId || option._id || optionIndex);
+
+                              return (
+                                <SelectItem key={optionKey} value={optionValue}>
+                                  {optionLabel}
+                                </SelectItem>
+                              );
+                            })
+                          ) : (
+                            <SelectItem value="placeholder">No options available</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )
+                case 'textarea':
+                  return (
+                    <div key={`div${index}`}>
+                      <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
+                        {item.title}
+                        {isRequired && <span className="text-red-500 ml-1">*</span>}
+                        {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
+                      </Label>
+                      <Textarea
+                        id={item.id}
+                        placeholder={item.placeholder}
+                        value={formData[item.id]}
+                        onChange={(e) => handleInputChange(item.id, e.target.value)}
+                        className="mt-1"
+                        required={isRequired}
+                        rows={3}
+                      />
+                    </div>
+                  )
+                case 'datetime':
+                  return (
+                    <div key={`div${index}`}>
+                      <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
+                        {item.title}
+                        {isRequired && <span className="text-red-500 ml-1">*</span>}
+                        {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
+                      </Label>
+                      <input
+                        type="datetime-local"
+                        id={item.id}
+                        value={formData[item.id] || ''}
+                        onChange={(e) => handleInputChange(item.id, e.target.value)}
+                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        required={isRequired}
+                      />
+                    </div>
+                  )
+                case 'file':
+                  return (
+                    <div key={`div${index}`}>
+                      <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
+                        {item.title}
+                        {isRequired && <span className="text-red-500 ml-1">*</span>}
+                        {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
+                      </Label>
+                      <Input
+                        id={item.id}
+                        placeholder={item.placeholder}
+                        type='file'
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          handleInputChange(item.id, file?.name || '');
+                        }}
+                        className="mt-1"
+                        required={isRequired}
+                      />
+                    </div>
+                  )
+              }
+            })}
+
+            {/* Call to Action Section */}
+            <div className="border-t pt-4">
+              <Label className="text-royal-dark-gray font-medium text-base mb-3 block">
+                Call to Action Buttons
+              </Label>
+
+              {/* Input fields for new CTA */}
+              <div className="space-y-3 mb-4 p-3 border rounded-md bg-gray-50">
+                <div>
+                  <Label htmlFor="new-cta-label" className="text-sm text-gray-600">
+                    Button Label
+                  </Label>
+                  <Input
+                    id="new-cta-label"
+                    placeholder="e.g., Register Now, Learn More"
+                    value={ctaLabel}
+                    onChange={(e) => setCtaLabel(e.target.value)}
+                    className="mt-1"
+                  />
                 </div>
-              );
-            }
-
-            switch (item.type) {
-              case 'input':
-                return (
-                  <div key={`div${index}`}>
-                    <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
-                      {item.title}
-                      {isRequired && <span className="text-red-500 ml-1">*</span>}
-                      {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
-                    </Label>
-                    <Input
-                      id={item.id}
-                      placeholder={item.placeholder}
-                      value={formData[item.id]}
-                      onChange={(e) => handleInputChange(item.id, e.target.value)}
-                      className="mt-1"
-                      required={isRequired}
-                    />
-                  </div>
-                )
-              case 'select':
-                return (
-                  <div key={`div${index}`}>
-                    <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
-                      {item.title}
-                      {isRequired && <span className="text-red-500 ml-1">*</span>}
-                      {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
-                    </Label>
-                    <Select
-                      value={formData[item.id]}
-                      onValueChange={(value) => handleInputChange(item.id, value)}
-                    >
-                      <SelectTrigger className="border-royal-light-gray">
-                        <SelectValue placeholder={item.placeholder} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {fieldOptions && fieldOptions.length > 0 ? (
-                          fieldOptions.map((option, optionIndex) => {
-                            // Handle both string options and object options
-                            const optionValue = typeof option === 'string' ? option : (option.listId || option._id || option);
-                            const optionLabel = typeof option === 'string' ? option : (option.name || option);
-                            const optionKey = typeof option === 'string' ? option : (option.listId || option._id || optionIndex);
-
-                            return (
-                              <SelectItem key={optionKey} value={optionValue}>
-                                {optionLabel}
-                              </SelectItem>
-                            );
-                          })
-                        ) : (
-                          <SelectItem value="placeholder">No options available</SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )
-              case 'textarea':
-                return (
-                  <div key={`div${index}`}>
-                    <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
-                      {item.title}
-                      {isRequired && <span className="text-red-500 ml-1">*</span>}
-                      {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
-                    </Label>
-                    <Textarea
-                      id={item.id}
-                      placeholder={item.placeholder}
-                      value={formData[item.id]}
-                      onChange={(e) => handleInputChange(item.id, e.target.value)}
-                      className="mt-1"
-                      required={isRequired}
-                      rows={3}
-                    />
-                  </div>
-                )
-              case 'datetime':
-                return (
-                  <div key={`div${index}`}>
-                    <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
-                      {item.title}
-                      {isRequired && <span className="text-red-500 ml-1">*</span>}
-                      {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
-                    </Label>
-                    <input
-                      type="datetime-local"
-                      id={item.id}
-                      value={formData[item.id] || ''}
-                      onChange={(e) => handleInputChange(item.id, e.target.value)}
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required={isRequired}
-                    />
-                  </div>
-                )
-              case 'file':
-                return (
-                  <div key={`div${index}`}>
-                    <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
-                      {item.title}
-                      {isRequired && <span className="text-red-500 ml-1">*</span>}
-                      {item.desc && <span className="text-gray-500 ml-2">{item.desc}</span>}
-                    </Label>
-                    <Input
-                      id={item.id}
-                      placeholder={item.placeholder}
-                      type='file'
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        handleInputChange(item.id, file?.name || '');
-                      }}
-                      className="mt-1"
-                      required={isRequired}
-                    />
-                  </div>
-                )
-            }
-          })}
-
-          {/* Call to Action Section */}
-          <div className="border-t pt-4">
-            <Label className="text-royal-dark-gray font-medium text-base mb-3 block">
-              Call to Action Buttons
-            </Label>
-
-            {/* Input fields for new CTA */}
-            <div className="space-y-3 mb-4 p-3 border rounded-md bg-gray-50">
-              <div>
-                <Label htmlFor="new-cta-label" className="text-sm text-gray-600">
-                  Button Label
-                </Label>
-                <Input
-                  id="new-cta-label"
-                  placeholder="e.g., Register Now, Learn More"
-                  value={ctaLabel}
-                  onChange={(e) => setCtaLabel(e.target.value)}
-                  className="mt-1"
-                />
+                <div>
+                  <Label htmlFor="new-cta-link" className="text-sm text-gray-600">
+                    Link URL
+                  </Label>
+                  <Input
+                    id="new-cta-link"
+                    placeholder="https://example.com"
+                    value={ctaLink}
+                    onChange={(e) => setCtaLink(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  onClick={addCta}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1 w-full"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add CTA
+                </Button>
               </div>
-              <div>
-                <Label htmlFor="new-cta-link" className="text-sm text-gray-600">
-                  Link URL
-                </Label>
-                <Input
-                  id="new-cta-link"
-                  placeholder="https://example.com"
-                  value={ctaLink}
-                  onChange={(e) => setCtaLink(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-              <Button
-                type="button"
-                onClick={addCta}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1 w-full"
-              >
-                <Plus className="h-4 w-4" />
-                Add CTA
-              </Button>
+
+              {/* List of added CTAs */}
+              {ctas.length === 0 ? (
+                <div className="text-sm text-gray-500 text-center py-4 border border-dashed rounded-md">
+                  No CTAs added yet. Fill in the label and link above, then click "Add CTA".
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label className="text-sm text-gray-600">Added CTAs:</Label>
+                  {ctas.map((cta, index) => (
+                    <div key={index} className="flex items-start justify-between border rounded-md p-3 bg-white">
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">{cta.label}</div>
+                        <div className="text-sm text-gray-500 break-all">{cta.link}</div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeCta(index)}
+                        className="ml-2 text-red-500 hover:text-red-700 flex-shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* List of added CTAs */}
-            {ctas.length === 0 ? (
-              <div className="text-sm text-gray-500 text-center py-4 border border-dashed rounded-md">
-                No CTAs added yet. Fill in the label and link above, then click "Add CTA".
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label className="text-sm text-gray-600">Added CTAs:</Label>
-                {ctas.map((cta, index) => (
-                  <div key={index} className="flex items-start justify-between border rounded-md p-3 bg-white">
-                    <div className="flex-1">
-                      <div className="font-medium text-gray-900">{cta.label}</div>
-                      <div className="text-sm text-gray-500 break-all">{cta.link}</div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeCta(index)}
-                      className="ml-2 text-red-500 hover:text-red-700 flex-shrink-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+            {error && (
+              <div className="text-red-500 text-sm">{error}</div>
             )}
-          </div>
 
-          {error && (
-            <div className="text-red-500 text-sm">{error}</div>
-          )}
+            <Button
+              type="submit"
+              className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
+              disabled={loading}
+            >
+              {loading ? (editingWebinar ? "Updating..." : "Creating...") : (editingWebinar ? "Update Webinar" : "Create Webinar")}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-          <Button
-            type="submit"
-            className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
-            disabled={loading}
-          >
-            {loading ? (editingWebinar ? "Updating..." : "Creating...") : (editingWebinar ? "Update Webinar" : "Create Webinar")}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <UnsavedChangesDialog
+        open={showCloseConfirmation}
+        onOpenChange={setShowCloseConfirmation}
+        onConfirm={confirmClose}
+        onCancel={cancelClose}
+      />
+    </>
   );
 }

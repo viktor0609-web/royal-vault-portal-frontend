@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { dealApi, optionsApi, imageApi } from "@/lib/api";
 
 
@@ -67,6 +69,12 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
 
   const [loading, setLoading] = useState(false);
   const [optionsError, setOptionsError] = useState<string | null>(null);
+  const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<any>(null);
+
+  // Track unsaved changes with custom hook
+  const additionalChanges = imageFile !== null || (imageInputType === "url" && imageUrl !== (initialFormData?.image || ''));
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges(initialFormData, formData, additionalChanges);
 
   // Fetch options when modal opens
   useEffect(() => {
@@ -94,7 +102,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   // Populate form when editing
   useEffect(() => {
     if (editingDeal) {
-      setFormData({
+      const initialData = {
         name: editingDeal.name || "",
         url: editingDeal.url || "",
         categories: editingDeal.category?.map((cat: any) => cat._id) || [],
@@ -104,7 +112,9 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         requirements: editingDeal.requirement?.map((req: any) => req._id) || [],
         image: editingDeal.image || "",
         source: editingDeal.source?._id || "",
-      });
+      };
+      setFormData(initialData);
+      setInitialFormData(initialData);
       // Reset image file (blob URL cleanup happens automatically via useEffect)
       setImageFile(null);
       setImageUrl("");
@@ -117,7 +127,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
       }
     } else {
       // Reset form for new deal
-      setFormData({
+      const emptyData = {
         name: "",
         url: "",
         categories: [],
@@ -127,7 +137,9 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         requirements: [],
         image: "",
         source: "",
-      });
+      };
+      setFormData(emptyData);
+      setInitialFormData(emptyData);
       // Reset image file (blob URL cleanup happens automatically via useEffect)
       setImageFile(null);
       setImageUrl("");
@@ -215,6 +227,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         console.log("Deal created successfully:", dealData);
       }
 
+      resetChanges(); // Reset flag after successful save
       closeDialog();
       onDealSaved?.(); // Refresh the deals list
     } catch (error) {
@@ -252,182 +265,213 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
     }
   };
 
+  const handleDialogClose = (open: boolean) => {
+    if (!open) {
+      // User is trying to close the dialog
+      if (hasUnsavedChanges) {
+        // Show confirmation dialog
+        setShowCloseConfirmation(true);
+      } else {
+        // No changes, close directly
+        closeDialog();
+      }
+    }
+  };
+
+  const confirmClose = () => {
+    setShowCloseConfirmation(false);
+    closeDialog();
+  };
+
+  const cancelClose = () => {
+    setShowCloseConfirmation(false);
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={closeDialog}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{editingDeal ? 'Edit Deal' : 'Create New Deal'}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {optionsError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {optionsError}
-            </div>
-          )}
+    <>
+      <Dialog open={isOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingDeal ? 'Edit Deal' : 'Create New Deal'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {optionsError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                {optionsError}
+              </div>
+            )}
 
-          {/* Input Fields */}
-          {inputFields.map((item) => (
-            <div key={item.id}>
-              <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
-                {item.title}
-              </Label>
-              <Input
-                id={item.id}
-                placeholder={item.placeholder}
-                value={formData[item.id as keyof typeof formData] as string}
-                onChange={(e) => handleInputChange(item.id, e.target.value)}
+            {/* Input Fields */}
+            {inputFields.map((item) => (
+              <div key={item.id}>
+                <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
+                  {item.title}
+                </Label>
+                <Input
+                  id={item.id}
+                  placeholder={item.placeholder}
+                  value={formData[item.id as keyof typeof formData] as string}
+                  onChange={(e) => handleInputChange(item.id, e.target.value)}
+                  className="mt-1"
+                  type="text"
+                />
+              </div>
+            ))}
+
+            {/* Image Field with Tabs */}
+            <div>
+              <Label className="text-royal-dark-gray font-medium">Image</Label>
+              <Tabs
+                value={imageInputType}
+                onValueChange={(value) => setImageInputType(value as "file" | "url")}
                 className="mt-1"
-                type="text"
-              />
+              >
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="file">Upload File</TabsTrigger>
+                  <TabsTrigger value="url">Use URL</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="file" className="space-y-2">
+                  {editingDeal && formData.image && !formData.image.startsWith('http') && (
+                    <div className="mb-3">
+                      <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
+                      <div className="relative inline-block">
+                        <img
+                          src={import.meta.env.VITE_BACKEND_URL + formData.image}
+                          alt="Current deal image"
+                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="mb-2"
+                  />
+                  {imagePreviewUrl && (
+                    <div className="mt-2">
+                      <Label className="text-sm text-gray-600 mb-2 block">New Image Preview:</Label>
+                      <div className="relative inline-block">
+                        <img
+                          src={imagePreviewUrl}
+                          alt="New image preview"
+                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="url" className="space-y-2">
+                  {editingDeal && formData.image && formData.image.startsWith('http') && (
+                    <div className="mb-3">
+                      <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
+                      <div className="relative inline-block">
+                        <img
+                          src={formData.image}
+                          alt="Current deal image"
+                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <Input
+                    placeholder="https://example.com/image.jpg"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    type="url"
+                  />
+                  {imageUrl && (
+                    <div className="mt-2">
+                      <Label className="text-sm text-gray-600 mb-2 block">Image Preview:</Label>
+                      <div className="relative inline-block">
+                        <img
+                          src={imageUrl}
+                          alt="Image preview"
+                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             </div>
-          ))}
 
-          {/* Image Field with Tabs */}
-          <div>
-            <Label className="text-royal-dark-gray font-medium">Image</Label>
-            <Tabs
-              value={imageInputType}
-              onValueChange={(value) => setImageInputType(value as "file" | "url")}
-              className="mt-1"
-            >
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="file">Upload File</TabsTrigger>
-                <TabsTrigger value="url">Use URL</TabsTrigger>
-              </TabsList>
+            {/* Multi-Select Fields */}
+            {multiSelectFields.map((item) => {
+              // Map field IDs to options keys
+              const optionsKey = item.id === 'subCategories' ? 'subCategories' : item.id;
+              return (
+                <div key={item.id}>
+                  <Label className="text-royal-dark-gray font-medium">
+                    {item.title}
+                  </Label>
+                  <MultiSelect
+                    options={options[optionsKey as keyof typeof options] as MultiSelectOption[] || []}
+                    selected={formData[item.id as keyof typeof formData] as string[]}
+                    onChange={(selected) => handleMultiSelectChange(item.id, selected)}
+                    placeholder={item.placeholder}
+                    className="mt-1"
+                    disabled={loading}
+                  />
+                </div>
+              );
+            })}
 
-              <TabsContent value="file" className="space-y-2">
-                {editingDeal && formData.image && !formData.image.startsWith('http') && (
-                  <div className="mb-3">
-                    <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
-                    <div className="relative inline-block">
-                      <img
-                        src={import.meta.env.VITE_BACKEND_URL + formData.image}
-                        alt="Current deal image"
-                        className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                      />
-                    </div>
-                  </div>
-                )}
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="mb-2"
-                />
-                {imagePreviewUrl && (
-                  <div className="mt-2">
-                    <Label className="text-sm text-gray-600 mb-2 block">New Image Preview:</Label>
-                    <div className="relative inline-block">
-                      <img
-                        src={imagePreviewUrl}
-                        alt="New image preview"
-                        className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                      />
-                    </div>
-                  </div>
-                )}
-              </TabsContent>
-
-              <TabsContent value="url" className="space-y-2">
-                {editingDeal && formData.image && formData.image.startsWith('http') && (
-                  <div className="mb-3">
-                    <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
-                    <div className="relative inline-block">
-                      <img
-                        src={formData.image}
-                        alt="Current deal image"
-                        className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                      />
-                    </div>
-                  </div>
-                )}
-                <Input
-                  placeholder="https://example.com/image.jpg"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  type="url"
-                />
-                {imageUrl && (
-                  <div className="mt-2">
-                    <Label className="text-sm text-gray-600 mb-2 block">Image Preview:</Label>
-                    <div className="relative inline-block">
-                      <img
-                        src={imageUrl}
-                        alt="Image preview"
-                        className="w-32 h-32 object-cover rounded-lg border border-gray-300"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* Multi-Select Fields */}
-          {multiSelectFields.map((item) => {
-            // Map field IDs to options keys
-            const optionsKey = item.id === 'subCategories' ? 'subCategories' : item.id;
-            return (
+            {/* Single Select Fields */}
+            {singleSelectFields.map((item) => (
               <div key={item.id}>
                 <Label className="text-royal-dark-gray font-medium">
                   {item.title}
                 </Label>
-                <MultiSelect
-                  options={options[optionsKey as keyof typeof options] as MultiSelectOption[] || []}
-                  selected={formData[item.id as keyof typeof formData] as string[]}
-                  onChange={(selected) => handleMultiSelectChange(item.id, selected)}
-                  placeholder={item.placeholder}
-                  className="mt-1"
+                <Select
+                  value={formData[item.id as keyof typeof formData] as string}
+                  onValueChange={(value) => handleInputChange(item.id, value)}
                   disabled={loading}
-                />
-              </div>
-            );
-          })}
-
-          {/* Single Select Fields */}
-          {singleSelectFields.map((item) => (
-            <div key={item.id}>
-              <Label className="text-royal-dark-gray font-medium">
-                {item.title}
-              </Label>
-              <Select
-                value={formData[item.id as keyof typeof formData] as string}
-                onValueChange={(value) => handleInputChange(item.id, value)}
-                disabled={loading}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder={item.placeholder} />
-                </SelectTrigger>
-                <SelectContent
-                  className="max-h-[300px] overflow-y-auto"
-                  style={{
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: '#d1d5db #f3f4f6',
-                    WebkitOverflowScrolling: 'touch'
-                  }}
                 >
-                  {options[item.id === 'source' ? 'sources' : item.id as keyof typeof options]?.map((option: MultiSelectOption) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder={item.placeholder} />
+                  </SelectTrigger>
+                  <SelectContent
+                    className="max-h-[300px] overflow-y-auto"
+                    style={{
+                      scrollbarWidth: 'thin',
+                      scrollbarColor: '#d1d5db #f3f4f6',
+                      WebkitOverflowScrolling: 'touch'
+                    }}
+                  >
+                    {options[item.id === 'source' ? 'sources' : item.id as keyof typeof options]?.map((option: MultiSelectOption) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
 
-          <Button
-            type="submit"
-            className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
-            disabled={loading}
-          >
-            {loading ? (editingDeal ? "Updating..." : "Creating...") : (editingDeal ? "Update" : "Create")}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <Button
+              type="submit"
+              className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
+              disabled={loading}
+            >
+              {loading ? (editingDeal ? "Updating..." : "Creating...") : (editingDeal ? "Update" : "Create")}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <UnsavedChangesDialog
+        open={showCloseConfirmation}
+        onOpenChange={setShowCloseConfirmation}
+        onConfirm={confirmClose}
+        onCancel={cancelClose}
+      />
+    </>
   );
 }

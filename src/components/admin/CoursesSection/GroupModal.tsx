@@ -97,8 +97,8 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={closeDialog}>
-            <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <Dialog open={isOpen} onOpenChange={(open) => !open && closeDialog()}>
+            <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
                 <DialogTitle className="text-xl font-semibold">
                     {editingGroup ? "Edit Course Group" : "Create Course Group"}
                 </DialogTitle>

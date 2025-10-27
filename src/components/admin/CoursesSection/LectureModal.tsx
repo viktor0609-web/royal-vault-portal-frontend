@@ -151,8 +151,8 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={closeDialog}>
-            <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-6 space-y-1">
+        <Dialog open={isOpen} onOpenChange={(open) => !open && closeDialog()}>
+            <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-6 space-y-1" onInteractOutside={(e) => e.preventDefault()}>
                 <DialogTitle className="text-xl font-semibold">
                     {editingLecture ? "Edit Lecture" : "Create Lecture"}
                 </DialogTitle>

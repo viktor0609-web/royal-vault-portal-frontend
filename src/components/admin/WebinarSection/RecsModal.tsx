@@ -24,8 +24,8 @@ export function RecsModal({ isOpen, closeDialog }) {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={closeDialog}>
-            <DialogContent className="sm:max-w-md">
+        <Dialog open={isOpen} onOpenChange={(open) => !open && closeDialog()}>
+            <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
                 <form onSubmit={handleSubmit} className="space-y-4">
 
                     <div>

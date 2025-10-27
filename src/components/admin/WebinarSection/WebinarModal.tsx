@@ -256,8 +256,8 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeDialog}>
-      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-auto">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && closeDialog()}>
+      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-auto" onInteractOutside={(e) => e.preventDefault()}>
         <DialogTitle className="text-xl font-semibold mb-4">
           {editingWebinar ? "Edit Webinar" : "Create Webinar"}
         </DialogTitle>

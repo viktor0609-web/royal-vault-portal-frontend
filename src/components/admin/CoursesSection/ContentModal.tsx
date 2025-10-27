@@ -134,8 +134,8 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
   );
 
   return (
-    <Dialog open={isOpen} onOpenChange={closeDialog}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && closeDialog()}>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
         <DialogTitle className="text-xl font-semibold">
           {editingLecture ? "Edit Lecture" : "Create Lecture"}
         </DialogTitle>

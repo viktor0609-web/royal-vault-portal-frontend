@@ -3,7 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
-import { TagIcon, Trash2, Edit, PlusIcon, ExternalLinkIcon } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { TagIcon, Trash2, Edit, PlusIcon, ExternalLinkIcon, AlertTriangle } from "lucide-react";
 import { CreateDealModal } from "./CreateDealModal";
 import { dealApi } from "@/lib/api";
 import { formatDate, formatDateTime } from "@/utils/dateUtils";
@@ -37,6 +47,9 @@ export function DealsSection() {
 
     const [open, setOpen] = useState(false);
     const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [dealToDelete, setDealToDelete] = useState<{ id: string; name: string } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const closeModal = () => {
         setOpen(false);
@@ -53,16 +66,31 @@ export function DealsSection() {
         }
     };
 
-    const handleDelete = async (dealId: string) => {
-        if (window.confirm('Are you sure you want to delete this deal?')) {
-            try {
-                await dealApi.deleteDeal(dealId);
-                fetchDeals(); // Refresh the list
-            } catch (error) {
-                console.error('Error deleting deal:', error);
-                setError('Failed to delete deal');
-            }
+    const handleDeleteClick = (dealId: string, dealName: string) => {
+        setDealToDelete({ id: dealId, name: dealName });
+        setDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!dealToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            await dealApi.deleteDeal(dealToDelete.id);
+            setDeleteDialogOpen(false);
+            setDealToDelete(null);
+            fetchDeals(); // Refresh the list
+        } catch (error) {
+            console.error('Error deleting deal:', error);
+            setError('Failed to delete deal');
+        } finally {
+            setIsDeleting(false);
         }
+    };
+
+    const cancelDelete = () => {
+        setDeleteDialogOpen(false);
+        setDealToDelete(null);
     };
 
     const fetchDeals = async () => {
@@ -168,7 +196,7 @@ export function DealsSection() {
                                             <Button
                                                 size="sm"
                                                 variant="destructive"
-                                                onClick={() => handleDelete(deal._id)}
+                                                onClick={() => handleDeleteClick(deal._id, deal.name)}
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
@@ -220,7 +248,7 @@ export function DealsSection() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => handleDelete(deal._id)}
+                                        onClick={() => handleDeleteClick(deal._id, deal.name)}
                                         className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
                                     >
                                         <Trash2 className="h-3 w-3" />
@@ -284,6 +312,38 @@ export function DealsSection() {
                 editingDeal={editingDeal}
                 onDealSaved={fetchDeals}
             />
+
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
+                                <AlertTriangle className="h-5 w-5 text-red-600" />
+                            </div>
+                            <AlertDialogTitle className="text-xl">Delete Deal</AlertDialogTitle>
+                        </div>
+                        <AlertDialogDescription className="text-base">
+                            Are you sure you want to delete{' '}
+                            <span className="font-semibold text-royal-dark-gray">
+                                "{dealToDelete?.name || 'this deal'}"
+                            </span>
+                            ? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={cancelDelete} disabled={isDeleting}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDelete}
+                            disabled={isDeleting}
+                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                        >
+                            {isDeleting ? 'Deleting...' : 'Delete'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

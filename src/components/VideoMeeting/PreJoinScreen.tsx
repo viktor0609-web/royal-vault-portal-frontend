@@ -3,6 +3,7 @@ import { Button } from "../ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../ui/select";
 import { Video, Mic, Volume2, MicOff, VideoOff } from "lucide-react";
 import { useDailyMeeting } from "../../context/DailyMeetingContext";
+import { useAuth } from '../../context/AuthContext';
 
 export const PreJoinScreen: React.FC = () => {
   const {
@@ -32,6 +33,8 @@ export const PreJoinScreen: React.FC = () => {
     setUserName,
   } = useDailyMeeting();
 
+  const { user } = useAuth();
+
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
 
   // Attach localStream to video element
@@ -40,6 +43,12 @@ export const PreJoinScreen: React.FC = () => {
       localVideoRef.current.srcObject = localStream;
     }
   }, [localStream]);
+
+  useEffect(() => {
+    if (user) {
+      setUserName(user.firstName + " " + user.lastName);
+    }
+  }, [user]);
 
   if (isLoading) {
     return <div className="flex flex-1 items-center justify-center text-xl bg-gray-800 text-white">Joining...</div>;

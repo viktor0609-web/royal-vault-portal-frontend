@@ -291,6 +291,7 @@ export function DealsSection() {
               ) : deals.length > 0 ? (
                 deals.map((item, index) => (
                   <Link
+                    target="_blank"
                     key={index}
                     to={item.url}
                     className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"

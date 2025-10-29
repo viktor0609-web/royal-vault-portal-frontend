@@ -141,18 +141,18 @@ export function DealsSection() {
             {/* Desktop Table View */}
             <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm">
                 <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                    <Table className="w-full min-w-[1200px]">
+                    <Table className="w-full">
                         <TableHeader>
                             <TableRow className="bg-gray-50 hover:bg-gray-50">
                                 <TableHead className="w-48 min-w-48 font-semibold text-royal-dark-gray">Deal</TableHead>
-                                <TableHead className="w-32 min-w-32 font-semibold text-royal-dark-gray">Sources</TableHead>
-                                <TableHead className="w-32 min-w-32 font-semibold text-royal-dark-gray">Categories</TableHead>
-                                <TableHead className="w-32 min-w-32 font-semibold text-royal-dark-gray">Sub-Categories</TableHead>
-                                <TableHead className="w-32 min-w-32 font-semibold text-royal-dark-gray">Types</TableHead>
-                                <TableHead className="w-32 min-w-32 font-semibold text-royal-dark-gray">Strategies</TableHead>
-                                <TableHead className="w-32 min-w-32 font-semibold text-royal-dark-gray">Requirements</TableHead>
-                                <TableHead className="w-32 min-w-32 font-semibold text-royal-dark-gray">URL</TableHead>
-                                <TableHead className="w-32 min-w-32 font-semibold text-royal-dark-gray">Created</TableHead>
+                                <TableHead className="hidden md:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Sources</TableHead>
+                                <TableHead className="hidden lg:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Categories</TableHead>
+                                <TableHead className="hidden xl:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Sub-Categories</TableHead>
+                                <TableHead className="hidden xl:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Types</TableHead>
+                                <TableHead className="hidden 2xl:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Strategies</TableHead>
+                                <TableHead className="hidden 2xl:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Requirements</TableHead>
+                                <TableHead className="hidden md:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">URL</TableHead>
+                                <TableHead className="hidden xl:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Created</TableHead>
                                 <TableHead className="w-32 min-w-32 text-right font-semibold text-royal-dark-gray">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -180,13 +180,13 @@ export function DealsSection() {
                                 deals.map((deal) => (
                                     <TableRow key={deal._id} className="hover:bg-gray-50 transition-colors">
                                         <TableCell className="font-medium text-royal-dark-gray">{deal.name}</TableCell>
-                                        <TableCell className="text-gray-700">{deal.source?.name || 'N/A'}</TableCell>
-                                        <TableCell className="text-gray-700">{formatArrayData(deal.category)}</TableCell>
-                                        <TableCell className="text-gray-700">{formatArrayData(deal.subCategory)}</TableCell>
-                                        <TableCell className="text-gray-700">{formatArrayData(deal.type)}</TableCell>
-                                        <TableCell className="text-gray-700">{formatArrayData(deal.strategy)}</TableCell>
-                                        <TableCell className="text-gray-700">{formatArrayData(deal.requirement)}</TableCell>
-                                        <TableCell>
+                                        <TableCell className="hidden md:table-cell text-gray-700">{deal.source?.name || 'N/A'}</TableCell>
+                                        <TableCell className="hidden lg:table-cell text-gray-700">{formatArrayData(deal.category)}</TableCell>
+                                        <TableCell className="hidden xl:table-cell text-gray-700">{formatArrayData(deal.subCategory)}</TableCell>
+                                        <TableCell className="hidden xl:table-cell text-gray-700">{formatArrayData(deal.type)}</TableCell>
+                                        <TableCell className="hidden 2xl:table-cell text-gray-700">{formatArrayData(deal.strategy)}</TableCell>
+                                        <TableCell className="hidden 2xl:table-cell text-gray-700">{formatArrayData(deal.requirement)}</TableCell>
+                                        <TableCell className="hidden md:table-cell">
                                             {deal.url ? (
                                                 <a
                                                     href={deal.url}
@@ -201,7 +201,7 @@ export function DealsSection() {
                                                 <span className="text-gray-400">N/A</span>
                                             )}
                                         </TableCell>
-                                        <TableCell className="text-sm text-royal-gray">{formatDate(deal.createdAt)}</TableCell>
+                                        <TableCell className="hidden xl:table-cell text-sm text-royal-gray">{formatDate(deal.createdAt)}</TableCell>
                                         <TableCell>
                                             <div className="flex gap-2 justify-end">
                                                 <Button

@@ -79,7 +79,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [permissionRequested, setPermissionRequested] = useState<boolean>(false);
   const [isScreensharing, setIsScreensharing] = useState<boolean>(false);
   const [screenshareParticipantId, setScreenshareParticipantId] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>('New User'); // New state for user name
+  const [userName, setUserName] = useState<string>(""); // New state for user name
   const [localParticipant, setLocalParticipant] = useState<any>(null); // State for local participant
   const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(false);
 

@@ -62,21 +62,6 @@ export function useAdminState<T>(
         }
     }, [stateKey]);
 
-    // Load state from localStorage if stateKey is provided
-    const loadState = useCallback(() => {
-        if (stateKey) {
-            try {
-                const savedState = localStorage.getItem(`admin_${stateKey}`);
-                if (savedState) {
-                    return JSON.parse(savedState);
-                }
-            } catch (error) {
-                console.warn('Failed to load state from localStorage:', error);
-            }
-        }
-        return initialState;
-    }, [stateKey, initialState]);
-
     // Update state and save to localStorage
     const updateState = useCallback((newState: T | ((prevState: T) => T)) => {
         setState(prevState => {
@@ -88,27 +73,37 @@ export function useAdminState<T>(
 
     // Reset state to initial state
     const resetState = useCallback(() => {
-        setState(initialState);
         if (stateKey) {
             localStorage.removeItem(`admin_${stateKey}`);
         }
-    }, [initialState, stateKey]);
+        // Reset to the current initialState value, but don't track it as dependency
+        setState(() => initialState);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [stateKey]);
 
-    // Load state on mount and when stateKey changes
+    // Load state on mount only
     useEffect(() => {
-        const loadedState = loadState();
-        if (loadedState !== initialState) {
-            setState(loadedState);
+        if (stateKey) {
+            try {
+                const savedState = localStorage.getItem(`admin_${stateKey}`);
+                if (savedState) {
+                    const parsedState = JSON.parse(savedState);
+                    setState(parsedState);
+                }
+            } catch (error) {
+                console.warn('Failed to load state from localStorage:', error);
+            }
         }
         setIsLoading(false);
-    }, [loadState, initialState]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [stateKey]); // Only run on mount or when stateKey changes
 
     // Handle URL parameter changes
     useEffect(() => {
-        const urlParams = getUrlParams();
         // You can add logic here to handle URL parameter changes
         // For example, if groupId changes, refetch data
-    }, [getUrlParams]);
+        // Currently just tracking params without causing re-renders
+    }, [location.pathname, params]);
 
     return {
         state,
@@ -157,20 +152,17 @@ export function useAdminData<T>(
         } finally {
             setIsLoading(false);
         }
-    }, [fetchFunction, setData, setError, setIsLoading]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchFunction]);
 
     // Fetch data when dependencies change
     useEffect(() => {
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, dependencies);
 
-    // Refetch data when URL parameters change
-    useEffect(() => {
-        const urlParams = getUrlParams();
-        if (Object.keys(urlParams).length > 0) {
-            fetchData();
-        }
-    }, [getUrlParams, fetchData]);
+    // Note: Removed URL parameter refetch to prevent infinite loops
+    // If you need to refetch on URL changes, call refetch() manually
 
     return {
         data,

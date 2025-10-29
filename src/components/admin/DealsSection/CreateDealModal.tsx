@@ -290,56 +290,60 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingDeal ? 'Edit Deal' : 'Create New Deal'}</DialogTitle>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="px-4 sm:px-6 pt-4 sm:pt-6 pb-4 border-b border-gray-200">
+            <DialogTitle className="text-xl sm:text-2xl font-bold text-royal-dark-gray">
+              {editingDeal ? 'Edit Deal' : 'Create New Deal'}
+            </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="px-4 sm:px-6 py-4 space-y-5">
             {optionsError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                {optionsError}
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <p className="font-medium">{optionsError}</p>
               </div>
             )}
 
             {/* Input Fields */}
-            {inputFields.map((item) => (
-              <div key={item.id}>
-                <Label htmlFor={item.id} className="text-royal-dark-gray font-medium">
-                  {item.title}
-                </Label>
-                <Input
-                  id={item.id}
-                  placeholder={item.placeholder}
-                  value={formData[item.id as keyof typeof formData] as string}
-                  onChange={(e) => handleInputChange(item.id, e.target.value)}
-                  className="mt-1"
-                  type="text"
-                />
-              </div>
-            ))}
+            <div className="space-y-4">
+              {inputFields.map((item) => (
+                <div key={item.id} className="space-y-2">
+                  <Label htmlFor={item.id} className="text-sm font-semibold text-royal-dark-gray">
+                    {item.title}
+                  </Label>
+                  <Input
+                    id={item.id}
+                    placeholder={item.placeholder}
+                    value={formData[item.id as keyof typeof formData] as string}
+                    onChange={(e) => handleInputChange(item.id, e.target.value)}
+                    className="h-11 text-base"
+                    type="text"
+                  />
+                </div>
+              ))}
+            </div>
 
             {/* Image Field with Tabs */}
-            <div>
-              <Label className="text-royal-dark-gray font-medium">Image</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-royal-dark-gray">Image</Label>
               <Tabs
                 value={imageInputType}
                 onValueChange={(value) => setImageInputType(value as "file" | "url")}
-                className="mt-1"
+                className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="file">Upload File</TabsTrigger>
-                  <TabsTrigger value="url">Use URL</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 h-11">
+                  <TabsTrigger value="file" className="text-sm">Upload File</TabsTrigger>
+                  <TabsTrigger value="url" className="text-sm">Use URL</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="file" className="space-y-2">
+                <TabsContent value="file" className="space-y-3 mt-3">
                   {editingDeal && formData.image && !formData.image.startsWith('http') && (
-                    <div className="mb-3">
-                      <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
+                    <div>
+                      <Label className="text-xs font-medium text-gray-600 mb-2 block">Current Image</Label>
                       <div className="relative inline-block">
                         <img
                           src={import.meta.env.VITE_BACKEND_URL + formData.image}
                           alt="Current deal image"
-                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                          className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
                         />
                       </div>
                     </div>
@@ -348,31 +352,31 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
-                    className="mb-2"
+                    className="h-11 cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
                   />
                   {imagePreviewUrl && (
-                    <div className="mt-2">
-                      <Label className="text-sm text-gray-600 mb-2 block">New Image Preview:</Label>
+                    <div>
+                      <Label className="text-xs font-medium text-gray-600 mb-2 block">New Image Preview</Label>
                       <div className="relative inline-block">
                         <img
                           src={imagePreviewUrl}
                           alt="New image preview"
-                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                          className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-lg border-2 border-primary shadow-sm"
                         />
                       </div>
                     </div>
                   )}
                 </TabsContent>
 
-                <TabsContent value="url" className="space-y-2">
+                <TabsContent value="url" className="space-y-3 mt-3">
                   {editingDeal && formData.image && formData.image.startsWith('http') && (
-                    <div className="mb-3">
-                      <Label className="text-sm text-gray-600 mb-2 block">Current Image:</Label>
+                    <div>
+                      <Label className="text-xs font-medium text-gray-600 mb-2 block">Current Image</Label>
                       <div className="relative inline-block">
                         <img
                           src={formData.image}
                           alt="Current deal image"
-                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                          className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
                         />
                       </div>
                     </div>
@@ -382,15 +386,16 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
                     type="url"
+                    className="h-11 text-base"
                   />
                   {imageUrl && (
-                    <div className="mt-2">
-                      <Label className="text-sm text-gray-600 mb-2 block">Image Preview:</Label>
+                    <div>
+                      <Label className="text-xs font-medium text-gray-600 mb-2 block">Image Preview</Label>
                       <div className="relative inline-block">
                         <img
                           src={imageUrl}
                           alt="Image preview"
-                          className="w-32 h-32 object-cover rounded-lg border border-gray-300"
+                          className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-lg border-2 border-primary shadow-sm"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
                           }}
@@ -403,65 +408,83 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
             </div>
 
             {/* Multi-Select Fields */}
-            {multiSelectFields.map((item) => {
-              // Map field IDs to options keys
-              const optionsKey = item.id === 'subCategories' ? 'subCategories' : item.id;
-              return (
-                <div key={item.id}>
-                  <Label className="text-royal-dark-gray font-medium">
-                    {item.title}
-                  </Label>
-                  <MultiSelect
-                    options={options[optionsKey as keyof typeof options] as MultiSelectOption[] || []}
-                    selected={formData[item.id as keyof typeof formData] as string[]}
-                    onChange={(selected) => handleMultiSelectChange(item.id, selected)}
-                    placeholder={item.placeholder}
-                    className="mt-1"
-                    disabled={loading}
-                  />
+            <div className="space-y-4">
+              <div className="border-t border-gray-200 pt-4">
+                <h3 className="text-sm font-semibold text-royal-dark-gray mb-4 uppercase tracking-wide">Deal Classification</h3>
+                <div className="space-y-4">
+                  {multiSelectFields.map((item) => {
+                    // Map field IDs to options keys
+                    const optionsKey = item.id === 'subCategories' ? 'subCategories' : item.id;
+                    return (
+                      <div key={item.id} className="space-y-2">
+                        <Label className="text-sm font-semibold text-royal-dark-gray">
+                          {item.title}
+                        </Label>
+                        <MultiSelect
+                          options={options[optionsKey as keyof typeof options] as MultiSelectOption[] || []}
+                          selected={formData[item.id as keyof typeof formData] as string[]}
+                          onChange={(selected) => handleMultiSelectChange(item.id, selected)}
+                          placeholder={item.placeholder}
+                          disabled={loading}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })}
+              </div>
+            </div>
 
             {/* Single Select Fields */}
-            {singleSelectFields.map((item) => (
-              <div key={item.id}>
-                <Label className="text-royal-dark-gray font-medium">
-                  {item.title}
-                </Label>
-                <Select
-                  value={formData[item.id as keyof typeof formData] as string}
-                  onValueChange={(value) => handleInputChange(item.id, value)}
-                  disabled={loading}
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder={item.placeholder} />
-                  </SelectTrigger>
-                  <SelectContent
-                    className="max-h-[300px] overflow-y-auto"
-                    style={{
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: '#d1d5db #f3f4f6',
-                      WebkitOverflowScrolling: 'touch'
-                    }}
+            <div className="space-y-4">
+              {singleSelectFields.map((item) => (
+                <div key={item.id} className="space-y-2">
+                  <Label className="text-sm font-semibold text-royal-dark-gray">
+                    {item.title}
+                  </Label>
+                  <Select
+                    value={formData[item.id as keyof typeof formData] as string}
+                    onValueChange={(value) => handleInputChange(item.id, value)}
+                    disabled={loading}
                   >
-                    {options[item.id === 'source' ? 'sources' : item.id as keyof typeof options]?.map((option: MultiSelectOption) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ))}
+                    <SelectTrigger className="h-11 text-base">
+                      <SelectValue placeholder={item.placeholder} />
+                    </SelectTrigger>
+                    <SelectContent
+                      className="max-h-[300px] overflow-y-auto"
+                      style={{
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#d1d5db #f3f4f6',
+                        WebkitOverflowScrolling: 'touch'
+                      }}
+                    >
+                      {options[item.id === 'source' ? 'sources' : item.id as keyof typeof options]?.map((option: MultiSelectOption) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
 
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-lg font-medium"
-              disabled={loading}
-            >
-              {loading ? (editingDeal ? "Updating..." : "Creating...") : (editingDeal ? "Update" : "Create")}
-            </Button>
+            {/* Submit Button */}
+            <div className="pt-4 pb-2 border-t border-gray-200">
+              <Button
+                type="submit"
+                className="w-full h-12 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-shadow"
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>{editingDeal ? "Updating..." : "Creating..."}</span>
+                  </div>
+                ) : (
+                  editingDeal ? "Update Deal" : "Create Deal"
+                )}
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

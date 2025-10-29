@@ -45,12 +45,12 @@ export const VideoMeeting = () => {
         <div className="h-dvh w-screen flex flex-col overflow-hidden @container">
             {/* Header - Responsive with mobile-first approach */}
             <header className="flex flex-col sm:flex-row justify-between bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-3 sm:mb-6 flex-shrink-0 gap-3 sm:gap-0">
-                <div className="flex gap-2 sm:gap-4 items-center min-w-0">
-                    <BoxSelectIcon className="h-6 w-6 sm:h-10 sm:w-10 text-royal-gray flex-shrink-0" />
+                <div className="flex gap-2 md:gap-4 items-center min-w-0">
+                    <img src='/imgs/logo.svg' className=" w-5 sm:w-6 md:w-8" />
                     <h1 className="text-sm sm:text-lg md:text-2xl font-bold text-royal-dark-gray uppercase truncate">
                         {loading ? "Loading..." : (
                             <>
-                                {webinar?.name || "Webinar"} {format(new Date(webinar?.date), "MM-dd-yy")}
+                                {webinar?.name || "Webinar"}
                             </>
                         )}
                     </h1>

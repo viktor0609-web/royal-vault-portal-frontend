@@ -471,7 +471,12 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const startRecording = async () => {
     if (!dailyRoom) return;
     try {
-      await dailyRoom.startRecording();
+      await dailyRoom.startRecording({
+        type: "cloud",
+        layout: {
+          preset: "active-participant",
+        },
+      });
       setIsRecording(true);
     } catch (err) {
       console.error('Error starting recording:', err);

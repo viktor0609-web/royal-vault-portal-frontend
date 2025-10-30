@@ -235,12 +235,12 @@ export function DealsSection() {
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-16 bg-white rounded-lg border border-royal-light-gray">
+                    <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-royal-light-gray">
                         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-royal-gray mb-4"></div>
                         <p className="text-gray-500 font-medium">Loading deals...</p>
                     </div>
                 ) : deals.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 bg-white rounded-lg border border-royal-light-gray">
+                    <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-royal-light-gray">
                         <TagIcon className="h-16 w-16 text-gray-300 mb-4" />
                         <p className="text-gray-500 font-medium text-lg mb-2">No deals found</p>
                         <p className="text-sm text-gray-400">Create your first deal to get started!</p>
@@ -250,105 +250,148 @@ export function DealsSection() {
                         {deals.map((deal) => (
                             <div
                                 key={deal._id}
-                                className="bg-white rounded-lg border border-royal-light-gray shadow-sm hover:shadow-md transition-shadow"
+                                className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden"
                             >
-                                {/* Card Header */}
-                                <div className="p-4 border-b border-gray-100">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-2 leading-tight">
-                                                {deal.name}
-                                            </h3>
-                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                <span className="font-medium text-royal-gray">Source:</span>
-                                                <span className="truncate">{deal.source?.name || 'N/A'}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2 flex-shrink-0">
+                                {/* Card Header with gradient */}
+                                <div className="bg-gradient-to-r from-royal-gray/5 to-blue-50/50 p-5 border-b border-gray-100">
+                                    <div className="flex items-start justify-between gap-3 mb-3">
+                                        <h3 className="font-bold text-royal-dark-gray text-lg leading-tight flex-1">
+                                            {deal.name}
+                                        </h3>
+                                        <div className="flex gap-1.5 flex-shrink-0">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
                                                 onClick={() => handlebtnClick('edit', deal)}
-                                                className="h-9 w-9 p-0 hover:bg-gray-100"
+                                                className="h-8 w-8 p-0 hover:bg-blue-50 hover:border-blue-300 transition-colors"
                                                 title="Edit deal"
                                             >
-                                                <Edit className="h-4 w-4" />
+                                                <Edit className="h-3.5 w-3.5" />
                                             </Button>
                                             <Button
                                                 variant="outline"
                                                 size="sm"
                                                 onClick={() => handleDeleteClick(deal._id, deal.name)}
-                                                className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 hover:border-red-300 transition-colors"
                                                 title="Delete deal"
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <Trash2 className="h-3.5 w-3.5" />
                                             </Button>
                                         </div>
+                                    </div>
+                                    {/* Source Badge */}
+                                    <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white rounded-full border border-gray-200 shadow-sm">
+                                        <span className="text-xs font-medium text-gray-500">Source:</span>
+                                        <span className="text-xs font-semibold text-royal-gray">{deal.source?.name || 'N/A'}</span>
                                     </div>
                                 </div>
 
                                 {/* Card Body */}
-                                <div className="p-4 space-y-3">
-                                    {/* Categories Section */}
-                                    <div className="grid gap-3">
-                                        <div className="flex flex-col gap-1.5">
-                                            <span className="text-xs font-semibold text-royal-gray uppercase tracking-wide">Categories</span>
-                                            <span className="text-sm text-royal-dark-gray leading-relaxed">
-                                                {formatArrayData(deal.category) || 'N/A'}
-                                            </span>
+                                <div className="p-5 space-y-4">
+                                    {/* Categories with Tags */}
+                                    {deal.category && deal.category.length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
+                                                <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                                                Categories
+                                            </h4>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {deal.category.map((cat) => (
+                                                    <span key={cat._id} className="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium border border-blue-100">
+                                                        {cat.name}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col gap-1.5">
-                                            <span className="text-xs font-semibold text-royal-gray uppercase tracking-wide">Sub-Categories</span>
-                                            <span className="text-sm text-royal-dark-gray leading-relaxed">
-                                                {formatArrayData(deal.subCategory) || 'N/A'}
-                                            </span>
-                                        </div>
-                                        <div className="flex flex-col gap-1.5">
-                                            <span className="text-xs font-semibold text-royal-gray uppercase tracking-wide">Types</span>
-                                            <span className="text-sm text-royal-dark-gray leading-relaxed">
-                                                {formatArrayData(deal.type) || 'N/A'}
-                                            </span>
-                                        </div>
-                                    </div>
+                                    )}
 
-                                    {/* Divider */}
-                                    <div className="border-t border-gray-100"></div>
+                                    {/* Sub-Categories with Tags */}
+                                    {deal.subCategory && deal.subCategory.length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
+                                                <div className="w-1 h-4 bg-purple-500 rounded-full"></div>
+                                                Sub-Categories
+                                            </h4>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {deal.subCategory.map((subCat) => (
+                                                    <span key={subCat._id} className="inline-flex items-center px-2.5 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium border border-purple-100">
+                                                        {subCat.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
-                                    {/* Strategies & Requirements Section */}
-                                    <div className="grid gap-3">
-                                        <div className="flex flex-col gap-1.5">
-                                            <span className="text-xs font-semibold text-royal-gray uppercase tracking-wide">Strategies</span>
-                                            <span className="text-sm text-royal-dark-gray leading-relaxed">
-                                                {formatArrayData(deal.strategy) || 'N/A'}
-                                            </span>
+                                    {/* Types with Tags */}
+                                    {deal.type && deal.type.length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
+                                                <div className="w-1 h-4 bg-green-500 rounded-full"></div>
+                                                Types
+                                            </h4>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {deal.type.map((type) => (
+                                                    <span key={type._id} className="inline-flex items-center px-2.5 py-1 bg-green-50 text-green-700 rounded-md text-xs font-medium border border-green-100">
+                                                        {type.name}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col gap-1.5">
-                                            <span className="text-xs font-semibold text-royal-gray uppercase tracking-wide">Requirements</span>
-                                            <span className="text-sm text-royal-dark-gray leading-relaxed">
-                                                {formatArrayData(deal.requirement) || 'N/A'}
-                                            </span>
+                                    )}
+
+                                    {/* Strategies with Tags */}
+                                    {deal.strategy && deal.strategy.length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
+                                                <div className="w-1 h-4 bg-orange-500 rounded-full"></div>
+                                                Strategies
+                                            </h4>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {deal.strategy.map((strategy) => (
+                                                    <span key={strategy._id} className="inline-flex items-center px-2.5 py-1 bg-orange-50 text-orange-700 rounded-md text-xs font-medium border border-orange-100">
+                                                        {strategy.name}
+                                                    </span>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
+
+                                    {/* Requirements with Tags */}
+                                    {deal.requirement && deal.requirement.length > 0 && (
+                                        <div>
+                                            <h4 className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
+                                                <div className="w-1 h-4 bg-red-500 rounded-full"></div>
+                                                Requirements
+                                            </h4>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {deal.requirement.map((req) => (
+                                                    <span key={req._id} className="inline-flex items-center px-2.5 py-1 bg-red-50 text-red-700 rounded-md text-xs font-medium border border-red-100">
+                                                        {req.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Card Footer */}
-                                <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-3">
+                                <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-3">
                                     <div className="flex-1 min-w-0">
                                         {deal.url ? (
                                             <a
                                                 href={deal.url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-blue-600 hover:text-blue-700 font-medium text-sm inline-flex items-center gap-1.5 hover:underline"
+                                                className="text-blue-600 hover:text-blue-700 font-semibold text-sm inline-flex items-center gap-1.5 hover:underline"
                                             >
                                                 <ExternalLinkIcon className="h-4 w-4 flex-shrink-0" />
-                                                <span className="truncate">View URL</span>
+                                                <span className="truncate">View Deal</span>
                                             </a>
                                         ) : (
-                                            <span className="text-gray-400 text-sm">No URL available</span>
+                                            <span className="text-gray-400 text-sm font-medium">No URL</span>
                                         )}
                                     </div>
-                                    <span className="text-xs text-gray-500 flex-shrink-0">{formatDate(deal.createdAt)}</span>
+                                    <span className="text-xs text-gray-500 font-medium flex-shrink-0">{formatDate(deal.createdAt)}</span>
                                 </div>
                             </div>
                         ))}

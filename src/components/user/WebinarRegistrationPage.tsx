@@ -28,6 +28,7 @@ export function WebinarRegistrationPage() {
 
     const params = new URLSearchParams(new URL(window.location.href).search);
     const webinarId = params.get('id');
+    const isUser = params.get('is_user');
 
 
     useEffect(() => {
@@ -61,6 +62,10 @@ export function WebinarRegistrationPage() {
                 console.log(isRegistered, diff);
 
                 if (isRegistered && user.role === 'user') {
+                    navigate(`/royal-tv/${webinar?.slug}/user`);
+                }
+
+                else if (isRegistered && isUser === 'true') {
                     navigate(`/royal-tv/${webinar?.slug}/user`);
                 }
 

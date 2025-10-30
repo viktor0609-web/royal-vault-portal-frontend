@@ -428,6 +428,23 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
     dailyRoom.on('app-message', handleAppMessage);
 
+    // Recording event listeners
+    const handleRecordingStarted = () => {
+      console.log('Recording started');
+      setIsRecording(true);
+    };
+    const handleRecordingStopped = () => {
+      console.log('Recording stopped');
+      setIsRecording(false);
+    };
+    const handleRecordingError = (e: any) => {
+      console.error('Recording error:', e);
+      setIsRecording(false);
+    };
+    dailyRoom.on('recording-started', handleRecordingStarted);
+    dailyRoom.on('recording-stopped', handleRecordingStopped);
+    dailyRoom.on('recording-error', handleRecordingError);
+
     return () => {
       try {
         dailyRoom.off('joined-meeting', updateParticipants);
@@ -437,6 +454,9 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         dailyRoom.off('track-started', updateParticipants);
         dailyRoom.off('track-stopped', updateParticipants);
         dailyRoom.off('app-message', handleAppMessage);
+        dailyRoom.off('recording-started', handleRecordingStarted);
+        dailyRoom.off('recording-stopped', handleRecordingStopped);
+        dailyRoom.off('recording-error', handleRecordingError);
       } catch (e) {
         console.warn("Error removing event listeners:", e);
       }

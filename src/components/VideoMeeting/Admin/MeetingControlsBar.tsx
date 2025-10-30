@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, MessageSquare, MessageSquareX, Maximize, Minimize, Circle } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { BackgroundFilterModal } from '../BackgroundFilterModal';
 
@@ -125,6 +125,19 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
                 <Filter size={20} className="sm:w-6 sm:h-6" />
               </Button>
             </BackgroundFilterModal>
+            {role === "Admin" && (
+              <Button
+                variant="secondary"
+                onClick={isRecording ? stopRecording : startRecording}
+                className={`rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 ${isRecording ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-gray-700 hover:bg-gray-600'} text-white transition-all duration-200`}
+                title={isRecording ? "Stop Recording" : "Start Recording"}
+              >
+                <Circle 
+                  size={20} 
+                  className={`sm:w-6 sm:h-6 ${isRecording ? 'fill-white' : ''}`} 
+                />
+              </Button>
+            )}
             <Button
               onClick={() => { console.log("Leave Room Clicked"); leaveRoom(); }}
               variant="destructive"

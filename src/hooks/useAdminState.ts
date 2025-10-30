@@ -15,7 +15,7 @@ export function useAdminState<T>(
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Get current admin section from URL
+    // Get current admin section from  URL
     const getCurrentSection = useCallback(() => {
         const pathParts = location.pathname.split('/').filter(Boolean);
         if (pathParts[0] === 'admin') {

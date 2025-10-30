@@ -486,7 +486,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
             'videoSettings.dominant.outerPadding_gu': 0.5,
             'videoSettings.dominant.splitMargin_gu': 0,
             'videoSettings.preferScreenshare': true,
-            'videoSettings.preferredParticipantIds': participants.find((p: any) => p.role === 'Guest')?.session_id,
+            'videoSettings.preferredParticipantIds': participants.find((p: any) => p.name.includes('Guest') || p.name.includes('Admin'))?.id,
             'videoSettings.dominant.sharpCornersOnMain': true,
             'videoSettings.showParticipantLabels': true,
             'videoSettings.labels.fontFamily': 'Roboto',
@@ -497,11 +497,11 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
             'videoSettings.labels.color': 'white',
             'videoSettings.labels.strokeColor': 'rgba(0, 0, 0, 0.9)',
           },
-          // participants: {
-          //   video: participants.filter((p: any) => p.role === 'Guest' || p.role === 'Admin').map((p: any) => p.session_id),
-          //   audio: ["*"],
-          //   sort: "active",
-          // },
+          participants: {
+            video: participants.filter((p: any) => { console.log(p); return p.name.includes('Guest') || p.name.includes('Admin') }).map((p: any) => p.id),
+            audio: ["*"],
+            sort: "active",
+          },
         },
       });
 

@@ -141,19 +141,19 @@ export function DealsSection() {
             {/* Desktop Table View */}
             <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm">
                 <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                    <Table className="w-full">
+                    <Table className="w-full min-w-full">
                         <TableHeader>
                             <TableRow className="bg-gray-50 hover:bg-gray-50">
-                                <TableHead className="w-48 min-w-48 font-semibold text-royal-dark-gray">Deal</TableHead>
-                                <TableHead className="hidden md:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Sources</TableHead>
-                                <TableHead className="hidden lg:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Categories</TableHead>
-                                <TableHead className="hidden xl:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Sub-Categories</TableHead>
-                                <TableHead className="hidden xl:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Types</TableHead>
-                                <TableHead className="hidden 2xl:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Strategies</TableHead>
-                                <TableHead className="hidden 2xl:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Requirements</TableHead>
-                                <TableHead className="hidden md:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">URL</TableHead>
-                                <TableHead className="hidden xl:table-cell w-32 min-w-32 font-semibold text-royal-dark-gray">Created</TableHead>
-                                <TableHead className="w-32 min-w-32 text-right font-semibold text-royal-dark-gray">Actions</TableHead>
+                                <TableHead className="min-w-[200px] font-semibold text-royal-dark-gray">Deal</TableHead>
+                                <TableHead className="hidden md:table-cell min-w-[120px] font-semibold text-royal-dark-gray">Sources</TableHead>
+                                <TableHead className="hidden lg:table-cell min-w-[150px] font-semibold text-royal-dark-gray">Categories</TableHead>
+                                <TableHead className="hidden xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray">Sub-Categories</TableHead>
+                                <TableHead className="hidden xl:table-cell min-w-[120px] font-semibold text-royal-dark-gray">Types</TableHead>
+                                <TableHead className="hidden 2xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray">Strategies</TableHead>
+                                <TableHead className="hidden 2xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray">Requirements</TableHead>
+                                <TableHead className="hidden md:table-cell min-w-[100px] font-semibold text-royal-dark-gray">URL</TableHead>
+                                <TableHead className="hidden xl:table-cell min-w-[120px] font-semibold text-royal-dark-gray">Created</TableHead>
+                                <TableHead className="sticky right-0 bg-gray-50 min-w-[100px] text-right font-semibold text-royal-dark-gray z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -202,13 +202,13 @@ export function DealsSection() {
                                             )}
                                         </TableCell>
                                         <TableCell className="hidden xl:table-cell text-sm text-royal-gray">{formatDate(deal.createdAt)}</TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-2 justify-end">
+                                        <TableCell className="sticky right-0 bg-white hover:bg-gray-50 min-w-[100px] z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                                            <div className="flex gap-2 justify-end flex-shrink-0">
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
                                                     onClick={() => handlebtnClick('edit', deal)}
-                                                    className="h-8 w-8 p-0"
+                                                    className="h-8 w-8 p-0 flex-shrink-0"
                                                     title="Edit deal"
                                                 >
                                                     <Edit className="h-4 w-4" />
@@ -217,7 +217,7 @@ export function DealsSection() {
                                                     size="sm"
                                                     variant="destructive"
                                                     onClick={() => handleDeleteClick(deal._id, deal.name)}
-                                                    className="h-8 w-8 p-0"
+                                                    className="h-8 w-8 p-0 flex-shrink-0"
                                                     title="Delete deal"
                                                 >
                                                     <Trash2 className="h-4 w-4" />

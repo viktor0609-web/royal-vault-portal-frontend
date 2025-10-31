@@ -2,10 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { DailyCall } from '@daily-co/daily-js';
 import { useDailyMeeting } from "../../context/DailyMeetingContext";
 import { Smile } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 interface Message {
   id: string;
-  sender: string;
+  SenderUserId: string;
+  senderName: string;
   text: string;
   timestamp: number;
 }
@@ -60,6 +62,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastVisibleMessageId = useRef<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const userInfo = useAuth();
 
   // Popular emojis for the picker
   const popularEmojis = [
@@ -136,7 +139,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
 
   // Save messages to localStorage whenever messages change
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length >= 0) {
       localStorage.setItem('chat-messages', JSON.stringify(messages));
     }
   }, [messages]);
@@ -184,11 +187,12 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
         return;
       }
       const data = event.data;
-      if (!data || !data.text || !data.sender) return;
+      if (!data || !data.text || !data.senderName) return;
 
       const newMessage: Message = {
         id: crypto.randomUUID(),
-        sender: data.sender,
+        SenderUserId: data.SenderUserId,
+        senderName: data.senderName,
         text: data.text,
         timestamp: Date.now(),
       };
@@ -215,15 +219,17 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
     if (!dailyRoom || !input.trim()) return;
 
     const messageData = {
-      sender: dailyRoom.participants().local.user_name || "Guest",
+      SenderUserId: userInfo?.user?._id,
+      senderName: dailyRoom.participants().local.user_name,
       text: input.trim(),
     };
+    console.log(messageData);
 
     // Send message via Daily app-message
     (dailyRoom as any).sendAppMessage(messageData, '*');
 
     // Add message locally (don't increment unread count for own messages)
-    const newMessage: Message = {
+    const newMessage = {
       ...messageData,
       id: crypto.randomUUID(),
       timestamp: Date.now(),
@@ -246,7 +252,6 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
 
     // Clear local messages immediately
     setMessages([]);
-    localStorage.removeItem('chat-messages');
   };
 
   return (
@@ -281,8 +286,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
         }}
       >
         {messages.map(msg => {
-          const displayName = getDisplayName(msg.sender);
-          const isOwnMessage = msg.sender === (dailyRoom?.participants().local.user_name || "Guest");
+          const displayName = getDisplayName(msg.senderName);
+          const isOwnMessage = msg.SenderUserId && msg.SenderUserId === userInfo?.user?._id;
 
           return (
             <div

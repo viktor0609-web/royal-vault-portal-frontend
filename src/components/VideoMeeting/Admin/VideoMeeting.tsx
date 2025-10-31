@@ -31,6 +31,7 @@ export const VideoMeeting = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  /* ---------- Fetch Webinar By Slug ---------- */
   useEffect(() => {
     const fetchWebinar = async () => {
       if (!slug) return;

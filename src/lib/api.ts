@@ -272,4 +272,12 @@ export const webinarApi = {
   unregisterFromWebinar: (webinarId: string) => api.delete(`/api/webinars/${webinarId}/unregister`),
 
   markAsAttended: (webinarId: string) => api.post(`/api/webinars/${webinarId}/attend`),
+
+  // Chat functions
+  saveChatMessage: (webinarId: string, messageData: { senderUserId: string; senderName: string; text: string }) =>
+    api.post(`/api/webinars/${webinarId}/chat`, messageData),
+  
+  getChatMessages: (webinarId: string) => api.get(`/api/webinars/${webinarId}/chat`),
+  
+  clearChatMessages: (webinarId: string) => api.delete(`/api/webinars/${webinarId}/chat`),
 };

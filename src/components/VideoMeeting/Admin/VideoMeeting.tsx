@@ -165,7 +165,7 @@ export const VideoMeeting = () => {
               </div>
             </div>
           ) : (
-            <AdminMeeting />
+            <AdminMeeting webinarId={webinar?._id} />
           )}
         </section>
       </main>

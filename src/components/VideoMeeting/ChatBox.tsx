@@ -3,6 +3,7 @@ import { DailyCall } from '@daily-co/daily-js';
 import { useDailyMeeting } from "../../context/DailyMeetingContext";
 import { Smile } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { webinarApi } from '../../lib/api';
 
 interface Message {
   id: string;
@@ -51,18 +52,21 @@ interface ChatBoxProps {
   isVisible?: boolean;
   onUnreadCountChange?: (count: number) => void;
   isAdmin?: boolean;
+  webinarId?: string; // Webinar ID to associate chat messages
 }
 
-export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCountChange, isAdmin = false }) => {
+export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCountChange, isAdmin = false, webinarId }) => {
   const { dailyRoom } = useDailyMeeting();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [unreadCount, setUnreadCount] = useState(0);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastVisibleMessageId = useRef<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const userInfo = useAuth();
+  const hasLoadedMessages = useRef(false);
 
   // Popular emojis for the picker
   const popularEmojis = [
@@ -124,25 +128,42 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
     };
   }, [showEmojiPicker]);
 
-  // Load messages from localStorage on component mount
+  // Load past messages from database when webinarId is available
   useEffect(() => {
-    const savedMessages = localStorage.getItem('chat-messages');
-    if (savedMessages) {
-      try {
-        const parsedMessages = JSON.parse(savedMessages);
-        setMessages(parsedMessages);
-      } catch (error) {
-        console.error('Error loading chat messages from localStorage:', error);
-      }
-    }
-  }, []);
+    const loadPastMessages = async () => {
+      if (!webinarId || hasLoadedMessages.current) return;
 
-  // Save messages to localStorage whenever messages change
+      try {
+        setIsLoadingMessages(true);
+        const response = await webinarApi.getChatMessages(webinarId);
+        const pastMessages: Message[] = response.data.messages.map((msg: any) => ({
+          id: msg._id || crypto.randomUUID(),
+          SenderUserId: msg.senderUserId?._id || msg.senderUserId || '',
+          senderName: msg.senderName || '',
+          text: msg.text || '',
+          timestamp: new Date(msg.createdAt || msg.timestamp).getTime() || Date.now(),
+        }));
+
+        if (pastMessages.length > 0) {
+          setMessages(pastMessages);
+          hasLoadedMessages.current = true;
+        }
+      } catch (error) {
+        console.error('Error loading past chat messages:', error);
+        // Continue without past messages if there's an error
+      } finally {
+        setIsLoadingMessages(false);
+      }
+    };
+
+    loadPastMessages();
+  }, [webinarId]);
+
+  // Reset hasLoadedMessages when webinarId changes
   useEffect(() => {
-    if (messages.length >= 0) {
-      localStorage.setItem('chat-messages', JSON.stringify(messages));
-    }
-  }, [messages]);
+    hasLoadedMessages.current = false;
+    setMessages([]); // Clear messages when webinar changes
+  }, [webinarId]);
 
   // Track unread messages when chat is not visible
   useEffect(() => {
@@ -215,7 +236,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
   }, [dailyRoom, isVisible]);
 
   // Send a message
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!dailyRoom || !input.trim()) return;
 
     const messageData = {
@@ -228,15 +249,32 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
     // Send message via Daily app-message
     (dailyRoom as any).sendAppMessage(messageData, '*');
 
-    // Add message locally (don't increment unread count for own messages)
-    const newMessage = {
+    // Add message locally immediately (optimistic update)
+    const tempId = crypto.randomUUID();
+    const newMessage: Message = {
       ...messageData,
-      id: crypto.randomUUID(),
+      id: tempId,
       timestamp: Date.now(),
     };
 
     setMessages(prev => [...prev, newMessage]);
     setInput('');
+
+    // Save to database if webinarId is available
+    if (webinarId) {
+      try {
+        await webinarApi.saveChatMessage(webinarId, {
+          senderUserId: messageData.SenderUserId || '',
+          senderName: messageData.senderName,
+          text: messageData.text,
+        });
+        // Optionally update the message ID with the database ID if needed
+        // For now, we'll keep the temp ID as the database save is successful
+      } catch (error) {
+        console.error('Error saving chat message to database:', error);
+        // Message is still sent via Daily, so we keep it in the UI
+      }
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -244,7 +282,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
   };
 
   // Clear chat function for admin
-  const clearChat = () => {
+  const clearChat = async () => {
     if (!dailyRoom || !isAdmin) return;
 
     // Send clear-chat message to all participants
@@ -252,6 +290,15 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
 
     // Clear local messages immediately
     setMessages([]);
+
+    // Clear messages from database if webinarId is available
+    if (webinarId) {
+      try {
+        await webinarApi.clearChatMessages(webinarId);
+      } catch (error) {
+        console.error('Error clearing chat messages from database:', error);
+      }
+    }
   };
 
   return (

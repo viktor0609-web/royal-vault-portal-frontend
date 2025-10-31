@@ -9,7 +9,11 @@ import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment } from "react";
 
 
-export const UserMeeting = () => {
+interface UserMeetingProps {
+    webinarId?: string;
+}
+
+export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId }) => {
     const {
         roomUrl,
         joined,
@@ -198,6 +202,7 @@ export const UserMeeting = () => {
                             <ChatBox
                                 isVisible={showChatBox}
                                 onUnreadCountChange={setChatUnreadCount}
+                                webinarId={webinarId}
                             />
                         </div>
                     </div>

@@ -70,7 +70,7 @@ export const VideoMeeting = () => {
               </div>
             </div>
           ) : (
-            <UserMeeting />
+            <UserMeeting webinarId={webinar?._id} />
           )}
         </section>
       </main>

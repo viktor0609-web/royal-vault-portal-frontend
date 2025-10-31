@@ -8,7 +8,11 @@ import { PeoplePanel } from "./PeoplePanel";
 import { useState, useEffect, useRef, Fragment } from "react";
 import { VideoPlayer } from "../VideoPlayer";
 
-export const GuestMeeting = () => {
+interface GuestMeetingProps {
+    webinarId?: string;
+}
+
+export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId }) => {
     const {
         roomUrl,
         joined,
@@ -185,6 +189,7 @@ export const GuestMeeting = () => {
                             <ChatBox
                                 isVisible={showChatBox}
                                 onUnreadCountChange={setChatUnreadCount}
+                                webinarId={webinarId}
                             />
                         </div>
                     </div>

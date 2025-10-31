@@ -152,14 +152,13 @@ export function DealsSection() {
                                 <TableHead className="hidden 2xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray">Strategies</TableHead>
                                 <TableHead className="hidden 2xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray">Requirements</TableHead>
                                 <TableHead className="hidden md:table-cell min-w-[100px] font-semibold text-royal-dark-gray">URL</TableHead>
-                                <TableHead className="hidden xl:table-cell min-w-[120px] font-semibold text-royal-dark-gray">Created</TableHead>
                                 <TableHead className="sticky right-0 bg-gray-50 min-w-[100px] text-right font-semibold text-royal-dark-gray z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={10} className="text-center py-12">
+                                    <TableCell colSpan={9} className="text-center py-12">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-royal-gray"></div>
                                             <p className="text-gray-500">Loading deals...</p>
@@ -168,7 +167,7 @@ export function DealsSection() {
                                 </TableRow>
                             ) : deals.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={10} className="text-center py-12">
+                                    <TableCell colSpan={9} className="text-center py-12">
                                         <div className="flex flex-col items-center gap-2">
                                             <TagIcon className="h-12 w-12 text-gray-300" />
                                             <p className="text-gray-500 font-medium">No deals found</p>
@@ -201,7 +200,6 @@ export function DealsSection() {
                                                 <span className="text-gray-400">N/A</span>
                                             )}
                                         </TableCell>
-                                        <TableCell className="hidden xl:table-cell text-sm text-royal-gray">{formatDate(deal.createdAt)}</TableCell>
                                         <TableCell className="sticky right-0 bg-white hover:bg-gray-50 min-w-[100px] z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                                             <div className="flex gap-2 justify-end flex-shrink-0">
                                                 <Button

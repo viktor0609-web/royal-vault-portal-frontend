@@ -56,6 +56,9 @@ interface DailyMeetingContextType {
   localParticipant: any; // Add localParticipant to context type
   hasLocalAudioPermission: boolean; // Add hasLocalAudioPermission
   role: RoleType;
+  sendWebinarStatusChange: (status: string) => Promise<void>;
+  webinarStatus: string;
+  setWebinarStatus: (status: string) => void;
 }
 
 const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(undefined);
@@ -82,6 +85,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [userName, setUserName] = useState<string>(""); // New state for user name
   const [localParticipant, setLocalParticipant] = useState<any>(null); // State for local participant
   const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(false);
+  const [webinarStatus, setWebinarStatus] = useState<string>("Scheduled");
 
 
   const [backgroundFilterType, setBackgroundFilterType] = useState<BackgroundFilterType>('none');
@@ -425,6 +429,10 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
         setTimeout(() => alert('You have been ejected from the meeting by the admin.'), 1000);
       }
+      else if (e.data.type === 'webinar-status-changed') {
+        setWebinarStatus(e.data.status);
+      }
+
     };
     dailyRoom.on('app-message', handleAppMessage);
 
@@ -529,6 +537,15 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       dailyRoom.sendAppMessage({ type: 'ejected' }, sessionId); // Send app message to ejected participant
     } catch (err) {
       console.error('Error ejecting participant:', err);
+    }
+  };
+
+  const sendWebinarStatusChange = async (status: string) => {
+    if (!dailyRoom) return;
+    try {
+      dailyRoom.sendAppMessage({ type: 'webinar-status-changed', status: status }, '*');
+    } catch (err) {
+      console.error('Error sending webinar status change:', err);
     }
   };
 
@@ -775,8 +792,11 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         toggleParticipantAudioPermission,
         userName,
         setUserName,
+        sendWebinarStatusChange,
         localParticipant, // Provide localParticipant
         hasLocalAudioPermission, // Provide hasLocalAudioPermission
+        webinarStatus,
+        setWebinarStatus,
       }}
     >
       {children}

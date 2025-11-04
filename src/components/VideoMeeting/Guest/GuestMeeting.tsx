@@ -10,7 +10,7 @@ import { VideoPlayer } from "../VideoPlayer";
 
 interface GuestMeetingProps {
     webinarId?: string;
-    webinarStatus?: string;
+    webinarStatus: string;
 }
 
 export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarStatus }) => {

@@ -142,33 +142,51 @@ export function WebinarsSection() {
   };
 
   const handleJoinWebinar = (webinar: Webinar) => {
-    // Check if user is registered for upcoming webinars
-    if (filterIndex === 0 && !isUserRegistered(webinar)) {
-      toast({
-        title: "Registration Required",
-        description: "Please register for this webinar to access the live session",
-        variant: "destructive",
-      });
+    // Handle ENDED webinars - show replay/watch
+    if (webinar.status === 'Ended') {
+      // Navigate to watch replay (same as joining, but for ended webinars)
+      // if (user?.role === 'admin') {
+      //   navigate(`/royal-tv/${webinar.slug}/admin`);
+      // } else {
+      //   navigate(`/royal-tv/${webinar.slug}/user`);
+      // }
       return;
     }
 
-    // Check if user is logged in
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to access the live webinar",
-        variant: "destructive",
-      });
-      openDialog("login");
+    // For WAITING and IN PROGRESS statuses, check registration
+    if (webinar.status === 'Waiting' || webinar.status === 'In Progress') {
+      // Check if user is logged in
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please log in to join the webinar",
+          variant: "destructive",
+        });
+        openDialog("login");
+        return;
+      }
+
+      // Check if user is registered
+      if (!isUserRegistered(webinar)) {
+        toast({
+          title: "Registration Required",
+          description: "Please register for this webinar to access the live session",
+          variant: "destructive",
+        });
+        // Redirect to registration page
+        const registrationUrl = `/webinar-register?id=${webinar._id}&title=${encodeURIComponent(webinar.name)}&date=${encodeURIComponent(webinar.date)}&is_user=true`;
+        navigate(registrationUrl);
+        return;
+      }
+
+      // User is registered, allow joining
+      window.open(`/royal-tv/${webinar.slug}/user`, '_blank');
       return;
     }
 
-    // Determine user role and redirect to appropriate meeting page
-    if (user.role === 'admin') {
-      navigate(`/royal-tv/${webinar.slug}/admin`);
-    } else {
-      navigate(`/royal-tv/${webinar.slug}/user`);
-    }
+    // For SCHEDULED status, this shouldn't be called (should use handleRegister instead)
+    // But if it is, redirect to registration
+    handleRegister(webinar);
   };
 
   const changeFilter = (index: number) => {
@@ -181,19 +199,24 @@ export function WebinarsSection() {
     const currentWebinars = webinars.filter(webinar => webinar.portalDisplay === 'Yes');
 
     switch (filterIndex) {
-      case 0: // UPCOMING
+      case 0: // UPCOMING - Show Scheduled, Waiting, In Progress
         return currentWebinars.filter(webinar => {
-          return webinar.status !== 'Ended';
+          return webinar.status === 'Scheduled' ||
+            webinar.status === 'Waiting' ||
+            webinar.status === 'In Progress';
         });
-      case 1: // REPLAYS
+      case 1: // REPLAYS - Show all Ended webinars
         return currentWebinars.filter(webinar => {
           return webinar.status === 'Ended';
         });
-      case 2: // WATCHED
+      case 2: // WATCHED - Show Ended webinars where user attended
         return currentWebinars.filter(webinar => {
-          return webinar.attendees?.some(attendee =>
-            attendee.user === user?._id && attendee.attendanceStatus === 'attended'
-          );
+          return webinar.status === 'Ended' &&
+            webinar.attendees?.some(attendee => {
+              const attendeeUserId = attendee.user?.toString() || attendee.user;
+              const currentUserId = user?._id?.toString();
+              return attendeeUserId === currentUserId && attendee.attendanceStatus === 'attended';
+            });
         });
       default:
         return [];
@@ -272,13 +295,15 @@ export function WebinarsSection() {
                 key={webinar._id}
                 onClick={() => {
                   if (filterIndex === 0) {
-                    handleRegister(webinar);
-                  } else if (filterIndex === 1) {
-                    // For replays, anyone can access
-                    handleJoinWebinar(webinar);
-                  } else if (filterIndex === 2) {
-                    // For watched webinars, anyone can access
-                    handleJoinWebinar(webinar);
+                    // For upcoming webinars, handle based on status
+                    if (webinar.status === 'Scheduled') {
+                      handleRegister(webinar);
+                    } else if (webinar.status === 'Waiting' || webinar.status === 'In Progress') {
+                      handleJoinWebinar(webinar);
+                    }
+                  } else if (filterIndex === 1 || filterIndex === 2) {
+                    // For replays and watched webinars
+                    // handleJoinWebinar(webinar);
                   }
                 }}
                 className={`flex items-center justify-between p-3 sm:p-6 bg-sidebar rounded-lg border border-royal-light-gray transition-all duration-75 ease-in-out group cursor-pointer hover:shadow-sm hover:scale-[1.005] hover:border-royal-blue/10`}
@@ -305,37 +330,48 @@ export function WebinarsSection() {
                 {/* Desktop Buttons */}
                 <div className="hidden min-[700px]:flex gap-2">
                   {filterIndex === 0 ? (
-                    // For upcoming webinars
-                    isRegistered ? (
-                      // If registered, show unregister button
+                    // For upcoming webinars (Scheduled, Waiting, In Progress)
+                    webinar.status === 'Scheduled' ? (
+                      // SCHEDULED: Show REGISTER button
+                      isRegistered ? (
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUnregister(webinar);
+                          }}
+                          disabled={isProcessing}
+                          variant="outline"
+                          className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 transition-all duration-75"
+                        >
+                          {isUnregistering ? 'Canceling...' : 'Cancel Register'}
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRegister(webinar);
+                          }}
+                          disabled={isProcessing}
+                          className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
+                        >
+                          REGISTER
+                        </Button>
+                      )
+                    ) : webinar.status === 'Waiting' || webinar.status === 'In Progress' ? (
+                      // WAITING/IN PROGRESS: Show JOIN button
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleUnregister(webinar);
-                        }}
-                        disabled={isProcessing}
-                        variant="outline"
-                        className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 transition-all duration-75"
-                      >
-                        {isUnregistering ? 'Canceling...' : 'Cancel Register'}
-                      </Button>
-                    ) : (
-                      // If not registered, show register button
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRegister(webinar);
+                          handleJoinWebinar(webinar);
                         }}
                         disabled={isProcessing}
                         className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
                       >
-                        <a href={`/royal-tv/${webinar.slug}/user`} target="_blank" rel="noopener noreferrer">
-                          Register
-                        </a>
+                        JOIN
                       </Button>
-                    )
+                    ) : null
                   ) : (
-                    // For replays and watched webinars
+                    // For replays and watched webinars (ENDED status)
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -344,7 +380,7 @@ export function WebinarsSection() {
                       disabled={isProcessing}
                       className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
                     >
-                      {filterIndex === 1 ? 'Re-watch' : 'View Details'}
+                      WATCH
                     </Button>
                   )}
                 </div>
@@ -352,63 +388,82 @@ export function WebinarsSection() {
                 {/* Mobile Action Buttons */}
                 <div className="min-[700px]:hidden flex gap-2">
                   {filterIndex === 0 ? (
-                    // For upcoming webinars
-                    isRegistered ? (
-                      // If registered, show unregister button
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleUnregister(webinar);
-                              }}
-                              disabled={isProcessing}
-                              variant="outline"
-                              className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 w-10 h-10 p-0 rounded-full flex items-center justify-center"
-                              style={{ aspectRatio: '1/1' }}
-                            >
-                              {isUnregistering ? (
-                                <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                              ) : (
+                    // For upcoming webinars (Scheduled, Waiting, In Progress)
+                    webinar.status === 'Scheduled' ? (
+                      // SCHEDULED: Show register/unregister button
+                      isRegistered ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnregister(webinar);
+                                }}
+                                disabled={isProcessing}
+                                variant="outline"
+                                className="border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 w-10 h-10 p-0 rounded-full flex items-center justify-center"
+                                style={{ aspectRatio: '1/1' }}
+                              >
+                                {isUnregistering ? (
+                                  <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                  <CheckCircleIcon className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
+                              {isUnregistering ? 'Canceling...' : 'Cancel Register'}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRegister(webinar);
+                                }}
+                                disabled={isProcessing}
+                                className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
+                                style={{ aspectRatio: '1/1' }}
+                              >
                                 <CheckCircleIcon className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-                            {isUnregistering ? 'Canceling...' : 'Cancel Register'}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      // If not registered, show register button
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
+                              REGISTER
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )
+                    ) : webinar.status === 'Waiting' || webinar.status === 'In Progress' ? (
+                      // WAITING/IN PROGRESS: Show JOIN button
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleRegister(webinar);
+                                handleJoinWebinar(webinar);
                               }}
                               disabled={isProcessing}
                               className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
                               style={{ aspectRatio: '1/1' }}
                             >
-                              <CheckCircleIcon className="h-4 w-4" />
-                              {/* <a href={`/royal-tv/${webinar.slug}/user`} target="_blank" rel="noopener noreferrer">
-                                <CheckCircleIcon className="h-4 w-4" />
-                              </a> */}
-
+                              <ArrowRightIcon className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-                            Register for Webinar
+                            JOIN
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
-                    )
+                    ) : null
                   ) : (
-                    // For replays and watched webinars
+                    // For replays and watched webinars (ENDED status)
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -421,15 +476,11 @@ export function WebinarsSection() {
                             className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"
                             style={{ aspectRatio: '1/1' }}
                           >
-                            {filterIndex === 1 ? (
-                              <PlayIcon className="h-4 w-4" />
-                            ) : (
-                              <EyeIcon className="h-4 w-4" />
-                            )}
+                            <PlayIcon className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-                          {filterIndex === 1 ? 'Watch Replay' : 'View Details'}
+                          WATCH
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -445,9 +496,9 @@ export function WebinarsSection() {
           {getFilteredWebinars.length === 0 && (
             <div className="flex items-center justify-center p-4 sm:p-8">
               <div className="text-sm sm:text-base text-royal-gray">
-                {filterIndex === 0 ? 'No upcoming webinars' :
+                {filterIndex === 0 ? 'No upcoming webinars (Scheduled, Waiting, or In Progress)' :
                   filterIndex === 1 ? 'No replay webinars available' :
-                    'No watched webinars'}
+                    'No watched webinars (Ended webinars you attended)'}
               </div>
             </div>
           )}

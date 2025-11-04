@@ -140,6 +140,17 @@ export const VideoMeeting = () => {
             </Select>
           </div>
 
+          {/* Start Webinar Button - Show when status is Waiting */}
+          {webinar?.status === 'Waiting' && (
+            <Button
+              onClick={() => handleStatusChange('In Progress')}
+              disabled={updatingStatus || loading}
+              className="bg-green-600 hover:bg-green-700 h-9 sm:h-10 text-xs sm:text-sm text-white"
+            >
+              {updatingStatus ? "Starting..." : "Start Webinar"}
+            </Button>
+          )}
+
           {/* End Webinar Button */}
           <Button
             onClick={handleEndWebinar}

@@ -62,7 +62,7 @@ export const VideoMeeting = () => {
             <main className="flex-1 min-h-0 grid grid-rows-1 grid-cols-1 @[768px]:grid-cols-[1fr_320px] @[1024px]:grid-cols-[1fr_400px] gap-0">
                 {/* Video / Room Area - Responsive container */}
                 <section className="p-2 sm:p-4 flex flex-col min-h-0 @container/video">
-                    <GuestMeeting webinarId={webinar?._id} />
+                    <GuestMeeting webinarId={webinar?._id} webinarStatus={webinar?.status} />
                 </section>
             </main>
         </div>

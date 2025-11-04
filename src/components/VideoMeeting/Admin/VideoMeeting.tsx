@@ -9,6 +9,7 @@ import { webinarApi } from "@/lib/api";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useDailyMeeting } from "@/context/DailyMeetingContext";
 
 interface Webinar {
   _id: string;
@@ -30,6 +31,7 @@ export const VideoMeeting = () => {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { sendWebinarStatusChange } = useDailyMeeting();
 
   /* ---------- Fetch Webinar By Slug ---------- */
   useEffect(() => {
@@ -54,6 +56,7 @@ export const VideoMeeting = () => {
     try {
       setUpdatingStatus(true);
       await webinarApi.updateWebinar(webinar._id, { status: newStatus });
+      await sendWebinarStatusChange(newStatus);
 
       // Update local state
       setWebinar({ ...webinar, status: newStatus });

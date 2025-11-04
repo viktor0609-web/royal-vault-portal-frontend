@@ -11,7 +11,7 @@ import { useState, useEffect, useRef, Fragment } from "react";
 
 interface UserMeetingProps {
     webinarId?: string;
-    webinarStatus?: string;
+    webinarStatus: string;
 }
 
 export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStatus }) => {

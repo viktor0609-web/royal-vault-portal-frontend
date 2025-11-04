@@ -7,6 +7,7 @@ import { UserMeeting } from "./UserMeeting";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui/select";
 import { webinarApi } from "@/lib/api";
 import { format } from "date-fns";
+import { useDailyMeeting } from "@/context/DailyMeetingContext";
 
 interface Webinar {
   _id: string;
@@ -24,6 +25,7 @@ export const VideoMeeting = () => {
   const { slug } = useParams<{ slug: string }>();
   const [webinar, setWebinar] = useState<Webinar | null>(null);
   const [loading, setLoading] = useState(true);
+  const { webinarStatus, setWebinarStatus } = useDailyMeeting();
 
   useEffect(() => {
     const fetchWebinar = async () => {
@@ -32,6 +34,7 @@ export const VideoMeeting = () => {
         setLoading(true);
         const response = await webinarApi.getPublicWebinarBySlug(slug);
         setWebinar(response.data.webinar);
+        setWebinarStatus(response.data.webinar.status);
       } catch (error) {
         console.error("Error fetching webinar:", error);
       } finally {
@@ -62,7 +65,7 @@ export const VideoMeeting = () => {
       <main className="flex-1 min-h-0 grid grid-rows-1 grid-cols-1 @[768px]:grid-cols-[1fr_320px] @[1024px]:grid-cols-[1fr_400px] gap-0">
         {/* Video / Room Area - Responsive container */}
         <section className="p-2 sm:p-4 flex flex-col min-h-0 @container/video">
-          <UserMeeting webinarId={webinar?._id} webinarStatus={webinar?.status} />
+          <UserMeeting webinarId={webinar?._id} webinarStatus={webinarStatus} />
         </section>
       </main>
     </div>

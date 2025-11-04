@@ -118,7 +118,7 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
                 <div className="flex flex-1 items-center justify-center bg-gray-800 text-white rounded-lg">
                     <div className="text-center">
                         <h2 className="text-2xl font-bold mb-2">Webinar Is Not Started Yet</h2>
-                        <p className="text-gray-400">This webinar is not started yet.</p>
+                        <p className="text-gray-400">The webinar will start in just a few minutes. Please stay here. </p>
                     </div>
                 </div>
             )}

@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { VideoIcon, ArrowRightIcon, PlayIcon, EyeIcon, CheckCircleIcon } from "lucide-react";
+import { VideoIcon, ArrowRightIcon, PlayIcon, EyeIcon, CheckCircleIcon, RefreshCwIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -43,6 +43,8 @@ export function WebinarsSection() {
   const [error, setError] = useState<string | null>(null);
   const [unregistering, setUnregistering] = useState<string | null>(null);
   const [registeredWebinars, setRegisteredWebinars] = useState<Set<string>>(new Set());
+  const [refreshing, setRefreshing] = useState(false);
+  const isInitialMount = useRef(true);
   const { toast } = useToast();
   const { user } = useAuth();
   const { openDialog } = useAuthDialog();
@@ -54,9 +56,13 @@ export function WebinarsSection() {
     markChecklistItemCompleted(CHECKLIST_ITEMS.JOIN_WEBINAR);
   }, []);
 
-  const fetchWebinars = useCallback(async () => {
+  const fetchWebinars = useCallback(async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
       const response = await webinarApi.getPublicWebinars('detailed');
       const webinarsData = response.data.webinars;
       setWebinars(webinarsData);
@@ -84,6 +90,7 @@ export function WebinarsSection() {
       });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [user, toast]);
 
@@ -93,6 +100,34 @@ export function WebinarsSection() {
       fetchWebinars();
     }
   }, [user, fetchWebinars]);
+
+  // Refresh when filter tab changes
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return; // Skip refresh on initial mount
+    }
+
+    if (user !== undefined && !loading) {
+      fetchWebinars(true);
+    }
+  }, [filterIndex]); // Only depend on filterIndex, not fetchWebinars to avoid unnecessary refreshes
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    if (user === undefined || loading) {
+      return; // Don't set up interval if user is not loaded or initial load is in progress
+    }
+
+    const intervalId = setInterval(() => {
+      fetchWebinars(true);
+    }, 30000); // 30 seconds
+
+    // Cleanup interval on unmount or when dependencies change
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [user, loading, fetchWebinars]);
 
   const handleRegister = (webinar: Webinar) => {
     // Open registration page in new window/tab with webinar details
@@ -243,16 +278,36 @@ export function WebinarsSection() {
     return false;
   };
 
+  const handleRefresh = async () => {
+    await fetchWebinars(true);
+    toast({
+      title: "Refreshed",
+      description: "Webinar list has been updated",
+    });
+  };
+
   return (
     <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
-      <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-        <VideoIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
-        <div>
-          <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">WEBINARS</h1>
-          <p className="text-xs sm:text-base text-royal-gray">
-            Register for upcoming live webinars or watch replays.
-          </p>
+      <div className="flex items-center justify-between gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <VideoIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
+          <div>
+            <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">WEBINARS</h1>
+            <p className="text-xs sm:text-base text-royal-gray">
+              Register for upcoming live webinars or watch replays.
+            </p>
+          </div>
         </div>
+        <Button
+          onClick={handleRefresh}
+          disabled={refreshing || loading}
+          variant="outline"
+          size="sm"
+          className="border-royal-light-gray text-royal-gray hover:bg-royal-light-gray hover:text-royal-dark-gray transition-all duration-75 flex items-center gap-2"
+        >
+          <RefreshCwIcon className={`h-4 w-4 sm:h-5 sm:w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          <span className="text-xs sm:text-sm">Refresh</span>
+        </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-center bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">

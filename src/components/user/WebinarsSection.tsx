@@ -278,6 +278,36 @@ export function WebinarsSection() {
     return false;
   };
 
+  const getStatusBadgeStyles = (status: string) => {
+    switch (status) {
+      case 'Scheduled':
+        return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'Waiting':
+        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'In Progress':
+        return 'bg-green-100 text-green-700 border-green-200';
+      case 'Ended':
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+      default:
+        return 'bg-gray-100 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'Scheduled':
+        return 'Scheduled';
+      case 'Waiting':
+        return 'Waiting';
+      case 'In Progress':
+        return 'Live';
+      case 'Ended':
+        return 'Ended';
+      default:
+        return status;
+    }
+  };
+
   const handleRefresh = async () => {
     await fetchWebinars(true);
     toast({
@@ -371,9 +401,13 @@ export function WebinarsSection() {
                     <span className="group-hover:text-royal-dark-gray transition-colors duration-75">
                       {formatDate(webinar.date)} @ {formatTime(webinar.date)}
                     </span>
-                    <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-primary/10 text-primary rounded text-xs font-medium group-hover:bg-primary/20 group-hover:scale-102 transition-all duration-75">
-                      {webinar.streamType}
-                    </span>
+                    {filterIndex === 0 && (
+                      <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs font-medium border ${getStatusBadgeStyles(webinar.status)}`}>
+                        {getStatusLabel(webinar.status)}
+                      </span>
+                    )}
+
+
                     {isRegistered && (
                       <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 text-green-600 rounded text-xs font-medium">
                         Registered

@@ -279,79 +279,77 @@ export function DealsSection() {
 
       {/* Deals Grid */}
       <div className="relative h-[500px] sm:h-[660px]">
-        <div className="rounded-lg">
-          <div className="h-full overflow-y-auto mb-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
-              {loading ? (
-                <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
-                  <div className="text-sm sm:text-base text-royal-gray">
-                    Loading deals...
-                  </div>
+        <div className="h-full overflow-y-auto mb-2 rounded-lg ">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
+            {loading ? (
+              <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
+                <div className="text-sm sm:text-base text-royal-gray">
+                  Loading deals...
                 </div>
-              ) : deals.length > 0 ? (
-                deals.map((item, index) => (
-                  <Link
-                    target="_blank"
-                    key={index}
-                    to={item.url}
-                    className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
-                  >
-                    <div className="relative h-48 sm:h-64 w-full">
-                      <img
-                        src={item.image}
-                        className="w-full h-full object-cover"
-                        alt={item.name}
-                      />
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          background:
-                            "linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(0,0,0,0.8))"
-                        }}
-                      />
-                      <h3 className="absolute bottom-6 sm:bottom-8 text-sm sm:text-xl left-2 text-white font-bold z-10 uppercase line-clamp-2">
-                        {item.name}
-                      </h3>
-                      <div className="text-xs pl-2 sm:pl-3 left-0 right-0 rounded-md absolute bottom-0 m-2 sm:m-3 bg-card uppercase">
-                        {formatArrayData(item.type)}
-                      </div>
+              </div>
+            ) : deals.length > 0 ? (
+              deals.map((item, index) => (
+                <Link
+                  target="_blank"
+                  key={index}
+                  to={item.url}
+                  className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
+                >
+                  <div className="relative h-48 sm:h-64 w-full">
+                    <img
+                      src={item.image}
+                      className="w-full h-full object-cover"
+                      alt={item.name}
+                    />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        background:
+                          "linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(0,0,0,0.8))"
+                      }}
+                    />
+                    <h3 className="absolute bottom-6 sm:bottom-8 text-sm sm:text-xl left-2 text-white font-bold z-10 uppercase line-clamp-2">
+                      {item.name}
+                    </h3>
+                    <div className="text-xs pl-2 sm:pl-3 left-0 right-0 rounded-md absolute bottom-0 m-2 sm:m-3 bg-card uppercase">
+                      {formatArrayData(item.type)}
                     </div>
-                    <div className="text-xs sm:text-sm text-royal-gray p-3 sm:p-6">
-                      <p className="leading-relaxed">
-                        <span className="font-bold">Source: </span>
-                        {item.source?.name}
-                      </p>
-                      <p className="leading-relaxed">
-                        <span className="font-bold">Category: </span>
-                        {formatArrayData(item.category)}
-                      </p>
-                      <p className="leading-relaxed">
-                        <span className="font-bold">Sub-Category: </span>
-                        {formatArrayData(item.subCategory)}
-                      </p>
-                      <p className="leading-relaxed">
-                        <span className="font-bold">Strategy: </span>
-                        {formatArrayData(item.strategy)}
-                      </p>
-                      <p className="leading-relaxed">
-                        <span className="font-bold">Requirements: </span>
-                        {formatArrayData(item.requirement)}
-                      </p>
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
-                  <div className="text-sm sm:text-base text-royal-gray">
-                    No deals found matching your filters.
                   </div>
+                  <div className="text-xs sm:text-sm text-royal-gray p-3 sm:p-6">
+                    <p className="leading-relaxed">
+                      <span className="font-bold">Source: </span>
+                      {item.source?.name}
+                    </p>
+                    <p className="leading-relaxed">
+                      <span className="font-bold">Category: </span>
+                      {formatArrayData(item.category)}
+                    </p>
+                    <p className="leading-relaxed">
+                      <span className="font-bold">Sub-Category: </span>
+                      {formatArrayData(item.subCategory)}
+                    </p>
+                    <p className="leading-relaxed">
+                      <span className="font-bold">Strategy: </span>
+                      {formatArrayData(item.strategy)}
+                    </p>
+                    <p className="leading-relaxed">
+                      <span className="font-bold">Requirements: </span>
+                      {formatArrayData(item.requirement)}
+                    </p>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
+                <div className="text-sm sm:text-base text-royal-gray">
+                  No deals found matching your filters.
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
 
-        Overlay for non-logged-in users
+        {/* Overlay for non-logged-in users */}
 
         {/* {user?.client_type !== "Elite" && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur z-20">

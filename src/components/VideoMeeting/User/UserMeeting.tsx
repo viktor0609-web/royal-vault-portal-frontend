@@ -11,9 +11,10 @@ import { useState, useEffect, useRef, Fragment } from "react";
 
 interface UserMeetingProps {
     webinarId?: string;
+    webinarStatus?: string;
 }
 
-export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId }) => {
+export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStatus }) => {
     const {
         roomUrl,
         joined,
@@ -112,120 +113,140 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId }) => {
 
 
     return (
-        <div className="flex flex-col h-full w-full min-h-0 max-w-full @container/meeting">
-            {/* Main Meeting Area - Responsive video container */}
-            <div className="flex flex-1 overflow-hidden min-h-0 max-w-full">
-                <div
-                    ref={videoContainerRef}
-                    id="daily-video-container"
-                    className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full ${joined ? "" : "p-2 sm:p-4"}`}
-                >
-                    {joined && (
-                        <div className="h-full flex flex-col min-h-0 max-w-full">
-                            <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
-                                {/* Screenshare first */}
-                                {screenshareTrack && <VideoPlayer track={screenshareTrack} type="screen" />}
+        <>
+            {(webinarStatus === "Waiting" || webinarStatus === "Scheduled") && (
+                <div className="flex flex-1 items-center justify-center bg-gray-800 text-white rounded-lg">
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold mb-2">Webinar Is Not Started Yet</h2>
+                        <p className="text-gray-400">This webinar is not started yet.</p>
+                    </div>
+                </div>
+            )}
+            {/* Webinar Ended Message */}
+            {webinarStatus === 'Ended' && (
+                <div className="flex flex-1 items-center justify-center bg-gray-800 text-white rounded-lg">
+                    <div className="text-center">
+                        <h2 className="text-2xl font-bold mb-2">Webinar Has Ended</h2>
+                        <p className="text-gray-400">This webinar has been closed by the admin.</p>
+                    </div>
+                </div>
+            )}
+            {webinarStatus === "In Progress" && (
+                <div className="flex flex-col h-full w-full min-h-0 max-w-full @container/meeting">
+                    {/* Main Meeting Area - Responsive video container */}
+                    <div className="flex flex-1 overflow-hidden min-h-0 max-w-full">
+                        <div
+                            ref={videoContainerRef}
+                            id="daily-video-container"
+                            className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full ${joined ? "" : "p-2 sm:p-4"}`}
+                        >
+                            {joined && (
+                                <div className="h-full flex flex-col min-h-0 max-w-full">
+                                    <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
+                                        {/* Screenshare first */}
+                                        {screenshareTrack && <VideoPlayer track={screenshareTrack} type="screen" />}
 
-                                {/* Main video when no screenshare */}
-                                {!screenshareTrack && (
-                                    <>
-                                        <VideoPlayer
-                                            track={guestVideoTrack
-                                                ? (participants.find(p => p.name.includes("Guest"))?.video ? guestVideoTrack : null)
-                                                : (participants.find(p => p.local)?.video ? mainVideoTrack : null)
-                                            }
-                                            type="camera"
-                                            participantName={guestVideoTrack
-                                                ? participants.find(p => p.name.includes("Guest"))?.name || "Guest"
-                                                : participants.find(p => p.local)?.name || "User"
-                                            }
-                                            showAvatarWhenOff={true}
-                                        />
-                                        {/* Name label for main video */}
-                                        <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
-                                            {guestVideoTrack
-                                                ? `${participants.find(p => p.name.includes("Guest"))?.name}`
-                                                : `You: ${participants.find(p => p.local)?.name}`
-                                            }
-                                        </div>
-                                    </>
-                                )}
-
-                            </div>
-
-                            {/* Remote participants audio */}
-                            {participants.length > 1 && (
-                                <>
-                                    {participants.filter(p => p.id !== participants[0].id).map((p) => (
-                                        <Fragment key={p.id}>
-                                            {p.audioTrack && (
-                                                <audio
-                                                    ref={(audioElement) => {
-                                                        if (audioElement && p.audioTrack) {
-                                                            audioElement.srcObject = new MediaStream([p.audioTrack]);
-                                                        }
-                                                    }}
-                                                    autoPlay
-                                                    playsInline
+                                        {/* Main video when no screenshare */}
+                                        {!screenshareTrack && (
+                                            <>
+                                                <VideoPlayer
+                                                    track={guestVideoTrack
+                                                        ? (participants.find(p => p.name.includes("Guest"))?.video ? guestVideoTrack : null)
+                                                        : (participants.find(p => p.local)?.video ? mainVideoTrack : null)
+                                                    }
+                                                    type="camera"
+                                                    participantName={guestVideoTrack
+                                                        ? participants.find(p => p.name.includes("Guest"))?.name || "Guest"
+                                                        : participants.find(p => p.local)?.name || "User"
+                                                    }
+                                                    showAvatarWhenOff={true}
                                                 />
-                                            )}
-                                        </Fragment>
-                                    ))}
-                                </>
+                                                {/* Name label for main video */}
+                                                <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
+                                                    {guestVideoTrack
+                                                        ? `${participants.find(p => p.name.includes("Guest"))?.name}`
+                                                        : `You: ${participants.find(p => p.local)?.name}`
+                                                    }
+                                                </div>
+                                            </>
+                                        )}
+
+                                    </div>
+
+                                    {/* Remote participants audio */}
+                                    {participants.length > 1 && (
+                                        <>
+                                            {participants.filter(p => p.id !== participants[0].id).map((p) => (
+                                                <Fragment key={p.id}>
+                                                    {p.audioTrack && (
+                                                        <audio
+                                                            ref={(audioElement) => {
+                                                                if (audioElement && p.audioTrack) {
+                                                                    audioElement.srcObject = new MediaStream([p.audioTrack]);
+                                                                }
+                                                            }}
+                                                            autoPlay
+                                                            playsInline
+                                                        />
+                                                    )}
+                                                </Fragment>
+                                            ))}
+                                        </>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    )}
-                </div>
 
-                {/* Right Sidebars */}
-                {joined && showPeoplePanel && (
-                    <div className="fixed inset-0 z-50 sm:relative sm:inset-auto">
-                        <div className="w-full h-full sm:w-auto h-auto">
-                            <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
-                        </div>
-                    </div>
-                )}
-                {joined && showChatBox && (
-                    <div className="fixed inset-0 z-50 sm:relative sm:inset-auto flex border-l bg-gray-900 text-white">
-                        <div className="w-full sm:w-80 lg:w-96 p-4 flex flex-col">
-                            {/* Mobile close button */}
-                            <div className="flex justify-end mb-2 sm:hidden">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setShowChatBox(false)}
-                                    className="h-8 w-8 text-white hover:bg-gray-700"
-                                >
-                                    <X className="h-4 w-4" />
-                                </Button>
+                        {/* Right Sidebars */}
+                        {joined && showPeoplePanel && (
+                            <div className="fixed inset-0 z-50 sm:relative sm:inset-auto">
+                                <div className="w-full h-full sm:w-auto h-auto">
+                                    <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
+                                </div>
                             </div>
-                            <ChatBox
-                                isVisible={showChatBox}
-                                onUnreadCountChange={setChatUnreadCount}
-                                webinarId={webinarId}
-                            />
-                        </div>
+                        )}
+                        {joined && showChatBox && (
+                            <div className="fixed inset-0 z-50 sm:relative sm:inset-auto flex border-l bg-gray-900 text-white">
+                                <div className="w-full sm:w-80 lg:w-96 p-4 flex flex-col">
+                                    {/* Mobile close button */}
+                                    <div className="flex justify-end mb-2 sm:hidden">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => setShowChatBox(false)}
+                                            className="h-8 w-8 text-white hover:bg-gray-700"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                    <ChatBox
+                                        isVisible={showChatBox}
+                                        onUnreadCountChange={setChatUnreadCount}
+                                        webinarId={webinarId}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
 
-            {/* Bottom Control Bar */}
-            <MeetingControlsBar
-                position="bottom"
-                togglePeoplePanel={() => {
-                    setShowPeoplePanel(prev => !prev);
-                    if (showChatBox) setShowChatBox(false);
-                }}
-                toggleChatBox={() => {
-                    setShowChatBox(prev => !prev);
-                    if (showPeoplePanel) setShowPeoplePanel(false);
-                }}
-                showChatBox={showChatBox}
-                toggleFullscreen={toggleFullscreen}
-                isFullscreen={isFullscreen}
-                localParticipant={localParticipant}
-                chatUnreadCount={chatUnreadCount}
-            />
-        </div>
+                    {/* Bottom Control Bar */}
+                    <MeetingControlsBar
+                        position="bottom"
+                        togglePeoplePanel={() => {
+                            setShowPeoplePanel(prev => !prev);
+                            if (showChatBox) setShowChatBox(false);
+                        }}
+                        toggleChatBox={() => {
+                            setShowChatBox(prev => !prev);
+                            if (showPeoplePanel) setShowPeoplePanel(false);
+                        }}
+                        showChatBox={showChatBox}
+                        toggleFullscreen={toggleFullscreen}
+                        isFullscreen={isFullscreen}
+                        localParticipant={localParticipant}
+                        chatUnreadCount={chatUnreadCount}
+                    />
+                </div>)}
+        </>
     );
 };

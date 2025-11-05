@@ -129,7 +129,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
               <Button
                 variant="secondary"
                 onClick={isRecording ? stopRecording : startRecording}
-                className={`rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 ${isRecording ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-gray-700 hover:bg-gray-600'} text-white transition-all duration-200`}
+                className={`rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 ${isRecording ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white transition-all duration-200`}
                 title={isRecording ? "Stop Recording" : "Start Recording"}
               >
                 <Circle 

@@ -1,13 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     Dialog,
     DialogContent,
-    DialogTitle
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter
 } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Download, Upload, Link as LinkIcon, Loader2 } from "lucide-react";
+import { Download, Upload, Link as LinkIcon, Loader2, File, X } from "lucide-react";
 import { fileApi, webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,6 +34,9 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [recordingUrl, setRecordingUrl] = useState("");
     const [isUploading, setIsUploading] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const dropZoneRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (webinar?.recording) {
@@ -38,11 +45,57 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
             setRecordingUrl("");
         }
         setSelectedFile(null);
+        setIsDragging(false);
     }, [webinar, isOpen]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setSelectedFile(e.target.files[0]);
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+            const file = files[0];
+            // Check if it's a video or audio file
+            if (file.type.startsWith('video/') || file.type.startsWith('audio/') ||
+                /\.(mp4|webm|mkv|mov|avi|mp3|wav|m4a)$/i.test(file.name)) {
+                setSelectedFile(file);
+            } else {
+                toast({
+                    title: "Invalid file type",
+                    description: "Please upload a video or audio file",
+                    variant: "destructive",
+                });
+            }
+        }
+    };
+
+    const handleDropZoneClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const removeFile = () => {
+        setSelectedFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
         }
     };
 
@@ -134,19 +187,30 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
 
     return (
         <Dialog open={isOpen} onOpenChange={closeDialog}>
-            <DialogContent className="sm:max-w-md">
-                <DialogTitle className="text-royal-dark-gray font-medium mb-4">
-                    Local Recording
-                </DialogTitle>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Download button if recording exists */}
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>Local Recording</DialogTitle>
+                    <DialogDescription>
+                        Upload a recording file or provide a URL to the recording.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Download section if recording exists */}
                     {webinar?.recording && (
-                        <div className="flex items-center justify-between gap-2 p-3 bg-gray-50 rounded-lg border">
-                            <p className="text-sm text-gray-600">Recording available</p>
+                        <div className="flex items-center justify-between p-4 bg-muted rounded-lg border">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                                    <Download className="h-5 w-5 text-primary" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium">Recording Available</p>
+                                    <p className="text-xs text-muted-foreground">Click to download the recording file</p>
+                                </div>
+                            </div>
                             <Button
                                 type="button"
                                 variant="outline"
-                                size="sm"
                                 onClick={handleDownload}
                                 className="flex items-center gap-2"
                             >
@@ -156,81 +220,111 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
                         </div>
                     )}
 
-                    {/* Upload method selection */}
-                    <div className="flex gap-2">
-                        <Button
-                            type="button"
-                            variant={uploadMethod === "file" ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setUploadMethod("file")}
-                            className="flex-1"
-                        >
-                            <Upload className="h-4 w-4 mr-2" />
-                            Upload File
-                        </Button>
-                        <Button
-                            type="button"
-                            variant={uploadMethod === "url" ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setUploadMethod("url")}
-                            className="flex-1"
-                        >
-                            <LinkIcon className="h-4 w-4 mr-2" />
-                            Use URL
-                        </Button>
-                    </div>
+                    {/* Tabs for upload method */}
+                    <Tabs value={uploadMethod} onValueChange={(value) => setUploadMethod(value as "file" | "url")}>
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="file" className="flex items-center gap-2">
+                                <Upload className="h-4 w-4" />
+                                Upload File
+                            </TabsTrigger>
+                            <TabsTrigger value="url" className="flex items-center gap-2">
+                                <LinkIcon className="h-4 w-4" />
+                                Use URL
+                            </TabsTrigger>
+                        </TabsList>
 
-                    {/* File upload input */}
-                    {uploadMethod === "file" && (
-                        <div>
-                            <Label htmlFor="file" className="text-royal-dark-gray font-medium">
-                                Select Recording File
-                            </Label>
-                            <Input
-                                id="file"
-                                type="file"
-                                onChange={handleFileChange}
-                                className="mt-1"
-                                accept="video/*,audio/*,.mp4,.webm,.mkv,.mov,.avi"
-                            />
-                            {selectedFile && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                    Selected: {selectedFile.name}
-                                </p>
-                            )}
-                        </div>
-                    )}
+                        {/* File upload tab content */}
+                        <TabsContent value="file" className="space-y-4 mt-4">
+                            <div
+                                ref={dropZoneRef}
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                                onClick={handleDropZoneClick}
+                                className={`
+                                    relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
+                                    transition-colors
+                                    ${isDragging
+                                        ? 'border-primary bg-primary/5'
+                                        : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50'
+                                    }
+                                `}
+                            >
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    accept="video/*,audio/*,.mp4,.webm,.mkv,.mov,.avi"
+                                    className="hidden"
+                                />
 
-                    {/* URL input */}
-                    {uploadMethod === "url" && (
-                        <div>
-                            <Label htmlFor="url" className="text-royal-dark-gray font-medium">
-                                Recording URL
-                            </Label>
+                                {selectedFile ? (
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                                            <File className="h-6 w-6 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-medium">{selectedFile.name}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                                            </p>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                removeFile();
+                                            }}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <X className="h-4 w-4" />
+                                            Remove
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center gap-3">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                                            <Upload className="h-6 w-6 text-muted-foreground" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-medium">
+                                                Click to upload or drag and drop
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Video or audio files (MP4, WebM, MKV, MOV, AVI, etc.)
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </TabsContent>
+
+                        {/* URL tab content */}
+                        <TabsContent value="url" className="space-y-2 mt-4">
+                            <Label htmlFor="url">Recording URL</Label>
                             <Input
                                 id="url"
                                 type="url"
                                 value={recordingUrl}
                                 onChange={(e) => setRecordingUrl(e.target.value)}
                                 placeholder="https://example.com/recording.mp4"
-                                className="mt-1"
                             />
-                        </div>
-                    )}
+                        </TabsContent>
+                    </Tabs>
 
-                    <div className="flex gap-2">
+                    <DialogFooter>
                         <Button
                             type="button"
                             variant="outline"
                             onClick={closeDialog}
-                            className="flex-1"
                             disabled={isUploading}
                         >
                             Cancel
                         </Button>
                         <Button
                             type="submit"
-                            className="flex-1 bg-primary hover:bg-royal-blue-dark text-white"
                             disabled={isUploading}
                         >
                             {isUploading ? (
@@ -245,7 +339,7 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
                                 </>
                             )}
                         </Button>
-                    </div>
+                    </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog>

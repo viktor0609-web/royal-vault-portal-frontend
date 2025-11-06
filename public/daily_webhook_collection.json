@@ -1,0 +1,109 @@
+{
+    "info": {
+      "name": "Daily.co Webhook Collection (Corrected)",
+      "_postman_id": "d1f2e3a4-b5c6-7890-abcd-ef1234567890",
+      "description": "Daily.co webhook setup for cloud recordings. Make sure your endpoint responds with 200 OK.",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+      {
+        "name": "Create Webhook - recording.started",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer YOUR_DAILY_API_KEY",
+              "type": "text"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "type": "text"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"url\": \"https://royal-vault-portal-backend-v1.onrender.com/webhook/daily\",\n  \"eventTypes\": [\"recording.started\"]\n}"
+          },
+          "url": {
+            "raw": "https://api.daily.co/v1/webhooks",
+            "protocol": "https",
+            "host": ["api","daily","co"],
+            "path": ["v1","webhooks"]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Create Webhook - recording.ready-to-download",
+        "request": {
+          "method": "POST",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer YOUR_DAILY_API_KEY",
+              "type": "text"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json",
+              "type": "text"
+            }
+          ],
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"url\": \"https://royal-vault-portal-backend-v1.onrender.com/webhook/daily\",\n  \"eventTypes\": [\"recording.ready-to-download\"]\n}"
+          },
+          "url": {
+            "raw": "https://api.daily.co/v1/webhooks",
+            "protocol": "https",
+            "host": ["api","daily","co"],
+            "path": ["v1","webhooks"]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "List Webhooks",
+        "request": {
+          "method": "GET",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer YOUR_DAILY_API_KEY",
+              "type": "text"
+            }
+          ],
+          "url": {
+            "raw": "https://api.daily.co/v1/webhooks",
+            "protocol": "https",
+            "host": ["api","daily","co"],
+            "path": ["v1","webhooks"]
+          }
+        },
+        "response": []
+      },
+      {
+        "name": "Delete Webhook",
+        "request": {
+          "method": "DELETE",
+          "header": [
+            {
+              "key": "Authorization",
+              "value": "Bearer YOUR_DAILY_API_KEY",
+              "type": "text"
+            }
+          ],
+          "url": {
+            "raw": "https://api.daily.co/v1/webhooks/WH_ID_TO_DELETE",
+            "protocol": "https",
+            "host": ["api","daily","co"],
+            "path": ["v1","webhooks","WH_ID_TO_DELETE"]
+          }
+        },
+        "response": []
+      }
+    ]
+  }
+  

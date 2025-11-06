@@ -3,7 +3,7 @@ import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
-import { Mic, MicOff, X } from "lucide-react";
+import { Mic, MicOff, X, Loader2 } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
 import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment, useMemo } from "react";
@@ -26,13 +26,17 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
         isLoading,
         isScreensharing,
         screenshareParticipantId,
+        isRecording,
     } = useDailyMeeting();
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
+    const [showProcessingNotification, setShowProcessingNotification] = useState<boolean>(false);
     const hasAttemptedJoin = useRef<boolean>(false);
+    const prevRecordingRef = useRef<boolean>(false);
+    const processingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const videoContainerRef = useRef<HTMLDivElement>(null);
     // Audio refs
@@ -128,6 +132,43 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
         };
     }, []);
 
+    // Track recording state and show notification for 10 seconds after stopping
+    useEffect(() => {
+        // Check if recording just stopped (was true, now false)
+        if (prevRecordingRef.current && !isRecording) {
+            // Clear any existing timeout
+            if (processingTimeoutRef.current) {
+                clearTimeout(processingTimeoutRef.current);
+            }
+
+            // Show notification immediately
+            setShowProcessingNotification(true);
+
+            // Hide notification after 10 seconds
+            processingTimeoutRef.current = setTimeout(() => {
+                setShowProcessingNotification(false);
+            }, 10000); // 10 seconds
+        }
+
+        // Reset notification if recording starts again
+        if (isRecording) {
+            setShowProcessingNotification(false);
+            if (processingTimeoutRef.current) {
+                clearTimeout(processingTimeoutRef.current);
+            }
+        }
+
+        // Update previous recording state
+        prevRecordingRef.current = isRecording;
+
+        // Cleanup on unmount
+        return () => {
+            if (processingTimeoutRef.current) {
+                clearTimeout(processingTimeoutRef.current);
+            }
+        };
+    }, [isRecording]);
+
     if (isLoading && !isPermissionModalOpen) {
         return (
             <div className="flex flex-1 items-center justify-center text-xl bg-gray-800 text-white">
@@ -142,7 +183,25 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
 
 
     return (
-        <div className="flex flex-col h-full w-full min-h-0 max-w-full">
+        <div className="flex flex-col h-full w-full min-h-0 max-w-full relative">
+            {/* Recording Processing Notification */}
+            {showProcessingNotification && (
+                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center gap-3 bg-blue-600 text-white px-4 py-2.5 rounded-lg shadow-lg border border-blue-500/50">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm font-medium">Processing recording...</span>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowProcessingNotification(false)}
+                            className="h-5 w-5 p-0 hover:bg-blue-700 text-white ml-1"
+                        >
+                            <X className="h-3.5 w-3.5" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+
             <div className="flex flex-1 overflow-hidden min-h-0 max-w-full">
                 <div
                     ref={videoContainerRef}

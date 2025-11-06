@@ -3,6 +3,10 @@ import { Button } from "../../ui/button";
 import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, MessageSquare, MessageSquareX, Maximize, Minimize, Circle } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { BackgroundFilterModal } from '../BackgroundFilterModal';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
+import { useToast } from '../../../hooks/use-toast';
+import { webinarApi } from '../../../lib/api';
 
 interface MeetingControlsBarProps {
   position: "top" | "bottom";
@@ -32,6 +36,27 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
     dailyRoom,
   } = useDailyMeeting();
 
+  const { toast } = useToast();
+  const { slug } = useParams<{ slug: string }>();
+
+  const handleStartRecording = async () => {
+    console.log("Start Recording Clicked");
+    try {
+      const response = await webinarApi.setWebinarOnRecording(slug as string);
+      if (response.status !== 200) {
+        throw new Error('Failed to set webinar on recording');
+      }
+      startRecording();
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start recording. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }
+
 
   if (!joined) return null;
 
@@ -47,7 +72,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
         {position === "top" && role === "Admin" && (
           <div className="flex gap-4">
             {!isRecording ? (
-              <Button variant="ghost" className="text-white" onClick={() => { console.log("Start Recording Clicked"); startRecording(); }}>Start Recording</Button>
+              <Button variant="ghost" className="text-white" onClick={handleStartRecording}>Start Recording</Button>
             ) : (
               <Button variant="ghost" className="text-white" onClick={() => { console.log("Stop Recording Clicked"); stopRecording(); }}>Stop Recording</Button>
             )}
@@ -128,13 +153,13 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
             {role === "Admin" && (
               <Button
                 variant="secondary"
-                onClick={isRecording ? stopRecording : startRecording}
+                onClick={isRecording ? stopRecording : handleStartRecording}
                 className={`rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 ${isRecording ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white transition-all duration-200`}
                 title={isRecording ? "Stop Recording" : "Start Recording"}
               >
-                <Circle 
-                  size={20} 
-                  className={`sm:w-6 sm:h-6 ${isRecording ? 'fill-white' : ''}`} 
+                <Circle
+                  size={20}
+                  className={`sm:w-6 sm:h-6 ${isRecording ? 'fill-white' : ''}`}
                 />
               </Button>
             )}

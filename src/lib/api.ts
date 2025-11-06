@@ -224,6 +224,8 @@ export const fileApi = {
 
 // Webinar API functions - OPTIMIZED
 export const webinarApi = {
+  setWebinarOnRecording: (slug: string) => api.post(`/api/webinars/admin/${slug}/on-recording`),
+
   // Admin functions
   getAllWebinars: (fields: 'basic' | 'detailed' | 'full' = 'basic', filters?: { status?: string; streamType?: string }) => {
     const params = new URLSearchParams();
@@ -276,8 +278,8 @@ export const webinarApi = {
   // Chat functions
   saveChatMessage: (webinarId: string, messageData: { senderUserId: string; senderName: string; text: string }) =>
     api.post(`/api/webinars/${webinarId}/chat`, messageData),
-  
+
   getChatMessages: (webinarId: string) => api.get(`/api/webinars/${webinarId}/chat`),
-  
+
   clearChatMessages: (webinarId: string) => api.delete(`/api/webinars/${webinarId}/chat`),
 };

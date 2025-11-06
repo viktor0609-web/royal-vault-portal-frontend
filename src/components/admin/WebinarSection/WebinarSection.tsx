@@ -43,6 +43,7 @@ export function WebinarSection() {
     const [open, setOpen] = useState(false);
     const [recsOpen, setRecsOpen] = useState(false);
     const [editingWebinar, setEditingWebinar] = useState<Webinar | null>(null);
+    const [recsWebinar, setRecsWebinar] = useState<Webinar | null>(null);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
 
     // Fetch webinars on component mount
@@ -73,6 +74,7 @@ export function WebinarSection() {
         setOpen(false);
         setRecsOpen(false);
         setEditingWebinar(null);
+        setRecsWebinar(null);
     }
     const handleWebinarSaved = async (webinarData: Webinar, isUpdate: boolean) => {
         if (isUpdate) {
@@ -172,6 +174,7 @@ export function WebinarSection() {
                     const response = await webinarApi.getWebinarById(item!._id, 'full');
                     const webinarData = response.data.webinar;
 
+                    setRecsWebinar(webinarData);
                     setRecsOpen(true);
 
                     toast({
@@ -564,7 +567,7 @@ export function WebinarSection() {
                 editingWebinar={editingWebinar}
                 onWebinarSaved={handleWebinarSaved}
             />
-            <RecsModal isOpen={recsOpen} closeDialog={closeModal} />
+            <RecsModal isOpen={recsOpen} closeDialog={closeModal} webinar={recsWebinar} onRecordingSaved={fetchWebinars} />
         </div>
     );
 }

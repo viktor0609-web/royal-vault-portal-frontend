@@ -364,10 +364,6 @@ export function WebinarsSection() {
         <div className="flex items-center justify-center p-4 sm:p-8">
           <div className="text-sm sm:text-base text-royal-gray">Loading webinars...</div>
         </div>
-      ) : error ? (
-        <div className="flex items-center justify-center p-4 sm:p-8">
-          <div className="text-sm sm:text-base text-red-500">{error}</div>
-        </div>
       ) : (
         <div className="space-y-2">
           {getFilteredWebinars.map((webinar, index) => {

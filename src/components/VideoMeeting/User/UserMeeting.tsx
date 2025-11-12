@@ -43,9 +43,6 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
     // Main video: prioritize guest video, then local user's video
     const mainVideoTrack = guestVideoTrack || localUserVideoTrack;
 
-    // Secondary video: show the other participant (if main is guest, show user; if main is user, show guest)
-    const secondaryVideoTrack = guestVideoTrack ? localUserVideoTrack : guestVideoTrack;
-
     // Auto-join the room when component mounts
     useEffect(() => {
         if (roomUrl && !joined && !isLoading && !hasAttemptedJoin.current) {

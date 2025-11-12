@@ -101,7 +101,7 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
     };
 
     const handleDownload = async () => {
-        if (webinar?.recording) {
+        if (webinar?.rawRecordingId) {
             const response = await webinarApi.getDownloadLink(webinar.rawRecordingId);
             const downloadUrl = response.data.downloadUrl;
             window.open(downloadUrl, '_blank');

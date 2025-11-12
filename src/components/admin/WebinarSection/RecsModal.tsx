@@ -19,6 +19,7 @@ interface Webinar {
     _id: string;
     name?: string;
     recording?: string;
+    rawRecordingId?: string;
 }
 
 interface RecsModalProps {
@@ -99,15 +100,22 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
         }
     };
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         if (webinar?.recording) {
-            const link = document.createElement('a');
-            link.href = webinar.recording;
-            link.download = webinar.recording.split('/').pop() || 'recording';
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const response = await webinarApi.getDownloadLink(webinar.rawRecordingId);
+            const downloadUrl = response.data.downloadUrl;
+            window.open(downloadUrl, '_blank');
+            return;
+
+
+
+            // const link = document.createElement('a');
+            // link.href = webinar.recording;
+            // link.download = webinar.recording.split('/').pop() || 'recording';
+            // link.target = '_blank';
+            // document.body.appendChild(link);
+            // link.click();
+            // document.body.removeChild(link);
         }
     };
 

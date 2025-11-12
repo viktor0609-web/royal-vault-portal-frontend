@@ -224,6 +224,9 @@ export const fileApi = {
 
 // Webinar API functions - OPTIMIZED
 export const webinarApi = {
+
+  getDownloadLink: (rawRecordingId: string) => api.get(`/api/webinars/admin/${rawRecordingId}/download-link`),
+
   setWebinarOnRecording: (slug: string) => api.post(`/api/webinars/admin/${slug}/on-recording`),
 
   // Admin functions

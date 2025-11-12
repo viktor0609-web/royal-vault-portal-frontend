@@ -205,7 +205,7 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Download section if recording exists */}
-                    {webinar?.recording && (
+                    {webinar?.rawRecordingId && (
                         <div className="flex items-center justify-between p-4 bg-muted rounded-lg border">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">

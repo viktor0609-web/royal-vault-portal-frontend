@@ -74,9 +74,6 @@ const App = () => (
         <AuthProvider>
           <AuthDialogProvider>
             <DailyMeetingProvider>
-              {/* AWS Outage Banner - appears at top of all pages */}
-              <OutageBanner />
-
               <Toaster />
               <Sonner />
               <BrowserRouter>

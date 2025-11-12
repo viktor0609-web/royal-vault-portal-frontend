@@ -154,7 +154,7 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
                                     {/* Remote participants audio */}
                                     {participants.length > 1 && (
                                         <>
-                                            {participants.filter(p => p.id !== participants[0].id).map((p) => (
+                                            {participants.filter(p => p.id !== localParticipant?.id).map((p) => (
                                                 <Fragment key={p.id}>
                                                     {p.audioTrack && (
                                                         <audio

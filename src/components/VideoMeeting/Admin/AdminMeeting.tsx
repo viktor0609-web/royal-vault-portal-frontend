@@ -20,13 +20,12 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
         role,
         setRole,
         joinRoom,
-        ejectParticipant,
-        toggleParticipantAudio,
         isPermissionModalOpen,
         isLoading,
         isScreensharing,
         screenshareParticipantId,
         isRecording,
+        localParticipant,
     } = useDailyMeeting();
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
@@ -65,29 +64,6 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
             joinRoom();
         }
     }, [roomUrl, joined, isLoading, joinRoom]);
-
-
-    // Attach main participant audio
-    useEffect(() => {
-        if (mainAudioRef.current && participants[0]?.audioTrack) {
-            mainAudioRef.current.srcObject = new MediaStream([
-                participants[0].audioTrack,
-            ]);
-        }
-    }, [participants]);
-
-    // Attach remote audios
-    useEffect(() => {
-        participants.forEach((p) => {
-            if (p.audioTrack && remoteAudioRefs.current[p.id]) {
-                remoteAudioRefs.current[p.id]!.srcObject = new MediaStream([
-                    p.audioTrack,
-                ]);
-            }
-        });
-    }, [participants]);
-
-
 
     const toggleFullscreen = async () => {
         if (!videoContainerRef.current) return;
@@ -243,34 +219,27 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                                 )}
 
 
-                                {/* Main participant audio */}
-                                {participants[0]?.audioTrack && (
-                                    <audio
-                                        ref={mainAudioRef}
-                                        autoPlay
-                                        playsInline
-                                        muted={participants[0].local}
-                                    />
-                                )}
-
-
                             </div>
-
                             {/* Remote participants audio */}
-                            {participants.length > 1 &&
-                                participants
-                                    .filter((p) => p.id !== participants[0].id)
-                                    .map((p) => (
+                            {participants.length > 1 && (
+                                <>
+                                    {participants.filter(p => p.id !== localParticipant?.id).map((p) => (
                                         <Fragment key={p.id}>
                                             {p.audioTrack && (
                                                 <audio
-                                                    ref={(el) => (remoteAudioRefs.current[p.id] = el)}
+                                                    ref={(audioElement) => {
+                                                        if (audioElement && p.audioTrack) {
+                                                            audioElement.srcObject = new MediaStream([p.audioTrack]);
+                                                        }
+                                                    }}
                                                     autoPlay
                                                     playsInline
                                                 />
                                             )}
                                         </Fragment>
                                     ))}
+                                </>
+                            )}
                         </div>
                     )}
 

@@ -77,37 +77,6 @@ export const VideoMeeting = () => {
     }
   };
 
-  const handleEndWebinar = async () => {
-    if (!webinar) return;
-
-    if (!confirm("Are you sure you want to end this webinar? This will close the meeting for all participants.")) {
-      return;
-    }
-
-    try {
-      setEnding(true);
-      await webinarApi.endWebinar(webinar._id);
-      toast({
-        title: "Webinar Ended",
-        description: "The webinar has been successfully ended.",
-      });
-
-      // Redirect to admin dashboard after a short delay
-      setTimeout(() => {
-        navigate("/admin");
-      }, 2000);
-    } catch (error) {
-      console.error("Error ending webinar:", error);
-      toast({
-        title: "Error",
-        description: "Failed to end the webinar. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setEnding(false);
-    }
-  };
-
   return (
     <div className="h-dvh w-screen flex flex-col overflow-hidden @container">
       {/* Header - Responsive with mobile-first approach */}

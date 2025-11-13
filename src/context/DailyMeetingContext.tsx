@@ -340,6 +340,10 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const mics = devices.filter((d) => d.kind === 'audioinput' && d.deviceId !== '');
       const outs = devices.filter((d) => d.kind === 'audiooutput' && d.deviceId !== '');
 
+      console.log("vids:", vids);
+      console.log("mics:", mics);
+      console.log("outs:", outs);
+
       setCameras(vids);
       setMicrophones(mics);
       setSpeakers(outs);

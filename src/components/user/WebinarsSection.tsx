@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { VideoIcon, ArrowRightIcon, PlayIcon, EyeIcon, CheckCircleIcon, RefreshCwIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { VideoIcon, ArrowRightIcon, PlayIcon, EyeIcon, CheckCircleIcon, RefreshCwIcon, Video } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -492,6 +493,16 @@ export function WebinarsSection() {
                       </span>
                     )}
 
+                    {/* Recording Ready Badge */}
+                    {webinar.recording && webinar.recording.trim() !== '' && (
+                      <Badge 
+                        variant="outline" 
+                        className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 transition-colors duration-75 flex items-center gap-1"
+                      >
+                        <Video className="h-3 w-3" />
+                        <span className="text-xs font-medium">Recording Ready</span>
+                      </Badge>
+                    )}
 
                     {isRegistered && (
                       <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 text-green-600 rounded text-xs font-medium">

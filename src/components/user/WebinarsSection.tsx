@@ -318,24 +318,40 @@ export function WebinarsSection() {
     setFilterIndex(index);
   };
 
-  // Filter webinars based on selected tab
+  // Filter and sort webinars based on selected tab
   const getFilteredWebinars = useMemo(() => {
     const now = new Date();
     const currentWebinars = webinars.filter(webinar => webinar.portalDisplay === 'Yes');
 
+    let filtered: Webinar[] = [];
+
     switch (filterIndex) {
       case 0: // UPCOMING - Show Scheduled, Waiting, In Progress
-        return currentWebinars.filter(webinar => {
+        filtered = currentWebinars.filter(webinar => {
           return webinar.status === 'Scheduled' ||
             webinar.status === 'Waiting' ||
             webinar.status === 'In Progress';
         });
+        // Sort by date ascending (soonest first)
+        filtered.sort((a, b) => {
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          return dateA - dateB;
+        });
+        break;
       case 1: // REPLAYS - Show all Ended webinars
-        return currentWebinars.filter(webinar => {
+        filtered = currentWebinars.filter(webinar => {
           return webinar.status === 'Ended';
         });
+        // Sort by date descending (most recent first)
+        filtered.sort((a, b) => {
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          return dateB - dateA;
+        });
+        break;
       case 2: // WATCHED - Show Ended webinars where user attended
-        return currentWebinars.filter(webinar => {
+        filtered = currentWebinars.filter(webinar => {
           return webinar.status === 'Ended' &&
             webinar.attendees?.some(attendee => {
               const attendeeUserId = attendee.user?.toString() || attendee.user;
@@ -343,9 +359,18 @@ export function WebinarsSection() {
               return attendeeUserId === currentUserId && attendee.attendanceStatus === 'attended';
             });
         });
+        // Sort by date descending (most recent first)
+        filtered.sort((a, b) => {
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          return dateB - dateA;
+        });
+        break;
       default:
         return [];
     }
+
+    return filtered;
   }, [webinars, filterIndex, user]);
 
   const isUserRegistered = (webinar: Webinar) => {

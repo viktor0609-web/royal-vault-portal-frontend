@@ -529,7 +529,7 @@ export function WebinarsSection() {
                       </Badge>
                     )}
 
-                    {isRegistered && (
+                    {webinar.status != "Ended" && isRegistered && (
                       <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-100 text-green-600 rounded text-xs font-medium">
                         Registered
                       </span>
@@ -697,9 +697,6 @@ export function WebinarsSection() {
                   )}
                 </div>
               </div>
-              // <a href="https://app.royallegalsolutions.com/royal-tv/we-2025-10-22/user" target="_blank" rel="noopener noreferrer">
-              //   Go to Webinar
-              // </a>
             );
           })}
 

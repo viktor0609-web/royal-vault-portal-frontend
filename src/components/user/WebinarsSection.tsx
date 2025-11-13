@@ -520,8 +520,8 @@ export function WebinarsSection() {
 
                     {/* Recording Ready Badge */}
                     {webinar.recording && webinar.recording.trim() !== '' && (
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 transition-colors duration-75 flex items-center gap-1"
                       >
                         <Video className="h-3 w-3" />

@@ -74,8 +74,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [role, setRole] = useState<RoleType>("User"); // replace with real logic
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState<boolean>(false);
-  const [hasMicPermission, setHasMicPermission] = useState<boolean>(false);
-  const [hasCamPermission, setHasCamPermission] = useState<boolean>(false);
+  const [hasMicPermission, setHasMicPermission] = useState<boolean>(true);
+  const [hasCamPermission, setHasCamPermission] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMicrophoneMuted, setIsMicrophoneMuted] = useState<boolean>(true);
   const [isCameraOff, setIsCameraOff] = useState<boolean>(true);
@@ -155,6 +155,10 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setHasMicPermission(true);
       setIsMicrophoneMuted(true);
       setIsCameraOff(false);
+
+      // Re-enumerate devices after permissions are granted to get proper device IDs and labels
+      // This is important because before permissions are granted, device labels are empty
+      await enumerateDevices();
     } catch (error) {
       console.error('Error starting local preview:', error);
       if (error instanceof DOMException && error.name === 'NotReadableError') {
@@ -296,9 +300,15 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   /* ---------- Devices / preview ---------- */
 
   const requestPermissions = async () => {
+    setPermissionRequested(true);
+
+    let micGranted = false;
+    let camGranted = false;
+
     try {
       const mic = await navigator.mediaDevices.getUserMedia({ audio: true });
       setHasMicPermission(true);
+      micGranted = true;
       mic.getTracks().forEach((t) => t.stop());
     } catch (err) {
       console.error('Microphone permission denied:', err);
@@ -308,32 +318,52 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       const cam = await navigator.mediaDevices.getUserMedia({ video: true });
       setHasCamPermission(true);
+      camGranted = true;
       cam.getTracks().forEach((t) => t.stop());
     } catch (err) {
       console.error('Camera permission denied:', err);
       setHasCamPermission(false);
+    }
+
+    // Re-enumerate devices after permissions are granted to get proper device IDs and labels
+    // This is important because before permissions are granted, device labels are empty
+    if (micGranted || camGranted) {
+      await enumerateDevices();
     }
   };
 
   const enumerateDevices = async () => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      const vids = devices.filter((d) => d.kind === 'videoinput');
-      const mics = devices.filter((d) => d.kind === 'audioinput');
-      const outs = devices.filter((d) => d.kind === 'audiooutput');
+      // Filter out devices with empty deviceId (these appear before permissions are granted)
+      const vids = devices.filter((d) => d.kind === 'videoinput' && d.deviceId !== '');
+      const mics = devices.filter((d) => d.kind === 'audioinput' && d.deviceId !== '');
+      const outs = devices.filter((d) => d.kind === 'audiooutput' && d.deviceId !== '');
 
       setCameras(vids);
       setMicrophones(mics);
       setSpeakers(outs);
 
-      if (vids.length > 0 && !selectedCamera) {
-        setSelectedCamera(vids[0].deviceId);
+      // Always set default devices if not set, or if current selection is invalid
+      if (vids.length > 0) {
+        const currentCameraValid = selectedCamera && vids.some(v => v.deviceId === selectedCamera);
+        if (!currentCameraValid) {
+          setSelectedCamera(vids[0].deviceId);
+        }
       }
-      if (mics.length > 0 && !selectedMicrophone) {
-        setSelectedMicrophone(mics[0].deviceId);
+
+      if (mics.length > 0) {
+        const currentMicValid = selectedMicrophone && mics.some(m => m.deviceId === selectedMicrophone);
+        if (!currentMicValid) {
+          setSelectedMicrophone(mics[0].deviceId);
+        }
       }
-      if (outs.length > 0 && !selectedSpeaker) {
-        setSelectedSpeaker(outs[0].deviceId);
+
+      if (outs.length > 0) {
+        const currentSpeakerValid = selectedSpeaker && outs.some(o => o.deviceId === selectedSpeaker);
+        if (!currentSpeakerValid) {
+          setSelectedSpeaker(outs[0].deviceId);
+        }
       }
     } catch (err) {
       console.error('Error enumerating devices:', err);

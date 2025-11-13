@@ -246,13 +246,60 @@ export function WebinarsSection() {
       </head>
       <body>
         <div class="video-container">
-          <video controls autoplay style="width: 100%; height: 100%;">
+          <video id="webinar-video" controls autoplay playsinline muted preload="auto" style="width: 100%; height: 100%;">
             <source src="${recordingUrl}" type="video/mp4">
             <source src="${recordingUrl}" type="video/webm">
             <source src="${recordingUrl}" type="video/ogg">
             Your browser does not support the video tag.
           </video>
         </div>
+        <script>
+          (function() {
+            const video = document.getElementById('webinar-video');
+            if (!video) return;
+            
+            // Function to attempt playing the video
+            const attemptPlay = (unmute = true) => {
+              if (video.paused) {
+                if (unmute) {
+                  video.muted = false;
+                }
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                  playPromise.catch((error) => {
+                    // If unmuted play fails, try muted
+                    if (unmute) {
+                      video.muted = true;
+                      video.play().catch(() => {
+                        console.log('Autoplay was prevented');
+                      });
+                    } else {
+                      console.log('Autoplay was prevented');
+                    }
+                  });
+                }
+              }
+            };
+            
+            // Try to play immediately if video is already loaded
+            if (video.readyState >= 2) {
+              attemptPlay();
+            }
+            
+            // Try to play on various events to ensure it starts
+            video.addEventListener('loadedmetadata', () => attemptPlay(), { once: true });
+            video.addEventListener('loadeddata', () => attemptPlay(), { once: true });
+            video.addEventListener('canplay', () => attemptPlay(), { once: true });
+            video.addEventListener('canplaythrough', () => attemptPlay(), { once: true });
+            
+            // Fallback: try to play after a short delay
+            setTimeout(() => {
+              if (video.paused) {
+                attemptPlay();
+              }
+            }, 100);
+          })();
+        </script>
       </body>
       </html>
     `;

@@ -29,6 +29,7 @@ interface Webinar {
   line1: string;
   line2: string;
   line3: string;
+  recording?: string;
   attendees?: Array<{
     user: string;
     attendanceStatus: string;
@@ -176,15 +177,103 @@ export function WebinarsSection() {
     }
   };
 
+  const handleWatchReplay = (webinar: Webinar) => {
+    // Check if recording exists
+    if (!webinar.recording) {
+      toast({
+        title: "Recording Not Available",
+        description: "This webinar recording is not available yet.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Escape HTML to prevent XSS in title
+    const escapeHtml = (text: string) => {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    };
+
+    // Escape quotes in URL for HTML attribute safety
+    const escapeUrl = (url: string) => {
+      return url.replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+    };
+
+    const title = escapeHtml(webinar.line1 || webinar.name || 'Webinar Recording');
+    const recordingUrl = escapeUrl(webinar.recording);
+
+    // Create a new window with embedded video player
+    const videoHtml = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title} - Recording</title>
+        <style>
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          body {
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow: hidden;
+          }
+          .video-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+          }
+          video {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            outline: none;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="video-container">
+          <video controls autoplay style="width: 100%; height: 100%;">
+            <source src="${recordingUrl}" type="video/mp4">
+            <source src="${recordingUrl}" type="video/webm">
+            <source src="${recordingUrl}" type="video/ogg">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Open new window and write HTML
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(videoHtml);
+      newWindow.document.close();
+    } else {
+      toast({
+        title: "Popup Blocked",
+        description: "Please allow popups for this site to watch recordings.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleJoinWebinar = (webinar: Webinar) => {
     // Handle ENDED webinars - show replay/watch
     if (webinar.status === 'Ended') {
-      // Navigate to watch replay (same as joining, but for ended webinars)
-      // if (user?.role === 'admin') {
-      //   navigate(`/royal-tv/${webinar.slug}/admin`);
-      // } else {
-      //   navigate(`/royal-tv/${webinar.slug}/user`);
-      // }
+      handleWatchReplay(webinar);
       return;
     }
 
@@ -384,7 +473,7 @@ export function WebinarsSection() {
                     }
                   } else if (filterIndex === 1 || filterIndex === 2) {
                     // For replays and watched webinars
-                    // handleJoinWebinar(webinar);
+                    handleWatchReplay(webinar);
                   }
                 }}
                 className={`flex items-center justify-between p-3 sm:p-6 bg-sidebar rounded-lg border border-royal-light-gray transition-all duration-75 ease-in-out group cursor-pointer hover:shadow-sm hover:scale-[1.005] hover:border-royal-blue/10`}
@@ -460,7 +549,7 @@ export function WebinarsSection() {
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleJoinWebinar(webinar);
+                        handleWatchReplay(webinar);
                       }}
                       disabled={isProcessing}
                       className="bg-primary hover:bg-royal-blue-dark text-white px-8 group-hover:scale-102 group-hover:shadow-sm transition-all duration-75"
@@ -555,7 +644,7 @@ export function WebinarsSection() {
                           <Button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleJoinWebinar(webinar);
+                              handleWatchReplay(webinar);
                             }}
                             disabled={isProcessing}
                             className="bg-primary hover:bg-royal-blue-dark text-white w-10 h-10 p-0 rounded-full group-hover:scale-105 group-hover:shadow-sm transition-all duration-75 flex items-center justify-center"

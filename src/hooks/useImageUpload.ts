@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-import { fileApi } from '@/lib/api';
+import { imageApi } from '@/lib/api';
 
 interface UploadProgress {
     loaded: number;
@@ -8,34 +8,27 @@ interface UploadProgress {
     percentage: number;
 }
 
-interface UseFileUploadReturn {
-    uploadFile: (file: File, onProgress?: (progress: UploadProgress) => void) => Promise<any>;
+interface UseImageUploadReturn {
+    uploadImage: (file: File, onProgress?: (progress: UploadProgress) => void) => Promise<any>;
     isUploading: boolean;
     uploadError: string | null;
 }
 
-export const useFileUpload = (): UseFileUploadReturn => {
+export const useImageUpload = (): UseImageUploadReturn => {
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
 
-    const uploadFile = useCallback(async (file: File, onProgress?: (progress: UploadProgress) => void) => {
+    const uploadImage = useCallback(async (file: File, onProgress?: (progress: UploadProgress) => void) => {
         setIsUploading(true);
         setUploadError(null);
 
         try {
             // Step 1: Request signed upload URL from backend
-            const signedUrlResponse = await fileApi.getSignedUploadUrl(file.name, file.type);
+            const signedUrlResponse = await imageApi.getSignedUploadUrl(file.name, file.type);
             const { signedUrl, token, publicUrl, path, filename } = signedUrlResponse.data;
 
-            // Step 2: Upload file directly to Supabase Storage using signed URL
+            // Step 2: Upload image directly to Supabase Storage using signed URL
             // Note: Supabase Storage signed URLs typically use POST method
-            console.log({
-                signedUrl: signedUrl,
-                token: token,
-                path: path,
-                filename: filename,
-                file: file
-            })
             await axios.put(signedUrl, file, {
                 headers: {
                     'Content-Type': file.type,
@@ -55,7 +48,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
 
             // Step 3: Return the upload result with public URL
             return {
-                message: 'File uploaded successfully',
+                message: 'Image uploaded successfully',
                 url: publicUrl,
                 filename: filename,
                 originalName: file.name,
@@ -64,8 +57,7 @@ export const useFileUpload = (): UseFileUploadReturn => {
                 path: path
             };
         } catch (error: any) {
-            const errorMessage = error.response?.data?.message || error.message || 'Failed to upload file';
-            console.log(error.response?.data?.message)
+            const errorMessage = error.response?.data?.message || error.message || 'Failed to upload image';
             setUploadError(errorMessage);
             throw error;
         } finally {
@@ -74,8 +66,9 @@ export const useFileUpload = (): UseFileUploadReturn => {
     }, []);
 
     return {
-        uploadFile,
+        uploadImage,
         isUploading,
         uploadError
     };
 };
+

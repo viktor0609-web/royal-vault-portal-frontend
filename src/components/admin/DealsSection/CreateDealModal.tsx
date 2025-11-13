@@ -13,7 +13,8 @@ import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { dealApi, optionsApi, imageApi } from "@/lib/api";
+import { useImageUpload } from "@/hooks/useImageUpload";
+import { dealApi, optionsApi } from "@/lib/api";
 
 
 const multiSelectFields = [
@@ -71,6 +72,9 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   const [optionsError, setOptionsError] = useState<string | null>(null);
   const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
   const [initialFormData, setInitialFormData] = useState<any>(null);
+
+  // Image upload hook for signed URL uploads
+  const { uploadImage: uploadImageToSupabase, isUploading: isImageUploading } = useImageUpload();
 
   // Track unsaved changes with custom hook
   const additionalChanges = imageFile !== null || (imageInputType === "url" && imageUrl !== (initialFormData?.image || ''));
@@ -253,12 +257,9 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   };
 
   const uploadImage = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('image', file);
-
     try {
-      const response = await imageApi.uploadImage(formData);
-      return response.data.url; // Assuming the API returns { url: "..." }
+      const response = await uploadImageToSupabase(file);
+      return response.url; // Returns { url: "...", filename: "...", ... }
     } catch (error) {
       console.error('Error uploading image:', error);
       throw error;

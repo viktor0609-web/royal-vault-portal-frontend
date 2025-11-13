@@ -12,8 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Download, Upload, Link as LinkIcon, Loader2, File, X } from "lucide-react";
-import { fileApi, webinarApi } from "@/lib/api";
+import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 interface Webinar {
     _id: string;
@@ -31,6 +32,7 @@ interface RecsModalProps {
 
 export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: RecsModalProps) {
     const { toast } = useToast();
+    const { uploadFile: uploadFileToSupabase, isUploading: isFileUploading } = useFileUpload();
     const [uploadMethod, setUploadMethod] = useState<"file" | "url">("file");
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [recordingUrl, setRecordingUrl] = useState("");
@@ -147,11 +149,9 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
                     return;
                 }
 
-                const formData = new FormData();
-                formData.append('file', selectedFile);
-
-                const uploadResponse = await fileApi.uploadFile(formData);
-                finalUrl = uploadResponse.data.url;
+                // Use new signed URL upload method
+                const uploadResponse = await uploadFileToSupabase(selectedFile);
+                finalUrl = uploadResponse.url;
             } else {
                 // URL method
                 if (!recordingUrl.trim()) {

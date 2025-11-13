@@ -203,23 +203,29 @@ export const courseApi = {
 
 // Image upload API
 export const imageApi = {
-  // Upload image
+  // Upload image (legacy - through backend)
   uploadImage: (formData: FormData) => api.post('/api/upload/image', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   }),
+  // Get signed upload URL for direct upload
+  getSignedUploadUrl: (filename: string, contentType: string) =>
+    api.post('/api/upload/image/signed-url', { filename, contentType }),
 };
 
 // File upload API (for all file types)
 export const fileApi = {
-  // Upload file
+  // Upload file (legacy - through backend)
   uploadFile: (formData: FormData, config?: any) => api.post('/api/upload/file', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
     ...config
   }),
+  // Get signed upload URL for direct upload
+  getSignedUploadUrl: (filename: string, contentType: string) =>
+    api.post('/api/upload/file/signed-url', { filename, contentType }),
 };
 
 // Webinar API functions - OPTIMIZED

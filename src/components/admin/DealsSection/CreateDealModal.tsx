@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
+import { ProgressBar } from "@/components/ui/progress-bar";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { dealApi, optionsApi } from "@/lib/api";
@@ -72,6 +73,8 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   const [optionsError, setOptionsError] = useState<string | null>(null);
   const [showCloseConfirmation, setShowCloseConfirmation] = useState(false);
   const [initialFormData, setInitialFormData] = useState<any>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Image upload hook for signed URL uploads
   const { uploadImage: uploadImageToSupabase, isUploading: isImageUploading } = useImageUpload();
@@ -257,12 +260,19 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   };
 
   const uploadImage = async (file: File): Promise<string> => {
+    setIsUploadingImage(true);
+    setUploadProgress(0);
     try {
-      const response = await uploadImageToSupabase(file);
+      const response = await uploadImageToSupabase(file, (progress) => {
+        setUploadProgress(progress.percentage);
+      });
       return response.url; // Returns { url: "...", filename: "...", ... }
     } catch (error) {
       console.error('Error uploading image:', error);
       throw error;
+    } finally {
+      setIsUploadingImage(false);
+      setUploadProgress(0);
     }
   };
 
@@ -365,6 +375,12 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                           className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-lg border-2 border-primary shadow-sm"
                         />
                       </div>
+                    </div>
+                  )}
+                  {isUploadingImage && (
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-gray-600 block">Uploading image...</Label>
+                      <ProgressBar progress={uploadProgress} size="md" />
                     </div>
                   )}
                 </TabsContent>

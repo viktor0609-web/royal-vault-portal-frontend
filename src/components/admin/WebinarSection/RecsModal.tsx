@@ -15,6 +15,7 @@ import { Download, Upload, Link as LinkIcon, Loader2, File, X } from "lucide-rea
 import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { ProgressBar } from "@/components/ui/progress-bar";
 
 interface Webinar {
     _id: string;
@@ -38,6 +39,7 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
     const [recordingUrl, setRecordingUrl] = useState("");
     const [isUploading, setIsUploading] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const dropZoneRef = useRef<HTMLDivElement>(null);
 
@@ -150,7 +152,10 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
                 }
 
                 // Use new signed URL upload method
-                const uploadResponse = await uploadFileToSupabase(selectedFile);
+                setUploadProgress(0);
+                const uploadResponse = await uploadFileToSupabase(selectedFile, (progress) => {
+                    setUploadProgress(progress.percentage);
+                });
                 finalUrl = uploadResponse.url;
             } else {
                 // URL method
@@ -190,6 +195,7 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
             });
         } finally {
             setIsUploading(false);
+            setUploadProgress(0);
         }
     };
 
@@ -307,6 +313,14 @@ export function RecsModal({ isOpen, closeDialog, webinar, onRecordingSaved }: Re
                                     </div>
                                 )}
                             </div>
+                            
+                            {/* Upload Progress Bar */}
+                            {isUploading && uploadMethod === "file" && uploadProgress > 0 && (
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-medium">Uploading file...</Label>
+                                    <ProgressBar progress={uploadProgress} size="md" />
+                                </div>
+                            )}
                         </TabsContent>
 
                         {/* URL tab content */}

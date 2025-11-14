@@ -28,9 +28,7 @@ export function VideoPlayer({
                 onPause={onPause}
                 onTimeUpdate={(e) => onTimeUpdate?.(e.currentTarget.currentTime)}
             >
-                <source src={videoUrl} type="video/mp4" />
-                <source src={videoUrl} type="video/webm" />
-                <source src={videoUrl} type="video/ogg" />
+                <source src={videoUrl} />
                 Your browser does not support the video tag.
             </video>
         );

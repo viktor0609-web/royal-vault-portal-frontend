@@ -57,6 +57,7 @@ interface Lecture {
     uploadedUrl: string;
   }[];
   completedBy: string[];
+  displayOnPublicPage?: boolean;
   createdBy: {
     _id: string;
     name: string;

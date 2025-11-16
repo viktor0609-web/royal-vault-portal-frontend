@@ -38,6 +38,7 @@ interface Lecture {
     uploadedUrl: string;
   }[];
   completedBy: string[];
+  displayOnPublicPage?: boolean;
   createdBy: {
     _id: string;
     name: string;
@@ -70,18 +71,27 @@ export function CourseDetailSection() {
         setLoading(true);
         // Use 'full' fields for course detail page to get all lecture data
         const response = await courseApi.getCourseById(courseId, 'full');
-        setCourse(response.data);
+
+        // Filter lectures to only show those with displayOnPublicPage: true
+        const allLectures = response.data.lectures || [];
+        const publicLectures = allLectures.filter((lecture: Lecture) => lecture.displayOnPublicPage === true);
+
+        // Update course data with filtered lectures
+        const courseData = {
+          ...response.data,
+          lectures: publicLectures
+        };
+        setCourse(courseData);
 
         // Initialize completed items based on lecture completion status (only for authenticated users)
-        const lectures = response.data.lectures || [];
         if (user) {
-          const completed = lectures.map((lecture: Lecture) =>
+          const completed = publicLectures.map((lecture: Lecture) =>
             lecture.completedBy && lecture.completedBy.length > 0
           );
           setCompletedItems(completed);
         } else {
           // For non-authenticated users, initialize with all false
-          setCompletedItems(new Array(lectures.length).fill(false));
+          setCompletedItems(new Array(publicLectures.length).fill(false));
         }
       } catch (err) {
         console.error('Error fetching course:', err);

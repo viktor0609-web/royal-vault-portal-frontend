@@ -51,6 +51,7 @@ interface Lecture {
         uploadedUrl: string;
     }[];
     completedBy: string[];
+    displayOnPublicPage?: boolean;
     createdBy: {
         _id: string;
         name: string;
@@ -88,7 +89,23 @@ export function CourseGroupDetailSection() {
             try {
                 setLoading(true);
                 const response = await courseApi.getCourseGroupById(groupId);
-                setCourseGroup(response.data);
+
+                // Filter lectures to only show public ones and update lecture counts
+                const courseData = response.data;
+                if (courseData.courses) {
+                    courseData.courses = courseData.courses.map((course: Course) => {
+                        if (course.lectures) {
+                            const publicLectures = course.lectures.filter((lecture: Lecture) => lecture.displayOnPublicPage === true);
+                            return {
+                                ...course,
+                                lectures: publicLectures
+                            };
+                        }
+                        return course;
+                    });
+                }
+
+                setCourseGroup(courseData);
             } catch (err) {
                 console.error('Error fetching course group:', err);
                 setError('Failed to load course group. Please try again.');

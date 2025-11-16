@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import { FileUploadWithProgress } from "@/components/ui/file-upload-with-progress";
@@ -22,6 +23,7 @@ interface Lecture {
     content: string;
     videoUrl: string;
     relatedFiles?: RelatedFile[];
+    displayOnPublicPage?: boolean;
     createdBy: {
         _id: string;
         name: string;
@@ -49,7 +51,8 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
         title: "",
         description: "",
         content: "",
-        videoUrl: ""
+        videoUrl: "",
+        displayOnPublicPage: false
     });
     const [relatedFiles, setRelatedFiles] = useState<RelatedFile[]>([]);
     const [newRelatedFile, setNewRelatedFile] = useState({ name: "", file: null as File | null, uploadedUrl: "" });
@@ -63,7 +66,8 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 title: editingLecture.title || "",
                 description: editingLecture.description || "",
                 content: editingLecture.content || "",
-                videoUrl: editingLecture.videoUrl || ""
+                videoUrl: editingLecture.videoUrl || "",
+                displayOnPublicPage: editingLecture.displayOnPublicPage || false
             });
             setRelatedFiles(editingLecture.relatedFiles || []);
         } else {
@@ -71,7 +75,8 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 title: "",
                 description: "",
                 content: "",
-                videoUrl: ""
+                videoUrl: "",
+                displayOnPublicPage: false
             });
             setRelatedFiles([]);
         }
@@ -204,6 +209,23 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                             placeholder="https://example.com/video.mp4"
                             className="mt-2"
                         />
+                    </div>
+
+                    {/* Display on Public Page Section */}
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="displayOnPublicPage"
+                            checked={formData.displayOnPublicPage}
+                            onCheckedChange={(checked) => {
+                                setFormData(prev => ({ ...prev, displayOnPublicPage: checked === true }));
+                            }}
+                        />
+                        <Label
+                            htmlFor="displayOnPublicPage"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                            Display on public page
+                        </Label>
                     </div>
 
                     {/* Related Files Section */}

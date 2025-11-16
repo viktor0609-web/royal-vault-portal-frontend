@@ -36,6 +36,7 @@ interface Lecture {
   description: string;
   videoUrl: string;
   completedBy: string[];
+  displayOnPublicPage?: boolean;
 }
 
 interface ContentModalProps {

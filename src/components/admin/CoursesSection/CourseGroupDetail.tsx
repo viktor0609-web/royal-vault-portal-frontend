@@ -27,6 +27,7 @@ interface Lecture {
     title: string;
     description: string;
     videoUrl: string;
+    displayOnPublicPage?: boolean;
 }
 
 interface CourseGroup {

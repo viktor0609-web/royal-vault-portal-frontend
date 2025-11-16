@@ -20,6 +20,7 @@ interface Lecture {
     url: string;
     uploadedUrl?: string;
   }>;
+  displayOnPublicPage?: boolean;
   createdBy: {
     _id: string;
     name: string;

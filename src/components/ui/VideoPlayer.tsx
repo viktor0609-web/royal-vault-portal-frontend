@@ -31,7 +31,6 @@ declare global {
                 PLAYING: number;
                 PAUSED: number;
             };
-
         };
         onYouTubeIframeAPIReady?: () => void;
     }

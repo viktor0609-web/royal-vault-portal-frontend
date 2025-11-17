@@ -64,12 +64,14 @@ export function CoursesSection() {
     }
   };
 
-  const handleEdit = (group: CourseGroup) => {
+  const handleEdit = (e: React.MouseEvent, group: CourseGroup) => {
+    e.stopPropagation();
     setEditingGroup(group);
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (groupId: string) => {
+  const handleDelete = async (e: React.MouseEvent, groupId: string) => {
+    e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this course group? This will also delete all associated courses and lectures.')) {
       try {
         await courseApi.deleteCourseGroup(groupId);
@@ -179,7 +181,7 @@ export function CoursesSection() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleEdit(group)}
+                        onClick={(e) => handleEdit(e, group)}
                         title="Edit"
                       >
                         <Edit className="h-4 w-4" />
@@ -187,7 +189,7 @@ export function CoursesSection() {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => handleDelete(group._id)}
+                        onClick={(e) => handleDelete(e, group._id)}
                         title="Delete"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -229,7 +231,7 @@ export function CoursesSection() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleEdit(group)}
+                    onClick={(e) => handleEdit(e, group)}
                     className="h-7 w-7 p-0"
                   >
                     <Edit className="h-3 w-3" />
@@ -237,7 +239,7 @@ export function CoursesSection() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDelete(group._id)}
+                    onClick={(e) => handleDelete(e, group._id)}
                     className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
                   >
                     <Trash2 className="h-3 w-3" />

@@ -84,12 +84,14 @@ export function CourseGroupDetail() {
         }
     };
 
-    const handleEdit = (course: Course) => {
+    const handleEdit = (e: React.MouseEvent, course: Course) => {
+        e.stopPropagation();
         setEditingCourse(course);
         setIsCourseModalOpen(true);
     };
 
-    const handleDelete = async (courseId: string) => {
+    const handleDelete = async (e: React.MouseEvent, courseId: string) => {
+        e.stopPropagation();
         if (window.confirm('Are you sure you want to delete this course? This will also delete all associated lectures.')) {
             try {
                 await courseApi.deleteCourse(courseId);
@@ -248,7 +250,7 @@ export function CourseGroupDetail() {
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() => handleEdit(course)}
+                                                onClick={(e) => handleEdit(e, course)}
                                                 title="Edit"
                                             >
                                                 <Edit className="h-4 w-4" />
@@ -256,7 +258,7 @@ export function CourseGroupDetail() {
                                             <Button
                                                 size="sm"
                                                 variant="destructive"
-                                                onClick={() => handleDelete(course._id)}
+                                                onClick={(e) => handleDelete(e, course._id)}
                                                 title="Delete"
                                             >
                                                 <Trash2 className="h-4 w-4" />
@@ -296,7 +298,7 @@ export function CourseGroupDetail() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => handleEdit(course)}
+                                        onClick={(e) => handleEdit(e, course)}
                                         className="h-7 w-7 p-0"
                                     >
                                         <Edit className="h-3 w-3" />
@@ -304,7 +306,7 @@ export function CourseGroupDetail() {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => handleDelete(course._id)}
+                                        onClick={(e) => handleDelete(e, course._id)}
                                         className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
                                     >
                                         <Trash2 className="h-3 w-3" />

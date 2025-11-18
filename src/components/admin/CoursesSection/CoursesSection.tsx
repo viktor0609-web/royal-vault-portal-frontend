@@ -222,7 +222,7 @@ export function CoursesSection() {
         ) : (
           courseGroups.map((group) => (
             <div key={group._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
-              <div className="flex items-start justify-between mb-2" onClick={() => handleViewGroup(group._id)}>
+              <div className="flex items-start justify-between mb-2 cursor-pointer" onClick={() => handleViewGroup(group._id)}>
                 <div className="flex-1">
                   <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">{group.title}</h3>
                   <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{group.description}</p>

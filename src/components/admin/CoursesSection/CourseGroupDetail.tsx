@@ -237,7 +237,7 @@ export function CourseGroupDetail() {
                             </TableRow>
                         ) : (
                             courses.map((course) => (
-                                <TableRow key={course._id} onClick={() => handleViewCourse(course._id)}>
+                                <TableRow key={course._id} onClick={() => handleViewCourse(course._id)} className="cursor-pointer">
                                     <TableCell className="font-medium">{course.title}</TableCell>
                                     <TableCell className="max-w-xs truncate">{course.description}</TableCell>
                                     <TableCell>{course.lectures?.length || 0}</TableCell>

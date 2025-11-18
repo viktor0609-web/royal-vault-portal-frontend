@@ -286,7 +286,7 @@ export function CourseDetailSection() {
       <style>{`
         .lecture-content {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif !important;
-          line-height: 1.6 !important;
+          line-height: 1.4 !important;
           color: #374151 !important;
         }
         
@@ -344,7 +344,7 @@ export function CourseDetailSection() {
         }
         .lecture-content p {
           margin-bottom: 0.75rem !important;
-          line-height: 1.6 !important;
+          line-height: 1.4 !important;
           color: #374151 !important;
         }
         .lecture-content a {
@@ -401,7 +401,7 @@ export function CourseDetailSection() {
         }
         .lecture-content li {
           margin: 0.25rem 0 !important;
-          line-height: 1.6 !important;
+          line-height: 1.4 !important;
         }
         .lecture-content ul li {
           list-style-type: disc !important;
@@ -536,6 +536,7 @@ export function CourseDetailSection() {
                   {lectures[currentItem]?.content && (
                     <div className="bg-white rounded-lg border p-3">
                       <div
+                        className="lecture-content"
                         dangerouslySetInnerHTML={{
                           __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
                         }}
@@ -767,6 +768,7 @@ export function CourseDetailSection() {
                 {lectures[currentItem]?.content && (
                   <div className="bg-white rounded-lg border p-3">
                     <div
+                      className="lecture-content"
                       dangerouslySetInnerHTML={{
                         __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
                       }}

@@ -289,7 +289,7 @@ export function CourseGroupDetail() {
                 ) : (
                     courses.map((course) => (
                         <div key={course._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
-                            <div className="flex items-start justify-between mb-2" onClick={() => handleViewCourse(course._id)}>
+                            <div className="flex items-start justify-between mb-2 cursor-pointer" onClick={() => handleViewCourse(course._id)}>
                                 <div className="flex-1">
                                     <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">{course.title}</h3>
                                     <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{course.description}</p>

@@ -165,7 +165,7 @@ export function CoursesSection() {
               </TableRow>
             ) : (
               courseGroups.map((group) => (
-                <TableRow key={group._id} onClick={() => handleViewGroup(group._id)}>
+                <TableRow key={group._id} onClick={() => handleViewGroup(group._id)} className="cursor-pointer">
                   <TableCell className="font-medium">{group.title}</TableCell>
                   <TableCell className="max-w-xs truncate">{group.description}</TableCell>
                   <TableCell>

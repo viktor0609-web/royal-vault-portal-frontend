@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
-import { ReceiptRussianRuble, VideoIcon, Users, Eye, Edit, BarChart3, Calendar, UserCheck, Trash2, Loader2, RefreshCw, Menu, MoreVertical } from "lucide-react";
+import { ReceiptRussianRuble, VideoIcon, Users, Eye, Edit, BarChart3, Calendar, UserCheck, Trash2, Loader2, RefreshCw, Menu, MoreVertical, ArrowUp, ArrowDown } from "lucide-react";
 import { WebinarModal } from "./WebinarModal";
 import { RecsModal } from "./RecsModal";
 import { webinarApi, api } from "@/lib/api";
@@ -45,17 +45,14 @@ export function WebinarSection() {
     const [editingWebinar, setEditingWebinar] = useState<Webinar | null>(null);
     const [recsWebinar, setRecsWebinar] = useState<Webinar | null>(null);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [orderBy, setOrderBy] = useState<string>('date');
+    const [order, setOrder] = useState<'asc' | 'desc'>('desc');
 
-    // Fetch webinars on component mount
-    useEffect(() => {
-        fetchWebinars();
-    }, []);
-
-    const fetchWebinars = async () => {
+    const fetchWebinars = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await webinarApi.getAllWebinars('detailed');
+            const response = await webinarApi.getAllWebinars('detailed', { orderBy, order });
             setWebinars(response.data.webinars || []);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Failed to fetch webinars';
@@ -68,7 +65,12 @@ export function WebinarSection() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [orderBy, order, toast]);
+
+    // Fetch webinars on component mount and when sort changes
+    useEffect(() => {
+        fetchWebinars();
+    }, [fetchWebinars]);
 
     const closeModal = () => {
         setOpen(false);
@@ -222,6 +224,28 @@ export function WebinarSection() {
         return 0;
     };
 
+    const handleSort = (field: string) => {
+        if (orderBy === field) {
+            // Toggle order if clicking the same field
+            setOrder(order === 'asc' ? 'desc' : 'asc');
+        } else {
+            // Set new field and default to ascending
+            setOrderBy(field);
+            setOrder('asc');
+        }
+    };
+
+    const getSortIcon = (field: string) => {
+        if (orderBy !== field) {
+            return null;
+        }
+        return order === 'asc' ? (
+            <ArrowUp className="h-3 w-3 inline-block ml-1" />
+        ) : (
+            <ArrowDown className="h-3 w-3 inline-block ml-1" />
+        );
+    };
+
     if (loading) {
         return (
             <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0">
@@ -288,10 +312,34 @@ export function WebinarSection() {
                 <Table className="w-full">
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="px-1 py-1.5 text-sm font-semibold">Webinar</TableHead>
-                            <TableHead className="px-1 py-1.5 w-24 text-sm font-semibold">Status</TableHead>
+                            <TableHead
+                                className="px-1 py-1.5 text-sm font-semibold cursor-pointer hover:bg-gray-100 select-none"
+                                onClick={() => handleSort('name')}
+                            >
+                                <div className="flex items-center">
+                                    Webinar
+                                    {getSortIcon('name')}
+                                </div>
+                            </TableHead>
+                            <TableHead
+                                className="px-1 py-1.5 w-24 text-sm font-semibold cursor-pointer hover:bg-gray-100 select-none"
+                                onClick={() => handleSort('status')}
+                            >
+                                <div className="flex items-center">
+                                    Status
+                                    {getSortIcon('status')}
+                                </div>
+                            </TableHead>
                             <TableHead className="px-1 py-1.5 w-28 text-sm font-semibold">Portal</TableHead>
-                            <TableHead className="px-1 py-1.5 w-32 text-sm font-semibold">Date EST</TableHead>
+                            <TableHead
+                                className="px-1 py-1.5 w-32 text-sm font-semibold cursor-pointer hover:bg-gray-100 select-none"
+                                onClick={() => handleSort('date')}
+                            >
+                                <div className="flex items-center">
+                                    Date EST
+                                    {getSortIcon('date')}
+                                </div>
+                            </TableHead>
                             <TableHead className="px-1 py-1.5 w-20 text-center text-sm font-semibold">Reg.</TableHead>
                             <TableHead className="px-1 py-1.5 w-20 text-center text-sm font-semibold">Att.</TableHead>
                             <TableHead className="px-1 py-1.5 w-20 text-center text-sm font-semibold">Watch</TableHead>

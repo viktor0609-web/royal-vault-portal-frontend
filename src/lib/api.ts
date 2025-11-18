@@ -236,11 +236,13 @@ export const webinarApi = {
   setWebinarOnRecording: (slug: string) => api.post(`/api/webinars/admin/${slug}/on-recording`),
 
   // Admin functions
-  getAllWebinars: (fields: 'basic' | 'detailed' | 'full' = 'basic', filters?: { status?: string; streamType?: string }) => {
+  getAllWebinars: (fields: 'basic' | 'detailed' | 'full' = 'basic', filters?: { status?: string; streamType?: string; orderBy?: string; order?: 'asc' | 'desc' }) => {
     const params = new URLSearchParams();
     params.append('fields', fields);
     if (filters?.status) params.append('status', filters.status);
     if (filters?.streamType) params.append('streamType', filters.streamType);
+    if (filters?.orderBy) params.append('orderBy', filters.orderBy);
+    if (filters?.order) params.append('order', filters.order);
     return api.get(`/api/webinars/admin?${params.toString()}`);
   },
 

@@ -336,7 +336,7 @@ export function WebinarSection() {
                                 onClick={() => handleSort('date')}
                             >
                                 <div className="flex items-center">
-                                    Date EST
+                                    Date & Time
                                     {getSortIcon('date')}
                                 </div>
                             </TableHead>

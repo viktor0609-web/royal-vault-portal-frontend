@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, Hand, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Settings, Hand, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
-import { BackgroundFilterModal } from '../BackgroundFilterModal';
+import { SettingsModal } from '../SettingsModal';
 
 interface MeetingControlsBarProps {
   position: "top" | "bottom";
@@ -136,14 +136,14 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
               <Hand size={20} className="sm:w-6 sm:h-6" />
             </Button>
 
-            <BackgroundFilterModal>
+            <SettingsModal>
               <Button
                 variant="secondary"
                 className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 transition-all duration-200"
               >
-                <Filter size={20} className="sm:w-6 sm:h-6" />
+                <Settings size={20} className="sm:w-6 sm:h-6" />
               </Button>
-            </BackgroundFilterModal>
+            </SettingsModal>
 
             <Button
               onClick={leaveRoom}

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Filter, MessageSquare, MessageSquareX, Maximize, Minimize, Circle } from "lucide-react";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Settings, MessageSquare, MessageSquareX, Maximize, Minimize, Circle } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
-import { BackgroundFilterModal } from '../BackgroundFilterModal';
+import { SettingsModal } from '../SettingsModal';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useToast } from '../../../hooks/use-toast';
@@ -200,14 +200,14 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
                   <MonitorPlay size={20} className="sm:w-6 sm:h-6" />
                 </Button>
               )}
-              <BackgroundFilterModal>
+              <SettingsModal>
                 <Button
                   variant="secondary"
                   className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 transition-all duration-200"
                 >
-                  <Filter size={20} className="sm:w-6 sm:h-6" />
+                  <Settings size={20} className="sm:w-6 sm:h-6" />
                 </Button>
-              </BackgroundFilterModal>
+              </SettingsModal>
               {role === "Admin" && (
                 <Button
                   variant="secondary"

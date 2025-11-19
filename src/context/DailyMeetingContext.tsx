@@ -36,6 +36,9 @@ interface DailyMeetingContextType {
   stopLocalPreview: () => void;
   toggleCamera: () => void;
   toggleMicrophone: () => void;
+  switchCamera: (deviceId: string) => Promise<void>;
+  switchMicrophone: (deviceId: string) => Promise<void>;
+  switchSpeaker: (deviceId: string) => Promise<void>;
   joinMeetingAsAdmin: () => Promise<void>;
   joinMeetingAsGuest: () => Promise<void>;
   isMicrophoneMuted: boolean;
@@ -458,7 +461,11 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
     };
 
-    dailyRoom.on('joined-meeting', updateParticipants);
+    dailyRoom.on('joined-meeting', () => {
+      updateParticipants();
+      // Enumerate devices when meeting is joined to ensure we have the latest device list
+      enumerateDevices();
+    });
     dailyRoom.on('participant-joined', updateParticipants);
     dailyRoom.on('participant-updated', updateParticipants);
     dailyRoom.on('participant-left', updateParticipants);
@@ -717,6 +724,72 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setIsMicrophoneMuted(!willTurnOn);
   };
 
+  /* ---------- Device switching during meeting ---------- */
+
+  const switchCamera = async (deviceId: string) => {
+    if (!dailyRoom || !joined) {
+      console.warn('Cannot switch camera: not in a meeting');
+      return;
+    }
+
+    try {
+      setSelectedCamera(deviceId);
+      await dailyRoom.setInputDevicesAsync({
+        videoDeviceId: deviceId,
+      });
+      console.log(`Camera switched to: ${deviceId}`);
+    } catch (err) {
+      console.error('Error switching camera:', err);
+    }
+  };
+
+  const switchMicrophone = async (deviceId: string) => {
+    if (!dailyRoom || !joined) {
+      console.warn('Cannot switch microphone: not in a meeting');
+      return;
+    }
+
+    try {
+      setSelectedMicrophone(deviceId);
+      await dailyRoom.setInputDevicesAsync({
+        audioDeviceId: deviceId,
+      });
+      console.log(`Microphone switched to: ${deviceId}`);
+    } catch (err) {
+      console.error('Error switching microphone:', err);
+    }
+  };
+
+  const switchSpeaker = async (deviceId: string) => {
+    if (!dailyRoom || !joined) {
+      console.warn('Cannot switch speaker: not in a meeting');
+      return;
+    }
+
+    try {
+      setSelectedSpeaker(deviceId);
+      // Use Daily.co's setOutputDeviceAsync if available, otherwise use HTML5 setSinkId
+      if (dailyRoom.setOutputDeviceAsync) {
+        await dailyRoom.setOutputDeviceAsync({ outputDeviceId: deviceId });
+      } else {
+        // Fallback: try to set sinkId on audio elements
+        const audioElements = document.querySelectorAll('audio');
+        for (const audio of audioElements) {
+          if ((audio as any).setSinkId) {
+            try {
+              await (audio as any).setSinkId(deviceId);
+            } catch (e) {
+              console.warn('setSinkId not supported or failed:', e);
+            }
+          }
+        }
+      }
+      console.log(`Speaker switched to: ${deviceId}`);
+    } catch (err) {
+      console.error('Error switching speaker:', err);
+    }
+  };
+
   /* ---------- Background filter (fix applied here) ---------- */
 
   const setBackgroundFilter = async (type: BackgroundFilterType, imageUrl?: string) => {
@@ -825,6 +898,9 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         stopLocalPreview,
         toggleCamera,
         toggleMicrophone,
+        switchCamera,
+        switchMicrophone,
+        switchSpeaker,
         joinMeetingAsAdmin,
         joinMeetingAsGuest,
         isMicrophoneMuted,

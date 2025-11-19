@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
-import DailyIframe, { DailyCall, DailyParticipant } from '@daily-co/daily-js';
+import DailyIframe, { DailyCall, DailyParticipant, DailyParticipantPermissions } from '@daily-co/daily-js';
 
 type BackgroundFilterType = 'none' | 'blur' | 'image';
 
@@ -65,12 +65,24 @@ const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(u
 
 export type RoleType = "User" | "Guest" | "Admin";
 
+export type ParticipantType = {
+  id: string;
+  name: string;
+  local: boolean;
+  videoTrack: MediaStreamTrack;
+  audioTrack: MediaStreamTrack;
+  screenVideoTrack: MediaStreamTrack;
+  permissions: DailyParticipantPermissions;
+  audio: boolean;
+  video: boolean;
+}
+
 export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [roomUrl, setRoomUrl] = useState<string>(import.meta.env.VITE_DAILY_ROOM_URL || '');
   const [roomName, setRoomName] = useState<string>('');
   const [joined, setJoined] = useState<boolean>(false);
   const [dailyRoom, setDailyRoom] = useState<DailyCall | null>(null);
-  const [participants, setParticipants] = useState<any[]>([]);
+  const [participants, setParticipants] = useState<ParticipantType[]>([]);
   const [role, setRole] = useState<RoleType>("User"); // replace with real logic
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState<boolean>(false);
@@ -512,6 +524,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const startRecording = async () => {
     if (!dailyRoom) return;
+    const adminAndGuest = participants.filter((p: any) => { return p.name.includes('Guest') || p.name.includes('Admin') }).map((p: any) => p.id)
     try {
       await dailyRoom.startRecording({
         type: "cloud",
@@ -520,16 +533,18 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
           composition_id: "daily:baseline",
           composition_params: {
             mode: "dominant",
+            'videoSettings.preferScreenshare': true,
             'videoSettings.dominant.position': 'left',
             'videoSettings.dominant.splitPos': 0.8,
+            'videoSettings.dominant.splitMargin_gu': 0,
             'videoSettings.dominant.numChiclets': 5,
-            'videoSettings.dominant.followDomFlag': false,
             'videoSettings.dominant.itemInterval_gu': 0.7,
             'videoSettings.dominant.outerPadding_gu': 0.5,
-            'videoSettings.dominant.splitMargin_gu': 0,
-            'videoSettings.preferScreenshare': true,
-            'videoSettings.preferredParticipantIds': participants.find((p: any) => p.name.includes('Guest') || p.name.includes('Admin'))?.id,
             'videoSettings.dominant.sharpCornersOnMain': true,
+
+            //
+            // PARTICIPANT LABELS
+            //
             'videoSettings.showParticipantLabels': true,
             'videoSettings.labels.fontFamily': 'Roboto',
             'videoSettings.labels.fontWeight': '600',
@@ -540,9 +555,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
             'videoSettings.labels.strokeColor': 'rgba(0, 0, 0, 0.9)',
           },
           participants: {
-            video: participants.filter((p: any) => { console.log(p); return p.name.includes('Guest') || p.name.includes('Admin') }).map((p: any) => p.id),
+            video: adminAndGuest,
             audio: ["*"],
-            sort: "active",
           },
         },
       });
@@ -616,13 +630,15 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       // Force a participant update to reflect the new permissions immediately
       const updatedParticipants = await dailyRoom.participants();
       setParticipants(Object.values(updatedParticipants).map((p: any) => ({
-        id: p.local ? localParticipant?.id : p.session_id,
+        id: p.session_id,
         name: p.user_name,
         local: p.local,
         videoTrack: p.tracks?.video?.persistentTrack,
         audioTrack: p.tracks?.audio?.persistentTrack,
         screenVideoTrack: p.tracks?.screenVideo?.persistentTrack,
         permissions: p.permissions, // Ensure permissions are also captured
+        audio: p.audio,
+        video: p.video,
       })));
 
     } catch (err) {

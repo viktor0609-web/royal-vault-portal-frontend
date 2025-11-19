@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
-import { Mic, MicOff, Video, VideoOff, Hand } from "lucide-react";
+import { Mic, MicOff, Video, VideoOff, Hand, X } from "lucide-react";
 import { Button } from "../../ui/button";
 import { VideoPlayer } from "../VideoPlayer";
 
@@ -27,8 +27,22 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
 
   return (
     <div className="w-full sm:w-48 lg:w-56 bg-gray-900 text-white flex flex-col h-full @container/panel relative">
+      {/* Close button - visible on mobile only */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onClose}
+        className="absolute top-2 right-2 z-50 sm:hidden h-8 w-8 text-white hover:bg-gray-700 rounded-full"
+      >
+        <X className="h-5 w-5" />
+      </Button>
+      
+      {/* Header with title - visible on mobile */}
+      <div className="sm:hidden px-4 py-3 border-b border-gray-700">
+        <h2 className="text-lg font-semibold text-white">Participants</h2>
+      </div>
       {/* Video thumbnails - fill space only if 4+ participants, otherwise stay at bottom */}
-      <div className={`${adminAndGuestCount >= 4 ? 'flex-1' : 'flex-none'} overflow-y-auto p-0 mb-2`}>
+      <div className={`${adminAndGuestCount >= 4 ? 'flex-1' : 'flex-none'} overflow-y-auto p-0 sm:mb-2 mb-0`}>
         <div className={`grid grid-cols-1 gap-0 ${adminAndGuestCount >= 4 ? 'h-full' : ''}`}>
           {/* Admin video - always show first */}
           {participants.find(p => p.permissions?.canAdmin) && (() => {
@@ -111,7 +125,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
       </div>
 
       {/* Participant list - only show Users */}
-      <div className="flex-1 overflow-y-auto space-y-1 p-0">
+      <div className="flex-1 overflow-y-auto space-y-1 p-0 sm:p-0 px-2 sm:px-0">
         {participants
           .filter(p => !p.permissions?.canAdmin && !p.name.includes("Guest"))
           .sort((a, b) => a.name.localeCompare(b.name))

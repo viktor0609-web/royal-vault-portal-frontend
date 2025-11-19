@@ -121,7 +121,7 @@ export function CourseGroupDetail() {
 
         try {
             setError(null);
-            const response = await courseApi.getCourseGroupById(groupId);
+            const response = await courseApi.getCourseGroupById(groupId, 'basic');
             setCourseGroup(response.data);
             setCourses(response.data.courses || []);
         } catch (err: any) {

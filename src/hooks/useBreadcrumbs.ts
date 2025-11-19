@@ -32,7 +32,7 @@ export function useBreadcrumbs() {
                 // Fetch group name if we're in a group
                 if (pathParts[2] === 'groups' && pathParts[3]) {
                     try {
-                        const groupResponse = await courseApi.getCourseGroupById(pathParts[3]);
+                        const groupResponse = await courseApi.getCourseGroupById(pathParts[3], 'basic');
                         data.groupName = groupResponse.data.title;
                     } catch (error) {
                         console.warn('Failed to fetch group name:', error);

@@ -95,10 +95,11 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
                             <Users size={20} className="sm:w-6 sm:h-6" />
                         </Button>
 
+                        {/* Chat toggle button - only visible on mobile */}
                         <Button
                             variant="secondary"
                             onClick={toggleChatBox}
-                            className={`rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 ${showChatBox ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white relative transition-all duration-200`}
+                            className={`sm:hidden rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 ${showChatBox ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white relative transition-all duration-200`}
                         >
                             {showChatBox ? <MessageSquareX size={20} className="sm:w-6 sm:h-6" /> : <MessageSquare size={20} className="sm:w-6 sm:h-6" />}
                             {!showChatBox && chatUnreadCount > 0 && (

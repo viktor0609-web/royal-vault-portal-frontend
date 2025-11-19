@@ -32,6 +32,23 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
+
+    // On desktop, chat should always be visible
+    useEffect(() => {
+        if (joined) {
+            // Check if we're on desktop (sm breakpoint and above)
+            const checkDesktop = () => {
+                if (window.innerWidth >= 640) { // sm breakpoint
+                    setShowChatBox(true);
+                }
+            };
+            // Initial check
+            checkDesktop();
+            // Listen for resize events
+            window.addEventListener('resize', checkDesktop);
+            return () => window.removeEventListener('resize', checkDesktop);
+        }
+    }, [joined]);
     const [showProcessingNotification, setShowProcessingNotification] = useState<boolean>(false);
     const hasAttemptedJoin = useRef<boolean>(false);
     const prevRecordingRef = useRef<boolean>(false);
@@ -253,6 +270,7 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                     </div>
                 )}
 
+                {/* Chat panel - always visible on desktop, toggleable on mobile */}
                 {joined && showChatBox && (
                     <div className="fixed inset-0 z-50 sm:relative sm:inset-auto flex border-l bg-gray-900 text-white">
                         <div className="w-full sm:w-80 lg:w-96 p-4 flex flex-col">
@@ -282,11 +300,17 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                 position="bottom"
                 togglePeoplePanel={() => {
                     setShowPeoplePanel((prev) => !prev);
-                    if (showChatBox) setShowChatBox(false);
+                    // Don't close chat on desktop - only on mobile
+                    if (window.innerWidth < 640 && showChatBox) {
+                        setShowChatBox(false);
+                    }
                 }}
                 toggleChatBox={() => {
-                    setShowChatBox((prev) => !prev);
-                    if (showPeoplePanel) setShowPeoplePanel(false);
+                    // Only allow toggle on mobile
+                    if (window.innerWidth < 640) {
+                        setShowChatBox((prev) => !prev);
+                        if (showPeoplePanel) setShowPeoplePanel(false);
+                    }
                 }}
                 showChatBox={showChatBox}
                 toggleFullscreen={toggleFullscreen}

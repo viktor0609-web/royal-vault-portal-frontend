@@ -54,9 +54,10 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
 
     // Get video tracks
     const localUserVideoTrack = participants.find(p => p.local)?.videoTrack;
+    const guestVideoTrack = participants.find(p => p.name.includes("Guest"))?.videoTrack;
 
     // Main video: prioritize guest video, then local user's video
-    const mainVideoTrack = localUserVideoTrack;
+    const mainVideoTrack = guestVideoTrack || localUserVideoTrack;
 
     // Auto-join the room when component mounts
     useEffect(() => {
@@ -150,18 +151,18 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
                                         {/* Screenshare first */}
                                         {screenshareTrack && <VideoPlayer track={screenshareTrack} type="screen" />}
 
-                                        {/* Main video when no screenshare */}
+                                        {/* Main video when no screenshare - show Guest video */}
                                         {!screenshareTrack && (
                                             <>
                                                 <VideoPlayer
-                                                    track={participants.find(p => p.local)?.video ? mainVideoTrack : null}
+                                                    track={guestVideoTrack && participants.find(p => p.name.includes("Guest"))?.video ? guestVideoTrack : null}
                                                     type="camera"
-                                                    participantName={participants.find(p => p.local)?.name || "Guest"}
+                                                    participantName={participants.find(p => p.name.includes("Guest"))?.name || "Guest"}
                                                     showAvatarWhenOff={true}
                                                 />
                                                 {/* Name label for main video */}
                                                 <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
-                                                    You: {participants.find(p => p.local)?.name}
+                                                    {participants.find(p => p.name.includes("Guest"))?.name || "Guest"}
                                                 </div>
                                             </>
                                         )}

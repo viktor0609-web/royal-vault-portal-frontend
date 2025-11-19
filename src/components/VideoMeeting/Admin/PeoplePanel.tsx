@@ -33,14 +33,14 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
       <div className="mb-3 sm:mb-4 space-y-2">
         <h3 className="text-xs sm:text-sm font-semibold text-gray-300">Video Thumbnails</h3>
         <div className="grid grid-cols-1 @[320px]/panel:grid-cols-2 @[480px]/panel:grid-cols-1 gap-2">
-          {/* Admin video - only show if not in main video */}
-          {(
+          {/* Admin video - always show first */}
+          {participants.find(p => p.permissions?.canAdmin) && (
             <div className="relative bg-gray-800 rounded-lg overflow-hidden h-16 sm:h-20 aspect-video">
               <VideoPlayer
-                track={adminVideoTrack}
+                track={participants.find(p => p.permissions?.canAdmin)?.video ? adminVideoTrack : null}
                 type="camera"
                 thumbnail={true}
-                participantName="Admin"
+                participantName={participants.find(p => p.permissions?.canAdmin)?.name || "Admin"}
                 showAvatarWhenOff={true}
               />
               <div className="absolute bottom-1 left-1 text-white bg-black bg-opacity-50 px-1 py-0.5 rounded text-xs">
@@ -49,34 +49,41 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
             </div>
           )}
 
-          {/* Guest video - only show if not in main video */}
-          {guestVideoTrack && guestVideoTrack !== mainVideoTrack && (
-            <div className="relative bg-gray-800 rounded-lg overflow-hidden h-16 sm:h-20 aspect-video">
-              <VideoPlayer
-                track={participants.find(p => !p.local && !p.permissions.canAdmin)?.video ? guestVideoTrack : null}
-                type="camera"
-                thumbnail={true}
-                participantName={participants.find(p => !p.local && !p.permissions.canAdmin)?.name || "Guest"}
-                showAvatarWhenOff={true}
-              />
-              <div className="absolute bottom-1 left-1 text-white bg-black bg-opacity-50 px-1 py-0.5 rounded text-xs">
-                Guest
+          {/* All Guest videos - show after Admin */}
+          {participants
+            .filter(p => p.name.includes("Guest") && !p.permissions?.canAdmin)
+            .map((guest) => (
+              <div key={guest.id} className="relative bg-gray-800 rounded-lg overflow-hidden h-16 sm:h-20 aspect-video">
+                <VideoPlayer
+                  track={guest.video ? guest.videoTrack : null}
+                  type="camera"
+                  thumbnail={true}
+                  participantName={guest.name || "Guest"}
+                  showAvatarWhenOff={true}
+                />
+                <div className="absolute bottom-1 left-1 text-white bg-black bg-opacity-50 px-1 py-0.5 rounded text-xs">
+                  Guest
+                </div>
               </div>
-            </div>
-          )}
+            ))}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-2 sm:space-y-3">
         {participants
           .sort((a, b) => {
-            // Sort order: Admin, Guest, Users
+            // Sort order: Admin first, then all Guests, then Users
             const getRoleOrder = (participant: any) => {
               if (participant.permissions?.canAdmin) return 0; // Admin first
-              if (participant.name.includes("Guest")) return 1; // Guest second
+              if (participant.name.includes("Guest")) return 1; // All Guests second
               return 2; // Users last
             };
-            return getRoleOrder(a) - getRoleOrder(b);
+            const roleDiff = getRoleOrder(a) - getRoleOrder(b);
+            // If same role, maintain original order (or sort by name for consistency)
+            if (roleDiff === 0) {
+              return a.name.localeCompare(b.name);
+            }
+            return roleDiff;
           })
           .map((p) => {
             // Determine role for display

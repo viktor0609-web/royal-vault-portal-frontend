@@ -210,27 +210,18 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                                     <VideoPlayer track={screenshareTrack} type="screen" />
                                 )}
 
-                                {/* Main video when no screenshare */}
+                                {/* Main video when no screenshare - show Guest video */}
                                 {!screenshareTrack && (
                                     <>
                                         <VideoPlayer
-                                            track={guestVideoTrack
-                                                ? (participants.find(p => p.name.includes("Guest"))?.video ? guestVideoTrack : null)
-                                                : (participants.find(p => p.local)?.video ? mainVideoTrack : null)
-                                            }
+                                            track={guestVideoTrack && participants.find(p => p.name.includes("Guest"))?.video ? guestVideoTrack : null}
                                             type="camera"
-                                            participantName={guestVideoTrack
-                                                ? participants.find(p => p.name.includes("Guest"))?.name || "Guest"
-                                                : participants.find(p => p.local)?.name || "Admin"
-                                            }
+                                            participantName={participants.find(p => p.name.includes("Guest"))?.name || "Guest"}
                                             showAvatarWhenOff={true}
                                         />
                                         {/* Name label for main video */}
                                         <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
-                                            {guestVideoTrack
-                                                ? `${participants.find(p => p.name.includes("Guest"))?.name}`
-                                                : `${participants.find(p => p.local)?.name}`
-                                            }
+                                            {participants.find(p => p.name.includes("Guest"))?.name || "Guest"}
                                         </div>
                                     </>
                                 )}

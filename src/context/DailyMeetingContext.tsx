@@ -616,7 +616,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       // Force a participant update to reflect the new permissions immediately
       const updatedParticipants = await dailyRoom.participants();
       setParticipants(Object.values(updatedParticipants).map((p: any) => ({
-        id: p.session_id,
+        id: p.local ? localParticipant?.id : p.session_id,
         name: p.user_name,
         local: p.local,
         videoTrack: p.tracks?.video?.persistentTrack,

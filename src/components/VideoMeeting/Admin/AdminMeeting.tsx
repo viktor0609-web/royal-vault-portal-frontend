@@ -60,14 +60,26 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
     const remoteAudioRefs = useRef<Record<string, HTMLAudioElement | null>>({});
 
     // Get video tracks
-    const guestVideoTrack = participants.find(p => p.name.includes("Guest"))?.videoTrack;
     const localAdminVideoTrack = participants.find((p) => p.local)?.videoTrack;
     const screenshareTrack = isScreensharing
         ? participants.find((p) => p.id === screenshareParticipantId)
             ?.screenVideoTrack
         : null;
 
-    // Main video: prioritize guest video, then local admin's video
+    // Find active guest (prioritize: speaking/unmuted, then video on, then first guest)
+    const activeGuest = participants
+        .filter(p => p.name.includes("Guest") && !p.permissions?.canAdmin)
+        .sort((a, b) => {
+            // Prioritize guests with audio on (speaking)
+            if (a.audio && !b.audio) return -1;
+            if (!a.audio && b.audio) return 1;
+            // Then prioritize guests with video on
+            if (a.video && !b.video) return -1;
+            if (!a.video && b.video) return 1;
+            return 0;
+        })[0];
+
+    const guestVideoTrack = activeGuest?.videoTrack;
     const mainVideoTrack = guestVideoTrack || localAdminVideoTrack;
 
     useEffect(() => {
@@ -210,18 +222,18 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                                     <VideoPlayer track={screenshareTrack} type="screen" />
                                 )}
 
-                                {/* Main video when no screenshare - show Guest video */}
+                                {/* Main video when no screenshare - show active Guest video */}
                                 {!screenshareTrack && (
                                     <>
                                         <VideoPlayer
-                                            track={guestVideoTrack && participants.find(p => p.name.includes("Guest"))?.video ? guestVideoTrack : null}
+                                            track={activeGuest && activeGuest.video ? guestVideoTrack : null}
                                             type="camera"
-                                            participantName={participants.find(p => p.name.includes("Guest"))?.name || "Guest"}
+                                            participantName={activeGuest?.name || "Guest"}
                                             showAvatarWhenOff={true}
                                         />
                                         {/* Name label for main video */}
                                         <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
-                                            {participants.find(p => p.name.includes("Guest"))?.name || "Guest"}
+                                            {activeGuest?.name || "Guest"}
                                         </div>
                                     </>
                                 )}

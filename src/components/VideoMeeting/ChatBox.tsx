@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { DailyCall } from '@daily-co/daily-js';
 import { useDailyMeeting } from "../../context/DailyMeetingContext";
 import { Smile } from 'lucide-react';
@@ -65,6 +66,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const lastVisibleMessageId = useRef<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+  const [emojiPickerPosition, setEmojiPickerPosition] = useState<{ top: number; left: number } | null>(null);
   const userInfo = useAuth();
   const hasLoadedMessages = useRef(false);
 
@@ -111,8 +114,38 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
   const handleEmojiSelect = (emoji: string) => {
     setInput(prev => prev + emoji);
     setShowEmojiPicker(false);
+    setEmojiPickerPosition(null);
     inputRef.current?.focus();
   };
+
+  // Update emoji picker position when it opens
+  useEffect(() => {
+    if (showEmojiPicker && inputRef.current) {
+      const updatePosition = () => {
+        const rect = inputRef.current?.getBoundingClientRect();
+        if (rect) {
+          // Position above the input field
+          const pickerHeight = 220; // Approximate height of emoji picker
+          const margin = 8;
+          setEmojiPickerPosition({
+            top: rect.top + window.scrollY - pickerHeight - margin,
+            left: rect.left + window.scrollX,
+          });
+        }
+      };
+      updatePosition();
+      const interval = setInterval(updatePosition, 100); // Update position periodically
+      window.addEventListener('resize', updatePosition);
+      window.addEventListener('scroll', updatePosition, true);
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('resize', updatePosition);
+        window.removeEventListener('scroll', updatePosition, true);
+      };
+    } else {
+      setEmojiPickerPosition(null);
+    }
+  }, [showEmojiPicker]);
 
   // Close emoji picker when clicking outside
   useEffect(() => {
@@ -302,9 +335,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg relative">
       {/* Header with clear button for admin */}
-      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 bg-gray-50">
+      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
         <h3 className="text-base font-semibold text-gray-800">Live Chat</h3>
         {isAdmin && (
           <button
@@ -319,7 +352,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
 
       {/* Messages Area - WhatsApp style */}
       <div
-        className="flex-1 overflow-y-auto px-3 py-2 relative"
+        className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-2 relative min-h-0"
         style={{
           backgroundColor: '#efeae2',
           backgroundImage: `
@@ -380,8 +413,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
       </div>
 
       {/* Input Area */}
-      <div className="px-3 py-3 border-t border-gray-200 bg-white">
-        <div className="flex items-center gap-2">
+      <div className="px-3 py-3 border-t border-gray-200 bg-white relative flex-shrink-0 overflow-visible">
+        <div className="flex items-center gap-2 relative">
           <button
             className="bg-gray-100 text-gray-700 p-2 rounded-full hover:bg-gray-200 transition-colors flex-shrink-0"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -390,7 +423,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
             <Smile size={20} />
           </button>
 
-          <div className="flex-1 relative">
+          <div className="flex-1 relative overflow-visible" ref={emojiPickerRef}>
             <input
               ref={inputRef}
               type="text"
@@ -400,13 +433,19 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyPress}
             />
-            {showEmojiPicker && (
-              <div className="emoji-picker-container absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-xl p-3 max-h-52 overflow-y-auto z-10 w-80">
+            {showEmojiPicker && emojiPickerPosition && createPortal(
+              <div 
+                className="emoji-picker-container fixed bg-white border border-gray-200 rounded-lg shadow-xl p-3 max-h-52 overflow-y-auto z-[9999] w-80"
+                style={{
+                  top: `${emojiPickerPosition.top}px`,
+                  left: `${emojiPickerPosition.left}px`,
+                }}
+              >
                 <div className="grid grid-cols-8 gap-1">
                   {popularEmojis.map((emoji, index) => (
                     <button
                       key={index}
-                      className="text-xl hover:bg-gray-100 rounded p-1 transition-colors"
+                      className="text-xl hover:bg-gray-100 rounded p-1 transition-colors flex items-center justify-center min-w-[2rem] min-h-[2rem]"
                       onClick={() => handleEmojiSelect(emoji)}
                       title={emoji}
                     >
@@ -414,7 +453,8 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
                     </button>
                   ))}
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
 

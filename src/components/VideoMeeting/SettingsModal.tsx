@@ -7,6 +7,7 @@ import { Settings, Video, VideoOff, Mic, MicOff, Volume2, Filter } from "lucide-
 import { cn } from "@/lib/utils";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface SettingsModalProps {
   children: React.ReactNode;
@@ -35,7 +36,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ children }) => {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>{children}</DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Settings</p>
+        </TooltipContent>
+      </Tooltip>
       <DialogContent className="sm:max-w-[500px] bg-gray-900 text-white border-gray-700 max-h-[90vh] overflow-y-auto [&>button]:block sm:[&>button]:hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

@@ -335,9 +335,9 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg relative">
-      {/* Header with clear button for admin */}
-      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+    <div className="flex flex-col h-full bg-white rounded-lg shadow-lg relative min-h-0">
+      {/* Sticky header with clear button for admin */}
+      <div className="sticky top-0 z-10 flex justify-between items-center px-4 py-3 border-b border-gray-200 bg-gray-50 flex-shrink-0">
         <h3 className="text-base font-semibold text-gray-800">Live Chat</h3>
         {isAdmin && (
           <button

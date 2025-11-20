@@ -68,34 +68,37 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
 
   return (
     <div className="w-full sm:w-48 lg:w-56 bg-gray-900 text-white flex flex-col h-full @container/panel relative">
-      {/* Close button - visible on mobile only */}
+      {/* Close button - visible on desktop only (mobile uses BottomSheet close) */}
       <Button
         variant="ghost"
         size="icon"
         onClick={onClose}
-        className="absolute top-2 right-2 z-50 sm:hidden h-8 w-8 text-white hover:bg-gray-700 rounded-full"
+        className="hidden sm:block absolute top-2 right-2 z-50 h-8 w-8 text-white hover:bg-gray-700 rounded-full"
       >
         <X className="h-5 w-5" />
       </Button>
       
-      {/* Header with title - visible on mobile */}
-      <div className="sm:hidden px-4 py-3 border-b border-gray-700">
+      {/* Header with title - visible on desktop only (mobile uses BottomSheet title) */}
+      <div className="hidden sm:block px-4 py-3 border-b border-gray-700">
         <h2 className="text-lg font-semibold text-white">Participants</h2>
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
-        <div className="px-2 sm:px-2 pt-2 border-b border-gray-700">
+        {/* Sticky tabs - sticky on mobile, normal on desktop */}
+        <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-700 px-2 pt-2 pb-2">
           <TabsList className="grid w-full grid-cols-2 bg-gray-800">
             <TabsTrigger 
               value="thumbnails" 
               className="text-white data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+              onClick={(e) => e.stopPropagation()}
             >
               Thumbnails
             </TabsTrigger>
             <TabsTrigger 
               value="list" 
               className="text-white data-[state=active]:bg-gray-700 data-[state=active]:text-white"
+              onClick={(e) => e.stopPropagation()}
             >
               List ({attendeeCount})
             </TabsTrigger>

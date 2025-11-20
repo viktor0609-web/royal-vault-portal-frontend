@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -8,12 +8,27 @@ import { cn } from "@/lib/utils";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { BottomSheet } from "./BottomSheet";
 
 interface SettingsModalProps {
   children: React.ReactNode;
+  onOpen?: () => void;
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ children }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({ children, onOpen }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const {
     cameras,
     microphones,
@@ -34,25 +49,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ children }) => {
     selectedBackgroundImage,
   } = useDailyMeeting();
 
-  return (
-    <Dialog>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <DialogTrigger asChild>{children}</DialogTrigger>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Settings</p>
-        </TooltipContent>
-      </Tooltip>
-      <DialogContent className="sm:max-w-[500px] bg-gray-900 text-white border-gray-700 max-h-[90vh] overflow-y-auto [&>button]:block sm:[&>button]:hidden">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
-            Settings
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-6 py-4">
+  // Settings content component (reusable for both Dialog and BottomSheet)
+  const SettingsContent = () => (
+    <div className="space-y-6 py-4">
           {/* Camera Settings */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -221,6 +220,53 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ children }) => {
             </div>
           </div>
         </div>
+  );
+
+  // Mobile: Use BottomSheet
+  if (isMobile) {
+    return (
+      <>
+        <div onClick={() => {
+          setIsOpen(true);
+          onOpen?.();
+        }}>
+          {children}
+        </div>
+        <BottomSheet
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          title="Settings"
+          maxHeight="80vh"
+        >
+          <div className="p-4">
+            <SettingsContent />
+          </div>
+        </BottomSheet>
+      </>
+    );
+  }
+
+  // Desktop: Use Dialog (uncontrolled - Dialog manages its own state)
+  return (
+    <Dialog>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild onClick={() => onOpen?.()}>
+            {children}
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Settings</p>
+        </TooltipContent>
+      </Tooltip>
+      <DialogContent className="sm:max-w-[500px] bg-gray-900 text-white border-gray-700 max-h-[90vh] overflow-y-auto [&>button]:block sm:[&>button]:hidden">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            Settings
+          </DialogTitle>
+        </DialogHeader>
+        <SettingsContent />
       </DialogContent>
     </Dialog>
   );

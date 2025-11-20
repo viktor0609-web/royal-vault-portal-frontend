@@ -67,7 +67,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
   console.log("participants", participants)
 
   return (
-    <div className="w-full sm:w-48 lg:w-56 bg-gray-900 text-white flex flex-col h-full @container/panel relative">
+    <div className="w-full sm:w-48 lg:w-56 bg-gray-900 text-white flex flex-col h-full min-h-0 @container/panel relative">
       {/* Close button - visible on desktop only (mobile uses BottomSheet close) */}
       <Button
         variant="ghost"

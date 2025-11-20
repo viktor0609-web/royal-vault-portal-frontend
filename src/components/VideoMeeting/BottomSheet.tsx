@@ -56,7 +56,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-end justify-center md:hidden"
+      className="fixed inset-0 z-[60] flex items-end justify-center md:hidden"
       onClick={(e) => {
         if (e.target === backdropRef.current) {
           onClose();

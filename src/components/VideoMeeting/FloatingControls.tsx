@@ -25,6 +25,7 @@ import { BottomSheet } from './BottomSheet';
 interface FloatingControlsProps {
   togglePeoplePanel: () => void;
   toggleChatBox: () => void;
+  toggleSettings?: () => void;
   showChatBox: boolean;
   toggleFullscreen: () => void;
   isFullscreen: boolean;
@@ -43,6 +44,7 @@ interface FloatingControlsProps {
 export const FloatingControls: React.FC<FloatingControlsProps> = ({
   togglePeoplePanel,
   toggleChatBox,
+  toggleSettings,
   showChatBox,
   toggleFullscreen,
   isFullscreen,
@@ -253,7 +255,10 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
       )}
 
       {/* Settings */}
-      <SettingsModal onOpen={() => setIsMenuOpen(false)}>
+      <SettingsModal onOpen={() => {
+        setIsMenuOpen(false);
+        toggleSettings?.();
+      }}>
         <Button
           className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
           type="button"

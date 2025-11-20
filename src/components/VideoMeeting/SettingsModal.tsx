@@ -8,27 +8,14 @@ import { cn } from "@/lib/utils";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { BottomSheet } from "./BottomSheet";
 
 interface SettingsModalProps {
   children: React.ReactNode;
   onOpen?: () => void;
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ children, onOpen }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Check if mobile on mount and resize
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+// Settings content component (reusable for both Dialog and BottomSheet)
+export const SettingsContent = () => {
   const {
     cameras,
     microphones,
@@ -49,8 +36,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ children, onOpen }
     selectedBackgroundImage,
   } = useDailyMeeting();
 
-  // Settings content component (reusable for both Dialog and BottomSheet)
-  const SettingsContent = () => (
+  return (
     <div className="space-y-6 py-4">
       {/* Camera Settings */}
       <div className="space-y-3">
@@ -80,7 +66,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ children, onOpen }
             <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
               <SelectValue placeholder="Select a camera" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectContent className="bg-gray-800 border-gray-700 !z-[70]">
               {cameras.filter(device => device.deviceId !== '').map((device) => (
                 <SelectItem
                   key={device.deviceId}
@@ -125,7 +111,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ children, onOpen }
             <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
               <SelectValue placeholder="Select a microphone" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectContent className="bg-gray-800 border-gray-700 !z-[70]">
               {microphones.filter(device => device.deviceId !== '').map((device) => (
                 <SelectItem
                   key={device.deviceId}
@@ -154,7 +140,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ children, onOpen }
             <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white">
               <SelectValue placeholder="Select a speaker" />
             </SelectTrigger>
-            <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectContent className="bg-gray-800 border-gray-700 !z-[70]">
               {speakers.filter(device => device.deviceId !== '').map((device) => (
                 <SelectItem
                   key={device.deviceId}
@@ -221,21 +207,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ children, onOpen }
       </div>
     </div>
   );
+};
 
-  // Mobile: Use BottomSheet
+export const SettingsModal: React.FC<SettingsModalProps> = ({ children, onOpen }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Mobile: Just trigger the callback
   if (isMobile) {
-    const handleOpen = (e?: React.MouseEvent) => {
+    const handleClick = (e?: React.MouseEvent) => {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
-      // Open Settings - don't close FloatingControls menu yet
-      setIsOpen(true);
-    };
-
-    const handleClose = () => {
-      setIsOpen(false);
-      // Close FloatingControls menu when Settings closes
       onOpen?.();
     };
 
@@ -244,27 +238,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ children, onOpen }
         {React.isValidElement(children)
           ? React.cloneElement(children as React.ReactElement<any>, {
             onClick: (e: React.MouseEvent<HTMLButtonElement>) => {
-              handleOpen(e);
+              handleClick(e);
             }
           } as any)
           : (
             <div
-              onClick={handleOpen}
+              onClick={handleClick}
               className="w-full"
             >
               {children}
             </div>
           )}
-        <BottomSheet
-          isOpen={isOpen}
-          onClose={handleClose}
-          title="Settings"
-          maxHeight="80vh"
-        >
-          <div className="p-4">
-            <SettingsContent />
-          </div>
-        </BottomSheet>
       </>
     );
   }
@@ -294,4 +278,3 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ children, onOpen }
     </Dialog>
   );
 };
-

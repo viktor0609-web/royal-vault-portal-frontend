@@ -4,6 +4,7 @@ import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
+import { FloatingControls } from "../FloatingControls";
 import { PeoplePanel } from "./PeoplePanel";
 import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment } from "react";
@@ -27,6 +28,8 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
         screenshareParticipantId,
         localParticipant,
         hasLocalAudioPermission,
+        startScreenshare,
+        stopScreenshare,
     } = useDailyMeeting();
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
@@ -269,6 +272,30 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
                         isFullscreen={isFullscreen}
                         localParticipant={localParticipant}
                         chatUnreadCount={chatUnreadCount}
+                    />
+
+                    {/* Mobile Floating Controls */}
+                    <FloatingControls
+                        togglePeoplePanel={() => {
+                            setShowPeoplePanel(prev => !prev);
+                            if (window.innerWidth < 640 && showChatBox) {
+                                setShowChatBox(false);
+                            }
+                        }}
+                        toggleChatBox={() => {
+                            if (window.innerWidth < 640) {
+                                setShowChatBox(prev => !prev);
+                                if (showPeoplePanel) setShowPeoplePanel(false);
+                            }
+                        }}
+                        showChatBox={showChatBox}
+                        toggleFullscreen={toggleFullscreen}
+                        isFullscreen={isFullscreen}
+                        chatUnreadCount={chatUnreadCount}
+                        role={role}
+                        isScreensharing={isScreensharing}
+                        startScreenshare={startScreenshare}
+                        stopScreenshare={stopScreenshare}
                     />
                 </div>)}
         </>

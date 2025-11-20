@@ -3,10 +3,14 @@ import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
+import { FloatingControls } from "../FloatingControls";
 import { Mic, MicOff, X, Loader2 } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
 import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment, useMemo } from "react";
+import { useParams } from "react-router-dom";
+import { useToast } from "../../../hooks/use-toast";
+import { webinarApi } from "../../../lib/api";
 
 interface AdminMeetingProps {
     webinarId?: string;
@@ -26,12 +30,19 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
         screenshareParticipantId,
         isRecording,
         localParticipant,
+        startRecording,
+        stopRecording,
+        startScreenshare,
+        stopScreenshare,
     } = useDailyMeeting();
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
+    const [countdown, setCountdown] = useState<number | null>(null);
+    const { toast } = useToast();
+    const { slug } = useParams<{ slug: string }>();
 
     // On desktop, chat should always be visible
     useEffect(() => {
@@ -137,6 +148,62 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
         };
     }, []);
 
+    // Handle countdown timer
+    useEffect(() => {
+        if (countdown === null) return;
+
+        if (countdown === 0) {
+            // Countdown finished, start recording
+            const startActualRecording = async () => {
+                try {
+                    const response = await webinarApi.setWebinarOnRecording(slug as string);
+                    if (response.status !== 200) {
+                        throw new Error('Failed to set webinar on recording');
+                    }
+                    startRecording();
+                    setCountdown(null);
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    toast({
+                        title: "Error",
+                        description: "Failed to start recording. Please try again.",
+                        variant: "destructive",
+                    });
+                    setCountdown(null);
+                }
+            };
+            startActualRecording();
+            return;
+        }
+
+        // Decrease countdown every second
+        const timer = setTimeout(() => {
+            setCountdown(countdown - 1);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [countdown, slug, startRecording, toast]);
+
+    // Handle ESC key to cancel countdown
+    useEffect(() => {
+        if (countdown === null) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setCountdown(null);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [countdown]);
+
+    const handleStartRecording = () => {
+        console.log("Start Recording Clicked");
+        // Start countdown from 3
+        setCountdown(3);
+    };
+
     // Track recording state and show notification for 10 seconds after stopping
     useEffect(() => {
         // Check if recording just stopped (was true, now false)
@@ -189,6 +256,23 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
 
     return (
         <div className="flex flex-col h-full w-full min-h-0 max-w-full relative">
+            {/* Countdown Overlay */}
+            {countdown !== null && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                    <div className="text-center">
+                        <div className="text-9xl sm:text-[12rem] font-bold text-white animate-pulse">
+                            {countdown}
+                        </div>
+                        <p className="text-2xl sm:text-3xl text-white mt-4 font-semibold">
+                            Recording will start...
+                        </p>
+                        <p className="text-sm sm:text-base text-white/70 mt-2">
+                            Press ESC to cancel
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Recording Processing Notification */}
             {showProcessingNotification && (
                 <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -319,6 +403,38 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                 toggleFullscreen={toggleFullscreen}
                 isFullscreen={isFullscreen}
                 chatUnreadCount={chatUnreadCount}
+                countdown={countdown}
+                setCountdown={setCountdown}
+                handleStartRecording={handleStartRecording}
+            />
+
+            {/* Mobile Floating Controls */}
+            <FloatingControls
+                togglePeoplePanel={() => {
+                    setShowPeoplePanel((prev) => !prev);
+                    if (window.innerWidth < 640 && showChatBox) {
+                        setShowChatBox(false);
+                    }
+                }}
+                toggleChatBox={() => {
+                    if (window.innerWidth < 640) {
+                        setShowChatBox((prev) => !prev);
+                        if (showPeoplePanel) setShowPeoplePanel(false);
+                    }
+                }}
+                showChatBox={showChatBox}
+                toggleFullscreen={toggleFullscreen}
+                isFullscreen={isFullscreen}
+                chatUnreadCount={chatUnreadCount}
+                role={role}
+                isRecording={isRecording}
+                startRecording={startRecording}
+                stopRecording={stopRecording}
+                isScreensharing={isScreensharing}
+                startScreenshare={startScreenshare}
+                stopScreenshare={stopScreenshare}
+                onStartRecordingClick={handleStartRecording}
+                countdown={countdown}
             />
         </div>
     );

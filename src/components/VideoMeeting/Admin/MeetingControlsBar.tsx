@@ -17,9 +17,23 @@ interface MeetingControlsBarProps {
   toggleFullscreen: () => void;
   isFullscreen: boolean;
   chatUnreadCount?: number;
+  countdown?: number | null;
+  setCountdown?: (countdown: number | null) => void;
+  handleStartRecording?: () => void;
 }
 
-export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position, togglePeoplePanel, toggleChatBox, showChatBox, toggleFullscreen, isFullscreen, chatUnreadCount = 0 }) => {
+export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
+  position,
+  togglePeoplePanel,
+  toggleChatBox,
+  showChatBox,
+  toggleFullscreen,
+  isFullscreen,
+  chatUnreadCount = 0,
+  countdown: propCountdown,
+  setCountdown: propSetCountdown,
+  handleStartRecording: propHandleStartRecording,
+}) => {
   const {
     joined,
     role,
@@ -37,12 +51,21 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
     dailyRoom,
   } = useDailyMeeting();
 
+  // Use props if provided, otherwise use local state (for backward compatibility)
+  const [localCountdown, setLocalCountdown] = useState<number | null>(null);
+  const countdown = propCountdown !== undefined ? propCountdown : localCountdown;
+  const setCountdown = propSetCountdown || setLocalCountdown;
+  const handleStartRecording = propHandleStartRecording || (() => {
+    console.log("Start Recording Clicked");
+    setCountdown(3);
+  });
+
   const { toast } = useToast();
   const { slug } = useParams<{ slug: string }>();
-  const [countdown, setCountdown] = useState<number | null>(null);
 
-  // Handle countdown timer
+  // Handle countdown timer (only if using local state)
   useEffect(() => {
+    if (propCountdown !== undefined) return; // Don't handle if countdown is controlled by parent
     if (countdown === null) return;
 
     if (countdown === 0) {
@@ -75,7 +98,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [countdown, slug, startRecording, toast]);
+  }, [countdown, slug, startRecording, toast, propCountdown]);
 
   // Handle ESC key to cancel countdown
   useEffect(() => {
@@ -89,13 +112,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [countdown]);
-
-  const handleStartRecording = () => {
-    console.log("Start Recording Clicked");
-    // Start countdown from 3
-    setCountdown(3);
-  }
+  }, [countdown, setCountdown]);
 
 
   if (!joined) return null;
@@ -119,7 +136,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({ position
         </div>
       )}
 
-      <div className={`flex border-t-2 border-gray-600 flex-col sm:flex-row justify-center items-center p-2 sm:p-4 bg-gray-800 text-white flex-shrink-0 gap-2 sm:gap-4 ${position === "top" ? "justify-between" : ""}`}>
+      <div className={`hidden md:flex border-t-2 border-gray-600 flex-col sm:flex-row justify-center items-center p-2 sm:p-4 bg-gray-800 text-white flex-shrink-0 gap-2 sm:gap-4 ${position === "top" ? "justify-between" : ""}`}>
         {position === "top" && (
           <div className="flex items-center gap-2 order-1 sm:order-none">
             <span className="text-sm sm:text-lg font-semibold">Waiting for others to join</span>

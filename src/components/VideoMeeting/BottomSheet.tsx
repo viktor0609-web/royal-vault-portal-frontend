@@ -25,7 +25,19 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
     if (!isOpen) return;
 
     const handleClickOutside = (event: MouseEvent) => {
+
       const target = event.target as HTMLElement;
+      // Don't close if clicking on Select dropdown (Radix Portal) or any Select-related elements
+      if (
+        target.closest('[data-radix-portal]') ||
+        target.closest('[data-radix-select-content]') ||
+        target.closest('[data-radix-select-item]') ||
+        target.closest('[data-radix-select-viewport]') ||
+        target.closest('[role="option"]') ||
+        target.closest('[data-state]') // Radix Select uses data-state attributes
+      ) {
+        return;
+      }
       if (
         backdropRef.current &&
         backdropRef.current.contains(target) &&
@@ -58,6 +70,16 @@ export const BottomSheet: React.FC<BottomSheetProps> = ({
       ref={backdropRef}
       className="fixed inset-0 z-[60] flex items-end justify-center md:hidden"
       onClick={(e) => {
+        const target = e.target as HTMLElement;
+        // Don't close if clicking on Select dropdown or related elements
+        if (
+          target.closest('[data-radix-portal]') ||
+          target.closest('[data-radix-select-content]') ||
+          target.closest('[data-radix-select-item]') ||
+          target.closest('[role="option"]')
+        ) {
+          return;
+        }
         if (e.target === backdropRef.current) {
           onClose();
         }

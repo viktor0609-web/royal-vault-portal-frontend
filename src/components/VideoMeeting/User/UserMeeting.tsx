@@ -7,6 +7,7 @@ import { MeetingControlsBar } from "./MeetingControlsBar";
 import { FloatingControls } from "../FloatingControls";
 import { BottomSheet } from "../BottomSheet";
 import { PeoplePanel } from "./PeoplePanel";
+import { SettingsContent } from "../SettingsModal";
 import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment } from "react";
 
@@ -35,6 +36,7 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
+    const [showSettings, setShowSettings] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
     const hasAttemptedJoin = useRef<boolean>(false);
@@ -296,7 +298,7 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
                     />
 
                     {/* Mobile Floating Controls - Hide when panels are open */}
-                    {(!showPeoplePanel && !showChatBox) && (
+                    {(!showPeoplePanel && !showChatBox && !showSettings) && (
                         <FloatingControls
                             togglePeoplePanel={() => {
                                 setShowPeoplePanel(prev => !prev);
@@ -310,6 +312,13 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
                                     if (showPeoplePanel) setShowPeoplePanel(false);
                                 }
                             }}
+                            toggleSettings={() => {
+                                setShowSettings((prev) => !prev);
+                                if (window.innerWidth < 640) {
+                                    if (showPeoplePanel) setShowPeoplePanel(false);
+                                    if (showChatBox) setShowChatBox(false);
+                                }
+                            }}
                             showChatBox={showChatBox}
                             toggleFullscreen={toggleFullscreen}
                             isFullscreen={isFullscreen}
@@ -319,6 +328,24 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
                             startScreenshare={startScreenshare}
                             stopScreenshare={stopScreenshare}
                         />
+                    )}
+
+                    {/* Settings panel - BottomSheet on mobile, Dialog on desktop */}
+                    {joined && showSettings && (
+                        <>
+                            {/* Desktop: Dialog (handled by SettingsModal) */}
+                            {/* Mobile: BottomSheet */}
+                            <BottomSheet
+                                isOpen={showSettings}
+                                onClose={() => setShowSettings(false)}
+                                title="Settings"
+                                maxHeight="80vh"
+                            >
+                                <div className="p-4">
+                                    <SettingsContent />
+                                </div>
+                            </BottomSheet>
+                        </>
                     )}
                 </div>)}
         </>

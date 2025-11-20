@@ -5,6 +5,7 @@ import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
 import { FloatingControls } from "../FloatingControls";
 import { BottomSheet } from "../BottomSheet";
+import { SettingsContent } from "../SettingsModal";
 import { Mic, MicOff, X, Loader2 } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
 import { VideoPlayer } from "../VideoPlayer";
@@ -39,6 +40,7 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
+    const [showSettings, setShowSettings] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
     const [countdown, setCountdown] = useState<number | null>(null);
@@ -431,7 +433,7 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
             />
 
             {/* Mobile Floating Controls - Hide when panels are open */}
-            {(!showPeoplePanel && !showChatBox) && (
+            {(!showPeoplePanel && !showChatBox && !showSettings) && (
                 <FloatingControls
                     togglePeoplePanel={() => {
                         setShowPeoplePanel((prev) => !prev);
@@ -443,6 +445,13 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                         if (window.innerWidth < 640) {
                             setShowChatBox((prev) => !prev);
                             if (showPeoplePanel) setShowPeoplePanel(false);
+                        }
+                    }}
+                    toggleSettings={() => {
+                        setShowSettings((prev) => !prev);
+                        if (window.innerWidth < 640) {
+                            if (showPeoplePanel) setShowPeoplePanel(false);
+                            if (showChatBox) setShowChatBox(false);
                         }
                     }}
                     showChatBox={showChatBox}
@@ -459,6 +468,24 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                     onStartRecordingClick={handleStartRecording}
                     countdown={countdown}
                 />
+            )}
+
+            {/* Settings panel - BottomSheet on mobile, Dialog on desktop */}
+            {joined && showSettings && (
+                <>
+                    {/* Desktop: Dialog (handled by SettingsModal) */}
+                    {/* Mobile: BottomSheet */}
+                    <BottomSheet
+                        isOpen={showSettings}
+                        onClose={() => setShowSettings(false)}
+                        title="Settings"
+                        maxHeight="80vh"
+                    >
+                        <div className="p-4">
+                            <SettingsContent />
+                        </div>
+                    </BottomSheet>
+                </>
             )}
         </div>
     );

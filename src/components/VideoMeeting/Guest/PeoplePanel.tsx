@@ -66,19 +66,19 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
     }, [activeSpeaker?.id, activeTab]);
 
     return (
-        <div className="w-full sm:w-48 lg:w-56 bg-gray-900 text-white flex flex-col h-full @container/panel relative">
-            {/* Close button - visible on mobile only */}
+        <div className="w-full sm:w-48 lg:w-56 bg-gray-900 text-white flex flex-col h-full min-h-0 @container/panel relative">
+            {/* Close button - visible on desktop only (mobile uses BottomSheet close) */}
             <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="absolute top-2 right-2 z-50 sm:hidden h-8 w-8 text-white hover:bg-gray-700 rounded-full"
+                className="hidden sm:block absolute top-2 right-2 z-50 h-8 w-8 text-white hover:bg-gray-700 rounded-full"
             >
                 <X className="h-5 w-5" />
             </Button>
             
-            {/* Header with title - visible on mobile */}
-            <div className="sm:hidden px-4 py-3 border-b border-gray-700">
+            {/* Header with title - visible on desktop only (mobile uses BottomSheet title) */}
+            <div className="hidden sm:block px-4 py-3 border-b border-gray-700">
                 <h2 className="text-lg font-semibold text-white">Participants</h2>
             </div>
 

@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "../ui/button";
-import { 
-  Mic, 
-  MicOff, 
-  Video, 
-  VideoOff, 
-  Users, 
-  MessageSquare, 
-  MessageSquareX, 
-  Settings, 
-  LogOut, 
-  Maximize, 
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Users,
+  MessageSquare,
+  MessageSquareX,
+  Settings,
+  LogOut,
+  Maximize,
   Minimize,
   MonitorPlay,
   Circle,
@@ -75,7 +75,7 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768); // md breakpoint
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -125,155 +125,152 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
     <div className="flex flex-col gap-3 p-4">
       {/* Camera Toggle */}
       <Button
-              onClick={toggleCamera}
-              className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
-                isCameraOff 
-                  ? 'bg-red-600 hover:bg-red-700 text-white' 
-                  : 'bg-gray-700 hover:bg-gray-600 text-white'
-              }`}
-            >
-              {isCameraOff ? <VideoOff size={20} /> : <Video size={20} />}
-              <span className="text-base font-medium">
-                {isCameraOff ? "Turn Camera On" : "Turn Camera Off"}
-              </span>
-            </Button>
+        onClick={toggleCamera}
+        className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${isCameraOff
+          ? 'bg-red-600 hover:bg-red-700 text-white'
+          : 'bg-gray-700 hover:bg-gray-600 text-white'
+          }`}
+      >
+        {isCameraOff ? <VideoOff size={20} /> : <Video size={20} />}
+        <span className="text-base font-medium">
+          {isCameraOff ? "Turn Camera On" : "Turn Camera Off"}
+        </span>
+      </Button>
 
       {/* Microphone Toggle */}
       <Button
-              onClick={toggleMicrophone}
-              disabled={!hasAudioPermission}
-              className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
-                isMicrophoneMuted 
-                  ? 'bg-red-600 hover:bg-red-700 text-white' 
-                  : 'bg-gray-700 hover:bg-gray-600 text-white'
-              } ${!hasAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isMicrophoneMuted ? <MicOff size={20} /> : <Mic size={20} />}
-              <span className="text-base font-medium">
-                {!hasAudioPermission
-                  ? (role === "User" ? 'Request Speaking Permission' : 'Audio Permission Required')
-                  : (isMicrophoneMuted ? 'Unmute Microphone' : 'Mute Microphone')}
-              </span>
-            </Button>
+        onClick={toggleMicrophone}
+        disabled={!hasAudioPermission}
+        className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${isMicrophoneMuted
+          ? 'bg-red-600 hover:bg-red-700 text-white'
+          : 'bg-gray-700 hover:bg-gray-600 text-white'
+          } ${!hasAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
+      >
+        {isMicrophoneMuted ? <MicOff size={20} /> : <Mic size={20} />}
+        <span className="text-base font-medium">
+          {!hasAudioPermission
+            ? (role === "User" ? 'Request Speaking Permission' : 'Audio Permission Required')
+            : (isMicrophoneMuted ? 'Unmute Microphone' : 'Mute Microphone')}
+        </span>
+      </Button>
 
       {/* Raise Hand - for User */}
       {role === "User" && (
         <Button
-                onClick={() => {
-                  // Simple hand button - you can add your own logic here
-                  console.log('Hand button clicked');
-                }}
-                className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
-              >
-                <Hand size={20} />
-                <span className="text-base font-medium">Raise Hand</span>
-              </Button>
+          onClick={() => {
+            // Simple hand button - you can add your own logic here
+            console.log('Hand button clicked');
+          }}
+          className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
+        >
+          <Hand size={20} />
+          <span className="text-base font-medium">Raise Hand</span>
+        </Button>
       )}
 
       {/* Participants */}
       <Button
-              onClick={() => {
-                togglePeoplePanel();
-                setIsMenuOpen(false);
-              }}
-              className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
-            >
-              <Users size={20} />
-              <span className="text-base font-medium">Participants</span>
-            </Button>
+        onClick={() => {
+          togglePeoplePanel();
+          setIsMenuOpen(false);
+        }}
+        className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
+      >
+        <Users size={20} />
+        <span className="text-base font-medium">Participants</span>
+      </Button>
 
       {/* Chat Toggle */}
       <Button
-              onClick={() => {
-                toggleChatBox();
-                setIsMenuOpen(false);
-              }}
-              className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 relative ${
-                showChatBox 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                  : 'bg-gray-700 hover:bg-gray-600 text-white'
-              }`}
-            >
-              {showChatBox ? <MessageSquareX size={20} /> : <MessageSquare size={20} />}
-              <span className="text-base font-medium">
-                {showChatBox ? "Close Chat" : "Open Chat"}
-              </span>
-              {!showChatBox && chatUnreadCount > 0 && (
-                <span className="absolute right-4 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full min-w-[20px] h-[20px]">
-                  {chatUnreadCount}
-                </span>
-              )}
-            </Button>
+        onClick={() => {
+          toggleChatBox();
+          setIsMenuOpen(false);
+        }}
+        className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 relative ${showChatBox
+          ? 'bg-blue-600 hover:bg-blue-700 text-white'
+          : 'bg-gray-700 hover:bg-gray-600 text-white'
+          }`}
+      >
+        {showChatBox ? <MessageSquareX size={20} /> : <MessageSquare size={20} />}
+        <span className="text-base font-medium">
+          {showChatBox ? "Close Chat" : "Open Chat"}
+        </span>
+        {!showChatBox && chatUnreadCount > 0 && (
+          <span className="absolute right-4 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full min-w-[20px] h-[20px]">
+            {chatUnreadCount}
+          </span>
+        )}
+      </Button>
 
       {/* Fullscreen Toggle */}
       <Button
-              onClick={toggleFullscreen}
-              className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
-                isFullscreen 
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                  : 'bg-gray-700 hover:bg-gray-600 text-white'
-              }`}
-            >
-              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
-              <span className="text-base font-medium">
-                {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-              </span>
-            </Button>
+        onClick={toggleFullscreen}
+        className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${isFullscreen
+          ? 'bg-blue-600 hover:bg-blue-700 text-white'
+          : 'bg-gray-700 hover:bg-gray-600 text-white'
+          }`}
+      >
+        {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+        <span className="text-base font-medium">
+          {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+        </span>
+      </Button>
 
       {/* Screen Share - for Admin and Guest */}
       {(role === "Admin" || role === "Guest") && (
         <Button
-                onClick={isScreensharing ? stopScreenshare : startScreenshare}
-                className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
-                  isScreensharing 
-                    ? 'bg-red-600 hover:bg-red-700 text-white' 
-                    : 'bg-gray-700 hover:bg-gray-600 text-white'
-                }`}
-              >
-                <MonitorPlay size={20} />
-                <span className="text-base font-medium">
-                  {isScreensharing ? "Stop Screen Share" : "Start Screen Share"}
-                </span>
-              </Button>
+          onClick={isScreensharing ? stopScreenshare : startScreenshare}
+          className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${isScreensharing
+            ? 'bg-red-600 hover:bg-red-700 text-white'
+            : 'bg-gray-700 hover:bg-gray-600 text-white'
+            }`}
+        >
+          <MonitorPlay size={20} />
+          <span className="text-base font-medium">
+            {isScreensharing ? "Stop Screen Share" : "Start Screen Share"}
+          </span>
+        </Button>
       )}
 
       {/* Recording - for Admin */}
       {role === "Admin" && (
         <Button
-                onClick={isRecording ? stopRecording : onStartRecordingClick}
-                disabled={countdown !== null}
-                className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
-                  isRecording 
-                    ? 'bg-green-600 hover:bg-green-700 text-white' 
-                    : 'bg-red-600 hover:bg-red-700 text-white'
-                } ${countdown !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <Circle
-                  size={20}
-                  className={isRecording ? 'fill-white' : ''}
-                />
-                <span className="text-base font-medium">
-                  {isRecording ? "Stop Recording" : "Start Recording"}
-                </span>
-              </Button>
+          onClick={isRecording ? stopRecording : onStartRecordingClick}
+          disabled={countdown !== null}
+          className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${isRecording
+            ? 'bg-green-600 hover:bg-green-700 text-white'
+            : 'bg-red-600 hover:bg-red-700 text-white'
+            } ${countdown !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          <Circle
+            size={20}
+            className={isRecording ? 'fill-white' : ''}
+          />
+          <span className="text-base font-medium">
+            {isRecording ? "Stop Recording" : "Start Recording"}
+          </span>
+        </Button>
       )}
 
       {/* Settings */}
       <SettingsModal onOpen={() => setIsMenuOpen(false)}>
-              <Button className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3">
-                <Settings size={20} />
-                <span className="text-base font-medium">Settings</span>
-              </Button>
+        <Button
+          className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
+          type="button"
+        >
+          <Settings size={20} />
+          <span className="text-base font-medium">Settings</span>
+        </Button>
       </SettingsModal>
 
       {/* Leave Meeting */}
       <Button
-              onClick={leaveRoom}
-              className="w-full h-14 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
-            >
-              <LogOut size={20} />
-              <span className="text-base font-medium">Leave Meeting</span>
-            </Button>
+        onClick={leaveRoom}
+        className="w-full h-14 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
+      >
+        <LogOut size={20} />
+        <span className="text-base font-medium">Leave Meeting</span>
+      </Button>
     </div>
   );
 

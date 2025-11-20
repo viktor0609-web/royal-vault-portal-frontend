@@ -364,7 +364,9 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                             title="Participants"
                             maxHeight="80vh"
                         >
-                            <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
+                            <div className="h-full flex flex-col min-h-0" style={{ height: 'calc(80vh - 100px)' }}>
+                                <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
+                            </div>
                         </BottomSheet>
                     </>
                 )}

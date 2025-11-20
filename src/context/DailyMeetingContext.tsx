@@ -78,6 +78,7 @@ export type ParticipantType = {
   permissions: DailyParticipantPermissions;
   audio: boolean;
   video: boolean;
+  speaking: boolean;
 }
 
 export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -86,6 +87,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [joined, setJoined] = useState<boolean>(false);
   const [dailyRoom, setDailyRoom] = useState<DailyCall | null>(null);
   const [participants, setParticipants] = useState<ParticipantType[]>([]);
+  const [speakingParticipants, setSpeakingParticipants] = useState<Set<string>>(new Set());
   const [role, setRole] = useState<RoleType>("User"); // replace with real logic
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState<boolean>(false);
@@ -419,18 +421,28 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       try {
         const pObj = dailyRoom.participants();
-        const pList = Object.values(pObj).map((participant: DailyParticipant) => ({
-          id: participant.session_id,
-          name: participant.user_name,
-          local: participant.local,
-          videoTrack: participant.tracks?.video?.persistentTrack,
-          audioTrack: participant.tracks?.audio?.persistentTrack,
-          screenVideoTrack: participant.tracks?.screenVideo?.persistentTrack,
-          permissions: participant.permissions,
-          // Add Daily.co participant properties for audio/video state
-          audio: participant.audio,
-          video: participant.video,
-        }));
+        const pList = Object.values(pObj).map((participant: DailyParticipant) => {
+          const sessionId = participant.session_id;
+          // Mark as speaking if in speaking set, or if audio is active (for users)
+          const isUser = !participant.permissions?.canAdmin && !participant.user_name?.includes("Guest");
+          const hasAudioTrack = !!(participant.tracks?.audio?.persistentTrack);
+          const isSpeaking = speakingParticipants.has(sessionId) ||
+            (isUser && participant.audio && hasAudioTrack);
+
+          return {
+            id: sessionId,
+            name: participant.user_name,
+            local: participant.local,
+            videoTrack: participant.tracks?.video?.persistentTrack,
+            audioTrack: participant.tracks?.audio?.persistentTrack,
+            screenVideoTrack: participant.tracks?.screenVideo?.persistentTrack,
+            permissions: participant.permissions,
+            // Add Daily.co participant properties for audio/video state
+            audio: participant.audio,
+            video: participant.video,
+            speaking: !!isSpeaking, // Ensure boolean
+          };
+        });
         setParticipants(pList);
 
         const local = pList.find(p => p.local);
@@ -467,10 +479,41 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       enumerateDevices();
     });
     dailyRoom.on('participant-joined', updateParticipants);
-    dailyRoom.on('participant-updated', updateParticipants);
-    dailyRoom.on('participant-left', updateParticipants);
+    dailyRoom.on('participant-updated', (e: any) => {
+      // When participant is updated, check if they're speaking (audio active)
+      if (e.participant) {
+        const isUser = !e.participant.permissions?.canAdmin && !e.participant.user_name?.includes("Guest");
+        if (isUser && e.participant.audio && e.participant.tracks?.audio?.persistentTrack) {
+          setSpeakingParticipants(prev => new Set(prev).add(e.participant.session_id));
+        } else if (isUser && (!e.participant.audio || !e.participant.tracks?.audio?.persistentTrack)) {
+          // Remove after a delay to allow for natural speech pauses
+          setTimeout(() => {
+            setSpeakingParticipants(prev => {
+              const next = new Set(prev);
+              next.delete(e.participant.session_id);
+              return next;
+            });
+            updateParticipants();
+          }, 2000); // 2 second delay before removing
+        }
+      }
+      updateParticipants();
+    });
+    dailyRoom.on('participant-left', (e: any) => {
+      // Remove from speaking set when participant leaves
+      setSpeakingParticipants(prev => {
+        const next = new Set(prev);
+        next.delete(e.participant.session_id);
+        return next;
+      });
+      updateParticipants();
+    });
     dailyRoom.on('track-started', updateParticipants);
     dailyRoom.on('track-stopped', updateParticipants);
+
+    // Track speaking participants - use a simple approach: mark as speaking when audio is active
+    // Daily.co tracks this internally, we'll use participant state updates
+    // For a more accurate detection, we could use audio level analysis, but this is simpler
 
     // initial update
     updateParticipants();
@@ -646,6 +689,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         permissions: p.permissions, // Ensure permissions are also captured
         audio: p.audio,
         video: p.video,
+        speaking: speakingParticipants.has(p.session_id),
       })));
 
     } catch (err) {

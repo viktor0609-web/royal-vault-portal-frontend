@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useDailyMeeting } from "../../context/DailyMeetingContext";
 import { SettingsModal } from './SettingsModal';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { BottomSheet } from './BottomSheet';
 
 interface FloatingControlsProps {
   togglePeoplePanel: () => void;
@@ -104,297 +104,193 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
 
   // Main FAB button - always visible
   const MainFAB = (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary hover:bg-royal-blue-dark text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0"
-            style={{
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(59, 130, 246, 0.5)',
-            }}
-          >
-            {isMenuOpen ? (
-              <X className="h-6 w-6 transition-transform duration-300" />
-            ) : (
-              <MoreVertical className="h-6 w-6 transition-transform duration-300" />
-            )}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-          {isMenuOpen ? "Close Menu" : "Open Menu"}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Button
+      onClick={() => setIsMenuOpen(!isMenuOpen)}
+      className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary hover:bg-royal-blue-dark text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0"
+      style={{
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(59, 130, 246, 0.5)',
+      }}
+      title={isMenuOpen ? "Close Menu" : "Open Menu"}
+    >
+      {isMenuOpen ? (
+        <X className="h-6 w-6 transition-transform duration-300" />
+      ) : (
+        <MoreVertical className="h-6 w-6 transition-transform duration-300" />
+      )}
+    </Button>
   );
 
-  // Floating action buttons - appear when menu is open
-  const FloatingButtons = isMenuOpen && (
-    <div className="fixed bottom-24 right-6 z-40 flex flex-col gap-3 items-end">
+  // Control buttons for BottomSheet
+  const ControlButtons = (
+    <div className="flex flex-col gap-3 p-4">
       {/* Camera Toggle */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
+      <Button
               onClick={toggleCamera}
-              className={`h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0 ${
+              className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
                 isCameraOff 
                   ? 'bg-red-600 hover:bg-red-700 text-white' 
                   : 'bg-gray-700 hover:bg-gray-600 text-white'
               }`}
-              style={{
-                animation: isMenuOpen ? 'slideInRight 0.3s ease-out' : 'none',
-              }}
             >
               {isCameraOff ? <VideoOff size={20} /> : <Video size={20} />}
+              <span className="text-base font-medium">
+                {isCameraOff ? "Turn Camera On" : "Turn Camera Off"}
+              </span>
             </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-            {isCameraOff ? "Turn Camera On" : "Turn Camera Off"}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
 
       {/* Microphone Toggle */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
+      <Button
               onClick={toggleMicrophone}
               disabled={!hasAudioPermission}
-              className={`h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0 ${
+              className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
                 isMicrophoneMuted 
                   ? 'bg-red-600 hover:bg-red-700 text-white' 
                   : 'bg-gray-700 hover:bg-gray-600 text-white'
               } ${!hasAudioPermission ? 'opacity-50 cursor-not-allowed' : ''}`}
-              style={{
-                animation: isMenuOpen ? 'slideInRight 0.4s ease-out' : 'none',
-              }}
             >
               {isMicrophoneMuted ? <MicOff size={20} /> : <Mic size={20} />}
+              <span className="text-base font-medium">
+                {!hasAudioPermission
+                  ? (role === "User" ? 'Request Speaking Permission' : 'Audio Permission Required')
+                  : (isMicrophoneMuted ? 'Unmute Microphone' : 'Mute Microphone')}
+              </span>
             </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-            {!hasAudioPermission
-              ? (role === "User" ? 'Raise your hand to request speaking permission' : 'Audio permission required')
-              : (isMicrophoneMuted ? 'Unmute microphone' : 'Mute microphone')}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
 
       {/* Raise Hand - for User */}
       {role === "User" && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
+        <Button
                 onClick={() => {
                   // Simple hand button - you can add your own logic here
                   console.log('Hand button clicked');
                 }}
-                className="h-12 w-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0"
-                style={{
-                  animation: isMenuOpen ? 'slideInRight 0.5s ease-out' : 'none',
-                }}
+                className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
               >
                 <Hand size={20} />
+                <span className="text-base font-medium">Raise Hand</span>
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-              Raise Hand
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       )}
 
       {/* Participants */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={togglePeoplePanel}
-              className="h-12 w-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0"
-              style={{
-                animation: isMenuOpen ? 'slideInRight 0.6s ease-out' : 'none',
+      <Button
+              onClick={() => {
+                togglePeoplePanel();
+                setIsMenuOpen(false);
               }}
+              className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
             >
               <Users size={20} />
+              <span className="text-base font-medium">Participants</span>
             </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-            Participants
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
 
       {/* Chat Toggle */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={toggleChatBox}
-              className={`h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0 relative ${
+      <Button
+              onClick={() => {
+                toggleChatBox();
+                setIsMenuOpen(false);
+              }}
+              className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 relative ${
                 showChatBox 
                   ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                   : 'bg-gray-700 hover:bg-gray-600 text-white'
               }`}
-              style={{
-                animation: isMenuOpen ? 'slideInRight 0.7s ease-out' : 'none',
-              }}
             >
               {showChatBox ? <MessageSquareX size={20} /> : <MessageSquare size={20} />}
+              <span className="text-base font-medium">
+                {showChatBox ? "Close Chat" : "Open Chat"}
+              </span>
               {!showChatBox && chatUnreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full min-w-[18px] h-[18px]">
+                <span className="absolute right-4 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full min-w-[20px] h-[20px]">
                   {chatUnreadCount}
                 </span>
               )}
             </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-            {showChatBox ? "Close Chat" : "Open Chat"}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
 
       {/* Fullscreen Toggle */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
+      <Button
               onClick={toggleFullscreen}
-              className={`h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0 ${
+              className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
                 isFullscreen 
                   ? 'bg-blue-600 hover:bg-blue-700 text-white' 
                   : 'bg-gray-700 hover:bg-gray-600 text-white'
               }`}
-              style={{
-                animation: isMenuOpen ? 'slideInRight 0.8s ease-out' : 'none',
-              }}
             >
               {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+              <span className="text-base font-medium">
+                {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              </span>
             </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-            {isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
 
       {/* Screen Share - for Admin and Guest */}
       {(role === "Admin" || role === "Guest") && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
+        <Button
                 onClick={isScreensharing ? stopScreenshare : startScreenshare}
-                className={`h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0 ${
+                className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
                   isScreensharing 
                     ? 'bg-red-600 hover:bg-red-700 text-white' 
                     : 'bg-gray-700 hover:bg-gray-600 text-white'
                 }`}
-                style={{
-                  animation: isMenuOpen ? 'slideInRight 0.9s ease-out' : 'none',
-                }}
               >
                 <MonitorPlay size={20} />
+                <span className="text-base font-medium">
+                  {isScreensharing ? "Stop Screen Share" : "Start Screen Share"}
+                </span>
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-              {isScreensharing ? "Stop Screen Share" : "Start Screen Share"}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       )}
 
       {/* Recording - for Admin */}
       {role === "Admin" && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
+        <Button
                 onClick={isRecording ? stopRecording : onStartRecordingClick}
                 disabled={countdown !== null}
-                className={`h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0 ${
+                className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
                   isRecording 
                     ? 'bg-green-600 hover:bg-green-700 text-white' 
                     : 'bg-red-600 hover:bg-red-700 text-white'
                 } ${countdown !== null ? 'opacity-50 cursor-not-allowed' : ''}`}
-                style={{
-                  animation: isMenuOpen ? 'slideInRight 1s ease-out' : 'none',
-                }}
               >
                 <Circle
                   size={20}
                   className={isRecording ? 'fill-white' : ''}
                 />
+                <span className="text-base font-medium">
+                  {isRecording ? "Stop Recording" : "Start Recording"}
+                </span>
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-              {isRecording ? "Stop Recording" : "Start Recording"}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       )}
 
       {/* Settings */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <SettingsModal>
-              <Button
-                className="h-12 w-12 rounded-full bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0"
-                style={{
-                  animation: isMenuOpen ? 'slideInRight 1.1s ease-out' : 'none',
-                }}
-              >
+      <SettingsModal onOpen={() => setIsMenuOpen(false)}>
+              <Button className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3">
                 <Settings size={20} />
+                <span className="text-base font-medium">Settings</span>
               </Button>
-            </SettingsModal>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-            Settings
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      </SettingsModal>
 
       {/* Leave Meeting */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
+      <Button
               onClick={leaveRoom}
-              className="h-12 w-12 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center p-0"
-              style={{
-                animation: isMenuOpen ? 'slideInRight 1.2s ease-out' : 'none',
-              }}
+              className="w-full h-14 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
             >
               <LogOut size={20} />
+              <span className="text-base font-medium">Leave Meeting</span>
             </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="bg-gray-900 text-white text-sm px-3 py-2 rounded-md">
-            Leave Meeting
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
     </div>
   );
+
+  // Only render on mobile
+  if (!isMobile) return null;
 
   return (
     <div className="floating-controls-container">
       {MainFAB}
-      {FloatingButtons}
-      <style>{`
-        @keyframes slideInRight {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-      `}</style>
+      <BottomSheet
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        title="Meeting Controls"
+        maxHeight="70vh"
+      >
+        {ControlButtons}
+      </BottomSheet>
     </div>
   );
 };

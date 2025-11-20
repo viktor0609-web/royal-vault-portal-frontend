@@ -4,6 +4,7 @@ import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
 import { FloatingControls } from "../FloatingControls";
+import { BottomSheet } from "../BottomSheet";
 import { Mic, MicOff, X, Loader2 } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
 import { VideoPlayer } from "../VideoPlayer";
@@ -349,37 +350,56 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
 
                 </div>
 
+                {/* People Panel - BottomSheet on mobile, sidebar on desktop */}
                 {joined && showPeoplePanel && (
-                    <div className="fixed inset-0 z-50 sm:relative sm:inset-auto">
-                        <div className="w-full h-full sm:w-auto h-auto">
+                    <>
+                        {/* Desktop: Sidebar */}
+                        <div className="hidden md:block relative">
                             <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
                         </div>
-                    </div>
+                        {/* Mobile: BottomSheet */}
+                        <BottomSheet
+                            isOpen={showPeoplePanel}
+                            onClose={() => setShowPeoplePanel(false)}
+                            title="Participants"
+                            maxHeight="80vh"
+                        >
+                            <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
+                        </BottomSheet>
+                    </>
                 )}
 
-                {/* Chat panel - always visible on desktop, toggleable on mobile */}
+                {/* Chat panel - BottomSheet on mobile, sidebar on desktop */}
                 {joined && showChatBox && (
-                    <div className="fixed inset-0 z-50 sm:relative sm:inset-auto flex border-l bg-gray-900 text-white">
-                        <div className="w-full sm:w-80 lg:w-96 p-4 flex flex-col overflow-visible">
-                            {/* Mobile close button */}
-                            <div className="flex justify-end mb-2 sm:hidden">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setShowChatBox(false)}
-                                    className="h-8 w-8 text-white hover:bg-gray-700"
-                                >
-                                    <X className="h-4 w-4" />
-                                </Button>
+                    <>
+                        {/* Desktop: Sidebar */}
+                        <div className="hidden md:flex border-l bg-gray-900 text-white">
+                            <div className="w-80 lg:w-96 p-4 flex flex-col overflow-visible">
+                                <ChatBox
+                                    isVisible={showChatBox}
+                                    onUnreadCountChange={setChatUnreadCount}
+                                    isAdmin={true}
+                                    webinarId={webinarId}
+                                />
                             </div>
-                            <ChatBox
-                                isVisible={showChatBox}
-                                onUnreadCountChange={setChatUnreadCount}
-                                isAdmin={true}
-                                webinarId={webinarId}
-                            />
                         </div>
-                    </div>
+                        {/* Mobile: BottomSheet */}
+                        <BottomSheet
+                            isOpen={showChatBox}
+                            onClose={() => setShowChatBox(false)}
+                            title="Chat"
+                            maxHeight="80vh"
+                        >
+                            <div className="h-full flex flex-col min-h-0 p-4" style={{ height: 'calc(80vh - 100px)' }}>
+                                <ChatBox
+                                    isVisible={showChatBox}
+                                    onUnreadCountChange={setChatUnreadCount}
+                                    isAdmin={true}
+                                    webinarId={webinarId}
+                                />
+                            </div>
+                        </BottomSheet>
+                    </>
                 )}
             </div>
 
@@ -408,34 +428,36 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                 handleStartRecording={handleStartRecording}
             />
 
-            {/* Mobile Floating Controls */}
-            <FloatingControls
-                togglePeoplePanel={() => {
-                    setShowPeoplePanel((prev) => !prev);
-                    if (window.innerWidth < 640 && showChatBox) {
-                        setShowChatBox(false);
-                    }
-                }}
-                toggleChatBox={() => {
-                    if (window.innerWidth < 640) {
-                        setShowChatBox((prev) => !prev);
-                        if (showPeoplePanel) setShowPeoplePanel(false);
-                    }
-                }}
-                showChatBox={showChatBox}
-                toggleFullscreen={toggleFullscreen}
-                isFullscreen={isFullscreen}
-                chatUnreadCount={chatUnreadCount}
-                role={role}
-                isRecording={isRecording}
-                startRecording={startRecording}
-                stopRecording={stopRecording}
-                isScreensharing={isScreensharing}
-                startScreenshare={startScreenshare}
-                stopScreenshare={stopScreenshare}
-                onStartRecordingClick={handleStartRecording}
-                countdown={countdown}
-            />
+            {/* Mobile Floating Controls - Hide when panels are open */}
+            {(!showPeoplePanel && !showChatBox) && (
+                <FloatingControls
+                    togglePeoplePanel={() => {
+                        setShowPeoplePanel((prev) => !prev);
+                        if (window.innerWidth < 640 && showChatBox) {
+                            setShowChatBox(false);
+                        }
+                    }}
+                    toggleChatBox={() => {
+                        if (window.innerWidth < 640) {
+                            setShowChatBox((prev) => !prev);
+                            if (showPeoplePanel) setShowPeoplePanel(false);
+                        }
+                    }}
+                    showChatBox={showChatBox}
+                    toggleFullscreen={toggleFullscreen}
+                    isFullscreen={isFullscreen}
+                    chatUnreadCount={chatUnreadCount}
+                    role={role}
+                    isRecording={isRecording}
+                    startRecording={startRecording}
+                    stopRecording={stopRecording}
+                    isScreensharing={isScreensharing}
+                    startScreenshare={startScreenshare}
+                    stopScreenshare={stopScreenshare}
+                    onStartRecordingClick={handleStartRecording}
+                    countdown={countdown}
+                />
+            )}
         </div>
     );
 };

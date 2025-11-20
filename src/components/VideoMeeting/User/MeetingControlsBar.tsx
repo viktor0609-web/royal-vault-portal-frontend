@@ -51,7 +51,7 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
 
   return (
     <TooltipProvider>
-      <div className={`flex flex-col border-t-2 border-gray-600 sm:flex-row justify-center items-center p-2 sm:p-4 bg-gray-800 text-white gap-2 sm:gap-4 ${position === "top" ? "justify-between" : ""}`}>
+      <div className={`hidden md:flex flex-col border-t-2 border-gray-600 sm:flex-row justify-center items-center p-2 sm:p-4 bg-gray-800 text-white gap-2 sm:gap-4 ${position === "top" ? "justify-between" : ""}`}>
         {position === "top" && (
           <div className="flex items-center gap-2 order-1 sm:order-none">
             <span className="text-sm sm:text-lg font-semibold">Waiting for others to join</span>

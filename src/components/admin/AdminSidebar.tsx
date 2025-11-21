@@ -19,6 +19,7 @@ const navigationItems = [
   { title: "Webinars", path: "/admin/webinars", icon: null },
   { title: "Courses", path: "/admin/courses", icon: null },
   { title: "Deals", path: "/admin/deals", icon: null },
+  { title: "Users", path: "/admin/users", icon: null },
 ];
 
 

@@ -25,6 +25,7 @@ import { CoursesSection as AdminCourses } from "./components/admin/CoursesSectio
 import { CourseGroupDetail } from "./components/admin/CoursesSection/CourseGroupDetail";
 import { CourseDetail } from "./components/admin/CoursesSection/CourseDetail";
 import { StatsSection as AdminStats } from "./components/admin/StatsSection";
+import { UsersSection as AdminUsers } from "./components/admin/UsersSection/UsersSection";
 
 
 import NotFound from "./pages/NotFound";
@@ -97,6 +98,7 @@ const App = () => (
                     <Route path="/admin/courses" element={<AdminRoute><AdminLayout><AdminCourses /></AdminLayout></AdminRoute>} />
                     <Route path="/admin/courses/groups/:groupId" element={<AdminRoute><AdminLayout><CourseGroupDetail /></AdminLayout></AdminRoute>} />
                     <Route path="/admin/courses/groups/:groupId/courses/:courseId" element={<AdminRoute><AdminLayout><CourseDetail /></AdminLayout></AdminRoute>} />
+                    <Route path="/admin/users" element={<AdminRoute><AdminLayout><AdminUsers /></AdminLayout></AdminRoute>} />
 
 
                     <Route path="/verify/:token" element={<SetPassword />} />

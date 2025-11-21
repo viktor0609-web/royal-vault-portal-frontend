@@ -294,3 +294,76 @@ export const webinarApi = {
 
   clearChatMessages: (webinarId: string) => api.delete(`/api/webinars/${webinarId}/chat`),
 };
+
+// User Management API functions
+export const userApi = {
+  // Get all users with pagination, filtering, and sorting
+  getAllUsers: (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    role?: string;
+    isVerified?: string;
+    sortBy?: string;
+    order?: 'asc' | 'desc';
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.role) queryParams.append('role', params.role);
+    if (params?.isVerified !== undefined) queryParams.append('isVerified', params.isVerified);
+    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params?.order) queryParams.append('order', params.order);
+    return api.get(`/api/users?${queryParams.toString()}`);
+  },
+
+  // Get user by ID
+  getUserById: (userId: string) => api.get(`/api/users/${userId}`),
+
+  // Create new user
+  createUser: (userData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    role?: 'user' | 'admin';
+    sendVerificationEmail?: boolean;
+  }) => api.post('/api/users', userData),
+
+  // Update user
+  updateUser: (userId: string, userData: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    role?: 'user' | 'admin';
+    isVerified?: boolean;
+  }) => api.put(`/api/users/${userId}`, userData),
+
+  // Delete user
+  deleteUser: (userId: string) => api.delete(`/api/users/${userId}`),
+
+  // Reset user password
+  resetUserPassword: (userId: string, data?: { newPassword?: string; sendEmail?: boolean }) =>
+    api.post(`/api/users/${userId}/reset-password`, data || {}),
+
+  // Toggle user verification
+  toggleUserVerification: (userId: string, isVerified: boolean) =>
+    api.patch(`/api/users/${userId}/verification`, { isVerified }),
+
+  // Change user role
+  changeUserRole: (userId: string, role: 'user' | 'admin') =>
+    api.patch(`/api/users/${userId}/role`, { role }),
+
+  // Get user statistics
+  getUserStatistics: () => api.get('/api/users/statistics'),
+
+  // Bulk update users
+  bulkUpdateUsers: (userIds: string[], updates: { role?: 'user' | 'admin'; isVerified?: boolean }) =>
+    api.post('/api/users/bulk/update', { userIds, updates }),
+
+  // Bulk delete users
+  bulkDeleteUsers: (userIds: string[]) =>
+    api.post('/api/users/bulk/delete', { userIds }),
+};

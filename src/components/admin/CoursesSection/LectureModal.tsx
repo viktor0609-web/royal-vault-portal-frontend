@@ -156,15 +156,187 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={closeDialog}>
-            <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-6 space-y-1">
-                <DialogTitle className="text-xl font-semibold">
-                    {editingLecture ? "Edit Lecture" : "Create Lecture"}
-                </DialogTitle>
-                <DialogDescription>
-                    {editingLecture ? "Update the lecture details and content below." : "Fill in the details to create a new lecture for this course."}
-                </DialogDescription>
-                <form onSubmit={handleSubmit} className="space-y-6">
+        <>
+            <style>{`
+                .ql-editor {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif !important;
+                    line-height: 1.4 !important;
+                    color: #374151 !important;
+                }
+                
+                .ql-editor * {
+                    box-sizing: border-box !important;
+                }
+                
+                .ql-editor h1 {
+                    font-size: 1.875rem !important; /* 30px */
+                    font-weight: 700 !important;
+                    color: #1f2937 !important; /* royal-dark-gray */
+                    margin-bottom: 1rem !important;
+                    margin-top: 1.5rem !important;
+                    line-height: 1.2 !important;
+                }
+                .ql-editor h2 {
+                    font-size: 1.5rem !important; /* 24px */
+                    font-weight: 600 !important;
+                    color: #1f2937 !important; /* royal-dark-gray */
+                    margin-bottom: 0.75rem !important;
+                    margin-top: 1.25rem !important;
+                    line-height: 1.3 !important;
+                }
+                .ql-editor h3 {
+                    font-size: 1.25rem !important; /* 20px */
+                    font-weight: 600 !important;
+                    color: #1f2937 !important; /* royal-dark-gray */
+                    margin-bottom: 0.5rem !important;
+                    margin-top: 1rem !important;
+                    line-height: 1.4 !important;
+                }
+                .ql-editor h4 {
+                    font-size: 1.125rem !important; /* 18px */
+                    font-weight: 600 !important;
+                    color: #1f2937 !important; /* royal-dark-gray */
+                    margin-bottom: 0.5rem !important;
+                    margin-top: 0.75rem !important;
+                    line-height: 1.4 !important;
+                }
+                .ql-editor h5 {
+                    font-size: 1rem !important; /* 16px */
+                    font-weight: 600 !important;
+                    color: #1f2937 !important; /* royal-dark-gray */
+                    margin-bottom: 0.5rem !important;
+                    margin-top: 0.5rem !important;
+                    line-height: 1.5 !important;
+                }
+                .ql-editor h6 {
+                    font-size: 0.875rem !important; /* 14px */
+                    font-weight: 600 !important;
+                    color: #1f2937 !important; /* royal-dark-gray */
+                    margin-bottom: 0.5rem !important;
+                    margin-top: 0.5rem !important;
+                    line-height: 1.5 !important;
+                }
+                .ql-editor p {
+                    line-height: 1.4 !important;
+                    color: #374151 !important;
+                }
+                .ql-editor a {
+                    color: #3b82f6 !important; /* royal-blue */
+                    text-decoration: none !important;
+                    transition: color 0.2s ease !important;
+                }
+                .ql-editor a:hover {
+                    text-decoration: underline !important;
+                    color: #1d4ed8 !important;
+                }
+                .ql-editor strong, .ql-editor b {
+                    font-weight: 600 !important;
+                    color: #1f2937 !important; /* royal-dark-gray */
+                }
+                .ql-editor em, .ql-editor i {
+                    font-style: italic !important;
+                    color: #4b5563 !important;
+                }
+                .ql-editor code {
+                    background-color: #f3f4f6 !important;
+                    padding: 0.125rem 0.25rem !important;
+                    border-radius: 0.25rem !important;
+                    font-size: 0.875rem !important;
+                    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+                    color: #e11d48 !important;
+                }
+                .ql-editor pre {
+                    background-color: #f9fafb !important;
+                    border: 1px solid #e5e7eb !important;
+                    border-radius: 0.5rem !important;
+                    padding: 1rem !important;
+                    overflow-x: auto !important;
+                    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+                    font-size: 0.875rem !important;
+                    line-height: 1.5 !important;
+                }
+                .ql-editor pre code {
+                    background: none !important;
+                    padding: 0 !important;
+                    color: #374151 !important;
+                }
+                .ql-editor blockquote {
+                    border-left: 4px solid #3b82f6 !important;
+                    background-color: #eff6ff !important;
+                    padding: 0.75rem 1rem !important;
+                    margin: 1rem 0 !important;
+                    border-radius: 0 0.375rem 0.375rem 0 !important;
+                    font-style: italic !important;
+                }
+                .ql-editor ul, .ql-editor ol {
+                    margin: 0.75rem 0 !important;
+                    padding-left: 1.5rem !important;
+                }
+                .ql-editor li {
+                    margin: 0.25rem 0 !important;
+                    line-height: 1.4 !important;
+                }
+                .ql-editor ul li {
+                    list-style-type: disc !important;
+                }
+                .ql-editor ol li {
+                    list-style-type: decimal !important;
+                }
+                .ql-editor table {
+                    width: 100% !important;
+                    border-collapse: collapse !important;
+                    margin: 1rem 0 !important;
+                    border: 1px solid #e5e7eb !important;
+                    border-radius: 0.5rem !important;
+                    overflow: hidden !important;
+                }
+                .ql-editor th, .ql-editor td {
+                    padding: 0.75rem !important;
+                    text-align: left !important;
+                    border-bottom: 1px solid #e5e7eb !important;
+                }
+                .ql-editor th {
+                    background-color: #f9fafb !important;
+                    font-weight: 600 !important;
+                    color: #1f2937 !important;
+                }
+                .ql-editor tr:last-child td {
+                    border-bottom: none !important;
+                }
+                .ql-editor img {
+                    max-width: 100% !important;
+                    height: auto !important;
+                    border-radius: 0.375rem !important;
+                    margin: 0.5rem 0 !important;
+                }
+                .ql-editor hr {
+                    border: none !important;
+                    border-top: 1px solid #e5e7eb !important;
+                    margin: 1.5rem 0 !important;
+                }
+                .ql-editor mark {
+                    background-color: #fef3c7 !important;
+                    padding: 0.125rem 0.25rem !important;
+                    border-radius: 0.25rem !important;
+                }
+                .ql-editor del {
+                    text-decoration: line-through !important;
+                    color: #9ca3af !important;
+                }
+                .ql-editor ins {
+                    text-decoration: underline !important;
+                    color: #059669 !important;
+                }
+            `}</style>
+            <Dialog open={isOpen} onOpenChange={closeDialog}>
+                <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto p-6 space-y-1">
+                    <DialogTitle className="text-xl font-semibold">
+                        {editingLecture ? "Edit Lecture" : "Create Lecture"}
+                    </DialogTitle>
+                    <DialogDescription>
+                        {editingLecture ? "Update the lecture details and content below." : "Fill in the details to create a new lecture for this course."}
+                    </DialogDescription>
+                    <form onSubmit={handleSubmit} className="space-y-6">
 
                     {/* Title Section */}
                     <div>
@@ -318,5 +490,6 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 </form>
             </DialogContent>
         </Dialog>
+        </>
     );
 }

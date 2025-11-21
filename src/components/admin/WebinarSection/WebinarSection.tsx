@@ -53,7 +53,47 @@ export function WebinarSection() {
             setLoading(true);
             setError(null);
             const response = await webinarApi.getAllWebinars('detailed', { orderBy, order });
-            setWebinars(response.data.webinars || []);
+            const freshWebinars = response.data.webinars || [];
+
+            // Smart merge: preserve object references for unchanged items to prevent unnecessary re-renders
+            // Similar to UsersSection - React uses keys for reconciliation, we preserve references for unchanged items
+            setWebinars(prev => {
+                // If this is the initial load (prev is empty), just set the new array
+                if (prev.length === 0) {
+                    return freshWebinars;
+                }
+
+                // Create a map of existing webinars for reference comparison
+                const existingMap = new Map(prev.map(w => [w._id, w]));
+
+                // Helper function to create a stable comparison key from only the fields displayed in the table
+                // This matches UsersSection approach - only compare what's visible
+                const getComparisonKey = (w: Webinar) => {
+                    // Only compare fields that are displayed in the table UI
+                    // This ensures unchanged webinars keep their reference
+                    const attendeesCount = w.attendees?.length || 0;
+                    const registrantsCount = attendeesCount; // Same as attendees for now
+                    const attendeesCount_attended = w.attendees?.filter((a: any) => a.attendanceStatus === 'attended').length || 0;
+
+                    return `${w._id}|${w.name}|${w.status}|${w.portalDisplay}|${w.date}|${registrantsCount}|${attendeesCount_attended}|0`;
+                };
+
+                return freshWebinars.map(fresh => {
+                    const existing = existingMap.get(fresh._id);
+                    if (!existing) {
+                        return fresh; // New webinar, return new reference
+                    }
+
+                    // Compare using stable keys - only re-render if visible data actually changed
+                    const existingKey = getComparisonKey(existing);
+                    const freshKey = getComparisonKey(fresh);
+
+                    if (existingKey === freshKey) {
+                        return existing; // Preserve reference = no re-render (just like UsersSection)
+                    }
+                    return fresh; // New reference = will re-render only this item
+                });
+            });
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Failed to fetch webinars';
             setError(errorMessage);
@@ -79,14 +119,21 @@ export function WebinarSection() {
         setRecsWebinar(null);
     }
     const handleWebinarSaved = async (webinarData: Webinar, isUpdate: boolean) => {
-        if (isUpdate) {
-            setWebinars(prev => prev.map(w => w._id === webinarData._id ? webinarData : w));
-        } else {
-            setWebinars(prev => [webinarData, ...prev]);
-        }
-
-        // Refresh the webinar list to ensure data consistency
+        // Similar to UsersSection - just refetch, let fetchWebinars handle smart merging
+        // This ensures only the changed webinar re-renders
         await fetchWebinars();
+
+        // For new webinars, add to the list after refetch
+        if (!isUpdate) {
+            setWebinars(prev => {
+                // Check if it's already in the list (from refetch)
+                const exists = prev.some(w => w._id === webinarData._id);
+                if (!exists) {
+                    return [webinarData, ...prev];
+                }
+                return prev;
+            });
+        }
     };
 
     const handleDeleteWebinar = async (webinarId: string) => {

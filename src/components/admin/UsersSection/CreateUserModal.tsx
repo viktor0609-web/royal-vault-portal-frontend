@@ -40,6 +40,7 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
     role: "user" as "user" | "admin",
     supaadmin: false,
     sendVerificationEmail: true,
+    createHubSpotContact: true,
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -64,6 +65,7 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
         role: "user",
         supaadmin: false,
         sendVerificationEmail: true,
+        createHubSpotContact: true,
       });
     }
     setErrors({});
@@ -126,6 +128,7 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
           phone: formData.phone,
           role: formData.role,
           sendVerificationEmail: formData.sendVerificationEmail,
+          createHubSpotContact: formData.createHubSpotContact,
         });
         toast({
           title: "Success",
@@ -261,21 +264,38 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
           </div>
 
           {!editingUser && (
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="sendVerificationEmail"
-                checked={formData.sendVerificationEmail}
-                onCheckedChange={(checked) =>
-                  handleChange("sendVerificationEmail", checked)
-                }
-              />
-              <Label
-                htmlFor="sendVerificationEmail"
-                className="text-sm font-normal cursor-pointer"
-              >
-                Send verification email to user
-              </Label>
-            </div>
+            <>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="sendVerificationEmail"
+                  checked={formData.sendVerificationEmail}
+                  onCheckedChange={(checked) =>
+                    handleChange("sendVerificationEmail", checked)
+                  }
+                />
+                <Label
+                  htmlFor="sendVerificationEmail"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Send verification email to user
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="createHubSpotContact"
+                  checked={formData.createHubSpotContact}
+                  onCheckedChange={(checked) =>
+                    handleChange("createHubSpotContact", checked)
+                  }
+                />
+                <Label
+                  htmlFor="createHubSpotContact"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Create contact in HubSpot
+                </Label>
+              </div>
+            </>
           )}
 
           {editingUser && (

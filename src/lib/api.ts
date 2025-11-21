@@ -329,6 +329,7 @@ export const userApi = {
     phone: string;
     role?: 'user' | 'admin';
     sendVerificationEmail?: boolean;
+    createHubSpotContact?: boolean;
   }) => api.post('/api/users', userData),
 
   // Update user

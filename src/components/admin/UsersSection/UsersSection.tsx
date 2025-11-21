@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff } from "lucide-react";
+import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, ArrowUp, ArrowDown } from "lucide-react";
 import { CreateUserModal } from "./CreateUserModal";
 import { userApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -75,7 +75,7 @@ export function UsersSection() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [verificationFilter, setVerificationFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("createdAt");
+  const [orderBy, setOrderBy] = useState<string>("createdAt");
   const [order, setOrder] = useState<"asc" | "desc">("desc");
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -90,7 +90,7 @@ export function UsersSection() {
       const params: any = {
         page,
         limit,
-        sortBy,
+        sortBy: orderBy,
         order,
       };
       if (search) params.search = search;
@@ -122,7 +122,7 @@ export function UsersSection() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, limit, search, roleFilter, verificationFilter, sortBy, order]);
+  }, [page, limit, search, roleFilter, verificationFilter, orderBy, order]);
 
   useEffect(() => {
     fetchStatistics();
@@ -236,6 +236,29 @@ export function UsersSection() {
     setPage(1); // Reset to first page on new search
   };
 
+  const handleSort = (field: string) => {
+    if (orderBy === field) {
+      // Toggle order if clicking the same field
+      setOrder(order === "asc" ? "desc" : "asc");
+    } else {
+      // Set new field and default to ascending
+      setOrderBy(field);
+      setOrder("asc");
+    }
+    setPage(1); // Reset to first page on sort change
+  };
+
+  const getSortIcon = (field: string) => {
+    if (orderBy !== field) {
+      return null;
+    }
+    return order === "asc" ? (
+      <ArrowUp className="h-3 w-3 inline-block ml-1" />
+    ) : (
+      <ArrowDown className="h-3 w-3 inline-block ml-1" />
+    );
+  };
+
   return (
     <div className="flex-1 p-3 sm:p-4 lg:p-6 flex flex-col gap-4">
       {/* Header Section */}
@@ -321,27 +344,6 @@ export function UsersSection() {
               <SelectItem value="false">Unverified</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={sortBy} onValueChange={(value) => { setSortBy(value); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-[150px]">
-              <SelectValue placeholder="Sort By" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="createdAt">Created Date</SelectItem>
-              <SelectItem value="firstName">First Name</SelectItem>
-              <SelectItem value="lastName">Last Name</SelectItem>
-              <SelectItem value="email">Email</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setOrder(order === "asc" ? "desc" : "asc");
-              setPage(1);
-            }}
-            className="w-full sm:w-auto"
-          >
-            {order === "asc" ? "↑ Asc" : "↓ Desc"}
-          </Button>
         </div>
       </div>
 
@@ -357,12 +359,60 @@ export function UsersSection() {
           <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50">
-                <TableHead className="font-semibold text-royal-dark-gray">Name</TableHead>
-                <TableHead className="font-semibold text-royal-dark-gray">Email</TableHead>
-                <TableHead className="font-semibold text-royal-dark-gray">Phone</TableHead>
-                <TableHead className="font-semibold text-royal-dark-gray">Role</TableHead>
-                <TableHead className="font-semibold text-royal-dark-gray">Status</TableHead>
-                <TableHead className="font-semibold text-royal-dark-gray">Created</TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('firstName')}
+                >
+                  <div className="flex items-center">
+                    Name
+                    {getSortIcon('firstName')}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('email')}
+                >
+                  <div className="flex items-center">
+                    Email
+                    {getSortIcon('email')}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('phone')}
+                >
+                  <div className="flex items-center">
+                    Phone
+                    {getSortIcon('phone')}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('role')}
+                >
+                  <div className="flex items-center">
+                    Role
+                    {getSortIcon('role')}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('isVerified')}
+                >
+                  <div className="flex items-center">
+                    Status
+                    {getSortIcon('isVerified')}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('createdAt')}
+                >
+                  <div className="flex items-center">
+                    Created
+                    {getSortIcon('createdAt')}
+                  </div>
+                </TableHead>
                 <TableHead className="font-semibold text-royal-dark-gray text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>

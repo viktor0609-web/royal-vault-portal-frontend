@@ -85,22 +85,30 @@ export function AdminSidebar() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu className="space-y-1">
-                {navigationItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${isActive(item.path)
-                        ? "bg-royal-light-gray text-primary font-medium"
-                        : "text-royal-gray"
-                        }`}
-                    >
-                      <Link to={item.path} onClick={() => setOpenMobile(false)}>
-                        {item.icon && <item.icon className="mr-3 h-5 w-5" />}
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {navigationItems
+                  .filter((item) => {
+                    // Only show Users link for supaadmin
+                    if (item.path === "/admin/users") {
+                      return user && user.supaadmin === true;
+                    }
+                    return true;
+                  })
+                  .map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        className={`w-full justify-start px-4 py-3 text-left hover:bg-royal-light-gray transition-colors ${isActive(item.path)
+                          ? "bg-royal-light-gray text-primary font-medium"
+                          : "text-royal-gray"
+                          }`}
+                      >
+                        <Link to={item.path} onClick={() => setOpenMobile(false)}>
+                          {item.icon && <item.icon className="mr-3 h-5 w-5" />}
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild

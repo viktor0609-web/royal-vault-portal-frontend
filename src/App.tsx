@@ -61,6 +61,15 @@ function AdminRoute({ children }: { children: JSX.Element }) {
   return children;
 }
 
+function SupaadminRoute({ children }: { children: JSX.Element }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/" replace />;
+
+  // Only supaadmin can access user management
+  if (!user.supaadmin) return <Navigate to="/" replace />;
+  return children;
+}
+
 function UserRoute({ children }: { children: JSX.Element }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/" replace />;
@@ -98,7 +107,7 @@ const App = () => (
                     <Route path="/admin/courses" element={<AdminRoute><AdminLayout><AdminCourses /></AdminLayout></AdminRoute>} />
                     <Route path="/admin/courses/groups/:groupId" element={<AdminRoute><AdminLayout><CourseGroupDetail /></AdminLayout></AdminRoute>} />
                     <Route path="/admin/courses/groups/:groupId/courses/:courseId" element={<AdminRoute><AdminLayout><CourseDetail /></AdminLayout></AdminRoute>} />
-                    <Route path="/admin/users" element={<AdminRoute><AdminLayout><AdminUsers /></AdminLayout></AdminRoute>} />
+                    <Route path="/admin/users" element={<SupaadminRoute><AdminLayout><AdminUsers /></AdminLayout></SupaadminRoute>} />
 
 
                     <Route path="/verify/:token" element={<SetPassword />} />

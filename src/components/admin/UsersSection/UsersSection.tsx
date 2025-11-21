@@ -34,6 +34,7 @@ interface User {
   email: string;
   phone: string;
   role: "user" | "admin";
+  supaadmin?: boolean;
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;

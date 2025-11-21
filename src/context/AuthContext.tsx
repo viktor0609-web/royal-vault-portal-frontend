@@ -10,6 +10,7 @@ export interface User {
     email: string;
     phone: string;
     role: "user" | "admin";
+    supaadmin?: boolean;
     client_type?: string;
     isVerified: boolean;
     createdAt: string;

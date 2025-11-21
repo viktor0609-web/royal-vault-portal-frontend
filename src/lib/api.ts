@@ -338,6 +338,7 @@ export const userApi = {
     email?: string;
     phone?: string;
     role?: 'user' | 'admin';
+    supaadmin?: boolean;
     isVerified?: boolean;
   }) => api.put(`/api/users/${userId}`, userData),
 

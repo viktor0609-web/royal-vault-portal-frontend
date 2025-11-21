@@ -20,6 +20,7 @@ interface User {
   email: string;
   phone: string;
   role: "user" | "admin";
+  supaadmin?: boolean;
   isVerified: boolean;
 }
 
@@ -37,6 +38,7 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
     email: "",
     phone: "",
     role: "user" as "user" | "admin",
+    supaadmin: false,
     sendVerificationEmail: true,
   });
   const [loading, setLoading] = useState(false);
@@ -50,6 +52,7 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
         email: editingUser.email || "",
         phone: editingUser.phone || "",
         role: editingUser.role || "user",
+        supaadmin: editingUser.supaadmin || false,
         sendVerificationEmail: false, // Don't send email when editing
       });
     } else {
@@ -59,6 +62,7 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
         email: "",
         phone: "",
         role: "user",
+        supaadmin: false,
         sendVerificationEmail: true,
       });
     }
@@ -107,6 +111,7 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
           email: formData.email,
           phone: formData.phone,
           role: formData.role,
+          supaadmin: formData.supaadmin,
         });
         toast({
           title: "Success",
@@ -237,6 +242,22 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
                 <SelectItem value="admin">Admin</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="supaadmin"
+              checked={formData.supaadmin}
+              onCheckedChange={(checked) =>
+                handleChange("supaadmin", checked)
+              }
+            />
+            <Label
+              htmlFor="supaadmin"
+              className="text-sm font-normal cursor-pointer"
+            >
+              Supaadmin (can manage users)
+            </Label>
           </div>
 
           {!editingUser && (

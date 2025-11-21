@@ -270,7 +270,17 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
 
       {/* Leave Meeting */}
       <Button
-        onClick={leaveRoom}
+        onClick={() => {
+          leaveRoom();
+          // Try to close the browser tab
+          setTimeout(() => {
+            window.close();
+            // Fallback: if window.close() doesn't work, navigate away
+            if (!document.hidden) {
+              window.location.href = '/';
+            }
+          }, 500);
+        }}
         className="w-full h-14 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
       >
         <LogOut size={20} />

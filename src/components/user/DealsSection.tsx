@@ -318,14 +318,14 @@ export function DealsSection() {
                   <div className="text-xs sm:text-sm text-royal-gray p-3 sm:p-6">
                     <p className="leading-relaxed">
                       {item.source?.name == "Client Sourced" && (
-                        <div className="inline-block bg-yellow-100 border border-yellow-500 text-yellow-500 px-3 py-0.5 rounded-sm">
+                        <div className="inline-block bg-yellow-100 border border-yellow-500 text-yellow-500 px-4 py-0.5 rounded-sm border-2">
                           <span className="font-bold uppercase text-xs tracking-wide">
                             {item.source?.name}
                           </span>
                         </div>
                       )}
                       {item.source?.name == "Royal Sourced" && (
-                        <div className="inline-block bg-blue-100 border border-blue-500 text-blue-500 px-3 py-0.5 rounded-sm">
+                        <div className="inline-block bg-blue-100 border border-blue-500 text-blue-500 px-4 py-0.5 rounded-sm border-2">
                           <span className="font-bold uppercase text-xs tracking-wide">
                             {item.source?.name}
                           </span>

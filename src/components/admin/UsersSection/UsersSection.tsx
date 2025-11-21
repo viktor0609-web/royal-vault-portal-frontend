@@ -75,8 +75,8 @@ export function UsersSection() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [verificationFilter, setVerificationFilter] = useState<string>("all");
-  const [orderBy, setOrderBy] = useState<string>("createdAt");
-  const [order, setOrder] = useState<"asc" | "desc">("desc");
+  const [orderBy, setOrderBy] = useState<string>("firstName");
+  const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,

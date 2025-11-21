@@ -65,7 +65,7 @@ export function useAdminState<T>(
     // Update state and save to localStorage
     const updateState = useCallback((newState: T | ((prevState: T) => T)) => {
         setState(prevState => {
-            const updatedState = typeof newState === 'function' ? newState(prevState) : newState;
+            const updatedState = typeof newState === 'function' ? (newState as (prevState: T) => T)(prevState) : (newState as T);
             saveState(updatedState);
             return updatedState;
         });

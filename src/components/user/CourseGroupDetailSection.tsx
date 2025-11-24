@@ -88,7 +88,7 @@ export function CourseGroupDetailSection() {
 
             try {
                 setLoading(true);
-                const response = await courseApi.getCourseGroupById(groupId, 'basic');
+                const response = await courseApi.getCourseGroupById(groupId);
 
                 // Filter lectures to only show public ones and update lecture counts
                 const courseData = response.data;

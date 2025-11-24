@@ -206,6 +206,15 @@ export function CourseDetailSection() {
     }
   };
 
+  // Check if lecture has no data (no video, no content, no files)
+  const hasNoData = (lecture: Lecture | undefined) => {
+    if (!lecture) return true;
+    const hasVideo = !!lecture.videoUrl;
+    const hasContent = !!lecture.content && lecture.content.trim().length > 0;
+    const hasFiles = !!lecture.relatedFiles && lecture.relatedFiles.length > 0;
+    return !hasVideo && !hasContent && !hasFiles;
+  };
+
 
 
 
@@ -517,20 +526,31 @@ export function CourseDetailSection() {
                   </div>
 
                   {/* Video Content */}
-                  <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-4">
-                    <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
-                      <VideoPlayer
-                        videoUrl={lectures[currentItem]?.videoUrl}
-                        className="w-full h-full"
-                        onEnded={() => {
-                          // Auto-mark as complete when video ends (only for authenticated users)
-                          if (user && !completedItems[currentItem]) {
-                            handleCheckboxClick(currentItem, {} as React.MouseEvent);
-                          }
-                        }}
-                      />
+                  {lectures[currentItem]?.videoUrl ? (
+                    <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-4">
+                      <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
+                        <VideoPlayer
+                          videoUrl={lectures[currentItem]?.videoUrl}
+                          className="w-full h-full"
+                          onEnded={() => {
+                            // Auto-mark as complete when video ends (only for authenticated users)
+                            if (user && !completedItems[currentItem]) {
+                              handleCheckboxClick(currentItem, {} as React.MouseEvent);
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
-                  </div>
+                  ) : hasNoData(lectures[currentItem]) ? (
+                    <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-4">
+                      <div className="text-center p-6">
+                        <div className="text-4xl mb-3">📭</div>
+                        <p className="text-royal-gray text-sm sm:text-base">
+                          No content available for this lecture.
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
 
                   {/* Lecture Content */}
                   {lectures[currentItem]?.content && (
@@ -740,20 +760,31 @@ export function CourseDetailSection() {
                 </div>
 
                 {/* Video Content */}
-                <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-6">
-                  <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
-                    <VideoPlayer
-                      videoUrl={lectures[currentItem]?.videoUrl}
-                      className="w-full h-full"
-                      onEnded={() => {
-                        // Auto-mark as complete when video ends (only for authenticated users)
-                        if (user && !completedItems[currentItem]) {
-                          handleCheckboxClick(currentItem, {} as React.MouseEvent);
-                        }
-                      }}
-                    />
+                {lectures[currentItem]?.videoUrl ? (
+                  <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-6">
+                    <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
+                      <VideoPlayer
+                        videoUrl={lectures[currentItem]?.videoUrl}
+                        className="w-full h-full"
+                        onEnded={() => {
+                          // Auto-mark as complete when video ends (only for authenticated users)
+                          if (user && !completedItems[currentItem]) {
+                            handleCheckboxClick(currentItem, {} as React.MouseEvent);
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
+                ) : hasNoData(lectures[currentItem]) ? (
+                  <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-6">
+                    <div className="text-center p-6">
+                      <div className="text-4xl mb-3">📭</div>
+                      <p className="text-royal-gray text-sm sm:text-base">
+                        No content available for this lecture.
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
 
                 {/* Lecture Description */}
                 {lectures[currentItem]?.description && (

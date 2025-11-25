@@ -26,6 +26,8 @@ interface Course {
   };
   createdAt: string;
   updatedAt: string;
+  ebookName?: string;
+  ebookUrl?: string;
 }
 
 interface Lecture {
@@ -683,6 +685,27 @@ export function CourseDetailSection() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Ebook Download Button */}
+                  {course?.ebookUrl && course?.ebookName && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <Button
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = course.ebookUrl!;
+                          link.download = course.ebookName || 'ebook';
+                          link.target = '_blank';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                        className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-sm font-medium flex items-center gap-2 px-4"
+                      >
+                        <DownloadIcon className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate min-w-0 flex-1">Download {course.ebookName}</span>
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             )
@@ -866,6 +889,27 @@ export function CourseDetailSection() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Ebook Download Button */}
+                  {course?.ebookUrl && course?.ebookName && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <Button
+                        onClick={() => {
+                          const link = document.createElement('a');
+                          link.href = course.ebookUrl!;
+                          link.download = course.ebookName || 'ebook';
+                          link.target = '_blank';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                        className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-sm font-medium flex items-center gap-2 px-4"
+                      >
+                        <DownloadIcon className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate min-w-0 flex-1">Download {course.ebookName}</span>
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             </>

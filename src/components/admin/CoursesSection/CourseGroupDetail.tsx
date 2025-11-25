@@ -21,6 +21,8 @@ interface Course {
         email: string;
     };
     createdAt: string;
+    ebookName?: string;
+    ebookUrl?: string;
 }
 
 interface Lecture {

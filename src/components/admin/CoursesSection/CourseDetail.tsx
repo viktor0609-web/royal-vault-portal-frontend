@@ -47,6 +47,8 @@ interface Course {
     email: string;
   };
   createdAt: string;
+  ebookName?: string;
+  ebookUrl?: string;
 }
 
 export function CourseDetail() {

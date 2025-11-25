@@ -20,6 +20,12 @@ export function Loading({
     lg: "h-12 w-12"
   };
 
+  const textSizeClasses = {
+    sm: "text-sm sm:text-base",
+    md: "text-base sm:text-lg",
+    lg: "text-lg sm:text-xl"
+  };
+
   const content = (
     <div className={cn(
       "flex flex-col items-center justify-center gap-3",
@@ -30,7 +36,10 @@ export function Loading({
         "animate-spin text-royal-blue",
         sizeClasses[size]
       )} />
-      <p className="text-sm sm:text-base text-royal-gray font-medium">{message}</p>
+      <p className={cn(
+        "text-royal-gray font-medium",
+        textSizeClasses[size]
+      )}>{message}</p>
     </div>
   );
 

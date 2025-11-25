@@ -94,7 +94,8 @@ export function useAdminState<T>(
                 console.warn('Failed to load state from localStorage:', error);
             }
         }
-        setIsLoading(false);
+        // Don't set isLoading(false) here - let components manage their own loading state
+        // Components should set loading to true when fetching starts and false when done
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stateKey]); // Only run on mount or when stateKey changes
 

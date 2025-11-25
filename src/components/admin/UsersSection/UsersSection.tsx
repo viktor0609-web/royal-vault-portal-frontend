@@ -59,6 +59,7 @@ export function UsersSection() {
     state: users,
     setState: setUsers,
     isLoading: loading,
+    setIsLoading,
     error,
     setError,
   } = useAdminState<User[]>([], 'users');
@@ -87,6 +88,7 @@ export function UsersSection() {
 
   const fetchUsers = async () => {
     try {
+      setIsLoading(true);
       setError(null);
       const params: any = {
         page,
@@ -109,6 +111,8 @@ export function UsersSection() {
         description: error.response?.data?.message || "Failed to fetch users",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -421,7 +425,7 @@ export function UsersSection() {
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8">
-                    <Loading message="Loading users..." size="sm" />
+                    <Loading message="Loading users..." size="md" />
                   </TableCell>
                 </TableRow>
               ) : users.length === 0 ? (

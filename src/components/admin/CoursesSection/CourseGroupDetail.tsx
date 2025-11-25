@@ -54,6 +54,7 @@ export function CourseGroupDetail() {
         state: courseGroup,
         setState: setCourseGroup,
         isLoading: loading,
+        setIsLoading,
         error,
         setError,
         getUrlParams
@@ -121,6 +122,7 @@ export function CourseGroupDetail() {
         if (!groupId) return;
 
         try {
+            setIsLoading(true);
             setError(null);
             // Admin should see all courses, not just public ones (publicOnly=false)
             const response = await courseApi.getCourseGroupById(groupId, 'basic', false);
@@ -134,6 +136,8 @@ export function CourseGroupDetail() {
                 description: errorMessage,
                 variant: "destructive",
             });
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -232,7 +236,7 @@ export function CourseGroupDetail() {
                         {loading ? (
                             <TableRow>
                                 <TableCell colSpan={6} className="text-center py-8">
-                                    <Loading message="Loading courses..." size="sm" />
+                                    <Loading message="Loading courses..." size="md" />
                                 </TableCell>
                             </TableRow>
                         ) : courses.length === 0 ? (

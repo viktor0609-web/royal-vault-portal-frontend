@@ -59,6 +59,7 @@ export function CourseDetail() {
     state: course,
     setState: setCourse,
     isLoading: loading,
+    setIsLoading,
     error,
     setError,
     getUrlParams
@@ -136,6 +137,7 @@ export function CourseDetail() {
     if (!courseId) return;
 
     try {
+      setIsLoading(true);
       setError(null);
       const response = await courseApi.getCourseById(courseId);
       setCourse(response.data);
@@ -148,6 +150,8 @@ export function CourseDetail() {
         description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 

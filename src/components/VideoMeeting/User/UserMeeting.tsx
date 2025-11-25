@@ -34,7 +34,7 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
         stopScreenshare,
     } = useDailyMeeting();
 
-    const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
+    const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(true);
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [showSettings, setShowSettings] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
@@ -74,7 +74,7 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
             if (!a.video && b.video) return 1;
             return 0;
         })[0];
-    
+
     const guestVideoTrack = activeGuest?.videoTrack;
     const mainVideoTrack = guestVideoTrack || localUserVideoTrack;
 

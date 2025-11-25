@@ -22,7 +22,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, ArrowUp, ArrowDown } from "lucide-react";
+import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, ArrowUp, ArrowDown, BarChart3 } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { CreateUserModal } from "./CreateUserModal";
 import { userApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -70,6 +71,7 @@ export function UsersSection() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [statistics, setStatistics] = useState<UserStatistics | null>(null);
+  const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
 
   // Pagination and filters
   const [page, setPage] = useState(1);
@@ -265,60 +267,36 @@ export function UsersSection() {
   };
 
   return (
-    <div className="flex-1 p-3 sm:p-4 lg:p-6 flex flex-col gap-4">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 sm:p-5 lg:p-6 rounded-lg border border-royal-light-gray shadow-sm">
+    <div className="flex-1 p-3 sm:p-4 lg:p-6 flex flex-col h-full overflow-hidden">
+      {/* Header Section - Fixed */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 sm:p-5 lg:p-6 rounded-lg border border-royal-light-gray shadow-sm flex-shrink-0">
         <div className="flex gap-3 items-center">
           <div className="flex-shrink-0 p-2 bg-royal-gray/10 rounded-lg">
             <UsersIcon className="h-5 w-5 sm:h-6 sm:w-6 text-royal-gray" />
           </div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-royal-dark-gray">Users</h1>
         </div>
-        <Button
-          onClick={handleCreateUser}
-          className="flex items-center justify-center gap-2 w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
-        >
-          <PlusIcon className="h-5 w-5 sm:h-4 sm:w-4" />
-          Create New User
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setIsStatisticsModalOpen(true)}
+            variant="outline"
+            className="flex items-center justify-center gap-2 h-11 sm:h-10 text-base sm:text-sm font-medium"
+          >
+            <BarChart3 className="h-5 w-5 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Analytics</span>
+          </Button>
+          <Button
+            onClick={handleCreateUser}
+            className="flex items-center justify-center gap-2 w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
+          >
+            <PlusIcon className="h-5 w-5 sm:h-4 sm:w-4" />
+            Create New User
+          </Button>
+        </div>
       </div>
 
-      {/* Statistics Cards */}
-      {statistics && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
-          <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray shadow-sm">
-            <div className="text-xs sm:text-sm text-royal-gray mb-1">Total Users</div>
-            <div className="text-lg sm:text-xl font-bold text-royal-dark-gray">{statistics.total}</div>
-          </div>
-          <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray shadow-sm">
-            <div className="text-xs sm:text-sm text-royal-gray mb-1">Verified</div>
-            <div className="text-lg sm:text-xl font-bold text-green-600">{statistics.verified}</div>
-          </div>
-          <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray shadow-sm">
-            <div className="text-xs sm:text-sm text-royal-gray mb-1">Unverified</div>
-            <div className="text-lg sm:text-xl font-bold text-red-600">{statistics.unverified}</div>
-          </div>
-          <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray shadow-sm">
-            <div className="text-xs sm:text-sm text-royal-gray mb-1">Admins</div>
-            <div className="text-lg sm:text-xl font-bold text-blue-600">{statistics.admins}</div>
-          </div>
-          <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray shadow-sm">
-            <div className="text-xs sm:text-sm text-royal-gray mb-1">Regular Users</div>
-            <div className="text-lg sm:text-xl font-bold text-royal-dark-gray">{statistics.users}</div>
-          </div>
-          <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray shadow-sm">
-            <div className="text-xs sm:text-sm text-royal-gray mb-1">Recent (30d)</div>
-            <div className="text-lg sm:text-xl font-bold text-purple-600">{statistics.recentUsers}</div>
-          </div>
-          <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray shadow-sm">
-            <div className="text-xs sm:text-sm text-royal-gray mb-1">Active (30d)</div>
-            <div className="text-lg sm:text-xl font-bold text-orange-600">{statistics.recentActiveUsers}</div>
-          </div>
-        </div>
-      )}
-
-      {/* Filters and Search */}
-      <div className="bg-white p-4 rounded-lg border border-royal-light-gray shadow-sm">
+      {/* Filters and Search - Fixed */}
+      <div className="bg-white p-4 rounded-lg border border-royal-light-gray shadow-sm flex-shrink-0">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
@@ -353,241 +331,244 @@ export function UsersSection() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm flex-shrink-0">
           <p className="font-medium">{error}</p>
         </div>
       )}
 
-      {/* Desktop Table View */}
-      <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm">
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-          <Table className="w-full">
-            <TableHeader>
-              <TableRow className="bg-gray-50 hover:bg-gray-50">
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('firstName')}
-                >
-                  <div className="flex items-center">
-                    Name
-                    {getSortIcon('firstName')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('email')}
-                >
-                  <div className="flex items-center">
-                    Email
-                    {getSortIcon('email')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('phone')}
-                >
-                  <div className="flex items-center">
-                    Phone
-                    {getSortIcon('phone')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('role')}
-                >
-                  <div className="flex items-center">
-                    Role
-                    {getSortIcon('role')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('isVerified')}
-                >
-                  <div className="flex items-center">
-                    Status
-                    {getSortIcon('isVerified')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('createdAt')}
-                >
-                  <div className="flex items-center">
-                    Created
-                    {getSortIcon('createdAt')}
-                  </div>
-                </TableHead>
-                <TableHead className="font-semibold text-royal-dark-gray text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    <Loading message="Loading users..." size="md" />
-                  </TableCell>
+      {/* Scrollable User List Container */}
+      <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm flex-1 min-h-0 flex flex-col">
+          <div className="flex-1 overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow className="bg-gray-50 hover:bg-gray-50">
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('firstName')}
+                  >
+                    <div className="flex items-center">
+                      Name
+                      {getSortIcon('firstName')}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('email')}
+                  >
+                    <div className="flex items-center">
+                      Email
+                      {getSortIcon('email')}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('phone')}
+                  >
+                    <div className="flex items-center">
+                      Phone
+                      {getSortIcon('phone')}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('role')}
+                  >
+                    <div className="flex items-center">
+                      Role
+                      {getSortIcon('role')}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('isVerified')}
+                  >
+                    <div className="flex items-center">
+                      Status
+                      {getSortIcon('isVerified')}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    <div className="flex items-center">
+                      Created
+                      {getSortIcon('createdAt')}
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-royal-dark-gray text-right">Actions</TableHead>
                 </TableRow>
-              ) : users.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-royal-gray">
-                    No users found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                users.map((user) => (
-                  <TableRow key={user._id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">
-                      {user.firstName} {user.lastName}
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.phone}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.isVerified ? "default" : "destructive"}>
-                        {user.isVerified ? "Verified" : "Unverified"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-royal-gray">
-                      {formatDate(user.createdAt)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
-                            <KeyRound className="mr-2 h-4 w-4" />
-                            Reset Password
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
-                            {user.isVerified ? (
-                              <>
-                                <ShieldOff className="mr-2 h-4 w-4" />
-                                Deactivate
-                              </>
-                            ) : (
-                              <>
-                                <Shield className="mr-2 h-4 w-4" />
-                                Activate
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
-                          >
-                            <Shield className="mr-2 h-4 w-4" />
-                            Change to {user.role === "admin" ? "User" : "Admin"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteClick(user)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <Loading message="Loading users..." size="md" />
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : users.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-royal-gray">
+                      No users found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user._id} className="hover:bg-gray-50">
+                      <TableCell className="font-medium">
+                        {user.firstName} {user.lastName}
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.phone}</TableCell>
+                      <TableCell>
+                        <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.isVerified ? "default" : "destructive"}>
+                          {user.isVerified ? "Verified" : "Unverified"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-royal-gray">
+                        {formatDate(user.createdAt)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
+                              <KeyRound className="mr-2 h-4 w-4" />
+                              Reset Password
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
+                              {user.isVerified ? (
+                                <>
+                                  <ShieldOff className="mr-2 h-4 w-4" />
+                                  Deactivate
+                                </>
+                              ) : (
+                                <>
+                                  <Shield className="mr-2 h-4 w-4" />
+                                  Activate
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
+                            >
+                              <Shield className="mr-2 h-4 w-4" />
+                              Change to {user.role === "admin" ? "User" : "Admin"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteClick(user)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-3 flex-1 overflow-y-auto p-1">
+          {loading ? (
+            <Loading message="Loading users..." />
+          ) : users.length === 0 ? (
+            <div className="text-center py-8 text-royal-gray">No users found</div>
+          ) : (
+            users.map((user) => (
+              <div key={user._id} className="bg-white p-4 rounded-lg border border-royal-light-gray shadow-sm">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-semibold text-royal-dark-gray">
+                      {user.firstName} {user.lastName}
+                    </h3>
+                    <p className="text-sm text-royal-gray">{user.email}</p>
+                    <p className="text-sm text-royal-gray">{user.phone}</p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
+                        <KeyRound className="mr-2 h-4 w-4" />
+                        Reset Password
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
+                        {user.isVerified ? (
+                          <>
+                            <ShieldOff className="mr-2 h-4 w-4" />
+                            Deactivate
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="mr-2 h-4 w-4" />
+                            Activate
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
+                      >
+                        <Shield className="mr-2 h-4 w-4" />
+                        Change to {user.role === "admin" ? "User" : "Admin"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDeleteClick(user)}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                    {user.role}
+                  </Badge>
+                  <Badge variant={user.isVerified ? "default" : "destructive"}>
+                    {user.isVerified ? "Verified" : "Unverified"}
+                  </Badge>
+                  <span className="text-xs text-royal-gray">
+                    Created: {formatDate(user.createdAt)}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
-      {/* Mobile Card View */}
-      <div className="lg:hidden space-y-3">
-        {loading ? (
-          <Loading message="Loading users..." />
-        ) : users.length === 0 ? (
-          <div className="text-center py-8 text-royal-gray">No users found</div>
-        ) : (
-          users.map((user) => (
-            <div key={user._id} className="bg-white p-4 rounded-lg border border-royal-light-gray shadow-sm">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-semibold text-royal-dark-gray">
-                    {user.firstName} {user.lastName}
-                  </h3>
-                  <p className="text-sm text-royal-gray">{user.email}</p>
-                  <p className="text-sm text-royal-gray">{user.phone}</p>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
-                      <KeyRound className="mr-2 h-4 w-4" />
-                      Reset Password
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
-                      {user.isVerified ? (
-                        <>
-                          <ShieldOff className="mr-2 h-4 w-4" />
-                          Deactivate
-                        </>
-                      ) : (
-                        <>
-                          <Shield className="mr-2 h-4 w-4" />
-                          Activate
-                        </>
-                      )}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
-                    >
-                      <Shield className="mr-2 h-4 w-4" />
-                      Change to {user.role === "admin" ? "User" : "Admin"}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleDeleteClick(user)}
-                      className="text-red-600"
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                  {user.role}
-                </Badge>
-                <Badge variant={user.isVerified ? "default" : "destructive"}>
-                  {user.isVerified ? "Verified" : "Unverified"}
-                </Badge>
-                <span className="text-xs text-royal-gray">
-                  Created: {formatDate(user.createdAt)}
-                </span>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Pagination */}
+      {/* Pagination - Fixed */}
       {pagination.totalPages > 1 && (
-        <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray">
+        <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray flex-shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="text-xs sm:text-sm text-royal-gray text-center sm:text-left">
               Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, pagination.totalUsers)} of {pagination.totalUsers} users
@@ -662,6 +643,49 @@ export function UsersSection() {
         closeDialog={handleCloseModal}
         editingUser={editingUser}
       />
+
+      {/* User Statistics Modal */}
+      <Dialog open={isStatisticsModalOpen} onOpenChange={setIsStatisticsModalOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-royal-dark-gray">User Analytics</DialogTitle>
+          </DialogHeader>
+          {statistics && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                <div className="text-sm text-blue-700 mb-2 font-medium">Total Users</div>
+                <div className="text-3xl font-bold text-blue-900">{statistics.total}</div>
+              </div>
+              <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                <div className="text-sm text-green-700 mb-2 font-medium">Verified</div>
+                <div className="text-3xl font-bold text-green-900">{statistics.verified}</div>
+              </div>
+              <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
+                <div className="text-sm text-red-700 mb-2 font-medium">Unverified</div>
+                <div className="text-3xl font-bold text-red-900">{statistics.unverified}</div>
+              </div>
+              <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
+                <div className="text-sm text-indigo-700 mb-2 font-medium">Admins</div>
+                <div className="text-3xl font-bold text-indigo-900">{statistics.admins}</div>
+              </div>
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200">
+                <div className="text-sm text-gray-700 mb-2 font-medium">Regular Users</div>
+                <div className="text-3xl font-bold text-gray-900">{statistics.users}</div>
+              </div>
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                <div className="text-sm text-purple-700 mb-2 font-medium">Recent (30d)</div>
+                <div className="text-3xl font-bold text-purple-900">{statistics.recentUsers}</div>
+                <div className="text-xs text-purple-600 mt-1">New users in last month</div>
+              </div>
+              <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200 md:col-span-3">
+                <div className="text-sm text-orange-700 mb-2 font-medium">Active Users (30d)</div>
+                <div className="text-3xl font-bold text-orange-900">{statistics.recentActiveUsers}</div>
+                <div className="text-xs text-orange-600 mt-1">Users who logged in during the last 30 days</div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

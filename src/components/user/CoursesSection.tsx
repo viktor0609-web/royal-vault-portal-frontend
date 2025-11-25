@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
 import {
   EyeOffIcon,
   NetworkIcon,
@@ -131,7 +132,7 @@ export function CoursesSection() {
             </p>
           </div>
         </div>
-        <div className="text-center py-4 sm:py-8 text-sm sm:text-base">Loading courses...</div>
+        <Loading message="Loading courses..." />
       </div>
     );
   }

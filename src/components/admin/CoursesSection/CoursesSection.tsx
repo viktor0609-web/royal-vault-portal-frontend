@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
 import { GraduationCapIcon, Trash2, Edit, PlusIcon, EyeIcon } from "lucide-react";
 import { GroupModal } from "./GroupModal";
@@ -157,7 +158,7 @@ export function CoursesSection() {
             {loading ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8">
-                  Loading course groups...
+                  <Loading message="Loading course groups..." size="sm" />
                 </TableCell>
               </TableRow>
             ) : courseGroups.length === 0 ? (
@@ -217,7 +218,7 @@ export function CoursesSection() {
         </div>
 
         {loading ? (
-          <div className="text-center py-8">Loading course groups...</div>
+          <Loading message="Loading course groups..." />
         ) : courseGroups.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             No course groups found. Create your first course group!

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import {
@@ -419,8 +420,8 @@ export function UsersSection() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-royal-gray">
-                    Loading users...
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <Loading message="Loading users..." size="sm" />
                   </TableCell>
                 </TableRow>
               ) : users.length === 0 ? (
@@ -506,7 +507,7 @@ export function UsersSection() {
       {/* Mobile Card View */}
       <div className="lg:hidden space-y-3">
         {loading ? (
-          <div className="text-center py-8 text-royal-gray">Loading users...</div>
+          <Loading message="Loading users..." />
         ) : users.length === 0 ? (
           <div className="text-center py-8 text-royal-gray">No users found</div>
         ) : (

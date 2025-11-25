@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
 import {
   Select,
   SelectContent,
@@ -282,10 +283,8 @@ export function DealsSection() {
         <div className="h-full overflow-y-auto mb-2 rounded-lg ">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
             {loading ? (
-              <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
-                <div className="text-sm sm:text-base text-royal-gray">
-                  Loading deals...
-                </div>
+              <div className="col-span-full">
+                <Loading message="Loading deals..." />
               </div>
             ) : deals.length > 0 ? (
               deals.map((item, index) => (

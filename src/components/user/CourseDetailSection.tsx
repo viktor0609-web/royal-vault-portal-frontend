@@ -840,7 +840,7 @@ export function CourseDetailSection() {
                             className="flex-shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             <DownloadIcon className="h-4 w-4 mr-1" />
-                            <span className="hidden sm:inline">Download</span>
+                            <span className="hidden sm:inline">{file.name.split('.').pop()?.toUpperCase().includes('PDF') ? 'View' : 'Download'}</span>
                           </Button>
                         </div>
                       ))}

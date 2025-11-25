@@ -210,7 +210,7 @@ export function CourseDetail() {
 
   return (
     <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
-      <div className="bg-white rounded-lg border border-royal-light-gray shadow-sm mb-3 sm:mb-6">
+      <div className="sticky top-[41px] z-30 bg-white rounded-lg border border-royal-light-gray shadow-sm mb-3 sm:mb-6">
         <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-royal-light-gray">
           <div className="flex items-center gap-2 sm:gap-3">
             <button

@@ -191,8 +191,8 @@ export function CourseGroupDetail() {
 
     return (
         <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
-            {/* Header */}
-            <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6">
+            {/* Header - Sticky */}
+            <div className="sticky top-[41px] z-30 flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6 shadow-sm">
                 <div className="text-2xl sm:text-4xl">🎓</div>
                 <div className="flex-1 min-w-0">
                     <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2 truncate">{courseGroup.title}</h1>

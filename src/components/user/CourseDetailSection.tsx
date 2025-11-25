@@ -466,9 +466,9 @@ export function CourseDetailSection() {
         }
       `}</style>
       <div className="p-2 sm:p-4 animate-in fade-in duration-100">
-        {/* Header - Desktop only */}
+        {/* Header - Desktop only - Sticky */}
         <div className="hidden min-[1024px]:flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-          <div className="w-full flex items-center justify-between bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray">
+          <div className="sticky top-[41px] z-30 w-full flex items-center justify-between bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray shadow-sm">
             <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
               <PlayIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray flex-shrink-0" />
               <div className="min-w-0 flex-1">

@@ -275,12 +275,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                 .ql-editor li {
                     margin: 0.25rem 0 !important;
                     line-height: 1.4 !important;
-                }
-                .ql-editor ul li {
-                    list-style-type: disc !important;
-                }
-                .ql-editor ol li {
-                    list-style-type: decimal !important;
+                    list-style: none !important;
                 }
                 .ql-editor table {
                     width: 100% !important;

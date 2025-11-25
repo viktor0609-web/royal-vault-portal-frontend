@@ -18,6 +18,7 @@ let pendingRequestsQueue: Array<(token: string | null) => void> = [];
 const getAccessToken = (): string | null => localStorage.getItem("accessToken");
 const getRefreshToken = (): string | null => localStorage.getItem("refreshToken");
 const setAccessToken = (token: string) => localStorage.setItem("accessToken", token);
+const setRefreshToken = (token: string) => localStorage.setItem("refreshToken", token);
 
 // Attach Authorization header
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
@@ -65,10 +66,17 @@ api.interceptors.response.use(
         isRefreshing = true;
         const { data } = await api.post("/api/auth/refresh", { refreshToken });
         const newAccessToken = data?.accessToken as string | undefined;
+        const newRefreshToken = data?.refreshToken as string | undefined;
+        
         if (!newAccessToken) {
           throw new Error("No access token in refresh response");
         }
+        
+        // Update both tokens (token rotation)
         setAccessToken(newAccessToken);
+        if (newRefreshToken) {
+          setRefreshToken(newRefreshToken);
+        }
 
         // Process queued requests
         pendingRequestsQueue.forEach((cb) => cb(newAccessToken));

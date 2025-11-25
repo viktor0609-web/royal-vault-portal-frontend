@@ -465,25 +465,27 @@ export function CourseDetailSection() {
           color: #059669 !important;
         }
       `}</style>
-      <div className="p-2 sm:p-4 animate-in fade-in duration-100">
+      <div className="p-4 sm:p-6 lg:p-8 animate-in fade-in duration-100 bg-gradient-to-br from-gray-50 to-white min-h-screen">
         {/* Header - Desktop only - Sticky */}
-        <div className="hidden min-[1024px]:flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
-          <div className="sticky top-[41px] z-30 w-full flex items-center justify-between bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray shadow-sm">
-            <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-              <PlayIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray flex-shrink-0" />
+        <div className="hidden min-[1024px]:flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
+          <div className="sticky top-[41px] z-30 w-full flex items-center justify-between bg-white/80 backdrop-blur-sm p-4 sm:p-6 rounded-xl border border-gray-200/50 shadow-lg shadow-gray-900/5">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+              <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                <PlayIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+              </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2 truncate">{course.title}</h1>
-                <p className="text-xs sm:text-base text-royal-gray line-clamp-2">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1.5 sm:mb-2 truncate">{course.title}</h1>
+                <p className="text-sm sm:text-base text-gray-600 line-clamp-2 leading-relaxed">
                   {course.description}
                 </p>
               </div>
             </div>
             <div
-              className="cursor-pointer p-1.5 sm:p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-75 hover:scale-102 flex-shrink-0"
+              className="cursor-pointer p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 flex-shrink-0 group"
               onClick={() => navigate(`/course-groups/${course.courseGroup._id}`)}
               title="Back to Course Group"
             >
-              <ArrowLeftIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray hover:text-royal-blue transition-colors duration-75" />
+              <ArrowLeftIcon className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600 group-hover:text-primary transition-colors duration-200" />
             </div>
           </div>
         </div>
@@ -494,126 +496,132 @@ export function CourseDetailSection() {
               /* Mobile Content View */
               <div className="flex-1 flex flex-col w-full">
                 {/* Back Button and Mobile Fullscreen - Integrated */}
-                <div className="mb-4 flex justify-between items-center">
+                <div className="mb-6 flex justify-between items-center">
                   <div
-                    className="inline-flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue cursor-pointer transition-all duration-75 hover:bg-royal-blue/5 rounded-lg"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:text-primary cursor-pointer transition-all duration-200 hover:bg-gray-100 rounded-lg font-medium"
                     onClick={handleBackToList}
                   >
                     <ArrowLeftIcon className="h-4 w-4" />
                     <span className="text-sm font-medium">Back to List</span>
                   </div>
-
                 </div>
 
-                {/* Content Area */}
+                {/* Content Area - Unified Panel */}
                 <div className="flex-1 flex flex-col">
-                  {/* Header */}
-                  <div className="w-full flex items-center justify-between p-2 sm:p-4 bg-white rounded-lg border border-royal-light-gray mb-3 sm:mb-6">
-                    <h1 className="text-sm sm:text-lg font-bold text-royal-dark-gray line-clamp-1 min-w-0 flex-1 mr-2">
-                      {lectures[currentItem]?.title || 'No lecture selected'}
-                    </h1>
-                    {/* Completion Status Checkbox */}
-                    <div
-                      className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
-                        } ${completedItems[currentItem]
-                          ? "bg-primary border-primary"
-                          : "border-royal-light-gray"
-                        }`}
-                      onClick={(e) => handleCheckboxClick(currentItem, e)}
-                      title={user ? 'Mark as complete' : 'Login required to track progress'}
-                    >
-                      {completedItems[currentItem] && <CheckCircleIcon className="h-3 w-3 sm:h-4 sm:w-4 text-white transition-transform duration-75" />}
+                  {/* Unified Content Panel - Like a PDF document */}
+                  <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                    {/* Header */}
+                    <div className="w-full flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200">
+                      <h1 className="text-lg sm:text-xl font-bold text-gray-900 min-w-0 flex-1 mr-4 leading-snug pr-4">
+                        {lectures[currentItem]?.title || 'No lecture selected'}
+                      </h1>
+                      {/* Completion Status Checkbox */}
+                      <div
+                        className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0 shadow-sm ${user ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed opacity-50'
+                          } ${completedItems[currentItem]
+                            ? "bg-primary border-primary shadow-md"
+                            : "border-gray-300 hover:border-primary/50"
+                          }`}
+                        onClick={(e) => handleCheckboxClick(currentItem, e)}
+                        title={user ? 'Mark as complete' : 'Login required to track progress'}
+                      >
+                        {completedItems[currentItem] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-200" />}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Video Content */}
-                  {lectures[currentItem]?.videoUrl ? (
-                    <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-4">
-                      <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
-                        <VideoPlayer
-                          videoUrl={lectures[currentItem]?.videoUrl}
-                          className="w-full h-full"
-                          onEnded={() => {
-                            // Auto-mark as complete when video ends (only for authenticated users)
-                            if (user && !completedItems[currentItem]) {
-                              handleCheckboxClick(currentItem, {} as React.MouseEvent);
-                            }
+                    {/* Video Content */}
+                    {lectures[currentItem]?.videoUrl ? (
+                      <div className="w-full bg-black">
+                        <div className="w-full aspect-video bg-black">
+                          <VideoPlayer
+                            videoUrl={lectures[currentItem]?.videoUrl}
+                            className="w-full h-full"
+                            onEnded={() => {
+                              // Auto-mark as complete when video ends (only for authenticated users)
+                              if (user && !completedItems[currentItem]) {
+                                handleCheckboxClick(currentItem, {} as React.MouseEvent);
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : hasNoData(lectures[currentItem]) ? (
+                      <div className="flex-1 flex items-center justify-center bg-gray-50 min-h-96">
+                        <div className="text-center p-8">
+                          <div className="text-5xl mb-4">📭</div>
+                          <p className="text-gray-500 text-base font-medium">
+                            No content available for this lecture.
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {/* Lecture Content */}
+                    {lectures[currentItem]?.content && (
+                      <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-200">
+                        <div
+                          className="lecture-content"
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
                           }}
                         />
                       </div>
-                    </div>
-                  ) : hasNoData(lectures[currentItem]) ? (
-                    <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-4">
-                      <div className="text-center p-6">
-                        <div className="text-4xl mb-3">📭</div>
-                        <p className="text-royal-gray text-sm sm:text-base">
-                          No content available for this lecture.
-                        </p>
-                      </div>
-                    </div>
-                  ) : null}
+                    )}
 
-                  {/* Lecture Content */}
-                  {lectures[currentItem]?.content && (
-                    <div className="bg-white rounded-lg p-3">
-                      <div
-                        className="lecture-content"
-                        dangerouslySetInnerHTML={{
-                          __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {/* Related Files Section */}
-                  {lectures[currentItem]?.relatedFiles && lectures[currentItem].relatedFiles.length > 0 && (
-                    <div className="bg-white rounded-lg border border-royal-light-gray p-3 sm:p-4">
-                      <h3 className="text-sm sm:text-lg font-semibold text-royal-dark-gray mb-2 sm:mb-3 flex items-center gap-2">
-                        <FileIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                        Related Files
-                      </h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {lectures[currentItem].relatedFiles.map((file, fileIndex) => (
-                          <div
-                            key={fileIndex}
-                            className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
-                          >
-                            <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                              <span className="text-lg sm:text-2xl flex-shrink-0">
-                                {getFileIcon(file.name)}
-                              </span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-xs sm:text-sm font-medium text-royal-dark-gray truncate">
-                                  {file.name}
-                                </p>
-                                <p className="text-xs text-royal-gray">
-                                  Uploaded file
-                                </p>
-                              </div>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleFileDownload(file)}
-                              className="flex-shrink-0 ml-2 text-xs sm:text-sm"
-                            >
-                              <DownloadIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                              <span className="hidden sm:inline">Download</span>
-                            </Button>
+                    {/* Related Files Section */}
+                    {lectures[currentItem]?.relatedFiles && lectures[currentItem].relatedFiles.length > 0 && (
+                      <div className="px-4 sm:px-6 py-4 sm:py-5">
+                        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2.5">
+                          <div className="p-1.5 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <FileIcon className="h-4 w-4 text-primary" />
                           </div>
-                        ))}
+                          Related Files
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {lectures[currentItem].relatedFiles.map((file, fileIndex) => (
+                            <div
+                              key={fileIndex}
+                              className="flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-all duration-200 group rounded-lg"
+                            >
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="p-2 bg-white rounded-lg flex-shrink-0 flex items-center justify-center w-10 h-10">
+                                  <span className="text-lg block">
+                                    {getFileIcon(file.name)}
+                                  </span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-primary transition-colors">
+                                    {file.name}
+                                  </p>
+                                  <p className="text-xs text-gray-500 mt-0.5">
+                                    Uploaded file
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleFileDownload(file)}
+                                className="flex-shrink-0 ml-2 h-8 px-3 text-xs hover:bg-primary hover:text-white transition-all duration-200"
+                              >
+                                <DownloadIcon className="h-3.5 w-3.5 mr-1.5" />
+                                <span className="hidden sm:inline">Download</span>
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             ) : (
               /* Mobile List View */
-              <div className="w-full bg-white p-1">
+              <div className="w-full">
                 {/* Back Button */}
-                <div className="mb-4">
+                <div className="mb-6">
                   <div
-                    className="inline-flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue cursor-pointer transition-all duration-75 hover:bg-royal-blue/5 rounded-lg"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:text-primary cursor-pointer transition-all duration-200 hover:bg-gray-100 rounded-lg font-medium"
                     onClick={() => navigate('/courses', { state: { fromDetail: true } })}
                   >
                     <ArrowLeftIcon className="h-4 w-4" />
@@ -622,49 +630,49 @@ export function CourseDetailSection() {
                 </div>
 
                 <div className="mb-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="font-semibold text-royal-dark-gray">{course.title}</h3>
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">{course.title}</h3>
                   </div>
-                  <div className="space-y-2 sm:space-y-4">
+                  <div>
                     {lectures.map((lecture, index) => (
                       <div
                         key={index}
-                        className={`w-full flex items-center p-2 sm:p-4 rounded-lg border transition-all duration-75 ease-in-out cursor-pointer group ${index === currentItem
-                          ? "bg-primary/5 border-primary shadow-lg scale-[1.01] ring-2 ring-primary/30"
-                          : "bg-white border-royal-light-gray"
-                          }`}
+                        className={`w-full flex items-center p-3.5 transition-all duration-200 ease-in-out cursor-pointer group ${index === currentItem
+                          ? "bg-primary/10"
+                          : "hover:bg-gray-50"
+                          } ${index < lectures.length - 1 ? "border-b border-gray-200" : ""}`}
                         onClick={() => handleItemClick(index)}
                       >
-                        <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="flex items-center gap-3.5 w-full">
                           <div
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                            className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0 ${user ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed opacity-50'
                               } ${completedItems[index]
-                                ? "bg-primary border-primary "
-                                : "border-royal-light-gray "
+                                ? "bg-primary border-primary"
+                                : "border-gray-300 group-hover:border-primary/50"
                               }`}
                             onClick={(e) => handleCheckboxClick(index, e)}
                             title={user ? 'Mark as complete' : 'Login required to track progress'}
                           >
-                            {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 " />}
+                            {completedItems[index] && <CheckCircleIcon className="h-3.5 w-3.5 text-white transition-transform duration-200" />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className={`font-medium transition-colors duration-75  ${index === currentItem
-                              ? "text-primary font-semibold"
-                              : "text-royal-dark-gray"
+                            <span className={`font-semibold transition-colors duration-200 block text-sm leading-snug ${index === currentItem
+                              ? "text-primary"
+                              : "text-gray-900 group-hover:text-primary"
                               }`}>
                               {lecture.title}
                             </span>
-                            <div className="flex items-center gap-3 mt-1">
+                            <div className="flex items-center gap-2 mt-1.5">
                               {lecture.content && (
-                                <div className="flex items-center gap-1">
-                                  <span className="text-xs text-royal-gray">📄</span>
-                                  <span className="text-xs text-royal-gray">Content</span>
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md">
+                                  <span className="text-xs leading-none">📄</span>
+                                  <span className="text-xs text-gray-600 font-medium leading-tight">Content</span>
                                 </div>
                               )}
                               {lecture.relatedFiles && lecture.relatedFiles.length > 0 && (
-                                <div className="flex items-center gap-1">
-                                  <FileIcon className="h-3 w-3 text-royal-gray" />
-                                  <span className="text-xs text-royal-gray">
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md">
+                                  <FileIcon className="h-3 w-3 text-gray-600" />
+                                  <span className="text-xs text-gray-600 font-medium leading-tight">
                                     {lecture.relatedFiles.length} file{lecture.relatedFiles.length !== 1 ? 's' : ''}
                                   </span>
                                 </div>
@@ -681,162 +689,173 @@ export function CourseDetailSection() {
           ) : (
             /* Desktop: Show both list and content */
             <>
-              {/* Main Content */}
+              {/* Main Content - Unified Panel */}
               <div className="flex-1 flex flex-col">
-                {/* Header */}
-                <div className="w-full flex items-center justify-between p-2 sm:p-4 bg-white rounded-lg border border-royal-light-gray mb-6">
-                  <h1 className="text-2xl font-bold text-royal-dark-gray line-clamp-1">
-                    {lectures[currentItem]?.title || 'No lecture selected'}
-                  </h1>
-                  {/* Completion Status Checkbox */}
-                  <div
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
-                      } ${completedItems[currentItem]
-                        ? "bg-primary border-primary"
-                        : "border-royal-light-gray"
-                      }`}
-                    onClick={(e) => handleCheckboxClick(currentItem, e)}
-                    title={user ? 'Mark as complete' : 'Login required to track progress'}
-                  >
-                    {completedItems[currentItem] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75" />}
+                {/* Unified Content Panel - Like a PDF document */}
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                  {/* Header */}
+                  <div className="w-full flex items-center justify-between px-6 py-5 border-b border-gray-200">
+                    <h1 className="text-2xl font-bold text-gray-900 leading-snug pr-4 flex-1 min-w-0">
+                      {lectures[currentItem]?.title || 'No lecture selected'}
+                    </h1>
+                    {/* Completion Status Checkbox */}
+                    <div
+                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0 shadow-sm ${user ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed opacity-50'
+                        } ${completedItems[currentItem]
+                          ? "bg-primary border-primary shadow-md"
+                          : "border-gray-300 hover:border-primary/50"
+                        }`}
+                      onClick={(e) => handleCheckboxClick(currentItem, e)}
+                      title={user ? 'Mark as complete' : 'Login required to track progress'}
+                    >
+                      {completedItems[currentItem] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-200" />}
+                    </div>
                   </div>
-                </div>
 
-                {/* Video Content */}
-                {lectures[currentItem]?.videoUrl ? (
-                  <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-6">
-                    <div className="w-full max-w-4xl aspect-video bg-black rounded-lg overflow-hidden">
-                      <VideoPlayer
-                        videoUrl={lectures[currentItem]?.videoUrl}
-                        className="w-full h-full"
-                        onEnded={() => {
-                          // Auto-mark as complete when video ends (only for authenticated users)
-                          if (user && !completedItems[currentItem]) {
-                            handleCheckboxClick(currentItem, {} as React.MouseEvent);
-                          }
+                  {/* Video Content */}
+                  {lectures[currentItem]?.videoUrl ? (
+                    <div className="w-full bg-black">
+                      <div className="w-full aspect-video bg-black">
+                        <VideoPlayer
+                          videoUrl={lectures[currentItem]?.videoUrl}
+                          className="w-full h-full"
+                          onEnded={() => {
+                            // Auto-mark as complete when video ends (only for authenticated users)
+                            if (user && !completedItems[currentItem]) {
+                              handleCheckboxClick(currentItem, {} as React.MouseEvent);
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : hasNoData(lectures[currentItem]) ? (
+                    <div className="flex-1 flex items-center justify-center bg-gray-50 min-h-96">
+                      <div className="text-center p-8">
+                        <div className="text-5xl mb-4">📭</div>
+                        <p className="text-gray-500 text-base font-medium">
+                          No content available for this lecture.
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {/* Lecture Description */}
+                  {lectures[currentItem]?.description && (
+                    <div className="px-6 py-5 border-b border-gray-200">
+                      <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <div className="w-1 h-5 bg-primary rounded-full"></div>
+                        Description
+                      </h3>
+                      <p className="text-gray-600 text-sm leading-relaxed">
+                        {lectures[currentItem].description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Lecture Content */}
+                  {lectures[currentItem]?.content && (
+                    <div className="px-6 py-5 border-b border-gray-200">
+                      <div
+                        className="lecture-content"
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
                         }}
                       />
                     </div>
-                  </div>
-                ) : hasNoData(lectures[currentItem]) ? (
-                  <div className="flex-1 flex items-center justify-center bg-gray-100 rounded-lg min-h-96 mb-6">
-                    <div className="text-center p-6">
-                      <div className="text-4xl mb-3">📭</div>
-                      <p className="text-royal-gray text-sm sm:text-base">
-                        No content available for this lecture.
-                      </p>
-                    </div>
-                  </div>
-                ) : null}
+                  )}
 
-                {/* Lecture Description */}
-                {lectures[currentItem]?.description && (
-                  <div className="bg-white rounded-lg border border-royal-light-gray p-6 mb-6">
-                    <h3 className="text-lg font-semibold text-royal-dark-gray mb-4">Description</h3>
-                    <p className="text-royal-gray text-sm leading-relaxed">
-                      {lectures[currentItem].description}
-                    </p>
-                  </div>
-                )}
-
-                {lectures[currentItem]?.content && (
-                  <div className="bg-white rounded-lg p-3">
-                    <div
-                      className="lecture-content"
-                      dangerouslySetInnerHTML={{
-                        __html: sanitizeHtml(lectures[currentItem].content) || '<p class="text-gray-500 italic">No content available for this lecture.</p>'
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Related Files Section */}
-                {lectures[currentItem]?.relatedFiles && lectures[currentItem].relatedFiles.length > 0 && (
-                  <div className="bg-white rounded-lg border border-royal-light-gray p-6">
-                    <h3 className="text-lg font-semibold text-royal-dark-gray mb-4 flex items-center gap-2">
-                      <FileIcon className="h-5 w-5" />
-                      Related Files
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {lectures[currentItem].relatedFiles.map((file, fileIndex) => (
-                        <div
-                          key={fileIndex}
-                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors group"
-                        >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span className="text-2xl flex-shrink-0">
-                              {getFileIcon(file.name)}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-royal-dark-gray truncate group-hover:text-royal-blue transition-colors">
-                                {file.name}
-                              </p>
-                              <p className="text-xs text-royal-gray">
-                                Uploaded file
-                              </p>
-                            </div>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleFileDownload(file)}
-                            className="flex-shrink-0 ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <DownloadIcon className="h-4 w-4 mr-1" />
-                            <span className="hidden sm:inline">{file.name.split('.').pop()?.toUpperCase().includes('PDF') ? 'View' : 'Download'}</span>
-                          </Button>
+                  {/* Related Files Section */}
+                  {lectures[currentItem]?.relatedFiles && lectures[currentItem].relatedFiles.length > 0 && (
+                    <div className="px-6 py-5">
+                      <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2.5">
+                        <div className="p-1.5 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <FileIcon className="h-4 w-4 text-primary" />
                         </div>
-                      ))}
+                        Related Files
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {lectures[currentItem].relatedFiles.map((file, fileIndex) => (
+                          <div
+                            key={fileIndex}
+                            className="flex items-center justify-between p-3.5 bg-gray-50 hover:bg-gray-100 transition-all duration-200 group rounded-lg"
+                          >
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="p-2 bg-white rounded-lg flex-shrink-0 flex items-center justify-center w-10 h-10">
+                                <span className="text-lg block">
+                                  {getFileIcon(file.name)}
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-primary transition-colors">
+                                  {file.name}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-0.5">
+                                  Uploaded file
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleFileDownload(file)}
+                              className="flex-shrink-0 ml-2 h-8 px-3 hover:bg-primary hover:text-white transition-all duration-200"
+                            >
+                              <DownloadIcon className="h-3.5 w-3.5 mr-1.5" />
+                              <span className="hidden sm:inline text-xs">{file.name.split('.').pop()?.toUpperCase().includes('PDF') ? 'View' : 'Download'}</span>
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
-              {/* Right Sidebar - Curriculum */}
-              <div className="w-80 bg-white border-l border-royal-light-gray p-6 ml-8">
 
-                <div className="mb-6">
-                  <h3 className="font-semibold text-royal-dark-gray mb-2 sm:mb-4">{course.title}</h3>
-                  <div className="space-y-2 sm:space-y-4">
+              {/* Right Sidebar - Curriculum */}
+              <div className="w-80 bg-white/80 backdrop-blur-sm border-l border-gray-200 p-5 ml-6 rounded-r-xl shadow-sm">
+
+                <div className="mb-5">
+                  <div>
                     {lectures.map((lecture, index) => (
                       <div
                         key={index}
-                        className={`w-full flex items-center p-2 sm:p-4 rounded-lg border transition-all duration-75 ease-in-out cursor-pointer group ${index === currentItem
-                          ? "bg-primary/5 border-primary shadow-lg scale-[1.01] ring-2 ring-primary/30 min-[1024px]:bg-primary/10 min-[1024px]:shadow-xl min-[1024px]:scale-[1.015] min-[1024px]:ring-4 min-[1024px]:ring-primary/40"
-                          : "bg-white border-royal-light-gray"
-                          }`}
+                        className={`w-full flex items-center p-3.5 transition-all duration-200 ease-in-out cursor-pointer group ${index === currentItem
+                          ? "bg-primary/10"
+                          : "hover:bg-gray-50"
+                          } ${index < lectures.length - 1 ? "border-b border-gray-200" : ""}`}
                         onClick={() => handleItemClick(index)}
                       >
-                        <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="flex items-center gap-3.5 w-full">
                           <div
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                            className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-200 flex-shrink-0 ${user ? 'cursor-pointer hover:scale-110' : 'cursor-not-allowed opacity-50'
                               } ${completedItems[index]
-                                ? "bg-primary border-primary "
-                                : "border-royal-light-gray "
+                                ? "bg-primary border-primary"
+                                : "border-gray-300 group-hover:border-primary/50"
                               }`}
                             onClick={(e) => handleCheckboxClick(index, e)}
                             title={user ? 'Mark as complete' : 'Login required to track progress'}
                           >
-                            {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 " />}
+                            {completedItems[index] && <CheckCircleIcon className="h-3.5 w-3.5 text-white transition-transform duration-200" />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <span className={`font-medium transition-colors duration-75  ${index === currentItem
-                              ? "text-primary font-semibold"
-                              : "text-royal-dark-gray"
+                            <span className={`font-semibold transition-colors duration-200 block text-sm leading-snug ${index === currentItem
+                              ? "text-primary"
+                              : "text-gray-900 group-hover:text-primary"
                               }`}>
                               {lecture.title}
                             </span>
-                            <div className="flex items-center gap-3 mt-1">
+                            <div className="flex items-center gap-2 mt-1.5">
                               {lecture.content && (
-                                <div className="flex items-center gap-1">
-                                  <span className="text-xs text-royal-gray">📄</span>
-                                  <span className="text-xs text-royal-gray">Content</span>
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md">
+                                  <span className="text-xs leading-none">📄</span>
+                                  <span className="text-xs text-gray-600 font-medium leading-tight">Content</span>
                                 </div>
                               )}
                               {lecture.relatedFiles && lecture.relatedFiles.length > 0 && (
-                                <div className="flex items-center gap-1">
-                                  <FileIcon className="h-3 w-3 text-royal-gray" />
-                                  <span className="text-xs text-royal-gray">
+                                <div className="flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-md">
+                                  <FileIcon className="h-3 w-3 text-gray-600" />
+                                  <span className="text-xs text-gray-600 font-medium leading-tight">
                                     {lecture.relatedFiles.length} file{lecture.relatedFiles.length !== 1 ? 's' : ''}
                                   </span>
                                 </div>

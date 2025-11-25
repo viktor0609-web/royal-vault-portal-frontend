@@ -67,11 +67,11 @@ api.interceptors.response.use(
         const { data } = await api.post("/api/auth/refresh", { refreshToken });
         const newAccessToken = data?.accessToken as string | undefined;
         const newRefreshToken = data?.refreshToken as string | undefined;
-        
+
         if (!newAccessToken) {
           throw new Error("No access token in refresh response");
         }
-        
+
         // Update both tokens (token rotation)
         setAccessToken(newAccessToken);
         if (newRefreshToken) {
@@ -152,34 +152,90 @@ export const optionsApi = {
 
 // Course API functions - OPTIMIZED
 export const courseApi = {
-  // Course Groups with field selection
-  getAllCourseGroups: (filters?: { type?: string; search?: string }, fields: 'basic' | 'detailed' | 'full' = 'basic') => {
+  // Course Groups with field selection, pagination, and filtering
+  getAllCourseGroups: (
+    filters?: {
+      type?: string;
+      search?: string;
+      page?: number;
+      limit?: number;
+      publicOnly?: boolean;
+    },
+    fields: 'basic' | 'detailed' | 'full' = 'basic'
+  ) => {
     const params = new URLSearchParams();
     if (filters?.type) params.append('type', filters.type);
     if (filters?.search) params.append('search', filters.search);
+    if (filters?.page) params.append('page', filters.page.toString());
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.publicOnly) params.append('publicOnly', 'true');
     params.append('fields', fields);
     return api.get(`/api/courses/groups?${params.toString()}`);
   },
   createCourseGroup: (groupData: any) => api.post('/api/courses/groups', groupData),
-  getCourseGroupById: (groupId: string, fields: 'basic' | 'detailed' | 'full' = 'full') =>
-    api.get(`/api/courses/groups/${groupId}?fields=${fields}`),
+  getCourseGroupById: (
+    groupId: string,
+    fields: 'basic' | 'detailed' | 'full' = 'full',
+    publicOnly: boolean = true
+  ) => {
+    const params = new URLSearchParams();
+    params.append('fields', fields);
+    if (publicOnly) params.append('publicOnly', 'true');
+    return api.get(`/api/courses/groups/${groupId}?${params.toString()}`);
+  },
   updateCourseGroup: (groupId: string, groupData: any) => api.put(`/api/courses/groups/${groupId}`, groupData),
   deleteCourseGroup: (groupId: string) => api.delete(`/api/courses/groups/${groupId}`),
 
-  // Courses with field selection
-  getAllCourses: (fields: 'basic' | 'detailed' | 'full' = 'basic') =>
-    api.get(`/api/courses/courses?fields=${fields}`),
+  // Courses with field selection, pagination, and filtering
+  getAllCourses: (
+    options?: {
+      fields?: 'basic' | 'detailed' | 'full';
+      page?: number;
+      limit?: number;
+      publicOnly?: boolean;
+      courseGroup?: string;
+    }
+  ) => {
+    const params = new URLSearchParams();
+    const fields = options?.fields || 'basic';
+    params.append('fields', fields);
+    if (options?.page) params.append('page', options.page.toString());
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.publicOnly) params.append('publicOnly', 'true');
+    if (options?.courseGroup) params.append('courseGroup', options.courseGroup);
+    return api.get(`/api/courses/courses?${params.toString()}`);
+  },
   createCourse: (courseData: any, courseGroupId: string) => {
     const data = courseData;
     return api.post(`/api/courses/courses/${courseGroupId}`, data);
   },
-  getCourseById: (courseId: string, fields: 'basic' | 'detailed' | 'full' = 'full') =>
-    api.get(`/api/courses/courses/${courseId}?fields=${fields}`),
+  getCourseById: (
+    courseId: string,
+    fields: 'basic' | 'detailed' | 'full' = 'full',
+    publicOnly: boolean = true
+  ) => {
+    const params = new URLSearchParams();
+    params.append('fields', fields);
+    if (publicOnly) params.append('publicOnly', 'true');
+    return api.get(`/api/courses/courses/${courseId}?${params.toString()}`);
+  },
   updateCourse: (courseId: string, courseData: any) => api.put(`/api/courses/courses/${courseId}`, courseData),
   deleteCourse: (courseId: string) => api.delete(`/api/courses/courses/${courseId}`),
 
-  // Lectures
-  getAllLectures: () => api.get('/api/courses/lectures'),
+  // Lectures with pagination and filtering
+  getAllLectures: (options?: {
+    page?: number;
+    limit?: number;
+    publicOnly?: boolean;
+    courseId?: string;
+  }) => {
+    const params = new URLSearchParams();
+    if (options?.page) params.append('page', options.page.toString());
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.publicOnly) params.append('publicOnly', 'true');
+    if (options?.courseId) params.append('courseId', options.courseId);
+    return api.get(`/api/courses/lectures?${params.toString()}`);
+  },
   createLecture: (lectureData: any) => api.post('/api/courses/lectures', lectureData),
   getLectureById: (lectureId: string) => api.get(`/api/courses/lectures/${lectureId}`),
   updateLecture: (lectureId: string, lectureData: any) => api.put(`/api/courses/lectures/${lectureId}`, lectureData),

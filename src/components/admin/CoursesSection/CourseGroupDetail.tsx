@@ -121,7 +121,8 @@ export function CourseGroupDetail() {
 
         try {
             setError(null);
-            const response = await courseApi.getCourseGroupById(groupId, 'basic');
+            // Admin should see all courses, not just public ones (publicOnly=false)
+            const response = await courseApi.getCourseGroupById(groupId, 'basic', false);
             setCourseGroup(response.data);
             setCourses(response.data.courses || []);
         } catch (err: any) {

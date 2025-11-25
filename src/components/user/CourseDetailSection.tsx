@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
 import { ArrowLeftIcon, EyeOffIcon, CheckCircleIcon, PlayIcon, ClockIcon, DownloadIcon, FileIcon, ExternalLinkIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { courseApi } from "@/lib/api";
@@ -240,23 +241,28 @@ export function CourseDetailSection() {
 
   if (loading) {
     return (
-      <div className="p-2 sm:p-4 animate-in fade-in duration-100">
-        <div className="text-center py-4 sm:py-8 text-sm sm:text-base">Loading course...</div>
+      <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
+        <Loading message="Loading course details..." fullScreen />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-2 sm:p-4 animate-in fade-in duration-100">
-        <div className="text-center py-4 sm:py-8 text-sm sm:text-base text-red-500">{error}</div>
+      <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
+        <div className="text-center py-4 sm:py-8">
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button onClick={() => navigate('/courses')} variant="outline">
+            Back to Courses
+          </Button>
+        </div>
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="p-2 sm:p-4 animate-in fade-in duration-100">
+      <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
         <div className="text-center py-4 sm:py-8">
           <h2 className="text-lg sm:text-xl font-semibold text-royal-dark-gray mb-2">Course Not Found</h2>
           <p className="text-sm sm:text-base text-royal-gray mb-3 sm:mb-4">The requested course could not be found.</p>

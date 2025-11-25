@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
 import {
     ArrowLeftIcon,
     GraduationCapIcon,
@@ -111,11 +112,11 @@ export function CourseGroupDetailSection() {
                 <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6">
                     <div className="text-2xl sm:text-4xl">{getIconForGroup('graduation-cap')}</div>
                     <div>
-                        <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">Loading...</h1>
-                        <p className="text-sm sm:text-base text-royal-gray">Please wait while we load the course group.</p>
+                        <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">Course Group</h1>
+                        <p className="text-sm sm:text-base text-royal-gray">Loading course group details...</p>
                     </div>
                 </div>
-                <div className="text-center py-4 sm:py-8 text-sm sm:text-base">Loading courses...</div>
+                <Loading message="Loading courses..." />
             </div>
         );
     }

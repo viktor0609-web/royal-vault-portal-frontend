@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
 import { Badge } from "@/components/ui/badge";
 import { VideoIcon, ArrowRightIcon, PlayIcon, EyeIcon, CheckCircleIcon, RefreshCwIcon, Video } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -523,9 +524,7 @@ export function WebinarsSection() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center p-4 sm:p-8">
-          <div className="text-sm sm:text-base text-royal-gray">Loading webinars...</div>
-        </div>
+        <Loading message="Loading webinars..." />
       ) : (
         <div className="space-y-2">
           {getFilteredWebinars.map((webinar, index) => {

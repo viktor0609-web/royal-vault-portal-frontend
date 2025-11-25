@@ -1,4 +1,5 @@
 import { Button } from "../../ui/button";
+import { Loading } from "../../ui/Loading";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
@@ -246,8 +247,8 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
 
     if (isLoading && !isPermissionModalOpen) {
         return (
-            <div className="flex flex-1 items-center justify-center text-xl bg-gray-800 text-white">
-                Loading...
+            <div className="flex flex-1 items-center justify-center bg-gray-800">
+                <Loading message="Loading meeting..." className="text-white" />
             </div>
         );
     }

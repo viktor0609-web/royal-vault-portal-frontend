@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
 import { LectureModal } from "./LectureModal";
@@ -156,24 +157,22 @@ export function CourseDetail() {
 
   if (loading) {
     return (
-      <div className="flex-1 p-4">
-        <div className="bg-white rounded-lg border border-royal-light-gray shadow-sm mb-6">
-          <div className="px-6 py-4 border-b border-royal-light-gray">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate(`/admin/courses/groups/${groupId}`)}
-                className="flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded-md transition-all duration-200 group"
-              >
-                <ArrowLeftIcon className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
-                <span className="text-sm font-medium">Back to Course Group</span>
-              </button>
-            </div>
+      <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
+        <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6">
+          <div className="text-2xl sm:text-4xl">📚</div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">Course</h1>
+            <p className="text-xs sm:text-base text-royal-gray">Loading course details...</p>
           </div>
-          <div className="px-6 py-4">
-            <h1 className="text-2xl font-bold text-royal-dark-gray">Loading Course...</h1>
+          <div
+            className="cursor-pointer p-1.5 sm:p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-75 hover:scale-102 flex-shrink-0"
+            onClick={() => navigate(`/admin/courses/groups/${groupId}`)}
+            title="Back to Course Group"
+          >
+            <ArrowLeftIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray hover:text-royal-blue transition-colors duration-75" />
           </div>
         </div>
-        <div className="text-center py-8">Loading course...</div>
+        <Loading message="Loading lectures..." />
       </div>
     );
   }

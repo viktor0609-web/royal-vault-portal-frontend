@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
 import {
     AlertDialog,
@@ -159,10 +160,7 @@ export function DealsSection() {
                             {loading ? (
                                 <TableRow>
                                     <TableCell colSpan={9} className="text-center py-12">
-                                        <div className="flex flex-col items-center gap-3">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-royal-gray"></div>
-                                            <p className="text-gray-500">Loading deals...</p>
-                                        </div>
+                                        <Loading message="Loading deals..." size="sm" />
                                     </TableCell>
                                 </TableRow>
                             ) : deals.length === 0 ? (
@@ -233,10 +231,7 @@ export function DealsSection() {
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-royal-light-gray">
-                        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-royal-gray mb-4"></div>
-                        <p className="text-gray-500 font-medium">Loading deals...</p>
-                    </div>
+                    <Loading message="Loading deals..." />
                 ) : deals.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-royal-light-gray">
                         <TagIcon className="h-16 w-16 text-gray-300 mb-4" />

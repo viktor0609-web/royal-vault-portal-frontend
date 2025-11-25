@@ -1,4 +1,5 @@
 import { Button } from "../../ui/button";
+import { Loading } from "../../ui/Loading";
 import { X } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
@@ -132,7 +133,11 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
 
 
     if (isLoading && !isPermissionModalOpen) {
-        return <div className="flex flex-1 items-center justify-center text-xl bg-gray-800 text-white">Loading...</div>;
+        return (
+            <div className="flex flex-1 items-center justify-center bg-gray-800">
+                <Loading message="Loading meeting..." className="text-white" />
+            </div>
+        );
     }
 
     if (isPermissionModalOpen) {

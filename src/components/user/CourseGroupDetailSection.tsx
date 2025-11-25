@@ -152,8 +152,8 @@ export function CourseGroupDetailSection() {
 
     return (
         <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-300">
-            {/* Header - Sticky */}
-            <div className="sticky top-[41px] z-30 flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6 shadow-sm">
+            {/* Header */}
+            <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6 shadow-sm">
                 <div className="text-2xl sm:text-4xl">{getIconForGroup(courseGroup.icon)}</div>
                 <div className="flex-1 min-w-0">
                     <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2 truncate">{courseGroup.title}</h1>

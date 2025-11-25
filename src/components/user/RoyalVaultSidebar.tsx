@@ -112,7 +112,7 @@ export function RoyalVaultSidebar() {
           </SidebarGroup>
         )}
 
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-start pt-4">
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu className="space-y-1">

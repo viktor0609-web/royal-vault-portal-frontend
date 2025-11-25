@@ -555,7 +555,7 @@ export function CourseDetailSection() {
 
                   {/* Lecture Content */}
                   {lectures[currentItem]?.content && (
-                    <div className="bg-white rounded-lg border p-3">
+                    <div className="bg-white rounded-lg p-3">
                       <div
                         className="lecture-content"
                         dangerouslySetInnerHTML={{
@@ -681,64 +681,6 @@ export function CourseDetailSection() {
           ) : (
             /* Desktop: Show both list and content */
             <>
-              {/* Left Sidebar - Curriculum */}
-              <div className="w-80 bg-white border-r border-royal-light-gray p-6 mr-8">
-
-                <div className="mb-6">
-                  <h3 className="font-semibold text-royal-dark-gray mb-2 sm:mb-4">{course.title}</h3>
-                  <div className="space-y-2 sm:space-y-4">
-                    {lectures.map((lecture, index) => (
-                      <div
-                        key={index}
-                        className={`w-full flex items-center p-2 sm:p-4 rounded-lg border transition-all duration-75 ease-in-out cursor-pointer group ${index === currentItem
-                          ? "bg-primary/5 border-primary shadow-lg scale-[1.01] ring-2 ring-primary/30 min-[1024px]:bg-primary/10 min-[1024px]:shadow-xl min-[1024px]:scale-[1.015] min-[1024px]:ring-4 min-[1024px]:ring-primary/40"
-                          : "bg-white border-royal-light-gray"
-                          }`}
-                        onClick={() => handleItemClick(index)}
-                      >
-                        <div className="flex items-center gap-3 sm:gap-4">
-                          <div
-                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
-                              } ${completedItems[index]
-                                ? "bg-primary border-primary "
-                                : "border-royal-light-gray "
-                              }`}
-                            onClick={(e) => handleCheckboxClick(index, e)}
-                            title={user ? 'Mark as complete' : 'Login required to track progress'}
-                          >
-                            {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 " />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className={`font-medium transition-colors duration-75  ${index === currentItem
-                              ? "text-primary font-semibold"
-                              : "text-royal-dark-gray"
-                              }`}>
-                              {lecture.title}
-                            </span>
-                            <div className="flex items-center gap-3 mt-1">
-                              {lecture.content && (
-                                <div className="flex items-center gap-1">
-                                  <span className="text-xs text-royal-gray">📄</span>
-                                  <span className="text-xs text-royal-gray">Content</span>
-                                </div>
-                              )}
-                              {lecture.relatedFiles && lecture.relatedFiles.length > 0 && (
-                                <div className="flex items-center gap-1">
-                                  <FileIcon className="h-3 w-3 text-royal-gray" />
-                                  <span className="text-xs text-royal-gray">
-                                    {lecture.relatedFiles.length} file{lecture.relatedFiles.length !== 1 ? 's' : ''}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
               {/* Main Content */}
               <div className="flex-1 flex flex-col">
                 {/* Header */}
@@ -798,7 +740,7 @@ export function CourseDetailSection() {
                 )}
 
                 {lectures[currentItem]?.content && (
-                  <div className="bg-white rounded-lg border p-3">
+                  <div className="bg-white rounded-lg p-3">
                     <div
                       className="lecture-content"
                       dangerouslySetInnerHTML={{
@@ -848,6 +790,64 @@ export function CourseDetailSection() {
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Right Sidebar - Curriculum */}
+              <div className="w-80 bg-white border-l border-royal-light-gray p-6 ml-8">
+
+                <div className="mb-6">
+                  <h3 className="font-semibold text-royal-dark-gray mb-2 sm:mb-4">{course.title}</h3>
+                  <div className="space-y-2 sm:space-y-4">
+                    {lectures.map((lecture, index) => (
+                      <div
+                        key={index}
+                        className={`w-full flex items-center p-2 sm:p-4 rounded-lg border transition-all duration-75 ease-in-out cursor-pointer group ${index === currentItem
+                          ? "bg-primary/5 border-primary shadow-lg scale-[1.01] ring-2 ring-primary/30 min-[1024px]:bg-primary/10 min-[1024px]:shadow-xl min-[1024px]:scale-[1.015] min-[1024px]:ring-4 min-[1024px]:ring-primary/40"
+                          : "bg-white border-royal-light-gray"
+                          }`}
+                        onClick={() => handleItemClick(index)}
+                      >
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div
+                            className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-75 flex-shrink-0 ${user ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                              } ${completedItems[index]
+                                ? "bg-primary border-primary "
+                                : "border-royal-light-gray "
+                              }`}
+                            onClick={(e) => handleCheckboxClick(index, e)}
+                            title={user ? 'Mark as complete' : 'Login required to track progress'}
+                          >
+                            {completedItems[index] && <CheckCircleIcon className="h-4 w-4 text-white transition-transform duration-75 " />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className={`font-medium transition-colors duration-75  ${index === currentItem
+                              ? "text-primary font-semibold"
+                              : "text-royal-dark-gray"
+                              }`}>
+                              {lecture.title}
+                            </span>
+                            <div className="flex items-center gap-3 mt-1">
+                              {lecture.content && (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-xs text-royal-gray">📄</span>
+                                  <span className="text-xs text-royal-gray">Content</span>
+                                </div>
+                              )}
+                              {lecture.relatedFiles && lecture.relatedFiles.length > 0 && (
+                                <div className="flex items-center gap-1">
+                                  <FileIcon className="h-3 w-3 text-royal-gray" />
+                                  <span className="text-xs text-royal-gray">
+                                    {lecture.relatedFiles.length} file{lecture.relatedFiles.length !== 1 ? 's' : ''}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </>
           )}

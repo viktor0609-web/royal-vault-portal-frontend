@@ -42,6 +42,7 @@ export function DealsSection() {
         state: deals,
         setState: setDeals,
         isLoading: loading,
+        setIsLoading,
         error,
         setError
     } = useAdminState<Deal[]>([], 'deals');
@@ -96,6 +97,7 @@ export function DealsSection() {
 
     const fetchDeals = async () => {
         try {
+            setIsLoading(true);
             setError(null);
             // Use 'full' fields for admin view to show all details
             const response = await dealApi.getAllDeals('full');
@@ -103,6 +105,8 @@ export function DealsSection() {
         } catch (error) {
             console.error('Error fetching deals:', error);
             setError('Failed to fetch deals');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -160,7 +164,7 @@ export function DealsSection() {
                             {loading ? (
                                 <TableRow>
                                     <TableCell colSpan={9} className="text-center py-12">
-                                        <Loading message="Loading deals..." size="sm" />
+                                        <Loading message="Loading deals..." size="md" />
                                     </TableCell>
                                 </TableRow>
                             ) : deals.length === 0 ? (

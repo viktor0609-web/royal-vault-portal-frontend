@@ -35,6 +35,7 @@ export function CoursesSection() {
     state: courseGroups,
     setState: setCourseGroups,
     isLoading: loading,
+    setIsLoading,
     error,
     setError,
     getCurrentSection
@@ -99,6 +100,7 @@ export function CoursesSection() {
 
   const fetchCourseGroups = async () => {
     try {
+      setIsLoading(true);
       setError(null);
       // Use 'detailed' fields for admin list view to show course counts
       // Admin should see all courses, not just public ones
@@ -114,6 +116,8 @@ export function CoursesSection() {
         description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -158,7 +162,7 @@ export function CoursesSection() {
             {loading ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8">
-                  <Loading message="Loading course groups..." size="sm" />
+                  <Loading message="Loading course groups..." size="md" />
                 </TableCell>
               </TableRow>
             ) : courseGroups.length === 0 ? (

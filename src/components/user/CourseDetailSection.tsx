@@ -69,29 +69,24 @@ export function CourseDetailSection() {
 
       try {
         setLoading(true);
-        // Use 'full' fields for course detail page to get all lecture data
-        const response = await courseApi.getCourseById(courseId, 'full');
+        // Use 'full' fields for course detail page, with publicOnly=true to filter on backend
+        const response = await courseApi.getCourseById(courseId, 'full', true);
 
-        // Filter lectures to only show those with displayOnPublicPage: true
-        const allLectures = response.data.lectures || [];
-        const publicLectures = allLectures.filter((lecture: Lecture) => lecture.displayOnPublicPage === true);
-
-        // Update course data with filtered lectures
-        const courseData = {
-          ...response.data,
-          lectures: publicLectures
-        };
+        // Backend now filters displayOnPublicPage, so lectures are already filtered
+        const courseData = response.data;
         setCourse(courseData);
 
         // Initialize completed items based on lecture completion status (only for authenticated users)
         if (user) {
-          const completed = publicLectures.map((lecture: Lecture) =>
-            lecture.completedBy && lecture.completedBy.length > 0
+          const lectures = courseData.lectures || [];
+          const completed = lectures.map((lecture: Lecture) =>
+            lecture.completedBy && Array.isArray(lecture.completedBy) && lecture.completedBy.some((id: string) => id === user._id)
           );
           setCompletedItems(completed);
         } else {
           // For non-authenticated users, initialize with all false
-          setCompletedItems(new Array(publicLectures.length).fill(false));
+          const lectures = courseData.lectures || [];
+          setCompletedItems(new Array(lectures.length).fill(false));
         }
       } catch (err) {
         console.error('Error fetching course:', err);

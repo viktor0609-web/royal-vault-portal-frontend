@@ -96,8 +96,10 @@ export function CoursesSection() {
     const fetchCourseGroups = async () => {
       try {
         setLoading(true);
-        const response = await courseApi.getAllCourseGroups();
-        setCourseGroups(response.data);
+        const response = await courseApi.getAllCourseGroups({ publicOnly: true });
+        // Handle new response structure with pagination
+        const data = response.data?.data || response.data || [];
+        setCourseGroups(data);
       } catch (err) {
         console.error('Error fetching course groups:', err);
         setError('Failed to load courses. Please try again.');

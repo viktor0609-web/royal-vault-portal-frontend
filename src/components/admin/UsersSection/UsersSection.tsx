@@ -31,6 +31,8 @@ import { formatDate, formatDateTime } from "@/utils/dateUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { List } from "react-window";
 import type { RowComponentProps } from "react-window";
+import { BottomSheet } from "@/components/VideoMeeting/BottomSheet";
+import { Menu } from "lucide-react";
 
 interface User {
   _id: string;
@@ -82,6 +84,7 @@ export function UsersSection() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [statistics, setStatistics] = useState<UserStatistics | null>(null);
   const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
+  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 
   // Pagination and filters
   const [page, setPage] = useState(1);
@@ -181,14 +184,21 @@ export function UsersSection() {
       const updateHeight = () => {
         if (listContainerRef.current) {
           const rect = listContainerRef.current.getBoundingClientRect();
-          setListHeight(window.innerHeight - rect.top - 20);
+          // Account for padding and margins
+          const availableHeight = window.innerHeight - rect.top - 16;
+          setListHeight(Math.max(400, availableHeight));
         }
       };
       updateHeight();
       window.addEventListener('resize', updateHeight);
-      return () => window.removeEventListener('resize', updateHeight);
+      // Also update when filters/search change
+      const timeoutId = setTimeout(updateHeight, 100);
+      return () => {
+        window.removeEventListener('resize', updateHeight);
+        clearTimeout(timeoutId);
+      };
     }
-  }, [isMobile]);
+  }, [isMobile, search, roleFilter, verificationFilter]);
 
   useEffect(() => {
     fetchStatistics();
@@ -352,32 +362,45 @@ export function UsersSection() {
     if (!user) return null;
 
     return (
-      <div style={style} className="px-1" {...ariaAttributes}>
-        <div className="bg-white p-4 rounded-lg border border-royal-light-gray shadow-sm">
-          <div className="flex justify-between items-start mb-3">
-            <div>
-              <h3 className="font-semibold text-royal-dark-gray">
+      <div style={style} className="px-1.5 sm:px-3 pb-1.5" {...ariaAttributes}>
+        <div className="bg-white p-2.5 sm:p-5 rounded-lg border border-royal-light-gray shadow-sm hover:shadow-md transition-shadow h-full">
+          {/* Header Section */}
+          <div className="flex justify-between items-start mb-2">
+            <div className="flex-1 min-w-0 pr-2">
+              <h3 className="text-sm sm:text-lg font-semibold text-royal-dark-gray mb-1 leading-tight">
                 {user.firstName} {user.lastName}
               </h3>
-              <p className="text-sm text-royal-gray">{user.email}</p>
-              <p className="text-sm text-royal-gray">{user.phone}</p>
+              <div className="space-y-0.5">
+                <p className="text-xs sm:text-sm text-royal-gray truncate" title={user.email}>
+                  {user.email}
+                </p>
+                {user.phone && (
+                  <p className="text-xs sm:text-sm text-royal-gray">
+                    {user.phone}
+                  </p>
+                )}
+              </div>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <MoreVertical className="h-4 w-4" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0 flex-shrink-0 hover:bg-gray-100"
+                >
+                  <MoreVertical className="h-4 w-4 text-royal-gray" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => handleEditUser(user)}>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => handleEditUser(user)} className="text-sm">
                   <Edit className="mr-2 h-4 w-4" />
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
+                <DropdownMenuItem onClick={() => handleResetPassword(user._id)} className="text-sm">
                   <KeyRound className="mr-2 h-4 w-4" />
                   Reset Password
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
+                <DropdownMenuItem onClick={() => handleToggleVerification(user)} className="text-sm">
                   {user.isVerified ? (
                     <>
                       <ShieldOff className="mr-2 h-4 w-4" />
@@ -392,13 +415,14 @@ export function UsersSection() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
+                  className="text-sm"
                 >
                   <Shield className="mr-2 h-4 w-4" />
                   Change to {user.role === "admin" ? "User" : "Admin"}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => handleDeleteClick(user)}
-                  className="text-red-600"
+                  className="text-red-600 text-sm"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
@@ -406,16 +430,26 @@ export function UsersSection() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-              {user.role}
-            </Badge>
-            <Badge variant={user.isVerified ? "default" : "destructive"}>
-              {user.isVerified ? "Verified" : "Unverified"}
-            </Badge>
-            <span className="text-xs text-royal-gray">
+
+          {/* Badges and Metadata Section */}
+          <div className="flex flex-col gap-1.5 pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Badge
+                variant={user.role === "admin" ? "default" : "secondary"}
+                className="text-[10px] sm:text-xs font-medium px-1.5 py-0.5"
+              >
+                {user.role === "admin" ? "Admin" : "User"}
+              </Badge>
+              <Badge
+                variant={user.isVerified ? "default" : "destructive"}
+                className="text-[10px] sm:text-xs font-medium px-1.5 py-0.5"
+              >
+                {user.isVerified ? "Verified" : "Unverified"}
+              </Badge>
+            </div>
+            <div className="text-[10px] sm:text-xs text-royal-gray font-medium">
               Created: {formatDate(user.createdAt)}
-            </span>
+            </div>
           </div>
         </div>
       </div>
@@ -423,72 +457,89 @@ export function UsersSection() {
   }, [allUsers, handleEditUser, handleResetPassword, handleToggleVerification, handleChangeRole, handleDeleteClick]);
 
   return (
-    <div className="flex-1 p-3 sm:p-4 lg:p-6 flex flex-col h-full overflow-hidden">
+    <div className="flex-1 p-2 sm:p-4 lg:p-6 flex flex-col h-full overflow-hidden">
       {/* Header Section - Fixed */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 sm:p-5 lg:p-6 rounded-lg border border-royal-light-gray shadow-sm flex-shrink-0">
-        <div className="flex gap-3 items-center">
-          <div className="flex-shrink-0 p-2 bg-royal-gray/10 rounded-lg">
-            <UsersIcon className="h-5 w-5 sm:h-6 sm:w-6 text-royal-gray" />
+      <div className={`flex flex-col ${isMobile ? 'gap-2 p-3' : 'gap-3 p-4 sm:p-5 lg:p-6'} bg-white rounded-xl border border-royal-light-gray shadow-sm flex-shrink-0`}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+          <div className="flex gap-2 sm:gap-3 items-center">
+            <div className={`flex-shrink-0 ${isMobile ? 'p-1.5' : 'p-2.5'} bg-royal-gray/10 rounded-lg`}>
+              <UsersIcon className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5 sm:h-6 sm:w-6'} text-royal-gray`} />
+            </div>
+            <h1 className={`${isMobile ? 'text-lg' : 'text-xl sm:text-2xl lg:text-3xl'} font-bold text-royal-dark-gray`}>Users</h1>
           </div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-royal-dark-gray">Users</h1>
+          {/* Desktop Actions */}
+          <div className="hidden sm:flex gap-2">
+            <Button
+              onClick={() => setIsStatisticsModalOpen(true)}
+              variant="outline"
+              className="flex items-center justify-center gap-2 h-10 text-sm font-medium"
+            >
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </Button>
+            <Button
+              onClick={handleCreateUser}
+              className="flex items-center justify-center gap-2 h-10 text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
+            >
+              <PlusIcon className="h-4 w-4" />
+              Create New User
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setIsStatisticsModalOpen(true)}
-            variant="outline"
-            className="flex items-center justify-center gap-2 h-11 sm:h-10 text-base sm:text-sm font-medium"
-          >
-            <BarChart3 className="h-5 w-5 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">Analytics</span>
-          </Button>
-          <Button
-            onClick={handleCreateUser}
-            className="flex items-center justify-center gap-2 w-full sm:w-auto h-11 sm:h-10 text-base sm:text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
-          >
-            <PlusIcon className="h-5 w-5 sm:h-4 sm:w-4" />
-            Create New User
-          </Button>
-        </div>
-      </div>
-
-      {/* Filters and Search - Fixed */}
-      <div className="bg-white p-4 rounded-lg border border-royal-light-gray shadow-sm flex-shrink-0">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray" />
+        {/* Mobile Search - Real-time search in header */}
+        {isMobile && (
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-royal-gray z-10" />
             <Input
               placeholder="Search by name, email, or phone..."
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10"
+              className="pl-9 h-8 text-xs"
             />
           </div>
-          <Select value={roleFilter} onValueChange={(value) => { setRoleFilter(value); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-[150px]">
-              <SelectValue placeholder="All Roles" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="user">User</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={verificationFilter} onValueChange={(value) => { setVerificationFilter(value); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-[150px]">
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="true">Verified</SelectItem>
-              <SelectItem value="false">Unverified</SelectItem>
-            </SelectContent>
-          </Select>
+        )}
+      </div>
+
+      {/* Filters and Search - Desktop Only */}
+      <div className="hidden sm:block bg-white p-4 sm:p-5 rounded-xl border border-royal-light-gray shadow-sm flex-shrink-0">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray z-10" />
+            <Input
+              placeholder="Search by name, email, or phone..."
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-10 h-10 text-sm"
+            />
+          </div>
+          <div className="flex gap-2 sm:gap-3">
+            <Select value={roleFilter} onValueChange={(value) => { setRoleFilter(value); setPage(1); }}>
+              <SelectTrigger className="w-full sm:w-[140px] h-10 text-sm">
+                <SelectValue placeholder="All Roles" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="user">User</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={verificationFilter} onValueChange={(value) => { setVerificationFilter(value); setPage(1); }}>
+              <SelectTrigger className="w-full sm:w-[140px] h-10 text-sm">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="true">Verified</SelectItem>
+                <SelectItem value="false">Unverified</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm flex-shrink-0">
-          <p className="font-medium">{error}</p>
+          <p className="font-medium text-sm sm:text-base">{error}</p>
         </div>
       )}
 
@@ -643,15 +694,21 @@ export function UsersSection() {
         </div>
 
         {/* Mobile Card View with Virtualization */}
-        <div ref={listContainerRef} className="lg:hidden flex-1 min-h-0">
+        <div ref={listContainerRef} className="lg:hidden flex-1 min-h-0 py-1">
           {isLoadingAllUsers ? (
-            <Loading message="Loading users..." />
+            <div className="flex items-center justify-center h-full">
+              <Loading message="Loading users..." />
+            </div>
           ) : allUsers.length === 0 ? (
-            <div className="text-center py-8 text-royal-gray">No users found</div>
+            <div className="flex flex-col items-center justify-center h-full py-12">
+              <UsersIcon className="h-12 w-12 text-royal-gray/40 mb-4" />
+              <p className="text-base font-medium text-royal-gray">No users found</p>
+              <p className="text-sm text-royal-gray/70 mt-1">Try adjusting your filters</p>
+            </div>
           ) : (
             <List
               rowCount={allUsers.length}
-              rowHeight={180} // Approximate height of each card
+              rowHeight={140} // Adjusted height to prevent overlap
               style={{ height: listHeight, width: '100%' }}
               className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
               rowComponent={UserCard}
@@ -868,6 +925,94 @@ export function UsersSection() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Mobile Floating Action Button */}
+      {isMobile && (
+        <button
+          onClick={() => setIsBottomSheetOpen(true)}
+          className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center hover:scale-105 active:scale-95"
+          aria-label="Open filters and actions"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+      )}
+
+
+      {/* Mobile Bottom Sheet for Search, Filters, and Actions */}
+      {isMobile && (
+        <BottomSheet
+          isOpen={isBottomSheetOpen}
+          onClose={() => setIsBottomSheetOpen(false)}
+          title="Users"
+          maxHeight="85vh"
+        >
+          <div className="p-4 space-y-4">
+            {/* Filters */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Filters</label>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-gray-400 mb-1.5 block">Role</label>
+                  <Select value={roleFilter} onValueChange={(value) => { setRoleFilter(value); setPage(1); }}>
+                    <SelectTrigger className="w-full h-11 bg-gray-800 border-gray-700 text-white hover:bg-gray-750">
+                      <SelectValue placeholder="All Roles" />
+                    </SelectTrigger>
+                    <SelectContent className="!z-[70] bg-gray-800 border-gray-700 text-white">
+                      <SelectItem value="all" className="text-white focus:bg-gray-700">All Roles</SelectItem>
+                      <SelectItem value="admin" className="text-white focus:bg-gray-700">Admin</SelectItem>
+                      <SelectItem value="user" className="text-white focus:bg-gray-700">User</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 mb-1.5 block">Status</label>
+                  <Select value={verificationFilter} onValueChange={(value) => { setVerificationFilter(value); setPage(1); }}>
+                    <SelectTrigger className="w-full h-11 bg-gray-800 border-gray-700 text-white hover:bg-gray-750">
+                      <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent className="!z-[70] bg-gray-800 border-gray-700 text-white">
+                      <SelectItem value="all" className="text-white focus:bg-gray-700">All Status</SelectItem>
+                      <SelectItem value="true" className="text-white focus:bg-gray-700">Verified</SelectItem>
+                      <SelectItem value="false" className="text-white focus:bg-gray-700">Unverified</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-gray-700 my-2" />
+
+            {/* Actions */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Actions</label>
+              <div className="space-y-2">
+                <Button
+                  onClick={() => {
+                    setIsStatisticsModalOpen(true);
+                    setIsBottomSheetOpen(false);
+                  }}
+                  variant="outline"
+                  className="w-full h-11 bg-gray-800 border-gray-700 text-white hover:bg-gray-700 justify-start"
+                >
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  View Analytics
+                </Button>
+                <Button
+                  onClick={() => {
+                    handleCreateUser();
+                    setIsBottomSheetOpen(false);
+                  }}
+                  className="w-full h-11 bg-primary hover:bg-primary/90 text-white justify-start"
+                >
+                  <PlusIcon className="h-4 w-4 mr-2" />
+                  Create New User
+                </Button>
+              </div>
+            </div>
+          </div>
+        </BottomSheet>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogHeader,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -188,9 +189,11 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
     <>
       <Dialog open={isOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto overflow-x-hidden">
-          <DialogTitle className="text-xl font-semibold">
-            {editingCourse ? "Edit Course" : "Create Course"}
-          </DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold">
+              {editingCourse ? "Edit Course" : "Create Course"}
+            </DialogTitle>
+          </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4 min-w-0 w-full">
             <div className="w-full min-w-0">
               <Label htmlFor="title" className="text-royal-dark-gray font-medium">

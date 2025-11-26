@@ -3,6 +3,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogHeader,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -298,9 +299,11 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
     <>
       <Dialog open={isOpen} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-auto">
-          <DialogTitle className="text-xl font-semibold mb-4">
-            {editingWebinar ? "Edit Webinar" : "Create Webinar"}
-          </DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold mb-4">
+              {editingWebinar ? "Edit Webinar" : "Create Webinar"}
+            </DialogTitle>
+          </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             {formFields.map((item, index) => {
               const isRequired = item.required;

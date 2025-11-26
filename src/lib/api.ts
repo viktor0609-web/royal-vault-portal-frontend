@@ -15,18 +15,38 @@ console.log(import.meta.env.VITE_BACKEND_URL);
 let isRefreshing = false;
 let pendingRequestsQueue: Array<(token: string | null) => void> = [];
 
+// Callback to notify when tokens are cleared (for AuthContext)
+let onTokensCleared: (() => void) | null = null;
+
+export const setOnTokensCleared = (callback: () => void) => {
+  onTokensCleared = callback;
+};
+
 const getAccessToken = (): string | null => localStorage.getItem("accessToken");
 const getRefreshToken = (): string | null => localStorage.getItem("refreshToken");
 const setAccessToken = (token: string) => localStorage.setItem("accessToken", token);
 const setRefreshToken = (token: string) => localStorage.setItem("refreshToken", token);
 
+// Helper to clear tokens and notify
+const clearTokens = () => {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  if (onTokensCleared) {
+    onTokensCleared();
+  }
+};
+
 // Attach Authorization header
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  // Don't add token to refresh endpoint
+  if (config.url?.includes('/api/auth/refresh')) {
+    return config;
+  }
+
   const token = getAccessToken();
   if (token && !config.headers["Authorization"]) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
-
 
   return config;
 });
@@ -55,15 +75,18 @@ api.interceptors.response.use(
 
       if (isRefreshing) {
         // Queue the request until refresh completes
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           pendingRequestsQueue.push((newToken) => {
             if (newToken) {
               originalRequest.headers = {
                 ...originalRequest.headers,
                 Authorization: `Bearer ${newToken}`,
               } as any;
+              resolve(api(originalRequest));
+            } else {
+              // Reject if refresh failed
+              reject(new Error('Token refresh failed'));
             }
-            resolve(api(originalRequest));
           });
         });
       }
@@ -103,10 +126,24 @@ api.interceptors.response.use(
           Authorization: `Bearer ${newAccessToken}`,
         } as any;
         return api(originalRequest);
-      } catch (refreshError) {
-        // On refresh failure, clear tokens and fail queued requests
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+      } catch (refreshError: any) {
+        // Check if it's a network error vs token error
+        const isNetworkError = 
+          refreshError.code === 'ECONNABORTED' || 
+          refreshError.code === 'ERR_NETWORK' ||
+          refreshError.message?.includes('Network Error') ||
+          !refreshError.response;
+
+        if (isNetworkError) {
+          // Network error - don't clear tokens, just reject and reset state
+          pendingRequestsQueue.forEach((cb) => cb(null));
+          pendingRequestsQueue = [];
+          isRefreshing = false;
+          return Promise.reject(refreshError);
+        }
+
+        // Token error - clear tokens and fail queued requests
+        clearTokens();
         pendingRequestsQueue.forEach((cb) => cb(null));
         pendingRequestsQueue = [];
         return Promise.reject(refreshError);

@@ -1,6 +1,6 @@
 // src/context/AuthContext.tsx
 import { createContext, useEffect, useState, ReactNode, useContext } from "react";
-import { api } from "@/lib/api";
+import { api, setOnTokensCleared } from "@/lib/api";
 
 // Define shape of user data (MongoDB only - for AuthContext)
 export interface User {
@@ -69,6 +69,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (localStorage.getItem("accessToken")) {
             fetchProfile();
         }
+
+        // Register callback to clear user state when tokens are cleared
+        setOnTokensCleared(() => {
+            setUser(null);
+        });
+
+        // Cleanup on unmount
+        return () => {
+            setOnTokensCleared(() => {});
+        };
     }, []);
 
     return (

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, ArrowUp, ArrowDown, BarChart3 } from "lucide-react";
+import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, ArrowUp, ArrowDown, BarChart3, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { CreateUserModal } from "./CreateUserModal";
 import { userApi } from "@/lib/api";
@@ -75,7 +75,7 @@ export function UsersSection() {
 
   // Pagination and filters
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [verificationFilter, setVerificationFilter] = useState<string>("all");
@@ -255,6 +255,11 @@ export function UsersSection() {
     setPage(1); // Reset to first page on sort change
   };
 
+  const handleLimitChange = (value: string) => {
+    setLimit(parseInt(value));
+    setPage(1); // Reset to first page when changing items per page
+  };
+
   const getSortIcon = (field: string) => {
     if (orderBy !== field) {
       return null;
@@ -336,160 +341,158 @@ export function UsersSection() {
         </div>
       )}
 
-      {/* Scrollable User List Container */}
-      <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+      {/* Scrollable Content Area - Lists */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {/* Desktop Table View */}
-        <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm flex-1 min-h-0 flex flex-col">
-          <div className="flex-1 overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            <Table className="w-full">
-              <TableHeader>
-                <TableRow className="bg-gray-50 hover:bg-gray-50">
-                  <TableHead
-                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort('firstName')}
-                  >
-                    <div className="flex items-center">
-                      Name
-                      {getSortIcon('firstName')}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort('email')}
-                  >
-                    <div className="flex items-center">
-                      Email
-                      {getSortIcon('email')}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort('phone')}
-                  >
-                    <div className="flex items-center">
-                      Phone
-                      {getSortIcon('phone')}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort('role')}
-                  >
-                    <div className="flex items-center">
-                      Role
-                      {getSortIcon('role')}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort('isVerified')}
-                  >
-                    <div className="flex items-center">
-                      Status
-                      {getSortIcon('isVerified')}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                    onClick={() => handleSort('createdAt')}
-                  >
-                    <div className="flex items-center">
-                      Created
-                      {getSortIcon('createdAt')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="font-semibold text-royal-dark-gray text-right">Actions</TableHead>
+        <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm">
+          <Table className="w-full">
+            <TableHeader>
+              <TableRow className="bg-gray-50 hover:bg-gray-50">
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('firstName')}
+                >
+                  <div className="flex items-center">
+                    Name
+                    {getSortIcon('firstName')}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('email')}
+                >
+                  <div className="flex items-center">
+                    Email
+                    {getSortIcon('email')}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('phone')}
+                >
+                  <div className="flex items-center">
+                    Phone
+                    {getSortIcon('phone')}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('role')}
+                >
+                  <div className="flex items-center">
+                    Role
+                    {getSortIcon('role')}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('isVerified')}
+                >
+                  <div className="flex items-center">
+                    Status
+                    {getSortIcon('isVerified')}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                  onClick={() => handleSort('createdAt')}
+                >
+                  <div className="flex items-center">
+                    Created
+                    {getSortIcon('createdAt')}
+                  </div>
+                </TableHead>
+                <TableHead className="font-semibold text-royal-dark-gray text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <Loading message="Loading users..." size="md" />
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <Loading message="Loading users..." size="md" />
+              ) : users.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-royal-gray">
+                    No users found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                users.map((user) => (
+                  <TableRow key={user._id} className="hover:bg-gray-50">
+                    <TableCell className="font-medium">
+                      {user.firstName} {user.lastName}
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.phone}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                        {user.role}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={user.isVerified ? "default" : "destructive"}>
+                        {user.isVerified ? "Verified" : "Unverified"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-royal-gray">
+                      {formatDate(user.createdAt)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
+                            <KeyRound className="mr-2 h-4 w-4" />
+                            Reset Password
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
+                            {user.isVerified ? (
+                              <>
+                                <ShieldOff className="mr-2 h-4 w-4" />
+                                Deactivate
+                              </>
+                            ) : (
+                              <>
+                                <Shield className="mr-2 h-4 w-4" />
+                                Activate
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
+                          >
+                            <Shield className="mr-2 h-4 w-4" />
+                            Change to {user.role === "admin" ? "User" : "Admin"}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteClick(user)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ) : users.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-royal-gray">
-                      No users found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  users.map((user) => (
-                    <TableRow key={user._id} className="hover:bg-gray-50">
-                      <TableCell className="font-medium">
-                        {user.firstName} {user.lastName}
-                      </TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.phone}</TableCell>
-                      <TableCell>
-                        <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                          {user.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={user.isVerified ? "default" : "destructive"}>
-                          {user.isVerified ? "Verified" : "Unverified"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-royal-gray">
-                        {formatDate(user.createdAt)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
-                              <KeyRound className="mr-2 h-4 w-4" />
-                              Reset Password
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
-                              {user.isVerified ? (
-                                <>
-                                  <ShieldOff className="mr-2 h-4 w-4" />
-                                  Deactivate
-                                </>
-                              ) : (
-                                <>
-                                  <Shield className="mr-2 h-4 w-4" />
-                                  Activate
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
-                            >
-                              <Shield className="mr-2 h-4 w-4" />
-                              Change to {user.role === "admin" ? "User" : "Admin"}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteClick(user)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
 
         {/* Mobile Card View */}
-        <div className="lg:hidden space-y-3 flex-1 overflow-y-auto p-1">
+        <div className="lg:hidden space-y-3 p-1">
           {loading ? (
             <Loading message="Loading users..." />
           ) : users.length === 0 ? (
@@ -567,13 +570,42 @@ export function UsersSection() {
       </div>
 
       {/* Pagination - Fixed */}
-      {pagination.totalPages > 1 && (
-        <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray flex-shrink-0">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray flex-shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="text-xs sm:text-sm text-royal-gray text-center sm:text-left">
               Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, pagination.totalUsers)} of {pagination.totalUsers} users
             </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm text-royal-gray">Items per page:</span>
+              <Select value={limit.toString()} onValueChange={handleLimitChange}>
+                <SelectTrigger className="w-[80px] h-8 text-xs sm:text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          {pagination.totalPages > 1 && (
             <div className="flex items-center justify-center gap-1 sm:gap-2">
+              {/* First Page Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(1)}
+                disabled={page === 1}
+                className="text-xs sm:text-sm px-2 sm:px-3"
+                title="First page"
+              >
+                <ChevronsLeft className="h-4 w-4" />
+                <span className="hidden lg:inline ml-1">First</span>
+              </Button>
+              {/* Previous Page Button */}
               <Button
                 variant="outline"
                 size="sm"
@@ -584,8 +616,41 @@ export function UsersSection() {
                 <span className="hidden sm:inline">Previous</span>
                 <span className="sm:hidden">Prev</span>
               </Button>
-              {/* Mobile: Show 3 pages, Desktop: Show 5 pages */}
-              <div className="hidden sm:flex items-center gap-1">
+              {/* Page Number Selector */}
+              <div className="hidden md:flex items-center gap-2">
+                <span className="text-xs sm:text-sm text-royal-gray">Page</span>
+                <Select
+                  value={page.toString()}
+                  onValueChange={(value) => setPage(parseInt(value))}
+                >
+                  <SelectTrigger className="w-[70px] h-8 text-xs sm:text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
+                      <SelectItem key={pageNum} value={pageNum.toString()}>
+                        {pageNum}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-xs sm:text-sm text-royal-gray">of {pagination.totalPages}</span>
+              </div>
+              {/* Mobile: Show current page and total */}
+              <div className="flex md:hidden items-center gap-1">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="min-w-[32px] text-xs px-2"
+                  disabled
+                >
+                  {page}
+                </Button>
+                <span className="text-xs text-royal-gray">/</span>
+                <span className="text-xs text-royal-gray">{pagination.totalPages}</span>
+              </div>
+              {/* Desktop: Show page number buttons */}
+              <div className="hidden sm:flex md:hidden items-center gap-1">
                 {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                   let pageNum;
                   if (pagination.totalPages <= 5) {
@@ -610,19 +675,7 @@ export function UsersSection() {
                   );
                 })}
               </div>
-              {/* Mobile: Show current page and total */}
-              <div className="flex sm:hidden items-center gap-1">
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="min-w-[32px] text-xs px-2"
-                  disabled
-                >
-                  {page}
-                </Button>
-                <span className="text-xs text-royal-gray">/</span>
-                <span className="text-xs text-royal-gray">{pagination.totalPages}</span>
-              </div>
+              {/* Next Page Button */}
               <Button
                 variant="outline"
                 size="sm"
@@ -632,10 +685,22 @@ export function UsersSection() {
               >
                 Next
               </Button>
+              {/* Last Page Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(pagination.totalPages)}
+                disabled={page === pagination.totalPages}
+                className="text-xs sm:text-sm px-2 sm:px-3"
+                title="Last page"
+              >
+                <span className="hidden lg:inline mr-1">Last</span>
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Create/Edit User Modal */}
       <CreateUserModal

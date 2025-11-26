@@ -154,6 +154,23 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
     }
   }, [editingDeal, isOpen]);
 
+  // Ensure source value is set after options are loaded when editing
+  useEffect(() => {
+    if (editingDeal && options.sources.length > 0 && editingDeal.source?._id) {
+      // Ensure source is set after options are loaded
+      // This handles the case where formData was set before options loaded
+      setFormData(prev => {
+        if (prev.source !== editingDeal.source._id) {
+          return {
+            ...prev,
+            source: editingDeal.source._id
+          };
+        }
+        return prev;
+      });
+    }
+  }, [options.sources, editingDeal]);
+
   const fetchOptions = async () => {
     try {
       setLoading(true);
@@ -459,7 +476,8 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                     {item.title}
                   </Label>
                   <Select
-                    value={formData[item.id as keyof typeof formData] as string}
+                    key={`${item.id}-${options.sources.length > 0 ? 'loaded' : 'loading'}`}
+                    value={formData[item.id as keyof typeof formData] as string || undefined}
                     onValueChange={(value) => handleInputChange(item.id, value)}
                     disabled={loading}
                   >

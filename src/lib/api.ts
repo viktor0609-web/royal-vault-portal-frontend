@@ -37,6 +37,12 @@ api.interceptors.response.use(
   async (error: AxiosError<any>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
+    // Skip refresh logic for refresh endpoint to prevent infinite loops
+    const isRefreshEndpoint = originalRequest.url?.includes('/api/auth/refresh');
+    if (isRefreshEndpoint) {
+      return Promise.reject(error);
+    }
+
     // If unauthorized and we haven't retried yet, try to refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -64,7 +70,16 @@ api.interceptors.response.use(
 
       try {
         isRefreshing = true;
-        const { data } = await api.post("/api/auth/refresh", { refreshToken });
+        // Make refresh request without Authorization header to avoid issues
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/auth/refresh`,
+          { refreshToken },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
         const newAccessToken = data?.accessToken as string | undefined;
         const newRefreshToken = data?.refreshToken as string | undefined;
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
@@ -28,6 +28,9 @@ import { CreateUserModal } from "./CreateUserModal";
 import { userApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate, formatDateTime } from "@/utils/dateUtils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { List } from "react-window";
+import type { RowComponentProps } from "react-window";
 
 interface User {
   _id: string;
@@ -55,6 +58,7 @@ interface UserStatistics {
 
 export function UsersSection() {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const {
     state: users,
@@ -64,6 +68,12 @@ export function UsersSection() {
     error,
     setError,
   } = useAdminState<User[]>([], 'users');
+
+  // For mobile virtualization - store all users
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [isLoadingAllUsers, setIsLoadingAllUsers] = useState(false);
+  const [listHeight, setListHeight] = useState(600);
+  const listContainerRef = useRef<HTMLDivElement>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -118,6 +128,36 @@ export function UsersSection() {
     }
   };
 
+  // Fetch all users for mobile virtualization
+  const fetchAllUsers = async () => {
+    try {
+      setIsLoadingAllUsers(true);
+      setError(null);
+      const params: any = {
+        page: 1,
+        limit: 10000, // Large limit to get all users
+        sortBy: orderBy,
+        order,
+      };
+      if (search) params.search = search;
+      if (roleFilter && roleFilter !== "all") params.role = roleFilter;
+      if (verificationFilter && verificationFilter !== "all") params.isVerified = verificationFilter;
+
+      const response = await userApi.getAllUsers(params);
+      setAllUsers(response.data.users || []);
+    } catch (error: any) {
+      console.error("Error fetching all users:", error);
+      setError(error.response?.data?.message || "Failed to fetch users");
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to fetch users",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingAllUsers(false);
+    }
+  };
+
   const fetchStatistics = async () => {
     try {
       const response = await userApi.getUserStatistics();
@@ -128,8 +168,27 @@ export function UsersSection() {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, [page, limit, search, roleFilter, verificationFilter, orderBy, order]);
+    if (isMobile) {
+      fetchAllUsers();
+    } else {
+      fetchUsers();
+    }
+  }, [page, limit, search, roleFilter, verificationFilter, orderBy, order, isMobile]);
+
+  // Calculate list height for mobile virtualization
+  useEffect(() => {
+    if (isMobile && listContainerRef.current) {
+      const updateHeight = () => {
+        if (listContainerRef.current) {
+          const rect = listContainerRef.current.getBoundingClientRect();
+          setListHeight(window.innerHeight - rect.top - 20);
+        }
+      };
+      updateHeight();
+      window.addEventListener('resize', updateHeight);
+      return () => window.removeEventListener('resize', updateHeight);
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     fetchStatistics();
@@ -148,7 +207,11 @@ export function UsersSection() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingUser(null);
-    fetchUsers();
+    if (isMobile) {
+      fetchAllUsers();
+    } else {
+      fetchUsers();
+    }
     fetchStatistics();
   };
 
@@ -169,7 +232,11 @@ export function UsersSection() {
         title: "Success",
         description: "User deleted successfully",
       });
-      fetchUsers();
+      if (isMobile) {
+        fetchAllUsers();
+      } else {
+        fetchUsers();
+      }
       fetchStatistics();
     } catch (error: any) {
       console.error("Error deleting user:", error);
@@ -207,7 +274,11 @@ export function UsersSection() {
         title: "Success",
         description: `User ${!user.isVerified ? "activated" : "deactivated"} successfully`,
       });
-      fetchUsers();
+      if (isMobile) {
+        fetchAllUsers();
+      } else {
+        fetchUsers();
+      }
       fetchStatistics();
     } catch (error: any) {
       console.error("Error toggling verification:", error);
@@ -226,7 +297,11 @@ export function UsersSection() {
         title: "Success",
         description: `User role changed to ${newRole} successfully`,
       });
-      fetchUsers();
+      if (isMobile) {
+        fetchAllUsers();
+      } else {
+        fetchUsers();
+      }
       fetchStatistics();
     } catch (error: any) {
       console.error("Error changing role:", error);
@@ -270,6 +345,82 @@ export function UsersSection() {
       <ArrowDown className="h-3 w-3 inline-block ml-1" />
     );
   };
+
+  // User card component for virtualization
+  const UserCard = useCallback(({ index, style, ariaAttributes }: RowComponentProps) => {
+    const user = allUsers[index];
+    if (!user) return null;
+
+    return (
+      <div style={style} className="px-1" {...ariaAttributes}>
+        <div className="bg-white p-4 rounded-lg border border-royal-light-gray shadow-sm">
+          <div className="flex justify-between items-start mb-3">
+            <div>
+              <h3 className="font-semibold text-royal-dark-gray">
+                {user.firstName} {user.lastName}
+              </h3>
+              <p className="text-sm text-royal-gray">{user.email}</p>
+              <p className="text-sm text-royal-gray">{user.phone}</p>
+            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  Reset Password
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
+                  {user.isVerified ? (
+                    <>
+                      <ShieldOff className="mr-2 h-4 w-4" />
+                      Deactivate
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="mr-2 h-4 w-4" />
+                      Activate
+                    </>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
+                >
+                  <Shield className="mr-2 h-4 w-4" />
+                  Change to {user.role === "admin" ? "User" : "Admin"}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleDeleteClick(user)}
+                  className="text-red-600"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+              {user.role}
+            </Badge>
+            <Badge variant={user.isVerified ? "default" : "destructive"}>
+              {user.isVerified ? "Verified" : "Unverified"}
+            </Badge>
+            <span className="text-xs text-royal-gray">
+              Created: {formatDate(user.createdAt)}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }, [allUsers, handleEditUser, handleResetPassword, handleToggleVerification, handleChangeRole, handleDeleteClick]);
 
   return (
     <div className="flex-1 p-3 sm:p-4 lg:p-6 flex flex-col h-full overflow-hidden">
@@ -491,216 +642,159 @@ export function UsersSection() {
           </Table>
         </div>
 
-        {/* Mobile Card View */}
-        <div className="lg:hidden space-y-3 p-1">
-          {loading ? (
+        {/* Mobile Card View with Virtualization */}
+        <div ref={listContainerRef} className="lg:hidden flex-1 min-h-0">
+          {isLoadingAllUsers ? (
             <Loading message="Loading users..." />
-          ) : users.length === 0 ? (
+          ) : allUsers.length === 0 ? (
             <div className="text-center py-8 text-royal-gray">No users found</div>
           ) : (
-            users.map((user) => (
-              <div key={user._id} className="bg-white p-4 rounded-lg border border-royal-light-gray shadow-sm">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-semibold text-royal-dark-gray">
-                      {user.firstName} {user.lastName}
-                    </h3>
-                    <p className="text-sm text-royal-gray">{user.email}</p>
-                    <p className="text-sm text-royal-gray">{user.phone}</p>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
-                        <KeyRound className="mr-2 h-4 w-4" />
-                        Reset Password
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
-                        {user.isVerified ? (
-                          <>
-                            <ShieldOff className="mr-2 h-4 w-4" />
-                            Deactivate
-                          </>
-                        ) : (
-                          <>
-                            <Shield className="mr-2 h-4 w-4" />
-                            Activate
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
-                      >
-                        <Shield className="mr-2 h-4 w-4" />
-                        Change to {user.role === "admin" ? "User" : "Admin"}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleDeleteClick(user)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <div className="flex gap-2 flex-wrap">
-                  <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                    {user.role}
-                  </Badge>
-                  <Badge variant={user.isVerified ? "default" : "destructive"}>
-                    {user.isVerified ? "Verified" : "Unverified"}
-                  </Badge>
-                  <span className="text-xs text-royal-gray">
-                    Created: {formatDate(user.createdAt)}
-                  </span>
-                </div>
-              </div>
-            ))
+            <List
+              rowCount={allUsers.length}
+              rowHeight={180} // Approximate height of each card
+              style={{ height: listHeight, width: '100%' }}
+              className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+              rowComponent={UserCard}
+              rowProps={{}}
+            />
           )}
         </div>
       </div>
 
-      {/* Pagination - Fixed */}
-      <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray flex-shrink-0">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="text-xs sm:text-sm text-royal-gray text-center sm:text-left">
-              Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, pagination.totalUsers)} of {pagination.totalUsers} users
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm text-royal-gray">Items per page:</span>
-              <Select value={limit.toString()} onValueChange={handleLimitChange}>
-                <SelectTrigger className="w-[80px] h-8 text-xs sm:text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          {pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-1 sm:gap-2">
-              {/* First Page Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(1)}
-                disabled={page === 1}
-                className="text-xs sm:text-sm px-2 sm:px-3"
-                title="First page"
-              >
-                <ChevronsLeft className="h-4 w-4" />
-                <span className="hidden lg:inline ml-1">First</span>
-              </Button>
-              {/* Previous Page Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(page - 1)}
-                disabled={page === 1}
-                className="text-xs sm:text-sm px-2 sm:px-3"
-              >
-                <span className="hidden sm:inline">Previous</span>
-                <span className="sm:hidden">Prev</span>
-              </Button>
-              {/* Page Number Selector */}
-              <div className="hidden md:flex items-center gap-2">
-                <span className="text-xs sm:text-sm text-royal-gray">Page</span>
-                <Select
-                  value={page.toString()}
-                  onValueChange={(value) => setPage(parseInt(value))}
-                >
-                  <SelectTrigger className="w-[70px] h-8 text-xs sm:text-sm">
+      {/* Pagination - Fixed (Hidden on Mobile) */}
+      {!isMobile && (
+        <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray flex-shrink-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="text-xs sm:text-sm text-royal-gray text-center sm:text-left">
+                Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, pagination.totalUsers)} of {pagination.totalUsers} users
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs sm:text-sm text-royal-gray">Items per page:</span>
+                <Select value={limit.toString()} onValueChange={handleLimitChange}>
+                  <SelectTrigger className="w-[80px] h-8 text-xs sm:text-sm">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
-                      <SelectItem key={pageNum} value={pageNum.toString()}>
-                        {pageNum}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="25">25</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
                   </SelectContent>
                 </Select>
-                <span className="text-xs sm:text-sm text-royal-gray">of {pagination.totalPages}</span>
               </div>
-              {/* Mobile: Show current page and total */}
-              <div className="flex md:hidden items-center gap-1">
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="min-w-[32px] text-xs px-2"
-                  disabled
-                >
-                  {page}
-                </Button>
-                <span className="text-xs text-royal-gray">/</span>
-                <span className="text-xs text-royal-gray">{pagination.totalPages}</span>
-              </div>
-              {/* Desktop: Show page number buttons */}
-              <div className="hidden sm:flex md:hidden items-center gap-1">
-                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (pagination.totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (page <= 3) {
-                    pageNum = i + 1;
-                  } else if (page >= pagination.totalPages - 2) {
-                    pageNum = pagination.totalPages - 4 + i;
-                  } else {
-                    pageNum = page - 2 + i;
-                  }
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={page === pageNum ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setPage(pageNum)}
-                      className="min-w-[36px] text-sm px-2"
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
-              </div>
-              {/* Next Page Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(page + 1)}
-                disabled={page === pagination.totalPages}
-                className="text-xs sm:text-sm px-2 sm:px-3"
-              >
-                Next
-              </Button>
-              {/* Last Page Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(pagination.totalPages)}
-                disabled={page === pagination.totalPages}
-                className="text-xs sm:text-sm px-2 sm:px-3"
-                title="Last page"
-              >
-                <span className="hidden lg:inline mr-1">Last</span>
-                <ChevronsRight className="h-4 w-4" />
-              </Button>
             </div>
-          )}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-1 sm:gap-2">
+                {/* First Page Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(1)}
+                  disabled={page === 1}
+                  className="text-xs sm:text-sm px-2 sm:px-3"
+                  title="First page"
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                  <span className="hidden lg:inline ml-1">First</span>
+                </Button>
+                {/* Previous Page Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(page - 1)}
+                  disabled={page === 1}
+                  className="text-xs sm:text-sm px-2 sm:px-3"
+                >
+                  <span className="hidden sm:inline">Previous</span>
+                  <span className="sm:hidden">Prev</span>
+                </Button>
+                {/* Page Number Selector */}
+                <div className="hidden md:flex items-center gap-2">
+                  <span className="text-xs sm:text-sm text-royal-gray">Page</span>
+                  <Select
+                    value={page.toString()}
+                    onValueChange={(value) => setPage(parseInt(value))}
+                  >
+                    <SelectTrigger className="w-[70px] h-8 text-xs sm:text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
+                        <SelectItem key={pageNum} value={pageNum.toString()}>
+                          {pageNum}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <span className="text-xs sm:text-sm text-royal-gray">of {pagination.totalPages}</span>
+                </div>
+                {/* Mobile: Show current page and total */}
+                <div className="flex md:hidden items-center gap-1">
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="min-w-[32px] text-xs px-2"
+                    disabled
+                  >
+                    {page}
+                  </Button>
+                  <span className="text-xs text-royal-gray">/</span>
+                  <span className="text-xs text-royal-gray">{pagination.totalPages}</span>
+                </div>
+                {/* Desktop: Show page number buttons */}
+                <div className="hidden sm:flex md:hidden items-center gap-1">
+                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (pagination.totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (page <= 3) {
+                      pageNum = i + 1;
+                    } else if (page >= pagination.totalPages - 2) {
+                      pageNum = pagination.totalPages - 4 + i;
+                    } else {
+                      pageNum = page - 2 + i;
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={page === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPage(pageNum)}
+                        className="min-w-[36px] text-sm px-2"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                {/* Next Page Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(page + 1)}
+                  disabled={page === pagination.totalPages}
+                  className="text-xs sm:text-sm px-2 sm:px-3"
+                >
+                  Next
+                </Button>
+                {/* Last Page Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(pagination.totalPages)}
+                  disabled={page === pagination.totalPages}
+                  className="text-xs sm:text-sm px-2 sm:px-3"
+                  title="Last page"
+                >
+                  <span className="hidden lg:inline mr-1">Last</span>
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Create/Edit User Modal */}
       <CreateUserModal

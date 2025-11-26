@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogTitle,
   DialogDescription,
+  DialogHeader,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -137,12 +138,14 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
   return (
     <Dialog open={isOpen} onOpenChange={closeDialog}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogTitle className="text-xl font-semibold">
-          {editingLecture ? "Edit Lecture" : "Create Lecture"}
-        </DialogTitle>
-        <DialogDescription>
-          {editingLecture ? "Update the lecture details below." : "Fill in the details to create a new lecture."}
-        </DialogDescription>
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">
+            {editingLecture ? "Edit Lecture" : "Create Lecture"}
+          </DialogTitle>
+          <DialogDescription>
+            {editingLecture ? "Update the lecture details below." : "Fill in the details to create a new lecture."}
+          </DialogDescription>
+        </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {!editingLecture && (
             <div>

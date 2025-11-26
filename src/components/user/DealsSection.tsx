@@ -386,6 +386,9 @@ export function DealsSection() {
         {/* HubSpot "Talk to Sales" Modal */}
         <Dialog open={showSalesModal} onOpenChange={setShowSalesModal}>
           <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto p-0">
+            <DialogHeader>
+              <DialogTitle className="sr-only">Talk to Sales</DialogTitle>
+            </DialogHeader>
             <div
               className="meetings-iframe-container w-full h-full"
               data-src="https://meetings.hubspot.com/meet-rls/sales-demo-free?embed=true"

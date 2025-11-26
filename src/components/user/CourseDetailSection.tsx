@@ -60,6 +60,8 @@ export function CourseDetailSection() {
   const [currentItem, setCurrentItem] = useState(0);
   const [showMobileContent, setShowMobileContent] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
+  const mobileContentScrollRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   // Initialize checkbox state from localStorage or default values
@@ -145,7 +147,24 @@ export function CourseDetailSection() {
     if (window.innerWidth < 1024) {
       setShowMobileContent(true);
     }
+    // Scroll content to top when lecture changes
+    if (contentScrollRef.current && window.innerWidth >= 1024) {
+      contentScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    if (mobileContentScrollRef.current && window.innerWidth < 1024) {
+      mobileContentScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
+
+  // Scroll to top when currentItem changes
+  useEffect(() => {
+    if (contentScrollRef.current && window.innerWidth >= 1024) {
+      contentScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    if (mobileContentScrollRef.current && window.innerWidth < 1024 && showMobileContent) {
+      mobileContentScrollRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentItem, showMobileContent]);
 
   const handleBackToList = () => {
     setShowMobileContent(false);
@@ -491,12 +510,12 @@ export function CourseDetailSection() {
             </div>
           </div>
         </div>
-        <div className="flex-1 flex">
+        <div className="flex-1 flex min-h-0">
           {/* Mobile: Show only list or only content */}
           {window.innerWidth < 1024 ? (
             showMobileContent ? (
               /* Mobile Content View */
-              <div className="flex-1 flex flex-col w-full">
+              <div ref={mobileContentScrollRef} className="flex-1 flex flex-col w-full overflow-y-auto">
                 {/* Back Button and Mobile Fullscreen - Integrated */}
                 <div className="mb-6 flex justify-between items-center">
                   <div
@@ -713,9 +732,9 @@ export function CourseDetailSection() {
             /* Desktop: Show both list and content */
             <>
               {/* Main Content - Unified Panel */}
-              <div className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col min-h-0">
                 {/* Unified Content Panel - Like a PDF document */}
-                <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                <div ref={contentScrollRef} className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-y-auto overflow-x-hidden flex flex-col max-h-[calc(100vh-120px)]">
                   {/* Header */}
                   <div className="w-full flex items-center justify-between px-6 py-5 border-b border-gray-200">
                     <h1 className="text-2xl font-bold text-gray-900 leading-snug pr-4 flex-1 min-w-0">
@@ -836,9 +855,9 @@ export function CourseDetailSection() {
 
 
               {/* Right Sidebar - Curriculum */}
-              <div className="w-80 bg-white/80 backdrop-blur-sm border-l border-gray-200 p-5 ml-6 rounded-r-xl shadow-sm">
-
-                <div className="mb-5">
+              <div className="w-80 bg-white/80 backdrop-blur-sm border-l border-gray-200 ml-6 rounded-r-xl shadow-sm flex flex-col min-h-0 max-h-[calc(100vh-120px)]">
+                {/* Scrollable lecture list */}
+                <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 pb-0">
                   <div>
                     {lectures.map((lecture, index) => (
                       <div
@@ -889,28 +908,28 @@ export function CourseDetailSection() {
                       </div>
                     ))}
                   </div>
-
-                  {/* Ebook Download Button */}
-                  {course?.ebookUrl && course?.ebookName && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <Button
-                        onClick={() => {
-                          const link = document.createElement('a');
-                          link.href = course.ebookUrl!;
-                          link.download = course.ebookName || 'ebook';
-                          link.target = '_blank';
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                        }}
-                        className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-sm font-medium flex items-center gap-2 px-4"
-                      >
-                        <DownloadIcon className="h-4 w-4 flex-shrink-0" />
-                        <span className="truncate min-w-0 flex-1">Download {course.ebookName}</span>
-                      </Button>
-                    </div>
-                  )}
                 </div>
+
+                {/* Sticky Download Button */}
+                {course?.ebookUrl && course?.ebookName && (
+                  <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 p-5 mt-auto">
+                    <Button
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = course.ebookUrl!;
+                        link.download = course.ebookName || 'ebook';
+                        link.target = '_blank';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                      className="w-full bg-primary hover:bg-royal-blue-dark text-white py-3 text-sm font-medium flex items-center gap-2 px-4"
+                    >
+                      <DownloadIcon className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate min-w-0 flex-1">Download {course.ebookName}</span>
+                    </Button>
+                  </div>
+                )}
               </div>
             </>
           )}

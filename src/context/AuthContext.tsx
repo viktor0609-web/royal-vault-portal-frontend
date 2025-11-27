@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     // Helper function to check if token is expired or expiring soon
-    const isTokenExpiredOrExpiringSoon = (token: string): boolean => {
+    const isTokenExpiredOrExpiringSoon = (token: string, bufferMinutes: number = 3): boolean => {
         try {
             const base64Url = token.split('.')[1];
             if (!base64Url) return true;
@@ -107,12 +107,45 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             const expirationTime = decoded.exp * 1000;
             const currentTime = Date.now();
-            const bufferTime = 2 * 60 * 1000; // 2 minutes buffer
+            const bufferTime = bufferMinutes * 60 * 1000; // Buffer in milliseconds
             
             return currentTime >= (expirationTime - bufferTime);
         } catch (error) {
             console.error('Error checking token expiration:', error);
             return true;
+        }
+    };
+
+    // Background token refresh function
+    const refreshTokenIfNeeded = async () => {
+        const accessToken = localStorage.getItem("accessToken");
+        const refreshToken = localStorage.getItem("refreshToken");
+        
+        if (!accessToken || !refreshToken) {
+            return;
+        }
+
+        // Check if token is expiring soon (within 3 minutes) - refresh before it expires
+        if (isTokenExpiredOrExpiringSoon(accessToken, 3)) {
+            console.log('Background: Access token expiring soon (within 3 min), refreshing proactively...');
+            try {
+                // Make a lightweight request to trigger the refresh interceptor
+                // The request interceptor will detect expiration and refresh automatically
+                await api.get("/api/auth/user");
+                console.log('Background: Token refreshed successfully');
+            } catch (error: any) {
+                // Check if tokens were cleared (refresh failed)
+                const stillHasTokens = localStorage.getItem("accessToken") && localStorage.getItem("refreshToken");
+                if (!stillHasTokens) {
+                    console.log('Background: Tokens were cleared, user will need to login');
+                    setUser(null);
+                } else {
+                    // Don't log as error if it's just a network issue
+                    if (error.response?.status !== 401 && error.response?.status !== 403) {
+                        console.warn('Background: Token refresh attempt failed but tokens still exist:', error);
+                    }
+                }
+            }
         }
     };
 
@@ -156,6 +189,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         initializeAuth();
 
+        // Set up background token refresh - check every 2 minutes
+        const refreshInterval = setInterval(() => {
+            refreshTokenIfNeeded();
+        }, 2 * 60 * 1000); // Check every 2 minutes
+
         // Register callback to clear user state when tokens are cleared
         setOnTokensCleared(() => {
             setUser(null);
@@ -163,6 +201,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         // Cleanup on unmount
         return () => {
+            clearInterval(refreshInterval);
             setOnTokensCleared(() => {});
         };
     }, []);

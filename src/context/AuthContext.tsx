@@ -37,10 +37,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const [user, setUser] = useState<User | null>(null);
 
     const login = async (email: string, password: string): Promise<void> => {
-        const { data } = await api.post("/api/auth/login", { email, password });
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
-        await fetchProfile();
+        try {
+            const { data } = await api.post("/api/auth/login", { email, password });
+            
+            // Validate that we received both tokens
+            if (!data.accessToken) {
+                console.error('Login response missing accessToken:', data);
+                throw new Error('Login failed: No access token received');
+            }
+            
+            if (!data.refreshToken) {
+                console.error('Login response missing refreshToken:', data);
+                throw new Error('Login failed: No refresh token received. Token refresh will not work.');
+            }
+            
+            // Store tokens
+            localStorage.setItem("accessToken", data.accessToken);
+            localStorage.setItem("refreshToken", data.refreshToken);
+            
+            console.log('Both tokens stored successfully');
+            await fetchProfile();
+        } catch (error: any) {
+            console.error('Login error:', error);
+            // Clear any partial tokens on error
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            throw error;
+        }
     };
 
     const logout = async (): Promise<void> => {

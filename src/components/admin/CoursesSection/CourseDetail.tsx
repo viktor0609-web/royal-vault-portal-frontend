@@ -141,7 +141,7 @@ export function CourseDetail() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await courseApi.getCourseById(courseId);
+      const response = await courseApi.getCourseById(courseId, 'full', false);
       setCourse(response.data);
       setLectures(response.data.lectures || []);
     } catch (err: any) {

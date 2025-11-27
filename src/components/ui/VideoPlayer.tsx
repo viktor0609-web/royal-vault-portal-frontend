@@ -151,6 +151,7 @@ export function VideoPlayer({
             <video
                 className={className}
                 controls
+                muted={false}
                 onEnded={onEnded}
                 onPlay={onPlay}
                 onPause={onPause}

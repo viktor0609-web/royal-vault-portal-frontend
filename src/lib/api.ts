@@ -142,11 +142,27 @@ const refreshTokens = async (): Promise<string | null> => {
       return null;
     }
 
-    // Token error - clear tokens and fail queued requests
-    console.error('Refresh token is invalid or expired, clearing tokens');
-    clearTokens();
-    pendingRequestsQueue.forEach((cb) => cb(null));
-    pendingRequestsQueue = [];
+    // Check if it's a token error (invalid/expired refresh token)
+    const isTokenError =
+      refreshError.response?.status === 403 ||
+      refreshError.response?.status === 401 ||
+      refreshError.response?.data?.message?.toLowerCase().includes('expired') ||
+      refreshError.response?.data?.message?.toLowerCase().includes('invalid') ||
+      refreshError.response?.data?.message?.toLowerCase().includes('refresh token');
+
+    if (isTokenError) {
+      // Token error - clear tokens and fail queued requests
+      console.error('Refresh token is invalid or expired, clearing tokens');
+      clearTokens();
+      pendingRequestsQueue.forEach((cb) => cb(null));
+      pendingRequestsQueue = [];
+    } else {
+      // Unknown error - don't clear tokens, might be temporary
+      console.warn('Unknown error during proactive refresh, keeping tokens:', refreshError.response?.data);
+      pendingRequestsQueue.forEach((cb) => cb(null));
+      pendingRequestsQueue = [];
+    }
+
     return null;
   } finally {
     isRefreshing = false;

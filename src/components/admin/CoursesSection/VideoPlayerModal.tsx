@@ -52,6 +52,7 @@ export function VideoPlayerModal({ isOpen, onClose, videoUrl, title }: VideoPlay
                                 controls
                                 preload="metadata"
                                 autoPlay={false}
+                                muted={false}
                             />
                         )}
                     </div>

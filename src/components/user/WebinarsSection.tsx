@@ -247,7 +247,7 @@ export function WebinarsSection() {
       </head>
       <body>
         <div class="video-container">
-          <video id="webinar-video" controls autoplay playsinline muted preload="auto" style="width: 100%; height: 100%;">
+          <video id="webinar-video" controls autoplay playsinline preload="auto" style="width: 100%; height: 100%;">
             <source src="${recordingUrl}" type="video/mp4">
             <source src="${recordingUrl}" type="video/webm">
             <source src="${recordingUrl}" type="video/ogg">
@@ -259,24 +259,23 @@ export function WebinarsSection() {
             const video = document.getElementById('webinar-video');
             if (!video) return;
             
+            // Ensure video is unmuted
+            video.muted = false;
+            
             // Function to attempt playing the video
-            const attemptPlay = (unmute = true) => {
+            const attemptPlay = () => {
               if (video.paused) {
-                if (unmute) {
-                  video.muted = false;
-                }
+                // Try to play unmuted first
+                video.muted = false;
                 const playPromise = video.play();
                 if (playPromise !== undefined) {
                   playPromise.catch((error) => {
-                    // If unmuted play fails, try muted
-                    if (unmute) {
-                      video.muted = true;
-                      video.play().catch(() => {
-                        console.log('Autoplay was prevented');
-                      });
-                    } else {
-                      console.log('Autoplay was prevented');
-                    }
+                    // If unmuted play fails (autoplay policy), try muted as fallback
+                    console.log('Unmuted autoplay prevented, trying muted:', error);
+                    video.muted = true;
+                    video.play().catch(() => {
+                      console.log('Autoplay was prevented even when muted');
+                    });
                   });
                 }
               }

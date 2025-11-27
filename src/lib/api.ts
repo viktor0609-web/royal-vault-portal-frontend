@@ -58,15 +58,15 @@ const decodeToken = (token: string): { exp?: number; iat?: number } | null => {
 // Check if token is expired or about to expire (within buffer time)
 const isTokenExpiredOrExpiringSoon = (token: string | null, bufferMinutes: number = 2): boolean => {
   if (!token) return true;
-  
+
   const decoded = decodeToken(token);
   if (!decoded || !decoded.exp) return true;
-  
+
   // exp is in seconds, Date.now() is in milliseconds
   const expirationTime = decoded.exp * 1000;
   const currentTime = Date.now();
   const bufferTime = bufferMinutes * 60 * 1000; // Convert minutes to milliseconds
-  
+
   // Token is expired or will expire within buffer time
   return currentTime >= (expirationTime - bufferTime);
 };
@@ -91,7 +91,7 @@ const refreshTokens = async (): Promise<string | null> => {
   try {
     isRefreshing = true;
     console.log('Refreshing access token proactively...');
-    
+
     // Make refresh request without Authorization header to avoid issues
     const { data } = await axios.post(
       `${import.meta.env.VITE_BACKEND_URL}/api/auth/refresh`,
@@ -102,7 +102,7 @@ const refreshTokens = async (): Promise<string | null> => {
         },
       }
     );
-    
+
     const newAccessToken = data?.accessToken as string | undefined;
     const newRefreshToken = data?.refreshToken as string | undefined;
 
@@ -117,18 +117,18 @@ const refreshTokens = async (): Promise<string | null> => {
     }
 
     console.log('Token refreshed successfully');
-    
+
     // Process queued requests
     pendingRequestsQueue.forEach((cb) => cb(newAccessToken));
     pendingRequestsQueue = [];
-    
+
     return newAccessToken;
   } catch (refreshError: any) {
     console.error('Token refresh error:', refreshError);
-    
+
     // Check if it's a network error vs token error
-    const isNetworkError = 
-      refreshError.code === 'ECONNABORTED' || 
+    const isNetworkError =
+      refreshError.code === 'ECONNABORTED' ||
       refreshError.code === 'ERR_NETWORK' ||
       refreshError.message?.includes('Network Error') ||
       !refreshError.response;
@@ -162,7 +162,7 @@ api.interceptors.request.use(
     }
 
     const token = getAccessToken();
-    
+
     // If token exists but is expired or expiring soon, refresh it proactively
     if (token && isTokenExpiredOrExpiringSoon(token, 2)) {
       console.log('Access token expired or expiring soon, refreshing...');
@@ -227,7 +227,7 @@ api.interceptors.response.use(
       try {
         isRefreshing = true;
         console.log('Refreshing token due to 401 error...');
-        
+
         // Make refresh request without Authorization header to avoid issues
         const { data } = await axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/api/auth/refresh`,
@@ -263,26 +263,44 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError: any) {
         console.error('Token refresh error in 401 handler:', refreshError);
-        
+
         // Check if it's a network error vs token error
-        const isNetworkError = 
-          refreshError.code === 'ECONNABORTED' || 
+        const isNetworkError =
+          refreshError.code === 'ECONNABORTED' ||
           refreshError.code === 'ERR_NETWORK' ||
           refreshError.message?.includes('Network Error') ||
           !refreshError.response;
 
         if (isNetworkError) {
           // Network error - don't clear tokens, just reject and reset state
+          console.warn('Network error during token refresh, keeping tokens');
           pendingRequestsQueue.forEach((cb) => cb(null));
           pendingRequestsQueue = [];
           isRefreshing = false;
           return Promise.reject(refreshError);
         }
 
-        // Token error - clear tokens and fail queued requests
-        clearTokens();
-        pendingRequestsQueue.forEach((cb) => cb(null));
-        pendingRequestsQueue = [];
+        // Check if refresh token is actually invalid/expired (not just a temporary error)
+        const isTokenError =
+          refreshError.response?.status === 403 ||
+          refreshError.response?.status === 401 ||
+          refreshError.response?.data?.message?.toLowerCase().includes('expired') ||
+          refreshError.response?.data?.message?.toLowerCase().includes('invalid') ||
+          refreshError.response?.data?.message?.toLowerCase().includes('refresh token');
+
+        if (isTokenError) {
+          // Token error - clear tokens and fail queued requests
+          console.error('Refresh token is invalid or expired, clearing tokens');
+          clearTokens();
+          pendingRequestsQueue.forEach((cb) => cb(null));
+          pendingRequestsQueue = [];
+        } else {
+          // Unknown error - don't clear tokens, might be temporary
+          console.warn('Unknown error during refresh, keeping tokens. Error:', refreshError.response?.data);
+          pendingRequestsQueue.forEach((cb) => cb(null));
+          pendingRequestsQueue = [];
+        }
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

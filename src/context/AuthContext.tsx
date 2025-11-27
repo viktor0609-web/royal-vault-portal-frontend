@@ -88,10 +88,73 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     };
 
-    useEffect(() => {
-        if (localStorage.getItem("accessToken")) {
-            fetchProfile();
+    // Helper function to check if token is expired or expiring soon
+    const isTokenExpiredOrExpiringSoon = (token: string): boolean => {
+        try {
+            const base64Url = token.split('.')[1];
+            if (!base64Url) return true;
+            
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split('')
+                    .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join('')
+            );
+            const decoded = JSON.parse(jsonPayload);
+            
+            if (!decoded.exp) return true;
+            
+            const expirationTime = decoded.exp * 1000;
+            const currentTime = Date.now();
+            const bufferTime = 2 * 60 * 1000; // 2 minutes buffer
+            
+            return currentTime >= (expirationTime - bufferTime);
+        } catch (error) {
+            console.error('Error checking token expiration:', error);
+            return true;
         }
+    };
+
+    // Initialize auth on page load - check and refresh token if needed
+    useEffect(() => {
+        const initializeAuth = async () => {
+            const accessToken = localStorage.getItem("accessToken");
+            const refreshToken = localStorage.getItem("refreshToken");
+            
+            if (!accessToken || !refreshToken) {
+                setUser(null);
+                return;
+            }
+
+            // Check if access token is expired or expiring soon
+            if (isTokenExpiredOrExpiringSoon(accessToken)) {
+                console.log('Access token expired/expiring on page load, attempting refresh...');
+                // The request interceptor will handle the refresh automatically
+                // We just need to make a request which will trigger the refresh
+                try {
+                    // This will trigger the request interceptor to refresh the token
+                    await fetchProfile();
+                } catch (error: any) {
+                    // If fetchProfile fails after refresh attempt, check if tokens were cleared
+                    const stillHasTokens = localStorage.getItem("accessToken") && localStorage.getItem("refreshToken");
+                    if (!stillHasTokens) {
+                        // Tokens were cleared, user needs to login again
+                        console.log('Tokens were cleared, user needs to login');
+                        setUser(null);
+                    } else {
+                        // Tokens still exist, might be a temporary error
+                        console.warn('Failed to fetch profile but tokens still exist:', error);
+                        setUser(null);
+                    }
+                }
+            } else {
+                // Token is still valid, fetch profile normally
+                await fetchProfile();
+            }
+        };
+
+        initializeAuth();
 
         // Register callback to clear user state when tokens are cleared
         setOnTokensCleared(() => {

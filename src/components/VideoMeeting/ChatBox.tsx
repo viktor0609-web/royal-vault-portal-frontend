@@ -391,7 +391,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
                     }`}
                 >
                   {/* Message text */}
-                  <p className={`break-words ${isOwnMessage ? 'text-sm' : 'text-[15px] font-normal'
+                  <p className={`break-words ${isOwnMessage ? 'text-lg' : 'text-lg font-normal'
                     }`} style={{ lineHeight: '1.5' }}>
                     {linkifyText(msg.text, isOwnMessage)}
                   </p>
@@ -434,7 +434,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
               onKeyDown={handleKeyPress}
             />
             {showEmojiPicker && emojiPickerPosition && createPortal(
-              <div 
+              <div
                 className="emoji-picker-container fixed bg-white border border-gray-200 rounded-lg shadow-xl p-3 max-h-52 overflow-y-auto z-[9999] w-80"
                 style={{
                   top: `${emojiPickerPosition.top}px`,

@@ -74,7 +74,10 @@ export function SetPassword() {
       if (response.data.accessToken && response.data.refreshToken) {
         localStorage.setItem("accessToken", response.data.accessToken);
         localStorage.setItem("refreshToken", response.data.refreshToken);
+        console.log('Both tokens stored successfully after password setup');
         await fetchProfile();
+      } else {
+        console.error('Missing tokens in verification response:', response.data);
       }
 
       setSuccess(response.data.message);

@@ -14,7 +14,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
     const [activeTab, setActiveTab] = useState("thumbnails");
     const thumbnailContainerRef = useRef<HTMLDivElement>(null);
     const speakingUserRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-    
+
     console.log("participants", participants)
     // Get video tracks for thumbnails - Guest sees Admin and Guest only
     const adminVideoTrack = participants.find(p => p.name.includes("Admin"))?.videoTrack;
@@ -24,8 +24,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
     const mainVideoTrack = guestVideoTrack || adminVideoTrack;
 
     // Get participants for thumbnails: Admin, Guest, and Users who are speaking
-    const thumbnailParticipants = participants.filter(p => 
-        p.permissions?.canAdmin || 
+    const thumbnailParticipants = participants.filter(p =>
+        p.permissions?.canAdmin ||
         (p.name.includes("Guest") && !p.permissions?.canAdmin) ||
         (!p.permissions?.canAdmin && !p.name.includes("Guest") && p.speaking)
     );
@@ -34,7 +34,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
     const activeSpeaker = participants.find(p => p.speaking);
 
     // Count Admin and Guest participants (for layout purposes)
-    const adminAndGuestCount = participants.filter(p => 
+    const adminAndGuestCount = participants.filter(p =>
         p.permissions?.canAdmin || (p.name.includes("Guest") && !p.permissions?.canAdmin)
     ).length;
 
@@ -45,7 +45,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
     // Auto-scroll to speaking user when they start speaking
     useEffect(() => {
         if (activeTab !== "thumbnails" || !activeSpeaker) return;
-        
+
         // Only scroll if the active speaker is a User (not Admin or Guest)
         const isUser = !activeSpeaker.permissions?.canAdmin && !activeSpeaker.name.includes("Guest");
         if (!isUser) return;
@@ -54,8 +54,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
         const timeoutId = setTimeout(() => {
             const thumbnailElement = speakingUserRefs.current.get(activeSpeaker.id);
             if (thumbnailElement && thumbnailContainerRef.current) {
-                thumbnailElement.scrollIntoView({ 
-                    behavior: 'smooth', 
+                thumbnailElement.scrollIntoView({
+                    behavior: 'smooth',
                     block: 'nearest',
                     inline: 'nearest'
                 });
@@ -76,7 +76,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
             >
                 <X className="h-5 w-5" />
             </Button>
-            
+
             {/* Header with title - visible on desktop only (mobile uses BottomSheet title) */}
             <div className="hidden sm:block px-4 py-3 border-b border-gray-700">
                 <h2 className="text-lg font-semibold text-white">Participants</h2>
@@ -86,17 +86,17 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1 min-h-0">
                 <div className="px-2 sm:px-2 pt-2 border-b border-gray-700">
                     <TabsList className="grid w-full grid-cols-2 bg-gray-800">
-                        <TabsTrigger 
-                            value="thumbnails" 
+                        <TabsTrigger
+                            value="thumbnails"
                             className="text-white data-[state=active]:bg-gray-700 data-[state=active]:text-white"
                         >
-                            Thumbnails
+                            Hosts
                         </TabsTrigger>
-                        <TabsTrigger 
-                            value="list" 
+                        <TabsTrigger
+                            value="list"
                             className="text-white data-[state=active]:bg-gray-700 data-[state=active]:text-white"
                         >
-                            List ({attendeeCount})
+                            Viewers ({attendeeCount})
                         </TabsTrigger>
                     </TabsList>
                 </div>
@@ -121,20 +121,20 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                                 const isGuest = participant.name.includes("Guest") && !isAdmin;
                                 const isUser = !isAdmin && !isGuest;
                                 const isActiveSpeaker = activeSpeaker?.id === participant.id;
-                                
+
                                 const participantName = participant.name || (isAdmin ? "Admin" : isGuest ? "Guest" : "User");
                                 // Extract name and role from format like "John (Admin)" or just use the name
                                 const nameMatch = participantName.match(/^(.+?)\s*\((.+?)\)$/);
-                                const displayName = nameMatch 
-                                    ? `${nameMatch[1]} (${nameMatch[2]})` 
-                                    : isAdmin 
-                                        ? `${participantName} (Admin)` 
-                                        : isGuest 
-                                            ? `${participantName} (Guest)` 
+                                const displayName = nameMatch
+                                    ? `${nameMatch[1]} (${nameMatch[2]})`
+                                    : isAdmin
+                                        ? `${participantName} (Admin)`
+                                        : isGuest
+                                            ? `${participantName} (Guest)`
                                             : participantName;
 
                                 return (
-                                    <div 
+                                    <div
                                         key={participant.id}
                                         ref={(el) => {
                                             if (el && isUser) {
@@ -143,9 +143,8 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                                                 speakingUserRefs.current.delete(participant.id);
                                             }
                                         }}
-                                        className={`relative bg-gray-800 overflow-hidden h-32 group ${
-                                            isActiveSpeaker ? 'ring-4 ring-red-500 ring-offset-2 ring-offset-gray-900' : ''
-                                        }`}
+                                        className={`relative bg-gray-800 overflow-hidden h-32 group ${isActiveSpeaker ? 'ring-4 ring-red-500 ring-offset-2 ring-offset-gray-900' : ''
+                                            }`}
                                     >
                                         {/* Active speaker indicator - red border */}
                                         {isActiveSpeaker && (

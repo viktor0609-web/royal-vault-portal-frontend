@@ -82,13 +82,13 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
               value="thumbnails"
               className="text-white data-[state=active]:bg-gray-700 data-[state=active]:text-white"
             >
-              Thumbnails
+              Hosts
             </TabsTrigger>
             <TabsTrigger
               value="list"
               className="text-white data-[state=active]:bg-gray-700 data-[state=active]:text-white"
             >
-              List ({attendeeCount})
+              Viewers ({attendeeCount})
             </TabsTrigger>
           </TabsList>
         </div>

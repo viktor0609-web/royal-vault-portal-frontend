@@ -433,12 +433,46 @@ export function CourseDetailSection() {
         .lecture-content li {
           margin: 0.25rem 0 !important;
           line-height: 1.4 !important;
+          list-style-position: outside !important;
         }
         .lecture-content ul li {
           list-style-type: disc !important;
         }
         .lecture-content ol li {
           list-style-type: decimal !important;
+        }
+        /* Quill indent classes for nested list items */
+        .lecture-content li.ql-indent-1,
+        .lecture-content li.q1-indent-1 {
+          margin-left: 3em !important;
+        }
+        .lecture-content li.ql-indent-2,
+        .lecture-content li.q1-indent-2 {
+          margin-left: 6em !important;
+        }
+        .lecture-content li.ql-indent-3,
+        .lecture-content li.q1-indent-3 {
+          margin-left: 9em !important;
+        }
+        .lecture-content li.ql-indent-4,
+        .lecture-content li.q1-indent-4 {
+          margin-left: 12em !important;
+        }
+        .lecture-content li.ql-indent-5,
+        .lecture-content li.q1-indent-5 {
+          margin-left: 15em !important;
+        }
+        .lecture-content li.ql-indent-6,
+        .lecture-content li.q1-indent-6 {
+          margin-left: 18em !important;
+        }
+        .lecture-content li.ql-indent-7,
+        .lecture-content li.q1-indent-7 {
+          margin-left: 21em !important;
+        }
+        .lecture-content li.ql-indent-8,
+        .lecture-content li.q1-indent-8 {
+          margin-left: 24em !important;
         }
         .lecture-content table {
           width: 100% !important;

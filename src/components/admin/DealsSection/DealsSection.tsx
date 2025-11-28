@@ -4,6 +4,7 @@ import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -18,6 +19,7 @@ import { TagIcon, Trash2, Edit, PlusIcon, ExternalLinkIcon, AlertTriangle } from
 import { CreateDealModal } from "./CreateDealModal";
 import { dealApi } from "@/lib/api";
 import { formatDate, formatDateTime } from "@/utils/dateUtils";
+import { useToast } from "@/hooks/use-toast";
 
 interface Deal {
     _id: string;
@@ -33,9 +35,11 @@ interface Deal {
     createdBy: { _id: string; name: string };
     createdAt: string;
     updatedAt: string;
+    displayOnPublicPage?: boolean;
 }
 export function DealsSection() {
     const navigate = useNavigate();
+    const { toast } = useToast();
 
     // Use admin state management
     const {
@@ -118,15 +122,36 @@ export function DealsSection() {
         return data.map(item => item.name).join(', ');
     };
 
+    const handleToggleDisplay = async (deal: Deal) => {
+        try {
+            const newDisplayValue = !deal.displayOnPublicPage;
+            await dealApi.updateDeal(deal._id, { displayOnPublicPage: newDisplayValue });
+            setDeals(prev =>
+                prev.map(d => d._id === deal._id ? { ...d, displayOnPublicPage: newDisplayValue } : d)
+            );
+            toast({
+                title: "Success",
+                description: `Deal ${newDisplayValue ? 'enabled' : 'disabled'} for public pages`,
+            });
+        } catch (error: any) {
+            console.error('Error updating display option:', error);
+            toast({
+                title: "Error",
+                description: error.response?.data?.message || 'Failed to update display option',
+                variant: "destructive",
+            });
+        }
+    };
+
     return (
-        <div className="flex-1 p-3 sm:p-4 lg:p-6 flex flex-col gap-4">
+        <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
             {/* Header Section */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white p-4 sm:p-5 lg:p-6 rounded-lg border border-royal-light-gray shadow-sm">
-                <div className="flex gap-3 items-center">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray shadow-sm min-w-0">
+                <div className="flex gap-2 items-center min-w-0 flex-1">
                     <div className="flex-shrink-0 p-2 bg-royal-gray/10 rounded-lg">
                         <TagIcon className="h-5 w-5 sm:h-6 sm:w-6 text-royal-gray" />
                     </div>
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-royal-dark-gray">Deals</h1>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-royal-dark-gray truncate">Deals</h1>
                 </div>
                 <Button
                     onClick={() => handlebtnClick('create')}
@@ -144,32 +169,33 @@ export function DealsSection() {
             )}
 
             {/* Desktop Table View */}
-            <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm">
-                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                    <Table className="w-full min-w-full">
-                        <TableHeader>
-                            <TableRow className="bg-gray-50 hover:bg-gray-50">
-                                <TableHead className="min-w-[200px] font-semibold text-royal-dark-gray">Deal</TableHead>
-                                <TableHead className="hidden md:table-cell min-w-[120px] font-semibold text-royal-dark-gray">Sources</TableHead>
-                                <TableHead className="hidden lg:table-cell min-w-[150px] font-semibold text-royal-dark-gray">Categories</TableHead>
-                                <TableHead className="hidden xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray">Sub-Categories</TableHead>
-                                <TableHead className="hidden xl:table-cell min-w-[120px] font-semibold text-royal-dark-gray">Types</TableHead>
-                                <TableHead className="hidden 2xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray">Strategies</TableHead>
-                                <TableHead className="hidden 2xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray">Requirements</TableHead>
-                                <TableHead className="hidden md:table-cell min-w-[100px] font-semibold text-royal-dark-gray">URL</TableHead>
-                                <TableHead className="sticky right-0 bg-gray-50 min-w-[100px] text-right font-semibold text-royal-dark-gray z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Actions</TableHead>
+            <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm flex flex-col flex-1 min-h-0 mt-4">
+                <div className="overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex-1 min-h-0">
+                    <Table className="w-full text-sm">
+                        <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
+                            <TableRow className="border-b">
+                                <TableHead className="min-w-[200px] font-semibold text-royal-dark-gray px-2">Deal</TableHead>
+                                <TableHead className="hidden md:table-cell min-w-[120px] font-semibold text-royal-dark-gray py-2 px-2">Sources</TableHead>
+                                <TableHead className="hidden lg:table-cell min-w-[150px] font-semibold text-royal-dark-gray py-2 px-2">Categories</TableHead>
+                                <TableHead className="hidden xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray py-2 px-2">Sub-Categories</TableHead>
+                                <TableHead className="hidden xl:table-cell min-w-[120px] font-semibold text-royal-dark-gray py-2 px-2">Types</TableHead>
+                                <TableHead className="hidden 2xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray py-2 px-2">Strategies</TableHead>
+                                <TableHead className="hidden 2xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray py-2 px-2">Requirements</TableHead>
+                                <TableHead className="hidden md:table-cell min-w-[100px] font-semibold text-royal-dark-gray py-2 px-2">URL</TableHead>
+                                <TableHead className="min-w-[100px] font-semibold text-royal-dark-gray py-2 px-2">Display</TableHead>
+                                <TableHead className="sticky right-0 bg-gray-50 min-w-[100px] text-right font-semibold text-royal-dark-gray z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] py-2 px-2">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={9} className="text-center py-12">
+                                    <TableCell colSpan={10} className="text-center py-12">
                                         <Loading message="Loading deals..." size="md" />
                                     </TableCell>
                                 </TableRow>
                             ) : deals.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={9} className="text-center py-12">
+                                    <TableCell colSpan={10} className="text-center py-12">
                                         <div className="flex flex-col items-center gap-2">
                                             <TagIcon className="h-12 w-12 text-gray-300" />
                                             <p className="text-gray-500 font-medium">No deals found</p>
@@ -202,6 +228,18 @@ export function DealsSection() {
                                                 <span className="text-gray-400">N/A</span>
                                             )}
                                         </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                                                <Checkbox
+                                                    checked={deal.displayOnPublicPage || false}
+                                                    onCheckedChange={() => handleToggleDisplay(deal)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                                <span className="text-sm text-gray-600 hidden xl:inline">
+                                                    {deal.displayOnPublicPage ? 'Public' : 'Private'}
+                                                </span>
+                                            </div>
+                                        </TableCell>
                                         <TableCell className="sticky right-0 bg-white hover:bg-gray-50 min-w-[100px] z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                                             <div className="flex gap-2 justify-end flex-shrink-0">
                                                 <Button
@@ -233,7 +271,7 @@ export function DealsSection() {
             </div>
 
             {/* Mobile/Tablet Card View */}
-            <div className="lg:hidden">
+            <div className="lg:hidden space-y-3 sm:space-y-4 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
                 {loading ? (
                     <Loading message="Loading deals..." />
                 ) : deals.length === 0 ? (
@@ -247,12 +285,12 @@ export function DealsSection() {
                         {deals.map((deal) => (
                             <div
                                 key={deal._id}
-                                className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden"
+                                className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden min-w-0"
                             >
                                 {/* Card Header with gradient */}
                                 <div className="bg-gradient-to-r from-royal-gray/5 to-blue-50/50 p-5 border-b border-gray-100">
-                                    <div className="flex items-start justify-between gap-3 mb-3">
-                                        <h3 className="font-bold text-royal-dark-gray text-lg leading-tight flex-1">
+                                    <div className="flex items-start justify-between gap-3 mb-3 min-w-0">
+                                        <h3 className="font-bold text-royal-dark-gray text-sm sm:text-base lg:text-lg leading-tight flex-1 min-w-0 line-clamp-2">
                                             {deal.name}
                                         </h3>
                                         <div className="flex gap-1.5 flex-shrink-0">
@@ -372,23 +410,34 @@ export function DealsSection() {
                                 </div>
 
                                 {/* Card Footer */}
-                                <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between gap-3">
-                                    <div className="flex-1 min-w-0">
-                                        {deal.url ? (
-                                            <a
-                                                href={deal.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-600 hover:text-blue-700 font-semibold text-sm inline-flex items-center gap-1.5 hover:underline"
-                                            >
-                                                <ExternalLinkIcon className="h-4 w-4 flex-shrink-0" />
-                                                <span className="truncate">View Deal</span>
-                                            </a>
-                                        ) : (
-                                            <span className="text-gray-400 text-sm font-medium">No URL</span>
-                                        )}
+                                <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 space-y-2">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="flex-1 min-w-0">
+                                            {deal.url ? (
+                                                <a
+                                                    href={deal.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-blue-600 hover:text-blue-700 font-semibold text-sm inline-flex items-center gap-1.5 hover:underline"
+                                                >
+                                                    <ExternalLinkIcon className="h-4 w-4 flex-shrink-0" />
+                                                    <span className="truncate">View Deal</span>
+                                                </a>
+                                            ) : (
+                                                <span className="text-gray-400 text-sm font-medium">No URL</span>
+                                            )}
+                                        </div>
+                                        <span className="text-xs text-gray-500 font-medium flex-shrink-0">{formatDate(deal.createdAt)}</span>
                                     </div>
-                                    <span className="text-xs text-gray-500 font-medium flex-shrink-0">{formatDate(deal.createdAt)}</span>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            checked={deal.displayOnPublicPage || false}
+                                            onCheckedChange={() => handleToggleDisplay(deal)}
+                                        />
+                                        <span className="text-xs text-gray-600">
+                                            {deal.displayOnPublicPage ? 'Public' : 'Private'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         ))}

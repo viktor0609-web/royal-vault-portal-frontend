@@ -318,10 +318,11 @@ export function CourseDetail() {
                       ) : 'N/A'}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={lecture.displayOnPublicPage || false}
                           onCheckedChange={() => handleToggleDisplay(lecture)}
+                          onClick={(e) => e.stopPropagation()}
                         />
                         <span className="text-sm text-gray-600 hidden xl:inline">
                           {lecture.displayOnPublicPage ? 'Public' : 'Private'}

@@ -11,10 +11,6 @@ export const api = axios.create({
 console.log(import.meta.env.VITE_BACKEND_URL);
 
 
-// Flag to avoid multiple simultaneous refresh calls
-let isRefreshing = false;
-let pendingRequestsQueue: Array<(token: string | null) => void> = [];
-
 // Callback to notify when tokens are cleared (for AuthContext)
 let onTokensCleared: (() => void) | null = null;
 
@@ -23,176 +19,25 @@ export const setOnTokensCleared = (callback: () => void) => {
 };
 
 const getAccessToken = (): string | null => localStorage.getItem("accessToken");
-const getRefreshToken = (): string | null => localStorage.getItem("refreshToken");
 const setAccessToken = (token: string) => localStorage.setItem("accessToken", token);
-const setRefreshToken = (token: string) => localStorage.setItem("refreshToken", token);
 
 // Helper to clear tokens and notify
 const clearTokens = () => {
   localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
   if (onTokensCleared) {
     onTokensCleared();
   }
 };
 
-// Helper function to decode JWT token without verification (to check expiration)
-const decodeToken = (token: string): { exp?: number; iat?: number } | null => {
-  try {
-    const base64Url = token.split('.')[1];
-    if (!base64Url) return null;
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('Error decoding token:', error);
-    return null;
-  }
-};
 
-// Check if token is expired or about to expire (within buffer time)
-const isTokenExpiredOrExpiringSoon = (token: string | null, bufferMinutes: number = 2): boolean => {
-  if (!token) return true;
 
-  const decoded = decodeToken(token);
-  if (!decoded || !decoded.exp) return true;
-
-  // exp is in seconds, Date.now() is in milliseconds
-  const expirationTime = decoded.exp * 1000;
-  const currentTime = Date.now();
-  const bufferTime = bufferMinutes * 60 * 1000; // Convert minutes to milliseconds
-
-  // Token is expired or will expire within buffer time
-  return currentTime >= (expirationTime - bufferTime);
-};
-
-// Function to refresh tokens proactively
-const refreshTokens = async (): Promise<string | null> => {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) {
-    console.warn('No refresh token available');
-    return null;
-  }
-
-  if (isRefreshing) {
-    // If already refreshing, wait for it to complete
-    return new Promise((resolve) => {
-      pendingRequestsQueue.push((newToken) => {
-        resolve(newToken);
-      });
-    });
-  }
-
-  try {
-    isRefreshing = true;
-    console.log('Refreshing access token proactively...');
-
-    // Make refresh request without Authorization header to avoid issues
-    const { data } = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/auth/refresh`,
-      { refreshToken },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    const newAccessToken = data?.accessToken as string | undefined;
-    const newRefreshToken = data?.refreshToken as string | undefined;
-
-    if (!newAccessToken) {
-      throw new Error("No access token in refresh response");
-    }
-
-    // Update both tokens (token rotation)
-    setAccessToken(newAccessToken);
-    if (newRefreshToken) {
-      setRefreshToken(newRefreshToken);
-    }
-
-    console.log('Token refreshed successfully');
-
-    // Process queued requests
-    pendingRequestsQueue.forEach((cb) => cb(newAccessToken));
-    pendingRequestsQueue = [];
-
-    return newAccessToken;
-  } catch (refreshError: any) {
-    console.error('Token refresh error:', refreshError);
-
-    // Check if it's a network error vs token error
-    const isNetworkError =
-      refreshError.code === 'ECONNABORTED' ||
-      refreshError.code === 'ERR_NETWORK' ||
-      refreshError.message?.includes('Network Error') ||
-      !refreshError.response;
-
-    if (isNetworkError) {
-      // Network error - don't clear tokens, just reject and reset state
-      console.warn('Network error during token refresh, keeping existing tokens');
-      pendingRequestsQueue.forEach((cb) => cb(null));
-      pendingRequestsQueue = [];
-      isRefreshing = false;
-      return null;
-    }
-
-    // Check if it's a token error (invalid/expired refresh token)
-    const isTokenError =
-      refreshError.response?.status === 403 ||
-      refreshError.response?.status === 401 ||
-      refreshError.response?.data?.message?.toLowerCase().includes('expired') ||
-      refreshError.response?.data?.message?.toLowerCase().includes('invalid') ||
-      refreshError.response?.data?.message?.toLowerCase().includes('refresh token');
-
-    if (isTokenError) {
-      // Token error - clear tokens and fail queued requests
-      console.error('Refresh token is invalid or expired, clearing tokens');
-      clearTokens();
-      pendingRequestsQueue.forEach((cb) => cb(null));
-      pendingRequestsQueue = [];
-    } else {
-      // Unknown error - don't clear tokens, might be temporary
-      console.warn('Unknown error during proactive refresh, keeping tokens:', refreshError.response?.data);
-      pendingRequestsQueue.forEach((cb) => cb(null));
-      pendingRequestsQueue = [];
-    }
-
-    return null;
-  } finally {
-    isRefreshing = false;
-  }
-};
-
-// Attach Authorization header and check token expiration proactively
+// Attach Authorization header
 api.interceptors.request.use(
-  async (config: InternalAxiosRequestConfig) => {
-    // Don't add token to refresh endpoint
-    if (config.url?.includes('/api/auth/refresh')) {
-      return config;
-    }
-
+  (config: InternalAxiosRequestConfig) => {
     const token = getAccessToken();
-
-    // If token exists but is expired or expiring soon, refresh it proactively
-    if (token && isTokenExpiredOrExpiringSoon(token, 2)) {
-      console.log('Access token expired or expiring soon, refreshing...');
-      const newToken = await refreshTokens();
-      if (newToken) {
-        config.headers["Authorization"] = `Bearer ${newToken}`;
-      } else if (token) {
-        // If refresh failed but we have a token, try using it anyway (fallback to 401 handler)
-        config.headers["Authorization"] = `Bearer ${token}`;
-      }
-    } else if (token && !config.headers["Authorization"]) {
+    if (token && !config.headers["Authorization"]) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => {
@@ -200,129 +45,14 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle 401 and refresh
+// Response interceptor to handle 401 - clear tokens on unauthorized
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<any>) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-
-    // Skip refresh logic for refresh endpoint to prevent infinite loops
-    const isRefreshEndpoint = originalRequest.url?.includes('/api/auth/refresh');
-    if (isRefreshEndpoint) {
-      return Promise.reject(error);
+    // If unauthorized, clear tokens
+    if (error.response?.status === 401) {
+      clearTokens();
     }
-
-    // If unauthorized and we haven't retried yet, try to refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      const refreshToken = getRefreshToken();
-      if (!refreshToken) {
-        // No refresh token available -> propagate error
-        return Promise.reject(error);
-      }
-
-      if (isRefreshing) {
-        // Queue the request until refresh completes
-        return new Promise((resolve, reject) => {
-          pendingRequestsQueue.push((newToken) => {
-            if (newToken) {
-              originalRequest.headers = {
-                ...originalRequest.headers,
-                Authorization: `Bearer ${newToken}`,
-              } as any;
-              resolve(api(originalRequest));
-            } else {
-              // Reject if refresh failed
-              reject(new Error('Token refresh failed'));
-            }
-          });
-        });
-      }
-
-      try {
-        isRefreshing = true;
-        console.log('Refreshing token due to 401 error...');
-
-        // Make refresh request without Authorization header to avoid issues
-        const { data } = await axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/api/auth/refresh`,
-          { refreshToken },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const newAccessToken = data?.accessToken as string | undefined;
-        const newRefreshToken = data?.refreshToken as string | undefined;
-
-        if (!newAccessToken) {
-          throw new Error("No access token in refresh response");
-        }
-
-        // Update both tokens (token rotation)
-        setAccessToken(newAccessToken);
-        if (newRefreshToken) {
-          setRefreshToken(newRefreshToken);
-        }
-
-        // Process queued requests
-        pendingRequestsQueue.forEach((cb) => cb(newAccessToken));
-        pendingRequestsQueue = [];
-
-        // Retry the original request with new token
-        originalRequest.headers = {
-          ...originalRequest.headers,
-          Authorization: `Bearer ${newAccessToken}`,
-        } as any;
-        return api(originalRequest);
-      } catch (refreshError: any) {
-        console.error('Token refresh error in 401 handler:', refreshError);
-
-        // Check if it's a network error vs token error
-        const isNetworkError =
-          refreshError.code === 'ECONNABORTED' ||
-          refreshError.code === 'ERR_NETWORK' ||
-          refreshError.message?.includes('Network Error') ||
-          !refreshError.response;
-
-        if (isNetworkError) {
-          // Network error - don't clear tokens, just reject and reset state
-          console.warn('Network error during token refresh, keeping tokens');
-          pendingRequestsQueue.forEach((cb) => cb(null));
-          pendingRequestsQueue = [];
-          isRefreshing = false;
-          return Promise.reject(refreshError);
-        }
-
-        // Check if refresh token is actually invalid/expired (not just a temporary error)
-        const isTokenError =
-          refreshError.response?.status === 403 ||
-          refreshError.response?.status === 401 ||
-          refreshError.response?.data?.message?.toLowerCase().includes('expired') ||
-          refreshError.response?.data?.message?.toLowerCase().includes('invalid') ||
-          refreshError.response?.data?.message?.toLowerCase().includes('refresh token');
-
-        if (isTokenError) {
-          // Token error - clear tokens and fail queued requests
-          console.error('Refresh token is invalid or expired, clearing tokens');
-          clearTokens();
-          pendingRequestsQueue.forEach((cb) => cb(null));
-          pendingRequestsQueue = [];
-        } else {
-          // Unknown error - don't clear tokens, might be temporary
-          console.warn('Unknown error during refresh, keeping tokens. Error:', refreshError.response?.data);
-          pendingRequestsQueue.forEach((cb) => cb(null));
-          pendingRequestsQueue = [];
-        }
-
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
-    }
-
     return Promise.reject(error);
   }
 );

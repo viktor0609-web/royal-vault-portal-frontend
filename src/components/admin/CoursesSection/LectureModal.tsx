@@ -411,7 +411,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                             />
                         </div>
 
-                        {/* Display on Public Page Section */}
+                        {/* Display on Public Pages */}
                         <div className="flex items-center space-x-2">
                             <Checkbox
                                 id="displayOnPublicPage"
@@ -424,7 +424,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                 htmlFor="displayOnPublicPage"
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                             >
-                                Display on public page
+                                Display on public pages
                             </Label>
                         </div>
 

@@ -126,8 +126,8 @@ export function DealsSection() {
 
       const response =
         Object.keys(filterParams).length > 0
-          ? await dealApi.filterDeals(filterParams, "basic")
-          : await dealApi.getAllDeals("basic");
+          ? await dealApi.filterDeals(filterParams, "basic", true)
+          : await dealApi.getAllDeals("basic", true);
 
       setDeals(response.data.deals || []);
     } catch (error) {

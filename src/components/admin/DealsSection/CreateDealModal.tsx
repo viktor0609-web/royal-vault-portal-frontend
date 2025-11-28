@@ -13,6 +13,7 @@ import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { dealApi, optionsApi } from "@/lib/api";
@@ -53,6 +54,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
     requirements: [],
     image: "",
     source: "",
+    displayOnPublicPage: false,
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -119,6 +121,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         requirements: editingDeal.requirement?.map((req: any) => req._id) || [],
         image: editingDeal.image || "",
         source: editingDeal.source?._id || "",
+        displayOnPublicPage: (editingDeal as any).displayOnPublicPage || false,
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -144,6 +147,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         requirements: [],
         image: "",
         source: "",
+        displayOnPublicPage: false,
       };
       setFormData(emptyData);
       setInitialFormData(emptyData);
@@ -240,6 +244,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         strategyIds: formData.strategies,
         requirementIds: formData.requirements,
         sourceId: formData.source,
+        displayOnPublicPage: formData.displayOnPublicPage,
         createdBy: "user_id_here", // TODO: Get from auth context
       };
 
@@ -501,6 +506,23 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                   </Select>
                 </div>
               ))}
+            </div>
+
+            {/* Display on Public Pages */}
+            <div className="flex items-center space-x-2 pt-2">
+              <Checkbox
+                id="displayOnPublicPage"
+                checked={formData.displayOnPublicPage}
+                onCheckedChange={(checked) => {
+                  setFormData(prev => ({ ...prev, displayOnPublicPage: checked === true }));
+                }}
+              />
+              <Label
+                htmlFor="displayOnPublicPage"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Display on public pages
+              </Label>
             </div>
 
             {/* Submit Button */}

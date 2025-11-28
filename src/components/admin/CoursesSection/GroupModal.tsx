@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -35,7 +36,8 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        icon: ""
+        icon: "",
+        displayOnPublicPage: false
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -46,13 +48,15 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
             setFormData({
                 title: editingGroup.title || "",
                 description: editingGroup.description || "",
-                icon: editingGroup.icon || ""
+                icon: editingGroup.icon || "",
+                displayOnPublicPage: (editingGroup as any).displayOnPublicPage || false
             });
         } else {
             setFormData({
                 title: "",
                 description: "",
-                icon: ""
+                icon: "",
+                displayOnPublicPage: false
             });
         }
     }, [editingGroup, isOpen]);
@@ -142,6 +146,23 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
                             placeholder="e.g., material-symbols:school"
                             required
                         />
+                    </div>
+
+                    {/* Display on Public Pages */}
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="displayOnPublicPage"
+                            checked={formData.displayOnPublicPage}
+                            onCheckedChange={(checked) => {
+                                setFormData(prev => ({ ...prev, displayOnPublicPage: checked === true }));
+                            }}
+                        />
+                        <Label
+                            htmlFor="displayOnPublicPage"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                        >
+                            Display on public pages
+                        </Label>
                     </div>
 
                     {error && (

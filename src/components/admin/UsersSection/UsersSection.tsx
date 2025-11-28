@@ -538,160 +538,174 @@ export function UsersSection() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm flex-shrink-0">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm">
           <p className="font-medium text-sm sm:text-base">{error}</p>
         </div>
       )}
 
       {/* Scrollable Content Area - Lists */}
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+      <div className="flex-1 min-h-0 overflow-x-auto">
         {/* Desktop Table View */}
         <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm">
-          <Table className="w-full">
-            <TableHeader>
-              <TableRow className="bg-gray-50 hover:bg-gray-50">
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('firstName')}
-                >
-                  <div className="flex items-center">
-                    Name
-                    {getSortIcon('firstName')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('email')}
-                >
-                  <div className="flex items-center">
-                    Email
-                    {getSortIcon('email')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('phone')}
-                >
-                  <div className="flex items-center">
-                    Phone
-                    {getSortIcon('phone')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('role')}
-                >
-                  <div className="flex items-center">
-                    Role
-                    {getSortIcon('role')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('isVerified')}
-                >
-                  <div className="flex items-center">
-                    Status
-                    {getSortIcon('isVerified')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('createdAt')}
-                >
-                  <div className="flex items-center">
-                    Created
-                    {getSortIcon('createdAt')}
-                  </div>
-                </TableHead>
-                <TableHead className="font-semibold text-royal-dark-gray text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    <Loading message="Loading users..." size="md" />
-                  </TableCell>
+
+          {/* Table Header (Sticky) */}
+          <div className="overflow-hidden">
+            <Table className="w-full">
+              <TableHeader className="sticky top-0 bg-white z-10">
+                <TableRow className="bg-gray-50 hover:bg-gray-50">
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('firstName')}
+                  >
+                    <div className="flex items-center">
+                      Name
+                      {getSortIcon('firstName')}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('email')}
+                  >
+                    <div className="flex items-center">
+                      Email
+                      {getSortIcon('email')}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('phone')}
+                  >
+                    <div className="flex items-center">
+                      Phone
+                      {getSortIcon('phone')}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('role')}
+                  >
+                    <div className="flex items-center">
+                      Role
+                      {getSortIcon('role')}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('isVerified')}
+                  >
+                    <div className="flex items-center">
+                      Status
+                      {getSortIcon('isVerified')}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    <div className="flex items-center">
+                      Created
+                      {getSortIcon('createdAt')}
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-royal-dark-gray text-right">
+                    Actions
+                  </TableHead>
                 </TableRow>
-              ) : users.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-royal-gray">
-                    No users found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                users.map((user) => (
-                  <TableRow key={user._id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">
-                      {user.firstName} {user.lastName}
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.phone}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.isVerified ? "default" : "destructive"}>
-                        {user.isVerified ? "Verified" : "Unverified"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-royal-gray">
-                      {formatDate(user.createdAt)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
-                            <KeyRound className="mr-2 h-4 w-4" />
-                            Reset Password
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
-                            {user.isVerified ? (
-                              <>
-                                <ShieldOff className="mr-2 h-4 w-4" />
-                                Deactivate
-                              </>
-                            ) : (
-                              <>
-                                <Shield className="mr-2 h-4 w-4" />
-                                Activate
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
-                          >
-                            <Shield className="mr-2 h-4 w-4" />
-                            Change to {user.role === "admin" ? "User" : "Admin"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteClick(user)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+              </TableHeader>
+            </Table>
+          </div>
+
+          {/* Scrollable Body */}
+          <div className="max-h-[600px] overflow-y-auto">
+            <Table className="w-full">
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      <Loading message="Loading users..." size="md" />
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : users.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-royal-gray">
+                      No users found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user._id} className="hover:bg-gray-50">
+                      <TableCell className="font-medium">
+                        {user.firstName} {user.lastName}
+                      </TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>{user.phone}</TableCell>
+                      <TableCell>
+                        <Badge variant={user.role === "admin" ? "default" : "secondary"}>
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.isVerified ? "default" : "destructive"}>
+                          {user.isVerified ? "Verified" : "Unverified"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-royal-gray">
+                        {formatDate(user.createdAt)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
+                              <KeyRound className="mr-2 h-4 w-4" />
+                              Reset Password
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
+                              {user.isVerified ? (
+                                <>
+                                  <ShieldOff className="mr-2 h-4 w-4" />
+                                  Deactivate
+                                </>
+                              ) : (
+                                <>
+                                  <Shield className="mr-2 h-4 w-4" />
+                                  Activate
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
+                            >
+                              <Shield className="mr-2 h-4 w-4" />
+                              Change to {user.role === "admin" ? "User" : "Admin"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteClick(user)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
         </div>
+
 
         {/* Mobile Card View with Virtualization */}
         <div ref={listContainerRef} className="lg:hidden flex-1 min-h-0 py-1">

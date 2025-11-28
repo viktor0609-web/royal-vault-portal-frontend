@@ -4,6 +4,7 @@ import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
 import { LectureModal } from "./LectureModal";
 import { VideoPlayerModal } from "./VideoPlayerModal";
@@ -127,6 +128,27 @@ export function CourseDetail() {
           variant: "destructive",
         });
       }
+    }
+  };
+
+  const handleToggleDisplay = async (lecture: Lecture) => {
+    try {
+      const newDisplayValue = !lecture.displayOnPublicPage;
+      await courseApi.updateLecture(lecture._id, { displayOnPublicPage: newDisplayValue });
+      setLectures(prev =>
+        prev.map(l => l._id === lecture._id ? { ...l, displayOnPublicPage: newDisplayValue } : l)
+      );
+      toast({
+        title: "Success",
+        description: `Lecture ${newDisplayValue ? 'enabled' : 'disabled'} for public pages`,
+      });
+    } catch (error: any) {
+      console.error('Error updating display option:', error);
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || 'Failed to update display option',
+        variant: "destructive",
+      });
     }
   };
 
@@ -257,6 +279,7 @@ export function CourseDetail() {
               <TableHead className="w-48 min-w-48">Title</TableHead>
               <TableHead className="w-64 min-w-64">Description</TableHead>
               <TableHead className="w-40 min-w-40">Video (URL/File)</TableHead>
+              <TableHead className="w-32 min-w-32">Display</TableHead>
               <TableHead className="w-32 min-w-32">Created By</TableHead>
               <TableHead className="w-32 min-w-32">Created At</TableHead>
               <TableHead className="w-32 min-w-32 text-right">
@@ -271,7 +294,7 @@ export function CourseDetail() {
           <TableBody>
             {lectures.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   No lectures found. Create your first lecture!
                 </TableCell>
               </TableRow>
@@ -292,6 +315,17 @@ export function CourseDetail() {
                         View Video
                       </button>
                     ) : 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        checked={lecture.displayOnPublicPage || false}
+                        onCheckedChange={() => handleToggleDisplay(lecture)}
+                      />
+                      <span className="text-sm text-gray-600">
+                        {lecture.displayOnPublicPage ? 'Public' : 'Private'}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell>{lecture.createdBy?.name || 'N/A'}</TableCell>
                   <TableCell>
@@ -386,6 +420,15 @@ export function CourseDetail() {
                       </span>
                     )}
                   </span>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={lecture.displayOnPublicPage || false}
+                      onCheckedChange={() => handleToggleDisplay(lecture)}
+                    />
+                    <span className="text-xs">
+                      {lecture.displayOnPublicPage ? 'Public' : 'Private'}
+                    </span>
+                  </div>
                   <span className="hidden sm:inline">{lecture.createdBy?.name || 'N/A'}</span>
                 </div>
                 <span className="text-xs">{lecture.createdAt ? new Date(lecture.createdAt).toLocaleDateString() : 'N/A'}</span>

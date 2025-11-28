@@ -159,10 +159,40 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
     return (
         <>
             <style>{`
+                /* Make Quill editor container have fixed height with scrollable content */
+                .ql-container {
+                    height: 300px !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                }
+                
                 .ql-editor {
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif !important;
                     line-height: 1.4 !important;
                     color: #374151 !important;
+                    height: 300px !important;
+                    overflow-y: auto !important;
+                    overflow-x: hidden !important;
+                    flex: 1 1 auto !important;
+                }
+                
+                /* Custom scrollbar styling for better UX */
+                .ql-editor::-webkit-scrollbar {
+                    width: 8px !important;
+                }
+                
+                .ql-editor::-webkit-scrollbar-track {
+                    background: #f1f1f1 !important;
+                    border-radius: 4px !important;
+                }
+                
+                .ql-editor::-webkit-scrollbar-thumb {
+                    background: #888 !important;
+                    border-radius: 4px !important;
+                }
+                
+                .ql-editor::-webkit-scrollbar-thumb:hover {
+                    background: #555 !important;
                 }
                 
                 .ql-editor * {

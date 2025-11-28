@@ -616,7 +616,7 @@ export function UsersSection() {
           </div>
 
           {/* Scrollable Body */}
-          <div className="max-h-[600px] overflow-y-auto">
+          <div className="max-h-[570px] overflow-y-auto">
             <Table className="w-full">
               <TableBody>
                 {loading ? (

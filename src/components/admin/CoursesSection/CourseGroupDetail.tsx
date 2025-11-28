@@ -9,6 +9,12 @@ import { CourseModal } from "./CourseModal";
 import { useToast } from "@/hooks/use-toast";
 import { courseApi } from "@/lib/api";
 
+interface Resource {
+    name: string;
+    url: string;
+    type: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
+}
+
 interface Course {
     _id: string;
     title: string;
@@ -21,6 +27,8 @@ interface Course {
         email: string;
     };
     createdAt: string;
+    resources?: Resource[];
+    // Legacy fields for backward compatibility
     ebookName?: string;
     ebookUrl?: string;
 }

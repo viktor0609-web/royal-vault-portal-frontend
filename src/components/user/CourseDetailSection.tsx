@@ -8,6 +8,12 @@ import { sanitizeHtml } from "@/lib/htmlSanitizer";
 import { useAuth } from "@/context/AuthContext";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
 
+interface Resource {
+  name: string;
+  url: string;
+  type: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
+}
+
 interface Course {
   _id: string;
   title: string;
@@ -26,6 +32,8 @@ interface Course {
   };
   createdAt: string;
   updatedAt: string;
+  resources?: Resource[];
+  // Legacy fields for backward compatibility
   ebookName?: string;
   ebookUrl?: string;
 }
@@ -739,8 +747,45 @@ export function CourseDetailSection() {
                     ))}
                   </div>
 
-                  {/* Ebook Download Button */}
-                  {course?.ebookUrl && course?.ebookName && (
+                  {/* Resources Section */}
+                  {course?.resources && course.resources.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-3">Resources</h3>
+                      <div className="space-y-2">
+                        {course.resources.map((resource, index) => (
+                          <Button
+                            key={index}
+                            onClick={() => {
+                              if (resource.type === 'url') {
+                                window.open(resource.url, '_blank');
+                              } else {
+                                const link = document.createElement('a');
+                                link.href = resource.url;
+                                link.download = resource.name;
+                                link.target = '_blank';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              }
+                            }}
+                            className="w-full bg-primary hover:bg-royal-blue-dark text-white py-2.5 text-sm font-medium flex items-center gap-2 px-4"
+                            variant="default"
+                          >
+                            {resource.type === 'url' ? (
+                              <ExternalLinkIcon className="h-4 w-4 flex-shrink-0" />
+                            ) : (
+                              <DownloadIcon className="h-4 w-4 flex-shrink-0" />
+                            )}
+                            <span className="truncate min-w-0 flex-1">
+                              {resource.type === 'url' ? 'Open' : 'Download'} {resource.name}
+                            </span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {/* Legacy ebook support for backward compatibility */}
+                  {(!course?.resources || course.resources.length === 0) && course?.ebookUrl && course?.ebookName && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
                       <Button
                         onClick={() => {
@@ -944,8 +989,45 @@ export function CourseDetailSection() {
                   </div>
                 </div>
 
-                {/* Sticky Download Button */}
-                {course?.ebookUrl && course?.ebookName && (
+                {/* Sticky Resources Section */}
+                {course?.resources && course.resources.length > 0 && (
+                  <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 p-5 mt-auto">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Resources</h3>
+                    <div className="space-y-2">
+                      {course.resources.map((resource, index) => (
+                        <Button
+                          key={index}
+                          onClick={() => {
+                            if (resource.type === 'url') {
+                              window.open(resource.url, '_blank');
+                            } else {
+                              const link = document.createElement('a');
+                              link.href = resource.url;
+                              link.download = resource.name;
+                              link.target = '_blank';
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                            }
+                          }}
+                          className="w-full bg-primary hover:bg-royal-blue-dark text-white py-2.5 text-sm font-medium flex items-center gap-2 px-4"
+                          variant="default"
+                        >
+                          {resource.type === 'url' ? (
+                            <ExternalLinkIcon className="h-4 w-4 flex-shrink-0" />
+                          ) : (
+                            <DownloadIcon className="h-4 w-4 flex-shrink-0" />
+                          )}
+                          <span className="truncate min-w-0 flex-1">
+                            {resource.type === 'url' ? 'Open' : 'Download'} {resource.name}
+                          </span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Legacy ebook support for backward compatibility */}
+                {(!course?.resources || course.resources.length === 0) && course?.ebookUrl && course?.ebookName && (
                   <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 p-5 mt-auto">
                     <Button
                       onClick={() => {

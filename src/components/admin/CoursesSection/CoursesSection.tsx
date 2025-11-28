@@ -4,6 +4,7 @@ import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import { GraduationCapIcon, Trash2, Edit, PlusIcon, EyeIcon } from "lucide-react";
 import { GroupModal } from "./GroupModal";
 import { courseApi } from "@/lib/api";
@@ -23,6 +24,7 @@ interface CourseGroup {
   courses: any[];
   createdAt: string;
   updatedAt: string;
+  displayOnPublicPage?: boolean;
 }
 
 
@@ -94,6 +96,27 @@ export function CoursesSection() {
     }
   };
 
+  const handleToggleDisplay = async (group: CourseGroup) => {
+    try {
+      const newDisplayValue = !group.displayOnPublicPage;
+      await courseApi.updateCourseGroup(group._id, { displayOnPublicPage: newDisplayValue });
+      setCourseGroups(prev =>
+        prev.map(g => g._id === group._id ? { ...g, displayOnPublicPage: newDisplayValue } : g)
+      );
+      toast({
+        title: "Success",
+        description: `Course group ${newDisplayValue ? 'enabled' : 'disabled'} for public pages`,
+      });
+    } catch (error: any) {
+      console.error('Error updating display option:', error);
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || 'Failed to update display option',
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleViewGroup = (groupId: string) => {
     navigate(`/admin/courses/groups/${groupId}`);
   };
@@ -147,6 +170,7 @@ export function CoursesSection() {
               <TableHead className="w-64 min-w-64">Description</TableHead>
               <TableHead className="w-24 min-w-24">Icon</TableHead>
               <TableHead className="w-32 min-w-32">Courses Count</TableHead>
+              <TableHead className="w-32 min-w-32">Display</TableHead>
               <TableHead className="w-32 min-w-32">Created By</TableHead>
               <TableHead className="w-32 min-w-32">Created At</TableHead>
               <TableHead className="w-32 min-w-32 text-right">
@@ -161,13 +185,13 @@ export function CoursesSection() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   <Loading message="Loading course groups..." size="md" />
                 </TableCell>
               </TableRow>
             ) : courseGroups.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
+                <TableCell colSpan={8} className="text-center py-8">
                   No course groups found. Create your first course group!
                 </TableCell>
               </TableRow>
@@ -180,6 +204,18 @@ export function CoursesSection() {
                     <span className="text-sm text-gray-500">{group.icon}</span>
                   </TableCell>
                   <TableCell>{group.courses?.length || 0}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={group.displayOnPublicPage || false}
+                        onCheckedChange={() => handleToggleDisplay(group)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <span className="text-sm text-gray-600">
+                        {group.displayOnPublicPage ? 'Public' : 'Private'}
+                      </span>
+                    </div>
+                  </TableCell>
                   <TableCell>{group.createdBy?.name || 'N/A'}</TableCell>
                   <TableCell>
                     {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}
@@ -261,6 +297,16 @@ export function CoursesSection() {
                     <GraduationCapIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                     {group.courses?.length || 0} courses
                   </span>
+                  <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={group.displayOnPublicPage || false}
+                      onCheckedChange={() => handleToggleDisplay(group)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <span className="text-xs">
+                      {group.displayOnPublicPage ? 'Public' : 'Private'}
+                    </span>
+                  </div>
                   <span className="hidden sm:inline">{group.createdBy?.name || 'N/A'}</span>
                 </div>
                 <span className="text-xs">{group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}</span>

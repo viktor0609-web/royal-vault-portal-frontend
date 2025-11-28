@@ -4,6 +4,7 @@ import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, EyeIcon, PlayIcon } from "lucide-react";
 import { CourseModal } from "./CourseModal";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +29,7 @@ interface Course {
     };
     createdAt: string;
     resources?: Resource[];
+    displayOnPublicPage?: boolean;
     // Legacy fields for backward compatibility
     ebookName?: string;
     ebookUrl?: string;
@@ -121,6 +123,27 @@ export function CourseGroupDetail() {
                     variant: "destructive",
                 });
             }
+        }
+    };
+
+    const handleToggleDisplay = async (course: Course) => {
+        try {
+            const newDisplayValue = !course.displayOnPublicPage;
+            await courseApi.updateCourse(course._id, { displayOnPublicPage: newDisplayValue });
+            setCourses(prev =>
+                prev.map(c => c._id === course._id ? { ...c, displayOnPublicPage: newDisplayValue } : c)
+            );
+            toast({
+                title: "Success",
+                description: `Course ${newDisplayValue ? 'enabled' : 'disabled'} for public pages`,
+            });
+        } catch (error: any) {
+            console.error('Error updating display option:', error);
+            toast({
+                title: "Error",
+                description: error.response?.data?.message || 'Failed to update display option',
+                variant: "destructive",
+            });
         }
     };
 
@@ -231,6 +254,7 @@ export function CourseGroupDetail() {
                             <TableHead className="w-48 min-w-48">Title</TableHead>
                             <TableHead className="w-64 min-w-64">Description</TableHead>
                             <TableHead className="w-32 min-w-32">Lectures Count</TableHead>
+                            <TableHead className="w-32 min-w-32">Display</TableHead>
                             <TableHead className="w-32 min-w-32">Created By</TableHead>
                             <TableHead className="w-32 min-w-32">Created At</TableHead>
                             <TableHead className="w-32 min-w-32 text-right">
@@ -245,13 +269,13 @@ export function CourseGroupDetail() {
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8">
+                                <TableCell colSpan={7} className="text-center py-8">
                                     <Loading message="Loading courses..." size="md" />
                                 </TableCell>
                             </TableRow>
                         ) : courses.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center py-8">
+                                <TableCell colSpan={7} className="text-center py-8">
                                     No courses found. Create your first course!
                                 </TableCell>
                             </TableRow>
@@ -261,6 +285,18 @@ export function CourseGroupDetail() {
                                     <TableCell className="font-medium">{course.title}</TableCell>
                                     <TableCell className="max-w-xs truncate">{course.description}</TableCell>
                                     <TableCell>{course.lectures?.length || 0}</TableCell>
+                                    <TableCell>
+                                        <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                                            <Checkbox
+                                                checked={course.displayOnPublicPage || false}
+                                                onCheckedChange={() => handleToggleDisplay(course)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                            <span className="text-sm text-gray-600">
+                                                {course.displayOnPublicPage ? 'Public' : 'Private'}
+                                            </span>
+                                        </div>
+                                    </TableCell>
                                     <TableCell>{course.createdBy?.name || 'N/A'}</TableCell>
                                     <TableCell>
                                         {course.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'N/A'}
@@ -342,6 +378,16 @@ export function CourseGroupDetail() {
                                         <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                                         {course.lectures?.length || 0} lectures
                                     </span>
+                                    <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                                        <Checkbox
+                                            checked={course.displayOnPublicPage || false}
+                                            onCheckedChange={() => handleToggleDisplay(course)}
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                        <span className="text-xs">
+                                            {course.displayOnPublicPage ? 'Public' : 'Private'}
+                                        </span>
+                                    </div>
                                     <span>{course.createdBy?.name || 'N/A'}</span>
                                 </div>
                                 <span className="text-xs">{course.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'N/A'}</span>

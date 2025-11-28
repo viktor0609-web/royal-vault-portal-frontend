@@ -85,11 +85,10 @@ export function SignUp() {
         role: "user",
       });
 
-      // If registration includes tokens, store them and log in user
-      if (response.data.accessToken && response.data.refreshToken) {
+      // If registration includes token, store it and log in user
+      if (response.data.accessToken) {
         localStorage.setItem("accessToken", response.data.accessToken);
-        localStorage.setItem("refreshToken", response.data.refreshToken);
-        console.log('Both tokens stored successfully after signup');
+        console.log('Access token stored successfully after signup');
         await fetchProfile();
 
         // Mark "Set your password" as completed in checklist

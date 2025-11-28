@@ -70,14 +70,13 @@ export function ReSettingPasswordPage() {
                 password: formData.password,
             });
 
-            // If password reset includes tokens, store them and log in user
-            if (response.data.accessToken && response.data.refreshToken) {
+            // If password reset includes token, store it and log in user
+            if (response.data.accessToken) {
                 localStorage.setItem("accessToken", response.data.accessToken);
-                localStorage.setItem("refreshToken", response.data.refreshToken);
-                console.log('Both tokens stored successfully after password reset');
+                console.log('Access token stored successfully after password reset');
                 await fetchProfile();
             } else {
-                console.error('Missing tokens in password reset response:', response.data);
+                console.error('Missing access token in password reset response:', response.data);
             }
 
             setSuccess(response.data.message);

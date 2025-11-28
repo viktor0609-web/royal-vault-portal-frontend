@@ -223,10 +223,10 @@ export function CourseGroupDetail() {
     }
 
     return (
-        <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
+        <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
             {/* Header - Sticky */}
-            <div className="sticky top-[41px] z-30 flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6 shadow-sm">
-                <div className="text-2xl sm:text-4xl">🎓</div>
+            <div className="sticky top-[41px] z-30 flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6 shadow-sm min-w-0">
+                <div className="text-2xl sm:text-4xl flex-shrink-0">🎓</div>
                 <div className="flex-1 min-w-0">
                     <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2 truncate">{courseGroup.title}</h1>
                     <p className="text-xs sm:text-base text-royal-gray line-clamp-2">{courseGroup.description}</p>
@@ -248,15 +248,15 @@ export function CourseGroupDetail() {
 
             {/* Desktop Table View */}
             <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <Table className="w-full min-w-[800px] text-sm">
+                <Table className="w-full text-sm">
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-48 min-w-48">Title</TableHead>
-                            <TableHead className="w-64 min-w-64">Description</TableHead>
-                            <TableHead className="w-32 min-w-32">Lectures Count</TableHead>
+                            <TableHead className="w-64 min-w-64 hidden xl:table-cell">Description</TableHead>
+                            <TableHead className="w-32 min-w-32">Lectures</TableHead>
                             <TableHead className="w-32 min-w-32">Display</TableHead>
-                            <TableHead className="w-32 min-w-32">Created By</TableHead>
-                            <TableHead className="w-32 min-w-32">Created At</TableHead>
+                            <TableHead className="w-32 min-w-32 hidden xl:table-cell">Created By</TableHead>
+                            <TableHead className="w-32 min-w-32 hidden 2xl:table-cell">Created At</TableHead>
                             <TableHead className="w-32 min-w-32 text-right">
                                 <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={handleAddCourse}>
                                     <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -283,7 +283,7 @@ export function CourseGroupDetail() {
                             courses.map((course) => (
                                 <TableRow key={course._id} onClick={() => handleViewCourse(course._id)} className="cursor-pointer">
                                     <TableCell className="font-medium">{course.title}</TableCell>
-                                    <TableCell className="max-w-xs truncate">{course.description}</TableCell>
+                                    <TableCell className="max-w-xs truncate hidden xl:table-cell">{course.description}</TableCell>
                                     <TableCell>{course.lectures?.length || 0}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
@@ -292,13 +292,13 @@ export function CourseGroupDetail() {
                                                 onCheckedChange={() => handleToggleDisplay(course)}
                                                 onClick={(e) => e.stopPropagation()}
                                             />
-                                            <span className="text-sm text-gray-600">
+                                            <span className="text-sm text-gray-600 hidden xl:inline">
                                                 {course.displayOnPublicPage ? 'Public' : 'Private'}
                                             </span>
                                         </div>
                                     </TableCell>
-                                    <TableCell>{course.createdBy?.name || 'N/A'}</TableCell>
-                                    <TableCell>
+                                    <TableCell className="hidden xl:table-cell">{course.createdBy?.name || 'N/A'}</TableCell>
+                                    <TableCell className="hidden 2xl:table-cell">
                                         {course.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'N/A'}
                                     </TableCell>
                                     <TableCell className="w-40 min-w-40">
@@ -329,12 +329,12 @@ export function CourseGroupDetail() {
             </div>
 
             {/* Mobile/Tablet Card View */}
-            <div className="lg:hidden space-y-4">
+            <div className="lg:hidden space-y-3 sm:space-y-4 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
                 {/* Add Button for Mobile */}
                 <div className="flex justify-end">
-                    <Button onClick={handleAddCourse} className="flex items-center gap-2">
-                        <PlusIcon className="h-4 w-4" />
-                        Create
+                    <Button onClick={handleAddCourse} className="flex items-center gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
+                        <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span>Create</span>
                     </Button>
                 </div>
 
@@ -346,18 +346,19 @@ export function CourseGroupDetail() {
                     </div>
                 ) : (
                     courses.map((course) => (
-                        <div key={course._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
-                            <div className="flex items-start justify-between mb-2 cursor-pointer" onClick={() => handleViewCourse(course._id)}>
-                                <div className="flex-1">
-                                    <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">{course.title}</h3>
+                        <div key={course._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm min-w-0">
+                            <div className="flex items-start justify-between mb-2 cursor-pointer min-w-0" onClick={() => handleViewCourse(course._id)}>
+                                <div className="flex-1 min-w-0 mr-2">
+                                    <h3 className="font-semibold text-royal-dark-gray text-sm sm:text-base mb-1 line-clamp-2">{course.title}</h3>
                                     <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{course.description}</p>
                                 </div>
-                                <div className="flex gap-1 ml-2">
+                                <div className="flex gap-1 ml-2 flex-shrink-0">
                                     <Button
                                         variant="outline"
                                         size="sm"
                                         onClick={(e) => handleEdit(e, course)}
-                                        className="h-7 w-7 p-0"
+                                        className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                                        title="Edit"
                                     >
                                         <Edit className="h-3 w-3" />
                                     </Button>
@@ -365,20 +366,21 @@ export function CourseGroupDetail() {
                                         variant="outline"
                                         size="sm"
                                         onClick={(e) => handleDelete(e, course._id)}
-                                        className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
+                                        className="h-6 w-6 sm:h-7 sm:w-7 p-0 text-red-600 hover:text-red-700"
+                                        title="Delete"
                                     >
                                         <Trash2 className="h-3 w-3" />
                                     </Button>
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray">
-                                <div className="flex items-center gap-3">
-                                    <span className="flex items-center gap-1">
-                                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                            <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray mb-2 min-w-0">
+                                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 flex-wrap">
+                                    <span className="flex items-center gap-1 whitespace-nowrap">
+                                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                                         {course.lectures?.length || 0} lectures
                                     </span>
-                                    <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                                    <div className="flex items-center space-x-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                                         <Checkbox
                                             checked={course.displayOnPublicPage || false}
                                             onCheckedChange={() => handleToggleDisplay(course)}
@@ -388,9 +390,9 @@ export function CourseGroupDetail() {
                                             {course.displayOnPublicPage ? 'Public' : 'Private'}
                                         </span>
                                     </div>
-                                    <span>{course.createdBy?.name || 'N/A'}</span>
+                                    <span className="hidden sm:inline truncate">{course.createdBy?.name || 'N/A'}</span>
                                 </div>
-                                <span className="text-xs">{course.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'N/A'}</span>
+                                <span className="text-xs flex-shrink-0">{course.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'N/A'}</span>
                             </div>
                         </div>
                     ))

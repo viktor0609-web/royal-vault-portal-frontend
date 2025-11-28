@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -93,6 +94,7 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
     title: "",
     description: "",
     resources: [] as Resource[],
+    displayOnPublicPage: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -121,6 +123,7 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
         title: editingCourse.title || "",
         description: editingCourse.description || "",
         resources,
+        displayOnPublicPage: editingCourse.displayOnPublicPage || false,
       };
       setFormData(initialData);
       setInitialFormData(JSON.parse(JSON.stringify(initialData)));
@@ -129,6 +132,7 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
         title: "",
         description: "",
         resources: [],
+        displayOnPublicPage: false,
       };
       setFormData(emptyData);
       setInitialFormData(JSON.parse(JSON.stringify(emptyData)));
@@ -155,6 +159,7 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
         title: formData.title,
         description: formData.description,
         resources: formData.resources,
+        displayOnPublicPage: formData.displayOnPublicPage,
       };
 
       let response;
@@ -505,6 +510,23 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
             {error && (
               <div className="text-red-500 text-sm">{error}</div>
             )}
+
+            {/* Display on Public Pages */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="displayOnPublicPage"
+                checked={formData.displayOnPublicPage}
+                onCheckedChange={(checked) => {
+                  setFormData(prev => ({ ...prev, displayOnPublicPage: checked === true }));
+                }}
+              />
+              <Label
+                htmlFor="displayOnPublicPage"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Display on public pages
+              </Label>
+            </div>
 
             <Button
               type="submit"

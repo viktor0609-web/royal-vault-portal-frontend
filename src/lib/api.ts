@@ -60,8 +60,12 @@ api.interceptors.response.use(
 // Deal API functions - OPTIMIZED
 export const dealApi = {
   // Get all deals with field selection
-  getAllDeals: (fields: 'basic' | 'detailed' | 'full' = 'basic') =>
-    api.get(`/api/deals?fields=${fields}`),
+  getAllDeals: (fields: 'basic' | 'detailed' | 'full' = 'basic', publicOnly: boolean = false) => {
+    const params = new URLSearchParams();
+    params.append('fields', fields);
+    if (publicOnly) params.append('publicOnly', 'true');
+    return api.get(`/api/deals?${params.toString()}`);
+  },
 
   // Get deal by ID with field selection
   getDealById: (dealId: string, fields: 'basic' | 'detailed' | 'full' = 'full') =>
@@ -77,8 +81,11 @@ export const dealApi = {
   deleteDeal: (dealId: string) => api.delete(`/api/deals/${dealId}`),
 
   // Filter deals with field selection
-  filterDeals: (filters: any, fields: 'basic' | 'detailed' | 'full' = 'basic') =>
-    api.get('/api/deals/filter', { params: { ...filters, fields } }),
+  filterDeals: (filters: any, fields: 'basic' | 'detailed' | 'full' = 'basic', publicOnly: boolean = false) => {
+    const params = { ...filters, fields };
+    if (publicOnly) params.publicOnly = 'true';
+    return api.get('/api/deals/filter', { params });
+  },
 };
 
 

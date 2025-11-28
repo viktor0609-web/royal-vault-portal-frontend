@@ -241,13 +241,13 @@ export function CourseDetail() {
   }
 
   return (
-    <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
-      <div className="sticky top-[41px] z-30 bg-white rounded-lg border border-royal-light-gray shadow-sm mb-3 sm:mb-6">
+    <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
+      <div className="sticky top-[41px] z-30 bg-white rounded-lg border border-royal-light-gray shadow-sm mb-3 sm:mb-6 min-w-0">
         <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-royal-light-gray">
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => navigate(`/admin/courses/groups/${groupId}`)}
-              className="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded transition-all duration-200 group text-xs sm:text-sm"
+              className="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded transition-all duration-200 group text-xs sm:text-sm flex-shrink-0"
             >
               <ArrowLeftIcon className="h-3 w-3 sm:h-4 sm:w-4 group-hover:-translate-x-0.5 transition-transform" />
               <span className="font-medium hidden sm:inline">Back to Course Group</span>
@@ -256,10 +256,10 @@ export function CourseDetail() {
           </div>
         </div>
         <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray mb-2">{course.title}</h1>
-              <p className="text-royal-gray mb-3 text-xs sm:text-sm lg:text-base">{course.description}</p>
+          <div className="flex items-start justify-between min-w-0">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray mb-2 truncate">{course.title}</h1>
+              <p className="text-royal-gray mb-3 text-xs sm:text-sm lg:text-base line-clamp-2">{course.description}</p>
             </div>
           </div>
         </div>
@@ -273,15 +273,15 @@ export function CourseDetail() {
 
       {/* Desktop Table View */}
       <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        <Table className="w-full min-w-[900px] text-sm">
+        <Table className="w-full text-sm">
           <TableHeader>
             <TableRow>
               <TableHead className="w-48 min-w-48">Title</TableHead>
-              <TableHead className="w-64 min-w-64">Description</TableHead>
-              <TableHead className="w-40 min-w-40">Video (URL/File)</TableHead>
+              <TableHead className="w-64 min-w-64 hidden xl:table-cell">Description</TableHead>
+              <TableHead className="w-40 min-w-40 hidden xl:table-cell">Video</TableHead>
               <TableHead className="w-32 min-w-32">Display</TableHead>
-              <TableHead className="w-32 min-w-32">Created By</TableHead>
-              <TableHead className="w-32 min-w-32">Created At</TableHead>
+              <TableHead className="w-32 min-w-32 hidden 2xl:table-cell">Created By</TableHead>
+              <TableHead className="w-32 min-w-32 hidden 2xl:table-cell">Created At</TableHead>
               <TableHead className="w-32 min-w-32 text-right">
                 <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={handleAddLecture}>
                   <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -304,8 +304,8 @@ export function CourseDetail() {
                   <TableCell className="font-medium">
                     {lecture.title}
                   </TableCell>
-                  <TableCell className="max-w-xs truncate">{lecture.description}</TableCell>
-                  <TableCell>
+                  <TableCell className="max-w-xs truncate hidden xl:table-cell">{lecture.description}</TableCell>
+                  <TableCell className="hidden xl:table-cell">
                     {lecture.videoUrl ? (
                       <button
                         onClick={() => handleViewVideo(lecture.videoUrl, lecture.title)}
@@ -322,13 +322,13 @@ export function CourseDetail() {
                         checked={lecture.displayOnPublicPage || false}
                         onCheckedChange={() => handleToggleDisplay(lecture)}
                       />
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 hidden xl:inline">
                         {lecture.displayOnPublicPage ? 'Public' : 'Private'}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{lecture.createdBy?.name || 'N/A'}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden 2xl:table-cell">{lecture.createdBy?.name || 'N/A'}</TableCell>
+                  <TableCell className="hidden 2xl:table-cell">
                     {lecture.createdAt ? new Date(lecture.createdAt).toLocaleDateString() : 'N/A'}
                   </TableCell>
                   <TableCell className="w-40 min-w-40">
@@ -359,12 +359,12 @@ export function CourseDetail() {
       </div>
 
       {/* Mobile/Tablet Card View */}
-      <div className="lg:hidden space-y-4">
+      <div className="lg:hidden space-y-3 sm:space-y-4 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
         {/* Add Button for Mobile */}
         <div className="flex justify-end">
-          <Button onClick={handleAddLecture} className="flex items-center gap-2">
-            <PlusIcon className="h-4 w-4" />
-            Create
+          <Button onClick={handleAddLecture} className="flex items-center gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
+            <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span>Create</span>
           </Button>
         </div>
 
@@ -374,20 +374,21 @@ export function CourseDetail() {
           </div>
         ) : (
           lectures.map((lecture) => (
-            <div key={lecture._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">
+            <div key={lecture._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm min-w-0">
+              <div className="flex items-start justify-between mb-2 min-w-0">
+                <div className="flex-1 min-w-0 mr-2">
+                  <h3 className="font-semibold text-royal-dark-gray text-sm sm:text-base mb-1 line-clamp-2">
                     {lecture.title}
                   </h3>
                   <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{lecture.description}</p>
                 </div>
-                <div className="flex gap-1 ml-2">
+                <div className="flex gap-1 ml-2 flex-shrink-0">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleEdit(lecture)}
-                    className="h-7 w-7 p-0"
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                    title="Edit"
                   >
                     <Edit className="h-3 w-3" />
                   </Button>
@@ -395,32 +396,33 @@ export function CourseDetail() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDelete(lecture._id)}
-                    className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0 text-red-600 hover:text-red-700"
+                    title="Delete"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray">
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1">
+              <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray mb-2 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 flex-wrap">
+                  <span className="flex items-center gap-1 whitespace-nowrap">
                     {lecture.videoUrl ? (
                       <button
                         onClick={() => handleViewVideo(lecture.videoUrl, lecture.title)}
                         className="text-blue-600 hover:underline flex items-center gap-1"
                       >
-                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                         <span>Video</span>
                       </button>
                     ) : (
                       <span className="flex items-center gap-1">
-                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <PlayIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                         No Video
                       </span>
                     )}
                   </span>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 whitespace-nowrap">
                     <Checkbox
                       checked={lecture.displayOnPublicPage || false}
                       onCheckedChange={() => handleToggleDisplay(lecture)}
@@ -429,9 +431,9 @@ export function CourseDetail() {
                       {lecture.displayOnPublicPage ? 'Public' : 'Private'}
                     </span>
                   </div>
-                  <span className="hidden sm:inline">{lecture.createdBy?.name || 'N/A'}</span>
+                  <span className="hidden sm:inline truncate">{lecture.createdBy?.name || 'N/A'}</span>
                 </div>
-                <span className="text-xs">{lecture.createdAt ? new Date(lecture.createdAt).toLocaleDateString() : 'N/A'}</span>
+                <span className="text-xs flex-shrink-0">{lecture.createdAt ? new Date(lecture.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>
             </div>
           ))

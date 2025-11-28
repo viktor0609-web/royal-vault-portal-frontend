@@ -149,10 +149,12 @@ export function CoursesSection() {
   }, []);
 
   return (
-    <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
-      <div className="flex gap-2 items-center bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-        <GraduationCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray" />
-        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">Course Groups</h1>
+    <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 items-start sm:items-center justify-between bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3 min-w-0">
+        <div className="flex gap-2 items-center min-w-0 flex-1">
+          <GraduationCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray flex-shrink-0" />
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase truncate">Course Groups</h1>
+        </div>
       </div>
 
       {error && (
@@ -163,16 +165,16 @@ export function CoursesSection() {
 
       {/* Desktop Table View */}
       <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        <Table className="w-full min-w-[900px] text-sm">
+        <Table className="w-full text-sm">
           <TableHeader>
             <TableRow>
               <TableHead className="w-48 min-w-48">Title</TableHead>
-              <TableHead className="w-64 min-w-64">Description</TableHead>
-              <TableHead className="w-24 min-w-24">Icon</TableHead>
-              <TableHead className="w-32 min-w-32">Courses Count</TableHead>
+              <TableHead className="w-64 min-w-64 hidden xl:table-cell">Description</TableHead>
+              <TableHead className="w-24 min-w-24 hidden 2xl:table-cell">Icon</TableHead>
+              <TableHead className="w-32 min-w-32">Courses</TableHead>
               <TableHead className="w-32 min-w-32">Display</TableHead>
-              <TableHead className="w-32 min-w-32">Created By</TableHead>
-              <TableHead className="w-32 min-w-32">Created At</TableHead>
+              <TableHead className="w-32 min-w-32 hidden xl:table-cell">Created By</TableHead>
+              <TableHead className="w-32 min-w-32 hidden 2xl:table-cell">Created At</TableHead>
               <TableHead className="w-32 min-w-32 text-right">
                 <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={handleAddCourseGroup}>
                   <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -199,8 +201,8 @@ export function CoursesSection() {
               courseGroups.map((group) => (
                 <TableRow key={group._id} onClick={() => handleViewGroup(group._id)} className="cursor-pointer">
                   <TableCell className="font-medium">{group.title}</TableCell>
-                  <TableCell className="max-w-xs truncate">{group.description}</TableCell>
-                  <TableCell>
+                  <TableCell className="max-w-xs truncate hidden xl:table-cell">{group.description}</TableCell>
+                  <TableCell className="hidden 2xl:table-cell">
                     <span className="text-sm text-gray-500">{group.icon}</span>
                   </TableCell>
                   <TableCell>{group.courses?.length || 0}</TableCell>
@@ -211,13 +213,13 @@ export function CoursesSection() {
                         onCheckedChange={() => handleToggleDisplay(group)}
                         onClick={(e) => e.stopPropagation()}
                       />
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 hidden xl:inline">
                         {group.displayOnPublicPage ? 'Public' : 'Private'}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{group.createdBy?.name || 'N/A'}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden xl:table-cell">{group.createdBy?.name || 'N/A'}</TableCell>
+                  <TableCell className="hidden 2xl:table-cell">
                     {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}
                   </TableCell>
                   <TableCell className="w-40 min-w-40">
@@ -248,12 +250,12 @@ export function CoursesSection() {
       </div>
 
       {/* Mobile/Tablet Card View */}
-      <div className="lg:hidden space-y-4">
+      <div className="lg:hidden space-y-3 sm:space-y-4 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
         {/* Add Button for Mobile */}
         <div className="flex justify-end">
-          <Button onClick={handleAddCourseGroup} className="flex items-center gap-2">
-            <PlusIcon className="h-4 w-4" />
-            Create
+          <Button onClick={handleAddCourseGroup} className="flex items-center gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
+            <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span>Create</span>
           </Button>
         </div>
 
@@ -265,18 +267,19 @@ export function CoursesSection() {
           </div>
         ) : (
           courseGroups.map((group) => (
-            <div key={group._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm">
-              <div className="flex items-start justify-between mb-2 cursor-pointer" onClick={() => handleViewGroup(group._id)}>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-royal-dark-gray text-base sm:text-lg mb-1">{group.title}</h3>
+            <div key={group._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm min-w-0">
+              <div className="flex items-start justify-between mb-2 cursor-pointer min-w-0" onClick={() => handleViewGroup(group._id)}>
+                <div className="flex-1 min-w-0 mr-2">
+                  <h3 className="font-semibold text-royal-dark-gray text-sm sm:text-base mb-1 line-clamp-2">{group.title}</h3>
                   <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{group.description}</p>
                 </div>
-                <div className="flex gap-1 ml-2">
+                <div className="flex gap-1 ml-2 flex-shrink-0">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={(e) => handleEdit(e, group)}
-                    className="h-7 w-7 p-0"
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                    title="Edit"
                   >
                     <Edit className="h-3 w-3" />
                   </Button>
@@ -284,20 +287,21 @@ export function CoursesSection() {
                     variant="outline"
                     size="sm"
                     onClick={(e) => handleDelete(e, group._id)}
-                    className="h-7 w-7 p-0 text-red-600 hover:text-red-700"
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0 text-red-600 hover:text-red-700"
+                    title="Delete"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray">
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1">
-                    <GraduationCapIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <div className="flex items-center justify-between text-xs sm:text-sm text-royal-gray mb-2 min-w-0">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 flex-wrap">
+                  <span className="flex items-center gap-1 whitespace-nowrap">
+                    <GraduationCapIcon className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     {group.courses?.length || 0} courses
                   </span>
-                  <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center space-x-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                     <Checkbox
                       checked={group.displayOnPublicPage || false}
                       onCheckedChange={() => handleToggleDisplay(group)}
@@ -307,9 +311,9 @@ export function CoursesSection() {
                       {group.displayOnPublicPage ? 'Public' : 'Private'}
                     </span>
                   </div>
-                  <span className="hidden sm:inline">{group.createdBy?.name || 'N/A'}</span>
+                  <span className="hidden sm:inline truncate">{group.createdBy?.name || 'N/A'}</span>
                 </div>
-                <span className="text-xs">{group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}</span>
+                <span className="text-xs flex-shrink-0">{group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>
             </div>
           ))

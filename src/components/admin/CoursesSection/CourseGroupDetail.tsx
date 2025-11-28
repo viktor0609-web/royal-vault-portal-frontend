@@ -247,85 +247,87 @@ export function CourseGroupDetail() {
             )}
 
             {/* Desktop Table View */}
-            <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <Table className="w-full text-sm">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-48 min-w-48">Title</TableHead>
-                            <TableHead className="w-64 min-w-64 hidden xl:table-cell">Description</TableHead>
-                            <TableHead className="w-32 min-w-32">Lectures</TableHead>
-                            <TableHead className="w-32 min-w-32">Display</TableHead>
-                            <TableHead className="w-32 min-w-32 hidden xl:table-cell">Created By</TableHead>
-                            <TableHead className="w-32 min-w-32 hidden 2xl:table-cell">Created At</TableHead>
-                            <TableHead className="w-32 min-w-32 text-right">
-                                <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={handleAddCourse}>
-                                    <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                                    <span>Create</span>
-                                    <span className="sm:hidden">+</span>
-                                </Button>
-                            </TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {loading ? (
-                            <TableRow>
-                                <TableCell colSpan={7} className="text-center py-8">
-                                    <Loading message="Loading courses..." size="md" />
-                                </TableCell>
+            <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden flex flex-col flex-1 min-h-0 mt-4">
+                <div className="overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex-1 min-h-0">
+                    <Table className="w-full text-sm">
+                        <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
+                            <TableRow className="border-b">
+                                <TableHead className="w-48 min-w-48 py-2 px-2">Title</TableHead>
+                                <TableHead className="w-64 min-w-64 hidden xl:table-cell py-2 px-2">Description</TableHead>
+                                <TableHead className="w-32 min-w-32 py-2 px-2">Lectures</TableHead>
+                                <TableHead className="w-32 min-w-32 py-2 px-2">Display</TableHead>
+                                <TableHead className="w-32 min-w-32 hidden xl:table-cell py-2 px-2">Created By</TableHead>
+                                <TableHead className="w-32 min-w-32 hidden 2xl:table-cell py-2 px-2">Created At</TableHead>
+                                <TableHead className="w-32 min-w-32 text-right py-2 px-2">
+                                    <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={handleAddCourse}>
+                                        <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                                        <span>Create</span>
+                                        <span className="sm:hidden">+</span>
+                                    </Button>
+                                </TableHead>
                             </TableRow>
-                        ) : courses.length === 0 ? (
-                            <TableRow>
-                                <TableCell colSpan={7} className="text-center py-8">
-                                    No courses found. Create your first course!
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            courses.map((course) => (
-                                <TableRow key={course._id} onClick={() => handleViewCourse(course._id)} className="cursor-pointer">
-                                    <TableCell className="font-medium">{course.title}</TableCell>
-                                    <TableCell className="max-w-xs truncate hidden xl:table-cell">{course.description}</TableCell>
-                                    <TableCell>{course.lectures?.length || 0}</TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
-                                            <Checkbox
-                                                checked={course.displayOnPublicPage || false}
-                                                onCheckedChange={() => handleToggleDisplay(course)}
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
-                                            <span className="text-sm text-gray-600 hidden xl:inline">
-                                                {course.displayOnPublicPage ? 'Public' : 'Private'}
-                                            </span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="hidden xl:table-cell">{course.createdBy?.name || 'N/A'}</TableCell>
-                                    <TableCell className="hidden 2xl:table-cell">
-                                        {course.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'N/A'}
-                                    </TableCell>
-                                    <TableCell className="w-40 min-w-40">
-                                        <div className="flex gap-2 justify-end">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={(e) => handleEdit(e, course)}
-                                                title="Edit"
-                                            >
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="destructive"
-                                                onClick={(e) => handleDelete(e, course._id)}
-                                                title="Delete"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
+                        </TableHeader>
+                        <TableBody>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center py-8">
+                                        <Loading message="Loading courses..." size="md" />
                                     </TableCell>
                                 </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
+                            ) : courses.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center py-8">
+                                        No courses found. Create your first course!
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                courses.map((course) => (
+                                    <TableRow key={course._id} onClick={() => handleViewCourse(course._id)} className="cursor-pointer">
+                                        <TableCell className="font-medium">{course.title}</TableCell>
+                                        <TableCell className="max-w-xs truncate hidden xl:table-cell">{course.description}</TableCell>
+                                        <TableCell>{course.lectures?.length || 0}</TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
+                                                <Checkbox
+                                                    checked={course.displayOnPublicPage || false}
+                                                    onCheckedChange={() => handleToggleDisplay(course)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                                <span className="text-sm text-gray-600 hidden xl:inline">
+                                                    {course.displayOnPublicPage ? 'Public' : 'Private'}
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="hidden xl:table-cell">{course.createdBy?.name || 'N/A'}</TableCell>
+                                        <TableCell className="hidden 2xl:table-cell">
+                                            {course.createdAt ? new Date(course.createdAt).toLocaleDateString() : 'N/A'}
+                                        </TableCell>
+                                        <TableCell className="w-40 min-w-40">
+                                            <div className="flex gap-2 justify-end">
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={(e) => handleEdit(e, course)}
+                                                    title="Edit"
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    onClick={(e) => handleDelete(e, course._id)}
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
 
             {/* Mobile/Tablet Card View */}

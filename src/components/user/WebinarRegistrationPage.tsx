@@ -33,7 +33,7 @@ export function WebinarRegistrationPage() {
 
     useEffect(() => {
         const fetchWebinar = async () => {
-            const response = await webinarApi.getWebinarById(webinarId, 'basic');
+            const response = await webinarApi.getPublicWebinarById(webinarId, 'basic');
             setWebinar(response.data.webinar);
             setFormattedDate(format(new Date(response.data.webinar.date), "EEEE MMMM do, h:mma"));
         };

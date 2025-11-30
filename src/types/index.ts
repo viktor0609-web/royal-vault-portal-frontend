@@ -62,6 +62,7 @@ export interface CourseGroup {
   createdAt?: string;
   updatedAt?: string;
   displayOnPublicPage?: boolean;
+  hubSpotListIds?: string[];
 }
 
 export interface Course {

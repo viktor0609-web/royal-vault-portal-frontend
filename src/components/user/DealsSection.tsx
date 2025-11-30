@@ -315,22 +315,22 @@ export function DealsSection() {
                     </div>
                   </div>
                   <div className="text-xs sm:text-sm text-royal-gray p-3 sm:p-6">
-                    <p className="leading-relaxed">
+                    <div className="leading-relaxed mb-2">
                       {item.source?.name == "Client Sourced" && (
-                        <div className="inline-block bg-yellow-100 border border-yellow-300 text-yellow-500 px-4 py-0.5 rounded-sm border-2">
+                        <span className="inline-block bg-yellow-100 border border-yellow-300 text-yellow-500 px-4 py-0.5 rounded-sm border-2">
                           <span className="font-bold uppercase text-xs tracking-wide">
                             {item.source?.name}
                           </span>
-                        </div>
+                        </span>
                       )}
                       {item.source?.name == "Royal Sourced" && (
-                        <div className="inline-block bg-blue-100 border border-blue-300 text-blue-500 px-4 py-0.5 rounded-sm border-2">
+                        <span className="inline-block bg-blue-100 border border-blue-300 text-blue-500 px-4 py-0.5 rounded-sm border-2">
                           <span className="font-bold uppercase text-xs tracking-wide">
                             {item.source?.name}
                           </span>
-                        </div>
+                        </span>
                       )}
-                    </p>
+                    </div>
                     <p className="leading-relaxed">
                       <span className="font-bold">Category: </span>
                       {formatArrayData(item.category)}

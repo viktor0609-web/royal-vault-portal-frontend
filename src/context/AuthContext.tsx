@@ -1,21 +1,9 @@
 // src/context/AuthContext.tsx
 import { createContext, useEffect, useState, ReactNode, useContext } from "react";
-import { api, setOnTokensCleared } from "@/lib/api";
+import { api, setOnTokensCleared, authService } from "@/services/api";
+import type { User } from "@/types";
 
-// Define shape of user data (MongoDB only - for AuthContext)
-export interface User {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    role: "user" | "admin";
-    supaadmin?: boolean;
-    client_type?: string;
-    isVerified: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
+// User type is now imported from @/types
 
 // Define context value shape
 interface AuthContextType {
@@ -38,7 +26,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const login = async (email: string, password: string): Promise<void> => {
         try {
-            const { data } = await api.post("/api/auth/login", { email, password });
+            const { data } = await authService.login(email, password);
             
             // Validate that we received access token
             if (!data.accessToken) {
@@ -61,7 +49,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const logout = async (): Promise<void> => {
         try {
-            await api.post("/api/auth/logout");
+            await authService.logout();
         } finally {
             localStorage.removeItem("accessToken");
             setUser(null);
@@ -70,7 +58,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const fetchProfile = async (): Promise<void> => {
         try {
-            const { data } = await api.get<User>("/api/auth/user");
+            const { data } = await authService.getUser();
             setUser(data);
         } catch {
             setUser(null);

@@ -20,23 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-
-interface CourseGroup {
-  _id: string;
-  title: string;
-  description: string;
-  icon: string;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  courses: any[];
-  createdAt: string;
-  updatedAt: string;
-  displayOnPublicPage?: boolean;
-}
+import type { CourseGroup } from "@/types";
 
 
 export function CoursesSection() {
@@ -152,9 +136,9 @@ export function CoursesSection() {
       setError(null);
       // Use 'detailed' fields for admin list view to show course counts
       // Admin should see all courses, not just public ones
-      const response = await courseApi.getAllCourseGroups({}, 'detailed');
+      const response = await courseApi.getAllCourseGroups({}, 'basic');
       // Handle new response structure with pagination
-      const data = response.data?.data || response.data || [];
+      const data = response.data?.data || [];
       setCourseGroups(data);
     } catch (err) {
       const error = err as AxiosError<{ message?: string }>;
@@ -245,7 +229,7 @@ export function CoursesSection() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden xl:table-cell">{group.createdBy?.name || 'N/A'}</TableCell>
+                    <TableCell className="hidden xl:table-cell">{typeof group.createdBy === 'object' ? group.createdBy?.firstName + ' ' + group.createdBy?.lastName : 'N/A'}</TableCell>
                     <TableCell className="hidden 2xl:table-cell">
                       {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}
                     </TableCell>
@@ -339,7 +323,7 @@ export function CoursesSection() {
                       {group.displayOnPublicPage ? 'Public' : 'Private'}
                     </span>
                   </div>
-                  <span className="hidden sm:inline truncate">{group.createdBy?.name || 'N/A'}</span>
+                  <span className="hidden sm:inline truncate">{typeof group.createdBy === 'object' ? group.createdBy?.firstName + ' ' + group.createdBy?.lastName : 'N/A'}</span>
                 </div>
                 <span className="text-xs flex-shrink-0">{group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>

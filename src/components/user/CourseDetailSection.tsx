@@ -8,57 +8,10 @@ import { sanitizeHtml } from "@/lib/htmlSanitizer";
 import { useAuth } from "@/context/AuthContext";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
 import { useToast } from "@/hooks/use-toast";
+import type { Course, Lecture, CourseResource, CourseGroup } from "@/types";
 
-interface Resource {
-  name: string;
-  url: string;
-  type: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
-}
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  courseGroup: {
-    _id: string;
-    title: string;
-    description: string;
-    icon: string;
-  };
-  lectures: Lecture[];
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-  resources?: Resource[];
-  // Legacy fields for backward compatibility
-  ebookName?: string;
-  ebookUrl?: string;
-}
-
-interface Lecture {
-  _id: string;
-  title: string;
-  description?: string;
-  content?: string;
-  videoUrl?: string;
-  relatedFiles: {
-    name: string;
-    uploadedUrl: string;
-  }[];
-  completedBy: string[];
-  displayOnPublicPage?: boolean;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+// Use CourseResource from types, but keep Resource alias for backward compatibility
+type Resource = CourseResource;
 
 export function CourseDetailSection() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -317,7 +270,7 @@ export function CourseDetailSection() {
           <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📚</div>
           <h3 className="text-lg sm:text-xl font-semibold text-royal-dark-gray mb-2">No Lectures Available</h3>
           <p className="text-sm sm:text-base text-royal-gray mb-3 sm:mb-4">This course doesn't have any lectures yet.</p>
-          <Button onClick={() => navigate(`/course-groups/${course.courseGroup._id}`)} variant="outline" className="text-xs sm:text-sm">
+          <Button onClick={() => navigate(`/course-groups/${(course.courseGroup as CourseGroup)._id}`)} variant="outline" className="text-xs sm:text-sm">
             Back to Course Group
           </Button>
         </div>
@@ -550,7 +503,7 @@ export function CourseDetailSection() {
             </div>
             <div
               className="cursor-pointer p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 flex-shrink-0 group"
-              onClick={() => navigate(`/course-groups/${course.courseGroup._id}`)}
+              onClick={() => navigate(`/course-groups/${(course.courseGroup as CourseGroup)?._id}`)}
               title="Back to Course Group"
             >
               <ArrowLeftIcon className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600 group-hover:text-primary transition-colors duration-200" />

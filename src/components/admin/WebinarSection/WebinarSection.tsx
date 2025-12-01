@@ -24,24 +24,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-interface Webinar {
-    _id: string;
-    name: string;
-    slug: string;
-    status: string;
-    portalDisplay: string;
-    date: string;
-    attendees: Array<{
-        user: any;
-        attendanceStatus: string;
-        registeredAt: string;
-    }>;
-    streamType: string;
-    line1: string;
-    line2?: string;
-    line3?: string;
-}
+import type { Webinar } from "@/types";
 
 export function WebinarSection() {
     const navigate = useNavigate();

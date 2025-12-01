@@ -16,6 +16,7 @@ import { webinarApi, api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Search, X, Plus, Trash2 } from "lucide-react";
 import { formatDateForInput, convertLocalToUTC } from "@/utils/dateUtils";
+import type { Webinar } from "@/types";
 
 // Form field configuration with required/optional indicators
 const formFields = [
@@ -222,13 +223,13 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
 
       let response;
       if (editingWebinar) {
-        response = await webinarApi.updateWebinar(editingWebinar._id, submitData);
+        response = await webinarApi.updateWebinar(editingWebinar._id, submitData as unknown as Partial<Webinar>);
         toast({
           title: "Success",
           description: "Webinar updated successfully",
         });
       } else {
-        response = await webinarApi.createWebinar(submitData);
+        response = await webinarApi.createWebinar(submitData as unknown as Partial<Webinar>);
         toast({
           title: "Success",
           description: "Webinar created successfully",

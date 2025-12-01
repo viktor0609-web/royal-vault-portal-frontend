@@ -16,18 +16,15 @@ import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { ProgressBar } from "@/components/ui/progress-bar";
+import type { Webinar } from "@/types";
 
-interface Webinar {
-    _id: string;
-    name?: string;
-    recording?: string;
-    rawRecordingId?: string;
-}
+// Use a subset of Webinar for this modal
+type WebinarForRecs = Pick<Webinar, '_id' | 'name' | 'recording' | 'rawRecordingId'>;
 
 interface RecsModalProps {
     isOpen: boolean;
     closeDialog: () => void;
-    webinar?: Webinar | null;
+    webinar?: WebinarForRecs | null;
     onRecordingSaved?: () => void;
 }
 

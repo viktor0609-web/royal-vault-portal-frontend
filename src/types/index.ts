@@ -31,6 +31,8 @@ export interface UserStatistics {
   unverified: number;
   admins: number;
   users: number;
+  recentUsers: number;
+  recentActiveUsers: number;
 }
 
 // ==================== Option Types (Category, SubCategory, Type, Strategy, Requirement, Source) ====================
@@ -110,7 +112,7 @@ export interface CourseGroup {
   description: string;
   icon: string; // Backend uses 'icon', not 'image'
   courses?: Course[];
-  createdBy: { _id: string; name: string; email: string } | string;
+  createdBy: { _id: string; firstName: string; lastName: string } | string;
   createdAt?: string;
   updatedAt?: string;
   displayOnPublicPage?: boolean;
@@ -170,13 +172,15 @@ export interface WebinarAttendee {
   registeredAt: string;
 }
 
+export type WebinarStatus = "Scheduled" | "Waiting" | "In Progress" | "Ended";
+
 export interface Webinar {
   _id: string;
   name: string;
   slug: string;
   date: string; // Date stored in UTC
   streamType: "Live Call" | "Webinar";
-  status: "Scheduled" | "Waiting" | "In Progress" | "Ended"; // Backend enum values
+  status: WebinarStatus // Backend enum values
   line1: string; // Required
   line2?: string; // Optional
   line3?: string; // Optional
@@ -188,7 +192,7 @@ export interface Webinar {
   reminderSms?: string;
   proSmsList?: string | { _id: string; name: string };
   proSms?: string;
-  proSmsTime?: number; // in minutes, default 60
+  proSmsTime?: number | string; // in minutes, default 60
   attendOverwrite?: number; // default 100
   rawRecordingId?: string;
   recording?: string;
@@ -259,3 +263,9 @@ export interface RouteConfig {
   requiresSupaadmin?: boolean;
 }
 
+export interface Pagination {
+  currentPage: number;
+  totalPages: number;
+  totalUsers: number;
+  limit: number;
+}

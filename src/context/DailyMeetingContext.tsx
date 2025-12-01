@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import DailyIframe, { DailyCall, DailyParticipant, DailyParticipantPermissions } from '@daily-co/daily-js';
+import type { WebinarStatus } from '@/types';
 
 type BackgroundFilterType = 'none' | 'blur' | 'image';
 
@@ -61,7 +62,7 @@ interface DailyMeetingContextType {
   role: RoleType;
   sendWebinarStatusChange: (status: string) => Promise<void>;
   webinarStatus: string;
-  setWebinarStatus: (status: string) => void;
+  setWebinarStatus: (status: WebinarStatus) => void;
 }
 
 const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(undefined);
@@ -102,7 +103,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [userName, setUserName] = useState<string>(""); // New state for user name
   const [localParticipant, setLocalParticipant] = useState<any>(null); // State for local participant
   const [hasLocalAudioPermission, setHasLocalAudioPermission] = useState<boolean>(false);
-  const [webinarStatus, setWebinarStatus] = useState<string>("Scheduled");
+  const [webinarStatus, setWebinarStatus] = useState<WebinarStatus>("Scheduled");
 
 
   const [backgroundFilterType, setBackgroundFilterType] = useState<BackgroundFilterType>('none');

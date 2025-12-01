@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type React from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
@@ -11,61 +12,11 @@ import {
 } from "lucide-react";
 import { courseApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
-
-interface CourseGroup {
-    _id: string;
-    title: string;
-    description: string;
-    icon: string;
-    createdBy: {
-        _id: string;
-        name: string;
-        email: string;
-    };
-    courses: Course[];
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface Course {
-    _id: string;
-    title: string;
-    description: string;
-    courseGroup: string;
-    lectures: Lecture[];
-    createdBy: {
-        _id: string;
-        name: string;
-        email: string;
-    };
-    createdAt: string;
-    updatedAt: string;
-}
-
-interface Lecture {
-    _id: string;
-    title: string;
-    description?: string;
-    content?: string;
-    videoUrl?: string;
-    relatedFiles: {
-        name: string;
-        uploadedUrl: string;
-    }[];
-    completedBy: string[];
-    displayOnPublicPage?: boolean;
-    createdBy: {
-        _id: string;
-        name: string;
-        email: string;
-    };
-    createdAt: string;
-    updatedAt: string;
-}
+import type { CourseGroup, Course, Lecture } from "@/types";
 
 // Icon mapping for course groups
 const getIconForGroup = (iconName: string) => {
-    const iconMap: { [key: string]: any } = {
+    const iconMap: Record<string, string> = {
         'eye-off': '👁️‍🗨️',
         'network': '🌐',
         'refresh-cw': '🔄',

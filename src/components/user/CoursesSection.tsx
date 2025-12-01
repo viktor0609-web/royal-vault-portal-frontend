@@ -16,62 +16,12 @@ import {
 import { courseApi } from "@/lib/api";
 import { markChecklistItemCompleted, CHECKLIST_ITEMS } from "@/utils/checklistUtils";
 import { useAuth } from "@/context/AuthContext";
-
-
-interface CourseGroup {
-  _id: string;
-  title: string;
-  description: string;
-  icon: string;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  courses: Course[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  courseGroup: string;
-  lectures: Lecture[];
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Lecture {
-  _id: string;
-  title: string;
-  description?: string;
-  content?: string;
-  videoUrl?: string;
-  relatedFiles: {
-    name: string;
-    uploadedUrl: string;
-  }[];
-  completedBy: string[];
-  displayOnPublicPage?: boolean;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+import type { CourseGroup, Course, Lecture } from "@/types";
+import type React from "react";
 
 // Icon mapping for course groups
 const getIconForGroup = (iconName: string) => {
-  const iconMap: { [key: string]: any } = {
+  const iconMap: Record<string, React.ComponentType> = {
     'eye-off': EyeOffIcon,
     'network': NetworkIcon,
     'refresh-cw': RefreshCwIcon,
@@ -102,7 +52,7 @@ export function CoursesSection() {
         const response = await courseApi.getAllCourseGroups({ publicOnly: true });
         // Handle new response structure with pagination
         const data = response.data?.data || response.data || [];
-        setCourseGroups(data);
+        setCourseGroups(data as CourseGroup[]);
       } catch (err) {
         console.error('Error fetching course groups:', err);
         setError('Failed to load courses. Please try again.');

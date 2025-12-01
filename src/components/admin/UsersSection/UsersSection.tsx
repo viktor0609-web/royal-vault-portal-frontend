@@ -116,7 +116,7 @@ export function UsersSection() {
       if (verificationFilter && verificationFilter !== "all") params.isVerified = verificationFilter;
 
       const response = await userApi.getAllUsers(params);
-      setUsers(response.data.users || []);
+      setUsers(response.data.users as User[]);
       setPagination(response.data.pagination || pagination);
     } catch (error: any) {
       console.error("Error fetching users:", error);
@@ -147,7 +147,7 @@ export function UsersSection() {
       if (verificationFilter && verificationFilter !== "all") params.isVerified = verificationFilter;
 
       const response = await userApi.getAllUsers(params);
-      setAllUsers(response.data.users || []);
+      setAllUsers(response.data.users as User[]);
     } catch (error: any) {
       console.error("Error fetching all users:", error);
       setError(error.response?.data?.message || "Failed to fetch users");

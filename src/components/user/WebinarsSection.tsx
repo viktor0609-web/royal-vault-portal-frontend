@@ -18,26 +18,7 @@ const filterTabs = [
   { label: "WATCHED" },
 ];
 
-// Remove static data - will be replaced with API data
-
-interface Webinar {
-  _id: string;
-  name: string;
-  date: string;
-  streamType: string;
-  status: string;
-  portalDisplay: string;
-  slug: string;
-  line1: string;
-  line2: string;
-  line3: string;
-  recording?: string;
-  attendees?: Array<{
-    user: string;
-    attendanceStatus: string;
-    registeredAt: string;
-  }>;
-}
+import type { Webinar } from "@/types";
 
 export function WebinarsSection() {
   const [filterIndex, setFilterIndex] = useState(0);

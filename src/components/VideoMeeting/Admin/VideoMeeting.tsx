@@ -10,22 +10,14 @@ import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useDailyMeeting } from "@/context/DailyMeetingContext";
+import type { Webinar, WebinarStatus } from "@/types";
 
-interface Webinar {
-  _id: string;
-  name: string;
-  slug: string;
-  line1: string;
-  line2?: string;
-  line3?: string;
-  date: string;
-  streamType: string;
-  status: string;
-}
+// Use a subset of Webinar for video meeting
+type WebinarForMeeting = Pick<Webinar, '_id' | 'name' | 'slug' | 'line1' | 'line2' | 'line3' | 'date' | 'streamType' | 'status'>;
 
 export const VideoMeeting = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [webinar, setWebinar] = useState<Webinar | null>(null);
+  const [webinar, setWebinar] = useState<WebinarForMeeting | null>(null);
   const [loading, setLoading] = useState(true);
   const [ending, setEnding] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -50,7 +42,7 @@ export const VideoMeeting = () => {
     fetchWebinar();
   }, [slug]);
 
-  const handleStatusChange = async (newStatus: string) => {
+  const handleStatusChange = async (newStatus: WebinarStatus) => {
     if (!webinar) return;
 
     try {

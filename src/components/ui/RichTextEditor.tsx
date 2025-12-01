@@ -1,15 +1,6 @@
-import React, { forwardRef, useImperativeHandle, useRef, useState, useEffect } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-
-// Suppress findDOMNode warning for ReactQuill
-const originalConsoleWarn = console.warn;
-console.warn = (...args) => {
-    if (args[0]?.includes?.('findDOMNode is deprecated')) {
-        return;
-    }
-    originalConsoleWarn(...args);
-};
 
 interface RichTextEditorProps {
     value: string;

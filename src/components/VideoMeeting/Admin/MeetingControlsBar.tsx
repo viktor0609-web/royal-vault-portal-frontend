@@ -3,7 +3,6 @@ import { Button } from "../../ui/button";
 import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Settings, MessageSquare, MessageSquareX, Maximize, Minimize, Circle } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { SettingsModal } from '../SettingsModal';
-import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useToast } from '../../../hooks/use-toast';
 import { webinarApi } from '../../../lib/api';
@@ -298,8 +297,8 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={() => { 
-                      console.log("Leave Room Clicked"); 
+                    onClick={() => {
+                      console.log("Leave Room Clicked");
                       leaveRoom();
                       // Try to close the browser tab
                       setTimeout(() => {

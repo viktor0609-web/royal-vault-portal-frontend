@@ -1,14 +1,11 @@
 import { useState, useEffect } from "react";
-import type React from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import {
     ArrowLeftIcon,
-    GraduationCapIcon,
     ClockIcon,
     PlayIcon,
-    CheckCircleIcon,
 } from "lucide-react";
 import { courseApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";

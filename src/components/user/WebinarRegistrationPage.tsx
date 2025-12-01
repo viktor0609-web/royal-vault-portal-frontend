@@ -8,8 +8,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { register } from "module";
-import { log } from "console";
 
 export function WebinarRegistrationPage() {
     const [countdown, setCountdown] = useState({

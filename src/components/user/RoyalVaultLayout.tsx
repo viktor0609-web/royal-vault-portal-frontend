@@ -11,7 +11,6 @@ interface RoyalVaultLayoutProps {
 
 export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
   const location = useLocation();
-  const params = useParams();
   const [breadcrumbData, setBreadcrumbData] = useState<{
     courseName?: string;
     groupName?: string;

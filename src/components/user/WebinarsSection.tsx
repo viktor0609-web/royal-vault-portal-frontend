@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { Badge } from "@/components/ui/badge";
-import { VideoIcon, ArrowRightIcon, PlayIcon, EyeIcon, CheckCircleIcon, RefreshCwIcon, Video } from "lucide-react";
+import { VideoIcon, ArrowRightIcon, PlayIcon, CheckCircleIcon, RefreshCwIcon, Video } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -24,7 +24,7 @@ export function WebinarsSection() {
   const [filterIndex, setFilterIndex] = useState(0);
   const [webinars, setWebinars] = useState<Webinar[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [unregistering, setUnregistering] = useState<string | null>(null);
   const [registeredWebinars, setRegisteredWebinars] = useState<Set<string>>(new Set());
   const [refreshing, setRefreshing] = useState(false);

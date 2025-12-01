@@ -1,13 +1,9 @@
 
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { BoxSelectIcon, UserIcon } from "lucide-react";
+import { useParams } from "react-router-dom";
 import { AdminMeeting } from "./AdminMeeting";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui/select";
-import { Button } from "../../ui/button";
 import { webinarApi } from "@/lib/api";
-import { format } from "date-fns";
-import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useDailyMeeting } from "@/context/DailyMeetingContext";
 import type { Webinar, WebinarStatus } from "@/types";
@@ -19,9 +15,7 @@ export const VideoMeeting = () => {
   const { slug } = useParams<{ slug: string }>();
   const [webinar, setWebinar] = useState<WebinarForMeeting | null>(null);
   const [loading, setLoading] = useState(true);
-  const [ending, setEnding] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
-  const navigate = useNavigate();
   const { toast } = useToast();
   const { sendWebinarStatusChange } = useDailyMeeting();
 

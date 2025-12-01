@@ -7,7 +7,7 @@ import { MeetingControlsBar } from "./MeetingControlsBar";
 import { FloatingControls } from "../FloatingControls";
 import { BottomSheet } from "../BottomSheet";
 import { SettingsContent } from "../SettingsModal";
-import { Mic, MicOff, X, Loader2 } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
 import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment, useMemo } from "react";

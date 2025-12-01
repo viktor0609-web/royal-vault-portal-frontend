@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import {
   EyeOffIcon,
@@ -10,13 +9,11 @@ import {
   TruckIcon,
   GraduationCapIcon,
   ClockIcon,
-  ArrowLeftIcon,
-  HomeIcon
 } from "lucide-react";
 import { courseApi } from "@/lib/api";
 import { markChecklistItemCompleted, CHECKLIST_ITEMS } from "@/utils/checklistUtils";
 import { useAuth } from "@/context/AuthContext";
-import type { CourseGroup, Course, Lecture } from "@/types";
+import type { CourseGroup } from "@/types";
 import type React from "react";
 
 // Icon mapping for course groups

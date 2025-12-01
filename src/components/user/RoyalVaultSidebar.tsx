@@ -3,15 +3,11 @@ import { useAuthDialog } from "@/context/AuthDialogContext";
 import { useAuth } from "@/context/AuthContext";
 import {
   HandIcon,
-  MessageSquareIcon,
   TvIcon,
   GraduationCapIcon,
   TagIcon,
-  HelpCircleIcon,
   LogInIcon,
   LogOutIcon,
-  AxeIcon,
-  MessageCircleQuestionIcon,
   UserIcon,
   ArrowLeftIcon
 } from "lucide-react";

@@ -3,7 +3,6 @@ import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { useDailyMeeting } from "../../context/DailyMeetingContext";
 import { cn } from "@/lib/utils";
-import { Filter } from "lucide-react";
 
 interface BackgroundFilterModalProps {
   children: React.ReactNode;

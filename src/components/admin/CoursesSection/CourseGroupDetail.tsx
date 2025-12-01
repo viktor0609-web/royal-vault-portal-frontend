@@ -146,60 +146,59 @@ export function CourseGroupDetail() {
                 variant: "destructive",
             });
         }
-    }
-};
+    };
 
-const handleToggleDisplay = async (course: Course) => {
-    try {
-        const newDisplayValue = !course.displayOnPublicPage;
-        await courseApi.updateCourse(course._id, { displayOnPublicPage: newDisplayValue });
-        setCourses(prev =>
-            prev.map(c => c._id === course._id ? { ...c, displayOnPublicPage: newDisplayValue } : c)
-        );
-        toast({
-            title: "Success",
-            description: `Course ${newDisplayValue ? 'enabled' : 'disabled'} for public pages`,
-        });
-    } catch (error: any) {
-        console.error('Error updating display option:', error);
-        toast({
-            title: "Error",
-            description: error.response?.data?.message || 'Failed to update display option',
-            variant: "destructive",
-        });
-    }
-};
+    const handleToggleDisplay = async (course: Course) => {
+        try {
+            const newDisplayValue = !course.displayOnPublicPage;
+            await courseApi.updateCourse(course._id, { displayOnPublicPage: newDisplayValue });
+            setCourses(prev =>
+                prev.map(c => c._id === course._id ? { ...c, displayOnPublicPage: newDisplayValue } : c)
+            );
+            toast({
+                title: "Success",
+                description: `Course ${newDisplayValue ? 'enabled' : 'disabled'} for public pages`,
+            });
+        } catch (error: any) {
+            console.error('Error updating display option:', error);
+            toast({
+                title: "Error",
+                description: error.response?.data?.message || 'Failed to update display option',
+                variant: "destructive",
+            });
+        }
+    };
 
-const handleViewCourse = (courseId: string) => {
-    navigate(`/admin/courses/groups/${groupId}/courses/${courseId}`);
-};
+    const handleViewCourse = (courseId: string) => {
+        navigate(`/admin/courses/groups/${groupId}/courses/${courseId}`);
+    };
 
-const fetchCourseGroup = async () => {
-    if (!groupId) return;
+    const fetchCourseGroup = async () => {
+        if (!groupId) return;
 
-    try {
-        setIsLoading(true);
-        setError(null);
-        // Admin should see all courses, not just public ones (publicOnly=false)
-        const response = await courseApi.getCourseGroupById(groupId, 'basic', false);
-        setCourseGroup(response.data);
-        setCourses(response.data.courses || []);
-    } catch (err: any) {
-        const errorMessage = err.response?.data?.message || 'Failed to fetch course group';
-        setError(errorMessage);
-        toast({
-            title: "Error",
-            description: errorMessage,
-            variant: "destructive",
-        });
-    } finally {
-        setIsLoading(false);
-    }
-};
+        try {
+            setIsLoading(true);
+            setError(null);
+            // Admin should see all courses, not just public ones (publicOnly=false)
+            const response = await courseApi.getCourseGroupById(groupId, 'basic', false);
+            setCourseGroup(response.data);
+            setCourses(response.data.courses || []);
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || 'Failed to fetch course group';
+            setError(errorMessage);
+            toast({
+                title: "Error",
+                description: errorMessage,
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-useEffect(() => {
-    fetchCourseGroup();
-}, [groupId]);
+    useEffect(() => {
+        fetchCourseGroup();
+    }, [groupId]);
 
 if (loading) {
     return (

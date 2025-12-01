@@ -10,21 +10,21 @@ export interface Option {
 
 export const optionsService = {
   // Get all categories
-  getCategories: () => api.get<{ data: Option[] }>(API_ENDPOINTS.OPTIONS.CATEGORIES),
+  getCategories: () => api.get<{ message: string, categories: Option[] }>(API_ENDPOINTS.OPTIONS.CATEGORIES),
 
   // Get all subcategories
-  getSubCategories: () => api.get<{ data: Option[] }>(API_ENDPOINTS.OPTIONS.SUB_CATEGORIES),
+  getSubCategories: () => api.get<{ message: string, subCategories: Option[] }>(API_ENDPOINTS.OPTIONS.SUB_CATEGORIES),
 
   // Get all types
-  getTypes: () => api.get<{ data: Option[] }>(API_ENDPOINTS.OPTIONS.TYPES),
+  getTypes: () => api.get<{ message: string, types: Option[] }>(API_ENDPOINTS.OPTIONS.TYPES),
 
   // Get all strategies
-  getStrategies: () => api.get<{ data: Option[] }>(API_ENDPOINTS.OPTIONS.STRATEGIES),
+  getStrategies: () => api.get<{ message: string, strategies: Option[] }>(API_ENDPOINTS.OPTIONS.STRATEGIES),
 
   // Get all requirements
-  getRequirements: () => api.get<{ data: Option[] }>(API_ENDPOINTS.OPTIONS.REQUIREMENTS),
+  getRequirements: () => api.get<{ message: string, requirements: Option[] }>(API_ENDPOINTS.OPTIONS.REQUIREMENTS),
 
   // Get all sources
-  getSources: () => api.get<{ data: Option[] }>(API_ENDPOINTS.OPTIONS.SOURCES),
+  getSources: () => api.get<{ message: string, sources: Option[] }>(API_ENDPOINTS.OPTIONS.SOURCES),
 };
 

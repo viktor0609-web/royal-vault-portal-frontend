@@ -96,7 +96,7 @@ export function CourseGroupDetailSection() {
 
                 // Backend now filters displayOnPublicPage, so lectures are already filtered
                 // Backend returns CourseGroup directly, so response.data is the CourseGroup
-                const courseData = (response.data as any)?.data || (response.data as any);
+                const courseData = response.data;
                 setCourseGroup(courseData);
             } catch (err) {
                 console.error('Error fetching course group:', err);

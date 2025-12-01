@@ -194,7 +194,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const joinRoom = useCallback(() => {
     if (!roomUrl) {
-      alert('Please create a room first.');
+      console.warn('Please create a room first.');
+      // TODO: Show toast notification in the component using this context
       return;
     }
     // Show pre-join UI / preview:
@@ -523,7 +524,10 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         console.log('You have been ejected from the room.');
         leaveRoom(); // Ejected participant leaves the room
 
-        setTimeout(() => alert('You have been ejected from the meeting by the admin.'), 1000);
+        setTimeout(() => {
+          console.warn('You have been ejected from the meeting by the admin.');
+          // TODO: Show toast notification in the component using this context
+        }, 1000);
       }
       else if (e.data.type === 'webinar-status-changed') {
         setWebinarStatus(e.data.status);
@@ -848,7 +852,8 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       : null;
 
     if ((type === 'blur' || type === 'image') && !supported?.supportsVideoProcessing) {
-      alert('Your browser does not support virtual backgrounds (video processing). Try Chrome/Edge/Firefox on desktop.');
+      console.warn('Your browser does not support virtual backgrounds (video processing). Try Chrome/Edge/Firefox on desktop.');
+      // TODO: Show toast notification in the component using this context
       return;
     }
 

@@ -7,6 +7,7 @@ import { courseApi } from "@/lib/api";
 import { sanitizeHtml } from "@/lib/htmlSanitizer";
 import { useAuth } from "@/context/AuthContext";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
+import { useToast } from "@/hooks/use-toast";
 
 interface Resource {
   name: string;
@@ -62,6 +63,7 @@ interface Lecture {
 export function CourseDetailSection() {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,8 +128,11 @@ export function CourseDetailSection() {
 
     // Only allow completion tracking for authenticated users
     if (!user) {
-      // Show a message or redirect to login
-      alert('Please log in to track your progress');
+      toast({
+        title: "Login Required",
+        description: "Please log in to track your progress",
+        variant: "default",
+      });
       return;
     }
 

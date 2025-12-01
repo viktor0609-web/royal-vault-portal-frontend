@@ -14,6 +14,16 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Webinar {
     _id: string;
@@ -48,6 +58,8 @@ export function WebinarSection() {
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [orderBy, setOrderBy] = useState<string>('date');
     const [order, setOrder] = useState<'asc' | 'desc'>('desc');
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [webinarToDelete, setWebinarToDelete] = useState<string | null>(null);
 
     const fetchWebinars = useCallback(async () => {
         try {
@@ -137,16 +149,23 @@ export function WebinarSection() {
         }
     };
 
-    const handleDeleteWebinar = async (webinarId: string) => {
-        if (!confirm('Are you sure you want to delete this webinar?')) return;
+    const handleDeleteWebinar = (webinarId: string) => {
+        setWebinarToDelete(webinarId);
+        setDeleteDialogOpen(true);
+    };
+
+    const confirmDeleteWebinar = async () => {
+        if (!webinarToDelete) return;
 
         try {
-            await webinarApi.deleteWebinar(webinarId);
-            setWebinars(prev => prev.filter(w => w._id !== webinarId));
+            await webinarApi.deleteWebinar(webinarToDelete);
+            setWebinars(prev => prev.filter(w => w._id !== webinarToDelete));
             toast({
                 title: "Success",
                 description: "Webinar deleted successfully",
             });
+            setDeleteDialogOpen(false);
+            setWebinarToDelete(null);
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Failed to delete webinar';
             toast({
@@ -154,6 +173,8 @@ export function WebinarSection() {
                 description: errorMessage,
                 variant: "destructive",
             });
+            setDeleteDialogOpen(false);
+            setWebinarToDelete(null);
         }
     };
 
@@ -662,6 +683,31 @@ export function WebinarSection() {
                 onWebinarSaved={handleWebinarSaved}
             />
             <RecsModal isOpen={recsOpen} closeDialog={closeModal} webinar={recsWebinar} onRecordingSaved={fetchWebinars} />
+
+            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Webinar</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this webinar? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => {
+                            setDeleteDialogOpen(false);
+                            setWebinarToDelete(null);
+                        }}>
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmDeleteWebinar}
+                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

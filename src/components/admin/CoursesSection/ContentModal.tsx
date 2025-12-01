@@ -13,39 +13,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import { courseApi } from "@/lib/api";
-
-interface CourseGroup {
-  _id: string;
-  title: string;
-  description: string;
-  icon: string;
-  createdBy: string;
-  courses: Course[];
-}
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  url: string;
-  lectures: Lecture[];
-}
-
-interface Lecture {
-  _id: string;
-  title: string;
-  description: string;
-  videoUrl: string;
-  completedBy: string[];
-  displayOnPublicPage?: boolean;
-}
+import type { CourseGroup, Course, Lecture } from "@/types";
+import { AxiosError } from "axios";
 
 interface ContentModalProps {
   isOpen: boolean;
   closeDialog: () => void;
   editingLecture?: Lecture | null;
   selectedCourseId?: string;
-  onContentSaved: (lectureData?: any, isUpdate?: boolean) => void;
+  onContentSaved: (lectureData?: Lecture, isUpdate?: boolean) => void;
 }
 
 export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCourseId, onContentSaved }: ContentModalProps) {
@@ -85,7 +61,9 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
     setGroupsLoading(true);
     try {
       const response = await courseApi.getAllCourseGroups();
-      setCourseGroups(response.data);
+      // Handle paginated response structure: { data: CourseGroup[], pagination: {...} }
+      const data = response.data?.data || response.data || [];
+      setCourseGroups(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch course groups:", err);
     } finally {
@@ -112,12 +90,14 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
           description: formData.description,
           videoUrl: formData.videoUrl,
           courseId: formData.courseId
-        });
+        } as Partial<Lecture> & { courseId: string });
       }
       onContentSaved(response.data, !!editingLecture);
       closeDialog();
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to save lecture");
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
+      const errorMessage = error.response?.data?.message || "Failed to save lecture";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -129,7 +109,7 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
 
   // Get all courses from all groups for the dropdown
   const allCourses = courseGroups.flatMap(group =>
-    group.courses.map(course => ({
+    (group.courses || []).map(course => ({
       ...course,
       groupTitle: group.title
     }))

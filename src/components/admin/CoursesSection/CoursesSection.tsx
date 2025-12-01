@@ -9,6 +9,7 @@ import { GraduationCapIcon, Trash2, Edit, PlusIcon, EyeIcon } from "lucide-react
 import { GroupModal } from "./GroupModal";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { AxiosError } from "axios";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -104,12 +105,14 @@ export function CoursesSection() {
       });
       setDeleteDialogOpen(false);
       setGroupToDelete(null);
-    } catch (error: any) {
-      console.error('Error deleting course group:', error);
-      setError(error.response?.data?.message || 'Failed to delete course group');
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      console.error('Error deleting course group:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to delete course group';
+      setError(errorMessage);
       toast({
         title: "Error",
-        description: error.response?.data?.message || 'Failed to delete course group',
+        description: errorMessage,
         variant: "destructive",
       });
       setDeleteDialogOpen(false);
@@ -128,11 +131,12 @@ export function CoursesSection() {
         title: "Success",
         description: `Course group ${newDisplayValue ? 'enabled' : 'disabled'} for public pages`,
       });
-    } catch (error: any) {
-      console.error('Error updating display option:', error);
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      console.error('Error updating display option:', err);
       toast({
         title: "Error",
-        description: error.response?.data?.message || 'Failed to update display option',
+        description: err.response?.data?.message || 'Failed to update display option',
         variant: "destructive",
       });
     }
@@ -152,8 +156,9 @@ export function CoursesSection() {
       // Handle new response structure with pagination
       const data = response.data?.data || response.data || [];
       setCourseGroups(data);
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to fetch course groups';
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
+      const errorMessage = error.response?.data?.message || 'Failed to fetch course groups';
       setError(errorMessage);
       toast({
         title: "Error",

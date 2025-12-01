@@ -10,6 +10,8 @@ import { LectureModal } from "./LectureModal";
 import { VideoPlayerModal } from "./VideoPlayerModal";
 import { useToast } from "@/hooks/use-toast";
 import { courseApi } from "@/lib/api";
+import type { Course, Lecture, CourseResource } from "@/types";
+import { AxiosError } from "axios";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,55 +22,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-interface Lecture {
-  _id: string;
-  title: string;
-  description: string;
-  content: string;
-  videoUrl: string;
-  relatedFiles?: Array<{
-    name: string;
-    url: string;
-    uploadedUrl?: string;
-  }>;
-  displayOnPublicPage?: boolean;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-}
-
-interface Resource {
-  name: string;
-  url: string;
-  type: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
-}
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  courseGroup: {
-    _id: string;
-    title: string;
-    description: string;
-    icon: string;
-  };
-  lectures: Lecture[];
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  resources?: Resource[];
-  // Legacy fields for backward compatibility
-  ebookName?: string;
-  ebookUrl?: string;
-}
 
 export function CourseDetail() {
   const { groupId, courseId } = useParams<{ groupId: string; courseId: string }>();
@@ -140,14 +93,16 @@ export function CourseDetail() {
       });
       setDeleteDialogOpen(false);
       setLectureToDelete(null);
-    } catch (error: any) {
-      console.error('Error deleting lecture:', error);
-      setError(error.response?.data?.message || 'Failed to delete lecture');
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      console.error('Error deleting lecture:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to delete lecture';
+      setError(errorMessage);
       setDeleteDialogOpen(false);
       setLectureToDelete(null);
       toast({
         title: "Error",
-        description: error.response?.data?.message || 'Failed to delete lecture',
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -164,11 +119,12 @@ export function CourseDetail() {
         title: "Success",
         description: `Lecture ${newDisplayValue ? 'enabled' : 'disabled'} for public pages`,
       });
-    } catch (error: any) {
-      console.error('Error updating display option:', error);
+    } catch (error) {
+      const err = error as AxiosError<{ message?: string }>;
+      console.error('Error updating display option:', err);
       toast({
         title: "Error",
-        description: error.response?.data?.message || 'Failed to update display option',
+        description: err.response?.data?.message || 'Failed to update display option',
         variant: "destructive",
       });
     }
@@ -195,8 +151,9 @@ export function CourseDetail() {
       const response = await courseApi.getCourseById(courseId, 'full', false);
       setCourse(response.data);
       setLectures(response.data.lectures || []);
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to fetch course';
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
+      const errorMessage = error.response?.data?.message || 'Failed to fetch course';
       setError(errorMessage);
       toast({
         title: "Error",
@@ -350,7 +307,9 @@ export function CourseDetail() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden 2xl:table-cell">{lecture.createdBy?.name || 'N/A'}</TableCell>
+                    <TableCell className="hidden 2xl:table-cell">
+                      {typeof lecture.createdBy === 'object' ? lecture.createdBy?.name : 'N/A'}
+                    </TableCell>
                     <TableCell className="hidden 2xl:table-cell">
                       {lecture.createdAt ? new Date(lecture.createdAt).toLocaleDateString() : 'N/A'}
                     </TableCell>
@@ -455,7 +414,9 @@ export function CourseDetail() {
                       {lecture.displayOnPublicPage ? 'Public' : 'Private'}
                     </span>
                   </div>
-                  <span className="hidden sm:inline truncate">{lecture.createdBy?.name || 'N/A'}</span>
+                  <span className="hidden sm:inline truncate">
+                    {typeof lecture.createdBy === 'object' ? lecture.createdBy?.name : 'N/A'}
+                  </span>
                 </div>
                 <span className="text-xs flex-shrink-0">{lecture.createdAt ? new Date(lecture.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>

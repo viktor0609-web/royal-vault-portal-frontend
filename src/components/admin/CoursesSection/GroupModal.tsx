@@ -14,18 +14,14 @@ import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/services/api/client";
 import { Search, X } from "lucide-react";
+import type { CourseGroup, Course } from "@/types";
+import { AxiosError } from "axios";
 
-interface CourseGroup {
-    _id: string;
-    title: string;
-    description: string;
-    icon: string;
-    createdBy: {
-        _id: string;
-        name: string;
-        email: string;
-    };
-    courses: any[];
+interface HubSpotList {
+    _id?: string;
+    id?: string;
+    name: string;
+    [key: string]: unknown;
 }
 
 interface GroupModalProps {
@@ -46,8 +42,8 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [hubSpotLists, setHubSpotLists] = useState<any[]>([]);
-    const [filteredHubSpotLists, setFilteredHubSpotLists] = useState<any[]>([]);
+    const [hubSpotLists, setHubSpotLists] = useState<HubSpotList[]>([]);
+    const [filteredHubSpotLists, setFilteredHubSpotLists] = useState<HubSpotList[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [loadingLists, setLoadingLists] = useState(false);
@@ -83,7 +79,7 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
         if (query.trim() === '') {
             setFilteredHubSpotLists(hubSpotLists);
         } else {
-            const filtered = hubSpotLists.filter((list: any) =>
+            const filtered = hubSpotLists.filter((list: HubSpotList) =>
                 list.name?.toLowerCase().includes(query.toLowerCase())
             );
             setFilteredHubSpotLists(filtered);
@@ -115,8 +111,11 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
     }, [isSearchOpen]);
 
     // Get list ID helper
-    const getListId = (list: any) => {
-        return list.objectId || list.listId || list.id || String(list._id || '');
+    const getListId = (list: HubSpotList) => {
+        return (list as { objectId?: string; listId?: string }).objectId ||
+            (list as { listId?: string }).listId ||
+            list.id ||
+            String(list._id || '');
     };
 
     // Toggle list selection
@@ -207,8 +206,9 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
             }
             onGroupSaved(response.data, !!editingGroup);
             closeDialog();
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.message || "Failed to save course group";
+        } catch (err) {
+            const error = err as AxiosError<{ message?: string }>;
+            const errorMessage = error.response?.data?.message || "Failed to save course group";
             setError(errorMessage);
             toast({
                 title: "Error",
@@ -329,7 +329,7 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
                                                 {isSearchOpen && (
                                                     <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
                                                         {filteredHubSpotLists.length > 0 ? (
-                                                            filteredHubSpotLists.map((list: any) => {
+                                                            filteredHubSpotLists.map((list: HubSpotList) => {
                                                                 const listId = getListId(list);
                                                                 const isSelected = formData.hubSpotListIds?.includes(listId) || false;
                                                                 return (
@@ -344,7 +344,7 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
                                                                         <div className="flex-1">
                                                                             <div className="font-medium text-gray-900">{list.name || 'Unnamed List'}</div>
                                                                             {list.description && (
-                                                                                <div className="text-sm text-gray-500">{list.description}</div>
+                                                                                <div className="text-sm text-gray-500">{list.description as string}</div>
                                                                             )}
                                                                         </div>
                                                                         {isSelected && (
@@ -382,7 +382,7 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
                                                 {formData.hubSpotListIds && formData.hubSpotListIds.length > 0 && (
                                                     <div className="mt-2 space-y-2">
                                                         {formData.hubSpotListIds.map((listId: string) => {
-                                                            const list = hubSpotLists.find((l: any) => getListId(l) === listId);
+                                                            const list = hubSpotLists.find((l: HubSpotList) => getListId(l) === listId);
                                                             if (!list) return null;
                                                             return (
                                                                 <div key={listId} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md">

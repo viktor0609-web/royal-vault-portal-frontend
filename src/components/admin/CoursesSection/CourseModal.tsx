@@ -17,43 +17,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileUploadWithProgress } from "@/components/ui/file-upload-with-progress";
 import { X, Plus, Link as LinkIcon, FileText, FileSpreadsheet, BookOpen, Globe } from "lucide-react";
+import type { CourseGroup, Course, CourseResource, Lecture } from "@/types";
+import { AxiosError } from "axios";
 
-interface CourseGroup {
-  _id: string;
-  title: string;
-  description: string;
-  icon: string;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  courses: any[];
-}
-
-interface Resource {
-  name: string;
-  url: string;
-  type: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
-}
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  courseGroup: string;
-  lectures: any[];
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  resources?: Resource[];
-  // Legacy fields for backward compatibility
-  ebookName?: string;
-  ebookUrl?: string;
-}
+// Use CourseResource from types, but keep Resource alias for backward compatibility
+type Resource = CourseResource;
 
 interface CourseModalProps {
   isOpen: boolean;
@@ -179,8 +147,9 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
       resetChanges();
       onCourseSaved(response.data, !!editingCourse);
       closeDialog();
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || "Failed to save course";
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string }>;
+      const errorMessage = error.response?.data?.message || "Failed to save course";
       setError(errorMessage);
       toast({
         title: "Error",

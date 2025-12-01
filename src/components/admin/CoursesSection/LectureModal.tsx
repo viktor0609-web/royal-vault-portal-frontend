@@ -16,22 +16,8 @@ import { FileUploadWithProgress } from "@/components/ui/file-upload-with-progres
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { PlusIcon, Trash2 } from "lucide-react";
-
-interface Lecture {
-    _id: string;
-    title: string;
-    description: string;
-    content: string;
-    videoUrl: string;
-    relatedFiles?: RelatedFile[];
-    displayOnPublicPage?: boolean;
-    createdBy: {
-        _id: string;
-        name: string;
-        email: string;
-    };
-    createdAt: string;
-}
+import { AxiosError } from "axios";
+import type { Lecture, LectureRelatedFile } from "@/types";
 
 interface RelatedFile {
     name: string;
@@ -117,8 +103,9 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
             }
             onLectureSaved(response.data, !!editingLecture);
             closeDialog();
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.message || "Failed to save lecture";
+        } catch (err) {
+            const error = err as AxiosError<{ message?: string }>;
+            const errorMessage = error.response?.data?.message || "Failed to save lecture";
             setError(errorMessage);
             toast({
                 title: "Error",

@@ -138,10 +138,10 @@ export function DealsSection() {
     }
   };
 
-  // Update deals when filters change
+  // Update deals when filters change or user authentication state changes
   useEffect(() => {
     fetchDeals();
-  }, [selectedFilters]);
+  }, [selectedFilters, user]);
 
   // Load HubSpot script dynamically when modal opens
   useEffect(() => {

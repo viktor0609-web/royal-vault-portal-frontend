@@ -65,11 +65,11 @@ export const webinarService = {
     return api.get<{ data: Webinar[] }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}?${params.toString()}`);
   },
 
-  getPublicWebinarById: (webinarId: string) =>
-    api.get<{ data: Webinar }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}/${webinarId}`),
+  getPublicWebinarById: (webinarId: string, fields: FieldSelection = "basic") =>
+    api.get<{ message: string, webinar: Webinar }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}/${webinarId}?fields=${fields}`),
 
   getPublicWebinarBySlug: (slug: string) =>
-    api.get<{ data: Webinar }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}/${slug}`),
+    api.get<{ message: string, webinar: Webinar }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}/${slug}`),
 
   registerForWebinar: (webinarId: string, email: string) =>
     api.post(`${API_ENDPOINTS.WEBINARS.REGISTER}/${webinarId}/register`, { email }),

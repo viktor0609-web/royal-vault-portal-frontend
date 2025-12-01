@@ -58,5 +58,6 @@ export const isChecklistItemCompleted = (itemId: string): boolean => {
             return state[3];
         default:
             return false;
+
     }
 };

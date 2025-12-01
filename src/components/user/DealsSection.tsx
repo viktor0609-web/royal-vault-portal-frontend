@@ -293,9 +293,9 @@ export function DealsSection() {
                   target="_blank"
                   key={index}
                   to={item.url}
-                  className="bg-gray-50 rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
+                  className="bg-gray-100 rounded-lg border-2 border-gray-400 hover:shadow-md transition-shadow duration-75 cursor-pointer block p-[2px]"
                 >
-                  <div className="relative h-48 sm:h-64 w-full">
+                  <div className="relative h-48 sm:h-64 w-full rounded-t-lg overflow-hidden">
                     <img
                       src={item.image}
                       className="w-full h-full object-cover"

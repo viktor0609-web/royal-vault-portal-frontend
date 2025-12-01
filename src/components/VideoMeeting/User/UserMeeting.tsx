@@ -1,6 +1,4 @@
-import { Button } from "../../ui/button";
 import { Loading } from "../../ui/Loading";
-import { X } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
@@ -30,7 +28,6 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
         isScreensharing,
         screenshareParticipantId,
         localParticipant,
-        hasLocalAudioPermission,
         startScreenshare,
         stopScreenshare,
     } = useDailyMeeting();

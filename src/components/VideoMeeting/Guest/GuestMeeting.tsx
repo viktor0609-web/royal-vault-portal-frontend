@@ -1,5 +1,3 @@
-import { Button } from "../../ui/button";
-import { X } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
@@ -28,7 +26,6 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
         isScreensharing,
         screenshareParticipantId,
         localParticipant,
-        hasLocalAudioPermission,
         role,
         startScreenshare,
         stopScreenshare,
@@ -74,7 +71,7 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
             if (!a.video && b.video) return 1;
             return 0;
         })[0];
-    
+
     const guestVideoTrack = activeGuest?.videoTrack;
     const mainVideoTrack = guestVideoTrack || localUserVideoTrack;
 

@@ -1,12 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { BoxSelectIcon, UserIcon } from "lucide-react";
-import { Button } from "../../ui/button";
 import { UserMeeting } from "./UserMeeting";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../ui/select";
 import { webinarApi } from "@/lib/api";
-import { format } from "date-fns";
 import { useDailyMeeting } from "@/context/DailyMeetingContext";
 import type { Webinar } from "@/types";
 

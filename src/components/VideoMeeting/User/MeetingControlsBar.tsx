@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Settings, Hand, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
+import { LayoutGrid, Users, Mic, MicOff, Video, VideoOff, Settings, Hand, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { SettingsModal } from '../SettingsModal';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../ui/tooltip";
@@ -23,7 +23,6 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
   showChatBox,
   toggleFullscreen,
   isFullscreen,
-  localParticipant,
   chatUnreadCount = 0
 }) => {
   const {
@@ -32,14 +31,10 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
     isRecording,
     startRecording,
     stopRecording,
-    leaveRoom,
     toggleCamera,
     toggleMicrophone,
     isMicrophoneMuted,
     isCameraOff,
-    isScreensharing,
-    startScreenshare,
-    stopScreenshare,
     hasLocalAudioPermission, // ✅ use context directly
   } = useDailyMeeting();
 

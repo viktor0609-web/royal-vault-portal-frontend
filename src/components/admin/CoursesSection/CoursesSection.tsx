@@ -9,6 +9,16 @@ import { GraduationCapIcon, Trash2, Edit, PlusIcon, EyeIcon } from "lucide-react
 import { GroupModal } from "./GroupModal";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 
 interface CourseGroup {
@@ -45,6 +55,8 @@ export function CoursesSection() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<CourseGroup | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
 
   const handleAddCourseGroup = () => {
     setEditingGroup(null);
@@ -74,25 +86,34 @@ export function CoursesSection() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (e: React.MouseEvent, groupId: string) => {
+  const handleDelete = (e: React.MouseEvent, groupId: string) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this course group? This will also delete all associated courses and lectures.')) {
-      try {
-        await courseApi.deleteCourseGroup(groupId);
-        fetchCourseGroups(); // Refresh the list
-        toast({
-          title: "Success",
-          description: "Course group deleted successfully",
-        });
-      } catch (error: any) {
-        console.error('Error deleting course group:', error);
-        setError(error.response?.data?.message || 'Failed to delete course group');
-        toast({
-          title: "Error",
-          description: error.response?.data?.message || 'Failed to delete course group',
-          variant: "destructive",
-        });
-      }
+    setGroupToDelete(groupId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!groupToDelete) return;
+
+    try {
+      await courseApi.deleteCourseGroup(groupToDelete);
+      fetchCourseGroups(); // Refresh the list
+      toast({
+        title: "Success",
+        description: "Course group deleted successfully",
+      });
+      setDeleteDialogOpen(false);
+      setGroupToDelete(null);
+    } catch (error: any) {
+      console.error('Error deleting course group:', error);
+      setError(error.response?.data?.message || 'Failed to delete course group');
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || 'Failed to delete course group',
+        variant: "destructive",
+      });
+      setDeleteDialogOpen(false);
+      setGroupToDelete(null);
     }
   };
 
@@ -328,6 +349,31 @@ export function CoursesSection() {
         editingGroup={editingGroup}
         onGroupSaved={handleGroupSaved}
       />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Course Group</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this course group? This will also delete all associated courses and lectures. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeleteDialogOpen(false);
+              setGroupToDelete(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -33,7 +33,6 @@ const getIconForGroup = (iconName: string) => {
   return iconMap[iconName] || GraduationCapIcon;
 };
 
-
 export function CoursesSection() {
   const [courseGroups, setCourseGroups] = useState<CourseGroup[]>([]);
   const [loading, setLoading] = useState(true);

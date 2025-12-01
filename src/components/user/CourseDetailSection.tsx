@@ -1,17 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
-import { ArrowLeftIcon, EyeOffIcon, CheckCircleIcon, PlayIcon, ClockIcon, DownloadIcon, FileIcon, ExternalLinkIcon } from "lucide-react";
+import { ArrowLeftIcon, CheckCircleIcon, PlayIcon, DownloadIcon, FileIcon, ExternalLinkIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { courseApi } from "@/lib/api";
 import { sanitizeHtml } from "@/lib/htmlSanitizer";
 import { useAuth } from "@/context/AuthContext";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
 import { useToast } from "@/hooks/use-toast";
-import type { Course, Lecture, CourseResource, CourseGroup } from "@/types";
-
-// Use CourseResource from types, but keep Resource alias for backward compatibility
-type Resource = CourseResource;
+import type { Course, Lecture, CourseGroup } from "@/types";
 
 export function CourseDetailSection() {
   const { courseId } = useParams<{ courseId: string }>();

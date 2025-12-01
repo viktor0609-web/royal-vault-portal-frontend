@@ -33,15 +33,12 @@ export function WebinarRegistrationPage() {
 
     useEffect(() => {
         const fetchWebinar = async () => {
-            if (!webinarId) return;
-            const response = await webinarApi.getPublicWebinarById(webinarId);
-            console.log('response', response.data);
-            const webinarData = (response.data as any)?.data || (response.data as any);
-            setWebinar(webinarData);
-            setFormattedDate(format(new Date(webinarData.webinar.date), "EEEE MMMM do, h:mma"));
+            const response = await webinarApi.getPublicWebinarById(webinarId, 'basic');
+            setWebinar(response.data.webinar);
+            setFormattedDate(format(new Date(response.data.webinar.date), "EEEE MMMM do, h:mma"));
         };
         fetchWebinar();
-    }, [webinarId, user]); // Refetch when user authentication state changes
+    }, []);
 
     useEffect(() => {
         const checkRegistration = async () => {
@@ -56,7 +53,7 @@ export function WebinarRegistrationPage() {
     useEffect(() => {
         const interval = setInterval(() => {
             const now = new Date();
-            const eventDate = new Date(webinar?.webinar?.date);
+            const eventDate = new Date(webinar?.date);
             const diff = eventDate.getTime() - now.getTime();
 
             if (diff <= 0) {

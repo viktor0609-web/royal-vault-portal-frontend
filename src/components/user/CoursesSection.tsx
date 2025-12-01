@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { courseApi } from "@/lib/api";
 import { markChecklistItemCompleted, CHECKLIST_ITEMS } from "@/utils/checklistUtils";
+import { useAuth } from "@/context/AuthContext";
 
 
 interface CourseGroup {
@@ -89,6 +90,7 @@ export function CoursesSection() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   useEffect(() => {
     // Mark "Get tax, legal, & investing resources" as completed when CoursesSection is visited
@@ -110,7 +112,7 @@ export function CoursesSection() {
     };
 
     fetchCourseGroups();
-  }, []);
+  }, [user]); // Refetch when user authentication state changes
 
   // Map course groups to display categories
   const displayCategories = courseGroups.map((group) => ({

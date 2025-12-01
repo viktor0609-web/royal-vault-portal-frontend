@@ -10,6 +10,7 @@ import {
     CheckCircleIcon,
 } from "lucide-react";
 import { courseApi } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 interface CourseGroup {
     _id: string;
@@ -82,6 +83,7 @@ export function CourseGroupDetailSection() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     useEffect(() => {
         const fetchCourseGroup = async () => {
@@ -93,7 +95,8 @@ export function CourseGroupDetailSection() {
                 const response = await courseApi.getCourseGroupById(groupId, 'full', true);
 
                 // Backend now filters displayOnPublicPage, so lectures are already filtered
-                const courseData = response.data;
+                // Backend returns CourseGroup directly, so response.data is the CourseGroup
+                const courseData = (response.data as any)?.data || (response.data as any);
                 setCourseGroup(courseData);
             } catch (err) {
                 console.error('Error fetching course group:', err);
@@ -104,7 +107,7 @@ export function CourseGroupDetailSection() {
         };
 
         fetchCourseGroup();
-    }, [groupId]);
+    }, [groupId, user]); // Refetch when user authentication state changes
 
     if (loading) {
         return (

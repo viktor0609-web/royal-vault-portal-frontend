@@ -116,7 +116,7 @@ export class YouTubeDiagnostics {
     private async testGoogleAPIScripts(): Promise<void> {
         // Check if Google Identity Services is available
         if (typeof window !== 'undefined') {
-            if (window.google) {
+            if ((window as any).google) {
                 this.results.push({
                     test: 'Google Identity Services',
                     status: 'pass',
@@ -132,7 +132,7 @@ export class YouTubeDiagnostics {
                 });
             }
 
-            if (window.gapi) {
+            if ((window as any).gapi) {
                 this.results.push({
                     test: 'Google API Client',
                     status: 'pass',

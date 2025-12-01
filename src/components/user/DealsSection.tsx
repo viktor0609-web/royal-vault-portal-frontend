@@ -293,7 +293,7 @@ export function DealsSection() {
                   target="_blank"
                   key={index}
                   to={item.url}
-                  className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
+                  className="bg-gray-50 rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
                 >
                   <div className="relative h-48 sm:h-64 w-full">
                     <img
@@ -311,7 +311,7 @@ export function DealsSection() {
                     <h3 className="absolute bottom-6 sm:bottom-8 text-sm sm:text-xl left-2 text-white font-bold z-10 uppercase line-clamp-2">
                       {item.name}
                     </h3>
-                    <div className="text-xs pl-2 sm:pl-3 left-0 right-0 rounded-md absolute bottom-0 m-2 sm:m-3 bg-card uppercase">
+                    <div className="text-xs pl-2 sm:pl-3 left-0 right-0 rounded-md absolute bottom-0 m-2 sm:m-3 bg-white uppercase">
                       {formatArrayData(item.type)}
                     </div>
                   </div>

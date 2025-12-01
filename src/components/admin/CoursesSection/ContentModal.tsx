@@ -91,6 +91,7 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
     } finally {
       setGroupsLoading(false);
     }
+
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -210,7 +210,7 @@ export function DealsSection() {
     });
 
   return (
-    <div className="flex-1 p-2 sm:p-4">
+    <div className="flex flex-col h-full p-2 sm:p-4">
       <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
         <TagIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
         <div>
@@ -224,7 +224,7 @@ export function DealsSection() {
       </div>
 
       {/* Desktop Filters */}
-      <div className="hidden min-[800px]:block bg-white p-2 sm:p-3 rounded-lg border border-royal-light-gray mb-6 sm:mb-8">
+      <div className="hidden min-[800px]:block bg-white p-2 sm:p-3 rounded-lg border border-royal-light-gray">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-4">
           {renderFilters()}
         </div>
@@ -280,9 +280,9 @@ export function DealsSection() {
       </div>
 
       {/* Deals Grid */}
-      <div className="relative h-[500px] sm:h-[660px]">
-        <div className="h-full overflow-y-auto mb-2 rounded-lg ">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
+      <div className="flex-1 min-h-0 mt-2 sm:mt-4" >
+        <div className="h-full overflow-y-auto rounded-lg mb-2 sm:mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
             {loading ? (
               <div className="col-span-full">
                 <Loading message="Loading deals..." />

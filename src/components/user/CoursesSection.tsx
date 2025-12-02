@@ -16,22 +16,7 @@ import {
 import { courseApi } from "@/lib/api";
 import { markChecklistItemCompleted, CHECKLIST_ITEMS } from "@/utils/checklistUtils";
 import { useAuth } from "@/context/AuthContext";
-
-
-interface CourseGroup {
-  _id: string;
-  title: string;
-  description: string;
-  icon: string;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  courses: Course[];
-  createdAt: string;
-  updatedAt: string;
-}
+import type { CourseGroup } from "@/types";
 
 interface Course {
   _id: string;
@@ -100,8 +85,8 @@ export function CoursesSection() {
       try {
         setLoading(true);
         const response = await courseApi.getAllCourseGroups({ publicOnly: true });
-        // Handle new response structure with pagination
-        const data = response.data?.data || response.data || [];
+        // Response structure: { data: CourseGroup[], pagination: {...} }
+        const data = response.data.data || [];
         setCourseGroups(data);
       } catch (err) {
         console.error('Error fetching course groups:', err);

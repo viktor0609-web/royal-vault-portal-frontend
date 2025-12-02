@@ -149,8 +149,8 @@ export function CoursesSection() {
       // Use 'detailed' fields for admin list view to show course counts
       // Admin should see all courses, not just public ones
       const response = await courseApi.getAllCourseGroups({}, 'detailed');
-      // Handle new response structure with pagination
-      const data = response.data?.data || response.data || [];
+      // Response structure: { data: CourseGroup[], pagination: {...} }
+      const data = response.data.data || [];
       setCourseGroups(data);
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Failed to fetch course groups';

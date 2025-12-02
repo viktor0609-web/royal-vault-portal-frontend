@@ -16,22 +16,7 @@ import { FileUploadWithProgress } from "@/components/ui/file-upload-with-progres
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { PlusIcon, Trash2 } from "lucide-react";
-
-interface Lecture {
-    _id: string;
-    title: string;
-    description: string;
-    content: string;
-    videoUrl: string;
-    relatedFiles?: RelatedFile[];
-    displayOnPublicPage?: boolean;
-    createdBy: {
-        _id: string;
-        name: string;
-        email: string;
-    };
-    createdAt: string;
-}
+import type { Lecture } from "@/types";
 
 interface RelatedFile {
     name: string;

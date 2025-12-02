@@ -3,6 +3,22 @@ import api from "./client";
 import { API_ENDPOINTS } from "@/constants";
 import type { CourseGroup, Course, Lecture, FieldSelection } from "@/types";
 
+// Pagination response type
+interface PaginationResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+// Delete response type
+interface DeleteResponse {
+  message: string;
+}
+
 export const courseService = {
   // Course Groups with field selection, pagination, and filtering
   getAllCourseGroups: (
@@ -22,11 +38,11 @@ export const courseService = {
     if (filters?.limit) params.append("limit", filters.limit.toString());
     if (filters?.publicOnly) params.append("publicOnly", "true");
     params.append("fields", fields);
-    return api.get<{ data: CourseGroup[] }>(`${API_ENDPOINTS.COURSES.GROUPS}?${params.toString()}`);
+    return api.get<PaginationResponse<CourseGroup>>(`${API_ENDPOINTS.COURSES.GROUPS}?${params.toString()}`);
   },
 
   createCourseGroup: (groupData: Partial<CourseGroup>) =>
-    api.post<{ data: CourseGroup }>(API_ENDPOINTS.COURSES.GROUPS, groupData),
+    api.post<CourseGroup>(API_ENDPOINTS.COURSES.GROUPS, groupData),
 
   getCourseGroupById: (
     groupId: string,
@@ -36,14 +52,14 @@ export const courseService = {
     const params = new URLSearchParams();
     params.append("fields", fields);
     if (publicOnly) params.append("publicOnly", "true");
-    return api.get<{ data: CourseGroup }>(`${API_ENDPOINTS.COURSES.GROUPS}/${groupId}?${params.toString()}`);
+    return api.get<CourseGroup>(`${API_ENDPOINTS.COURSES.GROUPS}/${groupId}?${params.toString()}`);
   },
 
   updateCourseGroup: (groupId: string, groupData: Partial<CourseGroup>) =>
-    api.put<{ data: CourseGroup }>(`${API_ENDPOINTS.COURSES.GROUPS}/${groupId}`, groupData),
+    api.put<CourseGroup>(`${API_ENDPOINTS.COURSES.GROUPS}/${groupId}`, groupData),
 
   deleteCourseGroup: (groupId: string) =>
-    api.delete(`${API_ENDPOINTS.COURSES.GROUPS}/${groupId}`),
+    api.delete<DeleteResponse>(`${API_ENDPOINTS.COURSES.GROUPS}/${groupId}`),
 
   // Courses with field selection, pagination, and filtering
   getAllCourses: (options?: {
@@ -60,11 +76,11 @@ export const courseService = {
     if (options?.limit) params.append("limit", options.limit.toString());
     if (options?.publicOnly) params.append("publicOnly", "true");
     if (options?.courseGroup) params.append("courseGroup", options.courseGroup);
-    return api.get<{ data: Course[] }>(`${API_ENDPOINTS.COURSES.COURSES}?${params.toString()}`);
+    return api.get<PaginationResponse<Course>>(`${API_ENDPOINTS.COURSES.COURSES}?${params.toString()}`);
   },
 
   createCourse: (courseData: Partial<Course>, courseGroupId: string) =>
-    api.post<{ data: Course }>(`${API_ENDPOINTS.COURSES.COURSES}/${courseGroupId}`, courseData),
+    api.post<Course>(`${API_ENDPOINTS.COURSES.COURSES}/${courseGroupId}`, courseData),
 
   getCourseById: (
     courseId: string,
@@ -74,14 +90,14 @@ export const courseService = {
     const params = new URLSearchParams();
     params.append("fields", fields);
     if (publicOnly) params.append("publicOnly", "true");
-    return api.get<{ data: Course }>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}?${params.toString()}`);
+    return api.get<Course>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}?${params.toString()}`);
   },
 
   updateCourse: (courseId: string, courseData: Partial<Course>) =>
-    api.put<{ data: Course }>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}`, courseData),
+    api.put<Course>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}`, courseData),
 
   deleteCourse: (courseId: string) =>
-    api.delete(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}`),
+    api.delete<DeleteResponse>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}`),
 
   // Lectures with pagination and filtering
   getAllLectures: (options?: {
@@ -95,20 +111,20 @@ export const courseService = {
     if (options?.limit) params.append("limit", options.limit.toString());
     if (options?.publicOnly) params.append("publicOnly", "true");
     if (options?.courseId) params.append("courseId", options.courseId);
-    return api.get<{ data: Lecture[] }>(`${API_ENDPOINTS.COURSES.LECTURES}?${params.toString()}`);
+    return api.get<PaginationResponse<Lecture>>(`${API_ENDPOINTS.COURSES.LECTURES}?${params.toString()}`);
   },
 
   createLecture: (lectureData: Partial<Lecture>) =>
-    api.post<{ data: Lecture }>(API_ENDPOINTS.COURSES.LECTURES, lectureData),
+    api.post<Lecture>(API_ENDPOINTS.COURSES.LECTURES, lectureData),
 
   getLectureById: (lectureId: string) =>
-    api.get<{ data: Lecture }>(`${API_ENDPOINTS.COURSES.LECTURES}/${lectureId}`),
+    api.get<Lecture>(`${API_ENDPOINTS.COURSES.LECTURES}/${lectureId}`),
 
   updateLecture: (lectureId: string, lectureData: Partial<Lecture>) =>
-    api.put<{ data: Lecture }>(`${API_ENDPOINTS.COURSES.LECTURES}/${lectureId}`, lectureData),
+    api.put<Lecture>(`${API_ENDPOINTS.COURSES.LECTURES}/${lectureId}`, lectureData),
 
   deleteLecture: (lectureId: string) =>
-    api.delete(`${API_ENDPOINTS.COURSES.LECTURES}/${lectureId}`),
+    api.delete<DeleteResponse>(`${API_ENDPOINTS.COURSES.LECTURES}/${lectureId}`),
 
   completeLecture: (lectureId: string) =>
     api.post(`${API_ENDPOINTS.COURSES.LECTURES}/${lectureId}/complete`),

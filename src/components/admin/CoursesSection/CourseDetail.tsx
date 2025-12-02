@@ -20,55 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-interface Lecture {
-  _id: string;
-  title: string;
-  description: string;
-  content: string;
-  videoUrl: string;
-  relatedFiles?: Array<{
-    name: string;
-    url: string;
-    uploadedUrl?: string;
-  }>;
-  displayOnPublicPage?: boolean;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-}
-
-interface Resource {
-  name: string;
-  url: string;
-  type: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
-}
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  courseGroup: {
-    _id: string;
-    title: string;
-    description: string;
-    icon: string;
-  };
-  lectures: Lecture[];
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  resources?: Resource[];
-  // Legacy fields for backward compatibility
-  ebookName?: string;
-  ebookUrl?: string;
-}
+import type { Course, Lecture, CourseResource } from "@/types";
 
 export function CourseDetail() {
   const { groupId, courseId } = useParams<{ groupId: string; courseId: string }>();
@@ -350,7 +302,9 @@ export function CourseDetail() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden 2xl:table-cell">{lecture.createdBy?.name || 'N/A'}</TableCell>
+                    <TableCell className="hidden 2xl:table-cell">
+                      {typeof lecture.createdBy === 'object' && lecture.createdBy ? lecture.createdBy.name : 'N/A'}
+                    </TableCell>
                     <TableCell className="hidden 2xl:table-cell">
                       {lecture.createdAt ? new Date(lecture.createdAt).toLocaleDateString() : 'N/A'}
                     </TableCell>
@@ -455,7 +409,9 @@ export function CourseDetail() {
                       {lecture.displayOnPublicPage ? 'Public' : 'Private'}
                     </span>
                   </div>
-                  <span className="hidden sm:inline truncate">{lecture.createdBy?.name || 'N/A'}</span>
+                  <span className="hidden sm:inline truncate">
+                    {typeof lecture.createdBy === 'object' && lecture.createdBy ? lecture.createdBy.name : 'N/A'}
+                  </span>
                 </div>
                 <span className="text-xs flex-shrink-0">{lecture.createdAt ? new Date(lecture.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>

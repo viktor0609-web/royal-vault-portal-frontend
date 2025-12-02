@@ -51,6 +51,15 @@ export interface FilterOptions {
   sources: Array<{ id: string; name: string }>;
 }
 
+export type Status = "Scheduled" | "Waiting" | "In Progress" | "Ended";
+export type PortalDisplay = "Yes" | "No";
+export type StreamType = "Live Call" | "Webinar";
+export type AttendanceStatus = "registered" | "attended" | "missed";
+export type Role = "user" | "admin";
+export type ClientType = "individual" | "business";
+export type VerificationStatus = "verified" | "unverified";
+export type DisplayOnPublicPage = boolean;
+
 // ==================== Course Types ====================
 export interface CourseGroup {
   _id: string;

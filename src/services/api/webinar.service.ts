@@ -62,14 +62,14 @@ export const webinarService = {
     params.append("fields", fields);
     if (filters?.status) params.append("status", filters.status);
     if (filters?.streamType) params.append("streamType", filters.streamType);
-    return api.get<{ data: Webinar[] }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}?${params.toString()}`);
+    return api.get<{ message: string; webinars: Webinar[] }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}?${params.toString()}`);
   },
 
   getPublicWebinarById: (webinarId: string) =>
-    api.get<{ data: Webinar }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}/${webinarId}`),
+    api.get<{ message: string; webinar: Webinar }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}/${webinarId}`),
 
   getPublicWebinarBySlug: (slug: string) =>
-    api.get<{ data: Webinar }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}/${slug}`),
+    api.get<{ message: string; webinar: Webinar }>(`${API_ENDPOINTS.WEBINARS.PUBLIC}/${slug}`),
 
   registerForWebinar: (webinarId: string, email: string) =>
     api.post(`${API_ENDPOINTS.WEBINARS.REGISTER}/${webinarId}/register`, { email }),

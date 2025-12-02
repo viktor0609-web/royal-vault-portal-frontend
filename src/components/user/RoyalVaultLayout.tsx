@@ -33,7 +33,7 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
         if (pathParts[0] === 'courses' && pathParts[1]) {
           try {
             const courseResponse = await courseApi.getCourseById(pathParts[1], 'basic');
-            const groupId = courseResponse.data.courseGroup._id;
+            const groupId = typeof courseResponse.data.courseGroup === 'object' && courseResponse.data.courseGroup ? courseResponse.data.courseGroup._id : '';
 
             // Also fetch the group name
             let groupName = 'Group';

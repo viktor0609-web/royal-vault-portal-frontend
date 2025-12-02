@@ -54,11 +54,11 @@ export interface FilterOptions {
 // ==================== Course Types ====================
 export interface CourseGroup {
   _id: string;
-  name: string;
-  description?: string;
-  type?: string;
-  image?: string;
+  title: string;
+  description: string;
+  icon: string;
   courses?: Course[];
+  createdBy?: { _id: string; name: string; email: string } | string;
   createdAt?: string;
   updatedAt?: string;
   displayOnPublicPage?: boolean;
@@ -67,30 +67,53 @@ export interface CourseGroup {
 
 export interface Course {
   _id: string;
-  name: string;
-  description?: string;
+  title: string;
+  description: string;
   courseGroup: string | CourseGroup;
-  image?: string;
   lectures?: Lecture[];
+  resources?: Array<{
+    name: string;
+    url: string;
+    type?: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
+  }>;
+  createdBy?: { _id: string; name: string; email: string } | string;
+  // Legacy fields for backward compatibility (deprecated)
+  ebookName?: string;
+  ebookUrl?: string;
   createdAt?: string;
   updatedAt?: string;
   displayOnPublicPage?: boolean;
 }
 
+export interface CourseResource {
+  name: string;
+  url: string;
+  type?: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
+}
+
 export interface Lecture {
   _id: string;
-  name: string;
+  title: string;
   description?: string;
-  course: string | Course;
   content?: string;
   videoUrl?: string;
+  relatedFiles?: Array<{
+    name?: string;
+    uploadedUrl?: string;
+    file?: File;
+  }>;
+  completedBy?: Array<string | { _id: string; name: string; email: string }>;
+  createdBy?: { _id: string; name: string; email: string } | string;
+  createdAt?: string;
+  updatedAt?: string;
+  displayOnPublicPage?: boolean;
+  // Legacy fields for backward compatibility
+  course?: string | Course;
   youtubeUrl?: string;
   youtubeVideoId?: string;
   fileUrl?: string;
   order?: number;
   isCompleted?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
 // ==================== Webinar Types ====================

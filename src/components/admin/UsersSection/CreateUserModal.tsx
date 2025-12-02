@@ -55,6 +55,7 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
         role: editingUser.role || "user",
         supaadmin: editingUser.supaadmin || false,
         sendVerificationEmail: false, // Don't send email when editing
+        createHubSpotContact: false,
       });
     } else {
       setFormData({
@@ -144,7 +145,7 @@ export function CreateUserModal({ isOpen, closeDialog, editingUser }: CreateUser
         description: errorMessage,
         variant: "destructive",
       });
-      
+
       // Set field-specific errors if available
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);

@@ -1,10 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loading } from "@/components/ui/Loading";
-import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
     AlertDialog,
@@ -19,12 +18,11 @@ import {
 import { TagIcon, Trash2, Edit, PlusIcon, ExternalLinkIcon, AlertTriangle, Search } from "lucide-react";
 import { CreateDealModal } from "./CreateDealModal";
 import { dealApi } from "@/lib/api";
-import { formatDate, formatDateTime } from "@/utils/dateUtils";
+import { formatDate } from "@/utils/dateUtils";
 import { useToast } from "@/hooks/use-toast";
 import type { Deal } from "@/types";
 
 export function DealsSection() {
-    const navigate = useNavigate();
     const { toast } = useToast();
 
     // Use admin state management

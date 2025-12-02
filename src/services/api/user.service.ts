@@ -1,7 +1,7 @@
 // User Management API service
 import api from "./client";
 import { API_ENDPOINTS } from "@/constants";
-import type { User, UserStatistics, CreateUserData, UpdateUserData } from "@/types";
+import type { User, UserStatistics, CreateUserData, UpdateUserData, PaginationResponse } from "@/types";
 
 export const userService = {
   // Get all users with pagination, filtering, and sorting
@@ -23,7 +23,7 @@ export const userService = {
       queryParams.append("isVerified", params.isVerified);
     if (params?.sortBy) queryParams.append("sortBy", params.sortBy);
     if (params?.order) queryParams.append("order", params.order);
-    return api.get<{ data: User[] }>(`${API_ENDPOINTS.USERS.BASE}?${queryParams.toString()}`);
+    return api.get<{ message: string; users: User[]; pagination: { currentPage: number; totalPages: number; totalUsers: number; limit: number } }>(`${API_ENDPOINTS.USERS.BASE}?${queryParams.toString()}`);
   },
 
   // Get user by ID
@@ -56,7 +56,7 @@ export const userService = {
 
   // Get user statistics
   getUserStatistics: () =>
-    api.get<{ data: UserStatistics }>(API_ENDPOINTS.USERS.STATISTICS),
+    api.get<{ message: string; statistics: UserStatistics }>(API_ENDPOINTS.USERS.STATISTICS),
 
   // Bulk update users
   bulkUpdateUsers: (

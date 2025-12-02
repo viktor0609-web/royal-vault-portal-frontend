@@ -22,6 +22,8 @@ export interface UserStatistics {
   unverified: number;
   admins: number;
   users: number;
+  recentUsers: number;
+  recentActiveUsers: number;
 }
 
 // ==================== Deal Types ====================

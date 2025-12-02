@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { dealApi, optionsApi } from "@/lib/api";
+import type { Deal } from "@/types";
 
 
 const multiSelectFields = [
@@ -188,9 +189,6 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         optionsApi.getSources(),
       ]);
 
-      console.log(categoriesRes.data.categories);
-
-
       const optionsData = {
         categories: categoriesRes.data.categories.map((item: any) => ({ label: item.name, value: item._id })),
         subCategories: subCategoriesRes.data.subCategories.map((item: any) => ({ label: item.name, value: item._id })),
@@ -249,10 +247,10 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
       };
 
       if (editingDeal) {
-        await dealApi.updateDeal(editingDeal._id, dealData);
+        await dealApi.updateDeal(editingDeal._id, dealData as unknown as Partial<Deal>);
         console.log("Deal updated successfully:", dealData);
       } else {
-        await dealApi.createDeal(dealData);
+        await dealApi.createDeal(dealData as unknown as Partial<Deal>);
         console.log("Deal created successfully:", dealData);
       }
 

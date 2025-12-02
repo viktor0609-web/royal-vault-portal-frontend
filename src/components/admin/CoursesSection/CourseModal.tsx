@@ -64,8 +64,8 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
   useEffect(() => {
     if (editingCourse) {
       // Migrate legacy ebook fields to resources if needed
-      let resources: Resource[] = editingCourse.resources || [];
-      
+      let resources: CourseResource[] = editingCourse.resources || [];
+
       // If no resources but has legacy ebook fields, migrate them
       if (resources.length === 0 && editingCourse.ebookName && editingCourse.ebookUrl) {
         resources = [{
@@ -152,7 +152,7 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleResourceChange = (index: number, field: keyof Resource, value: string) => {
+  const handleResourceChange = (index: number, field: keyof CourseResource, value: string) => {
     setFormData(prev => ({
       ...prev,
       resources: prev.resources.map((resource, i) =>
@@ -182,20 +182,20 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
   const handleResourceUploaded = (index: number, url: string, filename: string) => {
     const resource = formData.resources[index];
     const nameWithoutExt = filename.replace(/\.[^/.]+$/, "");
-    
+
     setFormData(prev => ({
       ...prev,
       resources: prev.resources.map((r, i) =>
         i === index
           ? {
-              ...r,
-              url,
-              name: r.name || nameWithoutExt,
-            }
+            ...r,
+            url,
+            name: r.name || nameWithoutExt,
+          }
           : r
       ),
     }));
-    
+
     toast({
       title: "Success",
       description: "Resource uploaded successfully",
@@ -301,8 +301,8 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
                     const hasUrl = resource.url && resource.url.trim() !== '';
 
                     return (
-                      <div 
-                        key={index} 
+                      <div
+                        key={index}
                         className="group relative p-5 border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-200 hover:border-primary/30"
                       >
                         {/* Header with Icon and Remove Button */}

@@ -21,23 +21,8 @@ import { CreateDealModal } from "./CreateDealModal";
 import { dealApi } from "@/lib/api";
 import { formatDate, formatDateTime } from "@/utils/dateUtils";
 import { useToast } from "@/hooks/use-toast";
+import type { Deal } from "@/types";
 
-interface Deal {
-    _id: string;
-    name: string;
-    url?: string;
-    image?: string;
-    category: Array<{ _id: string; name: string }>;
-    subCategory: Array<{ _id: string; name: string }>;
-    type: Array<{ _id: string; name: string }>;
-    strategy: Array<{ _id: string; name: string }>;
-    requirement: Array<{ _id: string; name: string }>;
-    source: { _id: string; name: string };
-    createdBy: { _id: string; name: string };
-    createdAt: string;
-    updatedAt: string;
-    displayOnPublicPage?: boolean;
-}
 export function DealsSection() {
     const navigate = useNavigate();
     const { toast } = useToast();

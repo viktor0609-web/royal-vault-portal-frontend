@@ -10,18 +10,7 @@ import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useDailyMeeting } from "@/context/DailyMeetingContext";
-
-interface Webinar {
-  _id: string;
-  name: string;
-  slug: string;
-  line1: string;
-  line2?: string;
-  line3?: string;
-  date: string;
-  streamType: string;
-  status: string;
-}
+import type { Webinar, Status } from "@/types";
 
 export const VideoMeeting = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -50,7 +39,7 @@ export const VideoMeeting = () => {
     fetchWebinar();
   }, [slug]);
 
-  const handleStatusChange = async (newStatus: string) => {
+  const handleStatusChange = async (newStatus: Status) => {
     if (!webinar) return;
 
     try {

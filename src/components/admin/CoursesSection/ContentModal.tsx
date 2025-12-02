@@ -13,40 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import { courseApi } from "@/lib/api";
-
-interface CourseGroup {
-  _id: string;
-  title: string;
-  description: string;
-  icon: string;
-  createdBy: string;
-  courses: Course[];
-}
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  url: string;
-  lectures: Lecture[];
-}
-
-interface Lecture {
-  _id: string;
-  title: string;
-  description: string;
-  videoUrl: string;
-  completedBy: string[];
-  displayOnPublicPage?: boolean;
-}
-
-interface ContentModalProps {
-  isOpen: boolean;
-  closeDialog: () => void;
-  editingLecture?: Lecture | null;
-  selectedCourseId?: string;
-  onContentSaved: (lectureData?: any, isUpdate?: boolean) => void;
-}
+import type { CourseGroup, Course, Lecture, ContentModalProps } from "@/types";
 
 export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCourseId, onContentSaved }: ContentModalProps) {
   const [formData, setFormData] = useState({
@@ -85,7 +52,7 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
     setGroupsLoading(true);
     try {
       const response = await courseApi.getAllCourseGroups();
-      setCourseGroups(response.data);
+      setCourseGroups(response.data.data || []);
     } catch (err) {
       console.error("Failed to fetch course groups:", err);
     } finally {
@@ -111,7 +78,7 @@ export function ContentModal({ isOpen, closeDialog, editingLecture, selectedCour
           title: formData.title,
           description: formData.description,
           videoUrl: formData.videoUrl,
-          courseId: formData.courseId
+          course: formData.courseId
         });
       }
       onContentSaved(response.data, !!editingLecture);

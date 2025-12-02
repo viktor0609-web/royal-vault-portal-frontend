@@ -17,51 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileUploadWithProgress } from "@/components/ui/file-upload-with-progress";
 import { X, Plus, Link as LinkIcon, FileText, FileSpreadsheet, BookOpen, Globe } from "lucide-react";
-
-interface CourseGroup {
-  _id: string;
-  title: string;
-  description: string;
-  icon: string;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  courses: any[];
-}
-
-interface Resource {
-  name: string;
-  url: string;
-  type: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
-}
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  courseGroup: string;
-  lectures: any[];
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  resources?: Resource[];
-  // Legacy fields for backward compatibility
-  ebookName?: string;
-  ebookUrl?: string;
-}
-
-interface CourseModalProps {
-  isOpen: boolean;
-  closeDialog: () => void;
-  editingCourse?: Course | null;
-  onCourseSaved: (courseData?: Course, isUpdate?: boolean) => void;
-  courseGroupId?: string;
-}
+import type { CourseGroup, Course, CourseResource, CourseModalProps } from "@/types";
 
 const resourceTypes = [
   { value: 'ebook', label: 'Ebook', icon: BookOpen },
@@ -93,7 +49,7 @@ export function CourseModal({ isOpen, closeDialog, editingCourse, onCourseSaved,
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    resources: [] as Resource[],
+    resources: [] as CourseResource[],
     displayOnPublicPage: false,
   });
   const [loading, setLoading] = useState(false);

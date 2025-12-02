@@ -91,6 +91,13 @@ export interface CourseResource {
   type?: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
 }
 
+// Related file type for lectures (used in file uploads)
+export interface RelatedFile {
+  name?: string;
+  uploadedUrl?: string;
+  file?: File;
+}
+
 export interface Lecture {
   _id: string;
   title: string;
@@ -123,8 +130,8 @@ export interface Webinar {
   date: string;
   time?: string;
   streamType: string;
-  status: "upcoming" | "live" | "ended" | "replay";
-  portalDisplay: string;
+  status: "Scheduled" | "Waiting" | "In Progress" | "Ended";
+  portalDisplay: "Yes" | "No";
   slug: string;
   line1?: string;
   line2?: string;
@@ -158,6 +165,22 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+// Pagination response type for course API (matches backend structure)
+export interface PaginationResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+// Delete response type
+export interface DeleteResponse {
+  message: string;
+}
+
 // ==================== Form Types ====================
 export interface CreateUserData {
   firstName: string;
@@ -181,6 +204,40 @@ export interface UpdateUserData {
 
 // ==================== Field Selection Types ====================
 export type FieldSelection = "basic" | "detailed" | "full";
+
+// ==================== Component Props Types ====================
+
+// Modal Props
+export interface LectureModalProps {
+  isOpen: boolean;
+  closeDialog: () => void;
+  editingLecture?: Lecture | null;
+  onLectureSaved: (lectureData?: Lecture, isUpdate?: boolean) => void;
+  courseId?: string;
+}
+
+export interface CourseModalProps {
+  isOpen: boolean;
+  closeDialog: () => void;
+  editingCourse?: Course | null;
+  onCourseSaved: (courseData?: Course, isUpdate?: boolean) => void;
+  courseGroupId?: string;
+}
+
+export interface GroupModalProps {
+  isOpen: boolean;
+  closeDialog: () => void;
+  editingGroup?: CourseGroup | null;
+  onGroupSaved: (groupData?: CourseGroup, isUpdate?: boolean) => void;
+}
+
+export interface ContentModalProps {
+  isOpen: boolean;
+  closeDialog: () => void;
+  editingLecture?: Lecture | null;
+  selectedCourseId?: string;
+  onContentSaved: (lectureData?: Lecture, isUpdate?: boolean) => void;
+}
 
 // ==================== Route Types ====================
 export interface RouteConfig {

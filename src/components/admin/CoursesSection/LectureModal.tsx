@@ -16,21 +16,7 @@ import { FileUploadWithProgress } from "@/components/ui/file-upload-with-progres
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { PlusIcon, Trash2 } from "lucide-react";
-import type { Lecture } from "@/types";
-
-interface RelatedFile {
-    name: string;
-    uploadedUrl?: string;
-    file?: File;
-}
-
-interface LectureModalProps {
-    isOpen: boolean;
-    closeDialog: () => void;
-    editingLecture?: Lecture | null;
-    onLectureSaved: (lectureData?: Lecture, isUpdate?: boolean) => void;
-    courseId?: string;
-}
+import type { Lecture, RelatedFile, LectureModalProps } from "@/types";
 
 export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSaved, courseId }: LectureModalProps) {
     const [formData, setFormData] = useState({

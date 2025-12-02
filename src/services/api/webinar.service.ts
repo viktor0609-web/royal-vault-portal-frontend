@@ -20,17 +20,17 @@ export const webinarService = {
     if (filters?.streamType) params.append("streamType", filters.streamType);
     if (filters?.orderBy) params.append("orderBy", filters.orderBy);
     if (filters?.order) params.append("order", filters.order);
-    return api.get<{ data: Webinar[] }>(`${API_ENDPOINTS.WEBINARS.ADMIN}?${params.toString()}`);
+    return api.get<{ message: string; webinars: Webinar[] }>(`${API_ENDPOINTS.WEBINARS.ADMIN}?${params.toString()}`);
   },
 
   getWebinarById: (webinarId: string, fields: FieldSelection = "full") =>
-    api.get<{ data: Webinar }>(`${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}?fields=${fields}`),
+    api.get<{ message: string; webinar: Webinar }>(`${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}?fields=${fields}`),
 
   createWebinar: (webinarData: Partial<Webinar>) =>
-    api.post<{ data: Webinar }>(API_ENDPOINTS.WEBINARS.ADMIN, webinarData),
+    api.post<{ message: string; webinar: Webinar }>(API_ENDPOINTS.WEBINARS.ADMIN, webinarData),
 
   updateWebinar: (webinarId: string, webinarData: Partial<Webinar>) =>
-    api.put<{ data: Webinar }>(`${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}`, webinarData),
+    api.put<{ message: string; webinar: Webinar }>(`${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}`, webinarData),
 
   deleteWebinar: (webinarId: string) =>
     api.delete(`${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}`),

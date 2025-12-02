@@ -19,24 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-
-interface CourseGroup {
-  _id: string;
-  title: string;
-  description: string;
-  icon: string;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  courses: any[];
-  createdAt: string;
-  updatedAt: string;
-  displayOnPublicPage?: boolean;
-}
-
+import type { CourseGroup } from "@/types";
 
 export function CoursesSection() {
   const navigate = useNavigate();
@@ -240,7 +223,9 @@ export function CoursesSection() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden xl:table-cell">{group.createdBy?.name || 'N/A'}</TableCell>
+                    <TableCell className="hidden xl:table-cell">
+                      {typeof group.createdBy === 'object' && group.createdBy ? group.createdBy.name : 'N/A'}
+                    </TableCell>
                     <TableCell className="hidden 2xl:table-cell">
                       {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}
                     </TableCell>
@@ -334,7 +319,9 @@ export function CoursesSection() {
                       {group.displayOnPublicPage ? 'Public' : 'Private'}
                     </span>
                   </div>
-                  <span className="hidden sm:inline truncate">{group.createdBy?.name || 'N/A'}</span>
+                  <span className="hidden sm:inline truncate">
+                    {typeof group.createdBy === 'object' && group.createdBy ? group.createdBy.name : 'N/A'}
+                  </span>
                 </div>
                 <span className="text-xs flex-shrink-0">{group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>

@@ -1,23 +1,7 @@
 // Course API service
 import api from "./client";
 import { API_ENDPOINTS } from "@/constants";
-import type { CourseGroup, Course, Lecture, FieldSelection } from "@/types";
-
-// Pagination response type
-interface PaginationResponse<T> {
-  data: T[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
-}
-
-// Delete response type
-interface DeleteResponse {
-  message: string;
-}
+import type { CourseGroup, Course, Lecture, FieldSelection, PaginationResponse, DeleteResponse } from "@/types";
 
 export const courseService = {
   // Course Groups with field selection, pagination, and filtering

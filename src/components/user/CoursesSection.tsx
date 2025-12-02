@@ -16,43 +16,7 @@ import {
 import { courseApi } from "@/lib/api";
 import { markChecklistItemCompleted, CHECKLIST_ITEMS } from "@/utils/checklistUtils";
 import { useAuth } from "@/context/AuthContext";
-import type { CourseGroup } from "@/types";
-
-interface Course {
-  _id: string;
-  title: string;
-  description: string;
-  courseGroup: string;
-  lectures: Lecture[];
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Lecture {
-  _id: string;
-  title: string;
-  description?: string;
-  content?: string;
-  videoUrl?: string;
-  relatedFiles: {
-    name: string;
-    uploadedUrl: string;
-  }[];
-  completedBy: string[];
-  displayOnPublicPage?: boolean;
-  createdBy: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+import type { CourseGroup, Course, Lecture } from "@/types";
 
 // Icon mapping for course groups
 const getIconForGroup = (iconName: string) => {

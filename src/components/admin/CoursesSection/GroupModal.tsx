@@ -14,26 +14,7 @@ import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/services/api/client";
 import { Search, X } from "lucide-react";
-
-interface CourseGroup {
-    _id: string;
-    title: string;
-    description: string;
-    icon: string;
-    createdBy: {
-        _id: string;
-        name: string;
-        email: string;
-    };
-    courses: any[];
-}
-
-interface GroupModalProps {
-    isOpen: boolean;
-    closeDialog: () => void;
-    editingGroup?: CourseGroup | null;
-    onGroupSaved: (groupData?: CourseGroup, isUpdate?: boolean) => void;
-}
+import type { CourseGroup, GroupModalProps } from "@/types";
 
 export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: GroupModalProps) {
     const [formData, setFormData] = useState({

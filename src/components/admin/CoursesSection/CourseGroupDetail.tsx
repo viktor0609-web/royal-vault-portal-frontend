@@ -19,52 +19,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-interface Resource {
-    name: string;
-    url: string;
-    type: 'ebook' | 'pdf' | 'spreadsheet' | 'url' | 'other';
-}
-
-interface Course {
-    _id: string;
-    title: string;
-    description: string;
-    courseGroup: string;
-    lectures: Lecture[];
-    createdBy: {
-        _id: string;
-        name: string;
-        email: string;
-    };
-    createdAt: string;
-    resources?: Resource[];
-    displayOnPublicPage?: boolean;
-    // Legacy fields for backward compatibility
-    ebookName?: string;
-    ebookUrl?: string;
-}
-
-interface Lecture {
-    _id: string;
-    title: string;
-    description: string;
-    videoUrl: string;
-    displayOnPublicPage?: boolean;
-}
-
-interface CourseGroup {
-    _id: string;
-    title: string;
-    description: string;
-    icon: string;
-    createdBy: {
-        _id: string;
-        name: string;
-        email: string;
-    };
-    courses: Course[];
-}
+import type { CourseGroup, Course, Lecture, CourseResource } from "@/types";
 
 export function CourseGroupDetail() {
     const { groupId } = useParams<{ groupId: string }>();

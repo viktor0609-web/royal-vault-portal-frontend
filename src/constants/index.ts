@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
     STATISTICS: "/api/users/statistics",
     BULK_UPDATE: "/api/users/bulk/update",
     BULK_DELETE: "/api/users/bulk/delete",
+    MIGRATE_HUBSPOT: "/api/users/migrate/hubspot",
   },
   DEALS: {
     BASE: "/api/deals",

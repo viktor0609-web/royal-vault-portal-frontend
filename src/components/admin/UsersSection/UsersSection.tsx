@@ -22,9 +22,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, ArrowUp, ArrowDown, BarChart3, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, ArrowUp, ArrowDown, BarChart3, ChevronsLeft, ChevronsRight, Download } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { CreateUserModal } from "./CreateUserModal";
+import { HubSpotMigrationModal } from "./HubSpotMigrationModal";
 import { userApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/utils/dateUtils";
@@ -76,6 +77,7 @@ export function UsersSection() {
   const [statistics, setStatistics] = useState<UserStatistics | null>(null);
   const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [isMigrationModalOpen, setIsMigrationModalOpen] = useState(false);
 
   // Pagination and filters
   const [page, setPage] = useState(1);
@@ -469,6 +471,14 @@ export function UsersSection() {
               Analytics
             </Button>
             <Button
+              onClick={() => setIsMigrationModalOpen(true)}
+              variant="outline"
+              className="flex items-center justify-center gap-2 h-10 text-sm font-medium"
+            >
+              <Download className="h-4 w-4" />
+              Migrate HubSpot
+            </Button>
+            <Button
               onClick={handleCreateUser}
               className="flex items-center justify-center gap-2 h-10 text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
             >
@@ -851,6 +861,16 @@ export function UsersSection() {
         editingUser={editingUser}
       />
 
+      {/* HubSpot Migration Modal */}
+      <HubSpotMigrationModal
+        isOpen={isMigrationModalOpen}
+        onClose={() => setIsMigrationModalOpen(false)}
+        onComplete={() => {
+          fetchUsers();
+          if (isMobile) fetchAllUsers();
+        }}
+      />
+
       {/* User Statistics Modal */}
       <Dialog open={isStatisticsModalOpen} onOpenChange={setIsStatisticsModalOpen}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -998,6 +1018,17 @@ export function UsersSection() {
                 >
                   <PlusIcon className="h-4 w-4 mr-2" />
                   Create New User
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsMigrationModalOpen(true);
+                    setIsBottomSheetOpen(false);
+                  }}
+                  variant="outline"
+                  className="w-full h-11 bg-gray-800 border-gray-700 text-white hover:bg-gray-700 justify-start"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Migrate HubSpot
                 </Button>
               </div>
             </div>

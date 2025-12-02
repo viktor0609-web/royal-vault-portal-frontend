@@ -5,7 +5,6 @@ import { API_ENDPOINTS } from "@/constants";
 export interface Option {
   _id: string;
   name: string;
-  [key: string]: any;
 }
 
 export const optionsService = {

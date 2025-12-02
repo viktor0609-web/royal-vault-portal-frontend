@@ -13,6 +13,7 @@ import { TagIcon, FilterIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { optionsApi, dealApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import type { Option } from "@/services/api/options.service";
 
 const filterConfig = [
   { key: "categories", label: "Categories", placeholder: "Categories" },
@@ -24,12 +25,12 @@ const filterConfig = [
 ];
 
 interface FilterOptions {
-  categories: Array<{ id: string; name: string }>;
-  subCategories: Array<{ id: string; name: string }>;
-  types: Array<{ id: string; name: string }>;
-  strategies: Array<{ id: string; name: string }>;
-  requirements: Array<{ id: string; name: string }>;
-  sources: Array<{ id: string; name: string }>;
+  categories: Option[];
+  subCategories: Option[];
+  types: Option[];
+  strategies: Option[];
+  requirements: Option[];
+  sources: Option[];
 }
 
 interface Deal {

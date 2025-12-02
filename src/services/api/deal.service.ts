@@ -39,7 +39,7 @@ export const dealService = {
   ) => {
     const params = { ...filters, fields };
     if (publicOnly) params.publicOnly = "true";
-    return api.get<{ data: Deal[] }>(API_ENDPOINTS.DEALS.FILTER, { params });
+    return api.get<{ message: string; deals: Deal[] }>(API_ENDPOINTS.DEALS.FILTER, { params });
   },
 };
 

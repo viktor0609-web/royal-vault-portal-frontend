@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileUploadWithProgress } from "@/components/ui/file-upload-with-progress";
 import { X, Plus, Link as LinkIcon, FileText, FileSpreadsheet, BookOpen, Globe } from "lucide-react";
-import type { CourseGroup, Course, CourseResource, CourseModalProps } from "@/types";
+import type { CourseResource, CourseModalProps } from "@/types";
 
 const resourceTypes = [
   { value: 'ebook', label: 'Ebook', icon: BookOpen },

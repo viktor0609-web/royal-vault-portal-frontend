@@ -27,10 +27,11 @@ import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/u
 import { CreateUserModal } from "./CreateUserModal";
 import { userApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { formatDate, formatDateTime } from "@/utils/dateUtils";
+import { formatDate } from "@/utils/dateUtils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { List } from "react-window";
 import type { RowComponentProps } from "react-window";
+import type { UserStatistics } from "@/types";
 import { BottomSheet } from "@/components/VideoMeeting/BottomSheet";
 import { Menu } from "lucide-react";
 
@@ -46,16 +47,6 @@ interface User {
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
-}
-
-interface UserStatistics {
-  total: number;
-  verified: number;
-  unverified: number;
-  admins: number;
-  users: number;
-  recentUsers: number;
-  recentActiveUsers: number;
 }
 
 export function UsersSection() {

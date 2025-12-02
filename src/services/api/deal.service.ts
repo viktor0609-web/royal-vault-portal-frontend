@@ -12,7 +12,7 @@ export const dealService = {
     const params = new URLSearchParams();
     params.append("fields", fields);
     if (publicOnly) params.append("publicOnly", "true");
-    return api.get<{ data: Deal[] }>(`${API_ENDPOINTS.DEALS.BASE}?${params.toString()}`);
+    return api.get<{ message: string; deals: Deal[] }>(`${API_ENDPOINTS.DEALS.BASE}?${params.toString()}`);
   },
 
   // Get deal by ID with field selection

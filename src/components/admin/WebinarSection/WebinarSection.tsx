@@ -24,24 +24,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-interface Webinar {
-    _id: string;
-    name: string;
-    slug: string;
-    status: string;
-    portalDisplay: string;
-    date: string;
-    attendees: Array<{
-        user: any;
-        attendanceStatus: string;
-        registeredAt: string;
-    }>;
-    streamType: string;
-    line1: string;
-    line2?: string;
-    line3?: string;
-}
+import type { Webinar } from "@/types";
 
 export function WebinarSection() {
     const navigate = useNavigate();
@@ -70,7 +53,7 @@ export function WebinarSection() {
 
             // Smart merge: preserve object references for unchanged items to prevent unnecessary re-renders
             // Similar to UsersSection - React uses keys for reconciliation, we preserve references for unchanged items
-            setWebinars(prev => {
+            setWebinars((prev: Webinar[]) => {
                 // If this is the initial load (prev is empty), just set the new array
                 if (prev.length === 0) {
                     return freshWebinars;
@@ -99,7 +82,7 @@ export function WebinarSection() {
 
                     // Compare using stable keys - only re-render if visible data actually changed
                     const existingKey = getComparisonKey(existing);
-                    const freshKey = getComparisonKey(fresh);
+                    const freshKey = getComparisonKey(fresh as Webinar);
 
                     if (existingKey === freshKey) {
                         return existing; // Preserve reference = no re-render (just like UsersSection)

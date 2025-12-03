@@ -331,24 +331,9 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
           return updatedMessages;
         });
 
-        // If message doesn't have database ID yet, try to save it and update the ID (in background)
-        if (webinarId && !isValidObjectId(messageId)) {
-          // Try to save message to get database ID (in background)
-          webinarApi.saveChatMessage(webinarId, {
-            senderUserId: data.SenderUserId || '',
-            senderName: data.senderName,
-            text: data.text,
-          }).then(response => {
-            if (response.data.chatMessage?._id) {
-              // Update message ID with database ID
-              setMessages(prev => prev.map(msg =>
-                msg.id === messageId ? { ...msg, id: response.data.chatMessage._id } : msg
-              ));
-            }
-          }).catch(error => {
-            console.error('Error saving received message to database:', error);
-          });
-        }
+        // NOTE: Only the sender saves messages to the database.
+        // Receivers will get the database ID via the updateMessageId event broadcast by the sender.
+        // This prevents duplicate database requests from all users.
       };
 
       dailyRoom.on('app-message', handleMessage);
@@ -465,53 +450,68 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
         return;
       }
 
-      try {
-        const message = messages.find(msg => msg.id === messageId);
-        if (!message) return;
+      const message = messages.find(msg => msg.id === messageId);
+      if (!message) return;
 
-        if (isCurrentlyPinned) {
-          // Unpin
-          await webinarApi.unpinMessage(webinarId, messageId);
-          // Broadcast unpin event
-          (dailyRoom as any).sendAppMessage({
-            message: {
-              type: "pin-message",
-              messageId,
-              isPinned: false,
-            }
-          }, '*');
-          // Immediately refresh pinned messages in left sidebar
+      const newPinnedStatus = !isCurrentlyPinned;
+
+      // Optimistic update: Update local state immediately
+      setMessages(prev => prev.map(msg =>
+        msg.id === messageId
+          ? { ...msg, isPinned: newPinnedStatus }
+          : msg
+      ));
+
+      // Broadcast event immediately (don't wait for backend)
+      if (newPinnedStatus) {
+        // Pin
+        (dailyRoom as any).sendAppMessage({
+          message: {
+            type: "pin-message",
+            messageId,
+            isPinned: true,
+            messageText: message.text,
+            senderName: message.senderName,
+            createdAt: new Date(message.timestamp).toISOString(),
+          }
+        }, '*');
+      } else {
+        // Unpin
+        (dailyRoom as any).sendAppMessage({
+          message: {
+            type: "pin-message",
+            messageId,
+            isPinned: false,
+          }
+        }, '*');
+      }
+
+      // Notify parent to refresh pinned messages in left sidebar
+      onPinChange?.();
+
+      // Send API request in background (don't wait for response)
+      if (newPinnedStatus) {
+        webinarApi.pinMessage(webinarId, messageId).catch(error => {
+          console.error('Error pinning message:', error);
+          // Revert on error
+          setMessages(prev => prev.map(msg =>
+            msg.id === messageId
+              ? { ...msg, isPinned: isCurrentlyPinned }
+              : msg
+          ));
           onPinChange?.();
-        } else {
-          // Pin
-          await webinarApi.pinMessage(webinarId, messageId);
-          // Broadcast pin event with message details for immediate display
-          (dailyRoom as any).sendAppMessage({
-            message: {
-              type: "pin-message",
-              messageId,
-              isPinned: true,
-              messageText: message.text,
-              senderName: message.senderName,
-              createdAt: new Date(message.timestamp).toISOString(),
-            }
-          }, '*');
-
-          // Immediately refresh pinned messages in left sidebar
+        });
+      } else {
+        webinarApi.unpinMessage(webinarId, messageId).catch(error => {
+          console.error('Error unpinning message:', error);
+          // Revert on error
+          setMessages(prev => prev.map(msg =>
+            msg.id === messageId
+              ? { ...msg, isPinned: isCurrentlyPinned }
+              : msg
+          ));
           onPinChange?.();
-        }
-
-        // Update local state immediately
-        setMessages(prev => prev.map(msg =>
-          msg.id === messageId
-            ? { ...msg, isPinned: !isCurrentlyPinned }
-            : msg
-        ));
-
-        // Notify parent to refresh pinned messages
-        onPinChange?.();
-      } catch (error) {
-        console.error('Error pinning/unpinning message:', error);
+        });
       }
     };
 

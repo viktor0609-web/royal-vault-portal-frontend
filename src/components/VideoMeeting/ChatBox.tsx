@@ -276,6 +276,22 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
         const data = event.data;
         if (!data || !data.text || !data.senderName) return;
 
+        // Handle message ID updates (when sender gets database ID)
+        if (data.updateMessageId && data.messageId) {
+          // Update existing message with database ID
+          setMessages(prev => prev.map(msg => {
+            // Match by text, sender, and timestamp (within 5 seconds)
+            if (msg.text === data.text &&
+              msg.senderName === data.senderName &&
+              Math.abs(msg.timestamp - (data.timestamp || 0)) < 5000 &&
+              !isValidObjectId(msg.id)) {
+              return { ...msg, id: data.messageId || data._id };
+            }
+            return msg;
+          }));
+          return;
+        }
+
         // Use database ID if provided, otherwise try to find matching message by text/sender/timestamp
         let messageId = data.messageId || data._id;
 
@@ -315,7 +331,7 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
           return updatedMessages;
         });
 
-        // If message doesn't have database ID yet, try to save it and update the ID
+        // If message doesn't have database ID yet, try to save it and update the ID (in background)
         if (webinarId && !isValidObjectId(messageId)) {
           // Try to save message to get database ID (in background)
           webinarApi.saveChatMessage(webinarId, {
@@ -342,7 +358,7 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
       };
     }, [dailyRoom, isVisible]);
 
-    // Send a message
+    // Send a message - Optimistic update (no delay)
     const sendMessage = async () => {
       if (!dailyRoom || !input.trim()) return;
 
@@ -353,41 +369,54 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
       };
       console.log(messageData);
 
-      // Save to database first if webinarId is available (so we get the ObjectId)
-      let databaseId: string | null = null;
-      if (webinarId) {
-        try {
-          const response = await webinarApi.saveChatMessage(webinarId, {
-            senderUserId: messageData.SenderUserId || '',
-            senderName: messageData.senderName,
-            text: messageData.text,
-          });
-          databaseId = response.data.chatMessage?._id || null;
-        } catch (error) {
-          console.error('Error saving chat message to database:', error);
-          // Continue even if save fails
-        }
-      }
+      // Generate temporary ID for immediate display
+      const tempId = crypto.randomUUID();
+      const timestamp = Date.now();
 
-      // Send message via Daily app-message with database ID if available
-      (dailyRoom as any).sendAppMessage({
-        ...messageData,
-        messageId: databaseId, // Include database ID so others can pin it
-        _id: databaseId,
-        timestamp: Date.now(),
-      }, '*');
-
-      // Add message locally immediately
-      const messageId = databaseId || crypto.randomUUID();
+      // Add message locally immediately (optimistic update)
       const newMessage: Message = {
         ...messageData,
-        id: messageId,
-        timestamp: Date.now(),
+        id: tempId,
+        timestamp: timestamp,
         isPinned: false,
       };
 
       setMessages(prev => [...prev, newMessage]);
       setInput('');
+
+      // Send message via Daily app-message immediately (no waiting)
+      (dailyRoom as any).sendAppMessage({
+        ...messageData,
+        timestamp: timestamp,
+      }, '*');
+
+      // Save to database in background (don't wait for response)
+      if (webinarId) {
+        webinarApi.saveChatMessage(webinarId, {
+          senderUserId: messageData.SenderUserId || '',
+          senderName: messageData.senderName,
+          text: messageData.text,
+        }).then(response => {
+          // Update message ID with database ID when available
+          if (response.data.chatMessage?._id) {
+            setMessages(prev => prev.map(msg =>
+              msg.id === tempId ? { ...msg, id: response.data.chatMessage._id } : msg
+            ));
+
+            // Broadcast updated message with database ID for pinning capability
+            (dailyRoom as any).sendAppMessage({
+              ...messageData,
+              messageId: response.data.chatMessage._id,
+              _id: response.data.chatMessage._id,
+              timestamp: timestamp,
+              updateMessageId: true, // Flag to indicate this is an ID update
+            }, '*');
+          }
+        }).catch(error => {
+          console.error('Error saving chat message to database:', error);
+          // Message is still visible and sent via Daily, so we keep it
+        });
+      }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

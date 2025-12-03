@@ -609,8 +609,8 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
                       </button>
                     )}
 
-                    {/* Pinned indicator */}
-                    {msg.isPinned && (
+                    {/* Pinned indicator - only visible for Admin and Guest */}
+                    {msg.isPinned && (isAdmin || role === "Guest") && (
                       <div className="absolute -top-2 left-1 flex items-center gap-1">
                         <Pin className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                       </div>

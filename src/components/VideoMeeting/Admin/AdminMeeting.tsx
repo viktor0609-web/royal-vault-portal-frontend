@@ -305,7 +305,7 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }
                 {joined && (
                     <>
                         {/* Desktop: Sidebar - Always visible on left */}
-                        <div className="hidden md:flex border-r bg-white">
+                        <div className="hidden md:flex border-r border-gray-200 bg-white">
                             <div className="w-80 p-0 flex flex-col overflow-hidden">
                                 <LeftSidePanel webinar={webinar} />
                             </div>
@@ -409,8 +409,8 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }
                 {joined && (
                     <>
                         {/* Desktop: Sidebar - Always visible on right */}
-                        <div className="hidden md:flex border-l bg-gray-900 text-white">
-                            <div className="w-64 p-0 flex flex-col overflow-visible">
+                        <div className="hidden md:flex border-l border-gray-200 bg-white">
+                            <div className="w-80 p-0 flex flex-col overflow-visible">
                                 <ChatBox
                                     isVisible={true}
                                     onUnreadCountChange={setChatUnreadCount}

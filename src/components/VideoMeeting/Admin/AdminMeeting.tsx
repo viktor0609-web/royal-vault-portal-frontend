@@ -10,16 +10,19 @@ import { SettingsContent } from "../SettingsModal";
 import { Mic, MicOff, X, Loader2 } from "lucide-react";
 import { PeoplePanel } from "./PeoplePanel";
 import { VideoPlayer } from "../VideoPlayer";
+import { LeftSidePanel } from "../LeftSidePanel";
 import { useState, useEffect, useRef, Fragment, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useToast } from "../../../hooks/use-toast";
 import { webinarApi } from "../../../lib/api";
+import type { Webinar } from "@/types";
 
 interface AdminMeetingProps {
     webinarId?: string;
+    webinar?: Webinar | null;
 }
 
-export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
+export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }) => {
     const {
         roomUrl,
         joined,
@@ -41,6 +44,7 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(false);
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
+    const [showLeftPanel, setShowLeftPanel] = useState<boolean>(false);
     const [showSettings, setShowSettings] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
@@ -48,13 +52,14 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
     const { toast } = useToast();
     const { slug } = useParams<{ slug: string }>();
 
-    // On desktop, chat should always be visible
+    // On desktop, chat and left panel should always be visible
     useEffect(() => {
         if (joined) {
             // Check if we're on desktop (sm breakpoint and above)
             const checkDesktop = () => {
                 if (window.innerWidth >= 640) { // sm breakpoint
                     setShowChatBox(true);
+                    setShowLeftPanel(true);
                 }
             };
             // Initial check
@@ -296,6 +301,32 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
             )}
 
             <div className="flex flex-1 overflow-hidden min-h-0 max-w-full">
+                {/* Left Side Panel - CTA Buttons and Pinned Messages - Always visible on desktop */}
+                {joined && (
+                    <>
+                        {/* Desktop: Sidebar - Always visible on left */}
+                        <div className="hidden md:flex border-r bg-white">
+                            <div className="w-80 p-0 flex flex-col overflow-hidden">
+                                <LeftSidePanel webinar={webinar} />
+                            </div>
+                        </div>
+                        {/* Mobile: BottomSheet - Only show if explicitly opened */}
+                        {showLeftPanel && (
+                            <BottomSheet
+                                isOpen={showLeftPanel}
+                                onClose={() => setShowLeftPanel(false)}
+                                title="CTA & Pinned Messages"
+                                maxHeight="80vh"
+                            >
+                                <div className="h-full flex flex-col min-h-0" style={{ height: 'calc(80vh - 100px)' }}>
+                                    <LeftSidePanel webinar={webinar} />
+                                </div>
+                            </BottomSheet>
+                        )}
+                    </>
+                )}
+
+                {/* Main Video Container */}
                 <div
                     ref={videoContainerRef}
                     id="daily-video-container"
@@ -374,57 +405,49 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
                     </>
                 )}
 
-                {/* Chat panel - BottomSheet on mobile, sidebar on desktop */}
-                {joined && showChatBox && (
+                {/* Chat panel - Always visible on desktop, on the right */}
+                {joined && (
                     <>
-                        {/* Desktop: Sidebar */}
+                        {/* Desktop: Sidebar - Always visible on right */}
                         <div className="hidden md:flex border-l bg-gray-900 text-white">
                             <div className="w-80 lg:w-96 p-4 flex flex-col overflow-visible">
                                 <ChatBox
-                                    isVisible={showChatBox}
+                                    isVisible={true}
                                     onUnreadCountChange={setChatUnreadCount}
                                     isAdmin={true}
                                     webinarId={webinarId}
                                 />
                             </div>
                         </div>
-                        {/* Mobile: BottomSheet */}
-                        <BottomSheet
-                            isOpen={showChatBox}
-                            onClose={() => setShowChatBox(false)}
-                            title="Chat"
-                            maxHeight="80vh"
-                        >
-                            <div className="h-full flex flex-col min-h-0 p-4" style={{ height: 'calc(80vh - 100px)' }}>
-                                <ChatBox
-                                    isVisible={showChatBox}
-                                    onUnreadCountChange={setChatUnreadCount}
-                                    isAdmin={true}
-                                    webinarId={webinarId}
-                                />
-                            </div>
-                        </BottomSheet>
+                        {/* Mobile: BottomSheet - Only show if explicitly opened */}
+                        {showChatBox && (
+                            <BottomSheet
+                                isOpen={showChatBox}
+                                onClose={() => setShowChatBox(false)}
+                                title="Chat"
+                                maxHeight="80vh"
+                            >
+                                <div className="h-full flex flex-col min-h-0 p-4" style={{ height: 'calc(80vh - 100px)' }}>
+                                    <ChatBox
+                                        isVisible={showChatBox}
+                                        onUnreadCountChange={setChatUnreadCount}
+                                        isAdmin={true}
+                                        webinarId={webinarId}
+                                    />
+                                </div>
+                            </BottomSheet>
+                        )}
                     </>
                 )}
+
+
             </div>
 
             <MeetingControlsBar
                 position="bottom"
                 togglePeoplePanel={() => {
                     setShowPeoplePanel((prev) => !prev);
-                    // Don't close chat on desktop - only on mobile
-                    if (window.innerWidth < 640 && showChatBox) {
-                        setShowChatBox(false);
-                    }
                 }}
-                toggleChatBox={() => {
-                    // Only allow toggle on mobile
-                    if (window.innerWidth < 640) {
-                        setShowChatBox((prev) => !prev);
-                        if (showPeoplePanel) setShowPeoplePanel(false);
-                    }
-                }}
-                showChatBox={showChatBox}
                 toggleFullscreen={toggleFullscreen}
                 isFullscreen={isFullscreen}
                 chatUnreadCount={chatUnreadCount}
@@ -434,28 +457,17 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId }) => {
             />
 
             {/* Mobile Floating Controls - Hide when panels are open */}
-            {(!showPeoplePanel && !showChatBox && !showSettings) && (
+            {(!showPeoplePanel && !showSettings) && (
                 <FloatingControls
                     togglePeoplePanel={() => {
                         setShowPeoplePanel((prev) => !prev);
-                        if (window.innerWidth < 640 && showChatBox) {
-                            setShowChatBox(false);
-                        }
-                    }}
-                    toggleChatBox={() => {
-                        if (window.innerWidth < 640) {
-                            setShowChatBox((prev) => !prev);
-                            if (showPeoplePanel) setShowPeoplePanel(false);
-                        }
                     }}
                     toggleSettings={() => {
                         setShowSettings((prev) => !prev);
                         if (window.innerWidth < 640) {
                             if (showPeoplePanel) setShowPeoplePanel(false);
-                            if (showChatBox) setShowChatBox(false);
                         }
                     }}
-                    showChatBox={showChatBox}
                     toggleFullscreen={toggleFullscreen}
                     isFullscreen={isFullscreen}
                     chatUnreadCount={chatUnreadCount}

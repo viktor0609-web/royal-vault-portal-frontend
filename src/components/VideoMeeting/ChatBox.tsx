@@ -335,10 +335,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-900 relative min-h-0">
+    <div className="flex flex-col h-full bg-white relative min-h-0 shadow-sm">
       {/* Sticky header with clear button for admin */}
-      <div className="sticky top-0 z-10 flex justify-between items-center px-3 py-2 border-b border-gray-700 bg-gray-900 flex-shrink-0">
-        <h3 className="text-base font-semibold text-white">Live Chat</h3>
+      <div className="sticky top-0 z-10 flex justify-between items-center px-3 py-2.5 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+        <h3 className="text-base font-semibold text-gray-800">Live Chat</h3>
         {isAdmin && (
           <button
             onClick={clearChat}
@@ -350,9 +350,20 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
         )}
       </div>
 
-      {/* Messages Area */}
+      {/* Messages Area - WhatsApp style */}
       <div
-        className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-1.5 relative min-h-0 bg-gray-900"
+        className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-1.5 relative min-h-0"
+        style={{
+          backgroundColor: '#efeae2',
+          backgroundImage: `
+            linear-gradient(45deg, rgba(0,0,0,.02) 25%, transparent 25%),
+            linear-gradient(-45deg, rgba(0,0,0,.02) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, rgba(0,0,0,.02) 75%),
+            linear-gradient(-45deg, transparent 75%, rgba(0,0,0,.02) 75%)
+          `,
+          backgroundSize: '20px 20px',
+          backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px'
+        }}
       >
         {messages.map(msg => {
           const displayName = getDisplayName(msg.senderName);
@@ -367,7 +378,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
               <div className={`max-w-[75%] ${isOwnMessage ? 'items-end' : 'items-start'}`}>
                 {/* Sender name - only show for other people's messages */}
                 {!isOwnMessage && (
-                  <div className="text-xs font-semibold text-gray-300 mb-1 px-1">
+                  <div className="text-xs font-semibold text-gray-700 mb-1 px-1">
                     {displayName}
                   </div>
                 )}
@@ -376,7 +387,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
                 <div
                   className={`rounded-lg px-2.5 py-1.5 shadow-sm ${isOwnMessage
                     ? 'bg-blue-500 text-white rounded-br-none'
-                    : 'bg-gray-800 text-white rounded-bl-none border border-gray-700'
+                    : 'bg-white text-black rounded-bl-none border border-gray-200'
                     }`}
                 >
                   {/* Message text */}
@@ -386,7 +397,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
                   </p>
 
                   {/* Timestamp at bottom right of bubble */}
-                  <div className={`text-[10px] mt-1 text-right ${isOwnMessage ? 'text-blue-100' : 'text-gray-400'
+                  <div className={`text-[10px] mt-1 text-right ${isOwnMessage ? 'text-blue-100' : 'text-gray-600'
                     }`}>
                     {new Date(msg.timestamp).toLocaleTimeString([], {
                       hour: '2-digit',
@@ -402,10 +413,10 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
       </div>
 
       {/* Input Area */}
-      <div className="px-2 py-2 border-t border-gray-700 bg-gray-900 relative flex-shrink-0 overflow-visible">
+      <div className="px-2 py-2 border-t border-gray-200 bg-white relative flex-shrink-0 overflow-visible">
         <div className="flex items-center gap-2 relative">
           <button
-            className="bg-gray-800 text-gray-300 p-1.5 rounded-full hover:bg-gray-700 transition-colors flex-shrink-0 border border-gray-700"
+            className="bg-gray-100 text-gray-700 p-1.5 rounded-full hover:bg-gray-200 transition-colors flex-shrink-0"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
             title="Add emoji"
           >
@@ -416,7 +427,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ isVisible = true, onUnreadCoun
             <input
               ref={inputRef}
               type="text"
-              className="w-full border border-gray-700 rounded-full bg-gray-800 text-white px-3 py-1.5 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+              className="w-full border border-gray-300 rounded-full bg-white text-gray-900 px-3 py-1.5 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder:text-gray-400"
               placeholder="Type a message"
               value={input}
               onChange={e => setInput(e.target.value)}

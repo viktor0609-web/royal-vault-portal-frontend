@@ -70,6 +70,9 @@ export const webinarApi = {
   saveChatMessage: webinarService.saveChatMessage,
   getChatMessages: webinarService.getChatMessages,
   clearChatMessages: webinarService.clearChatMessages,
+  getPinnedMessages: webinarService.getPinnedMessages,
+  pinMessage: webinarService.pinMessage,
+  unpinMessage: webinarService.unpinMessage,
 };
 
 export const userApi = {

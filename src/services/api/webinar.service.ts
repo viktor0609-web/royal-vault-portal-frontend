@@ -94,5 +94,15 @@ export const webinarService = {
 
   clearChatMessages: (webinarId: string) =>
     api.delete(`${API_ENDPOINTS.WEBINARS.CHAT}/${webinarId}/chat`),
+
+  // Pinned messages functions
+  getPinnedMessages: (webinarId: string) =>
+    api.get(`${API_ENDPOINTS.WEBINARS.CHAT}/${webinarId}/chat/pinned`),
+
+  pinMessage: (webinarId: string, messageId: string) =>
+    api.post(`${API_ENDPOINTS.WEBINARS.CHAT}/${webinarId}/chat/${messageId}/pin`),
+
+  unpinMessage: (webinarId: string, messageId: string) =>
+    api.post(`${API_ENDPOINTS.WEBINARS.CHAT}/${webinarId}/chat/${messageId}/unpin`),
 };
 

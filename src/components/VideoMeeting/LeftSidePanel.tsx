@@ -25,8 +25,10 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
   const ctas = webinar?.ctas || [];
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { dailyRoom } = useDailyMeeting();
+  const [activeCtaIndices, setActiveCtaIndices] = useState<number[]>([]);
+  const { dailyRoom, role } = useDailyMeeting();
   const userInfo = useAuth();
+  const isAdminOrGuest = userInfo?.user?.role === "admin" || role === "Guest" || role === "Admin";
 
   // Fetch pinned messages
   const fetchPinnedMessages = async () => {
@@ -55,11 +57,18 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
     }
   }, [webinarId, refreshTrigger]);
 
-  // Listen for pin/unpin events from Daily.co
+  // Listen for pin/unpin events and CTA activation from Daily.co
   useEffect(() => {
     if (!dailyRoom) return;
 
-    const handlePinEvent = (event: any) => {
+    const handleAppMessage = (event: any) => {
+      // Handle clear-chat event - clear all pinned messages
+      if (event.data.message?.type === "clear-chat") {
+        setPinnedMessages([]);
+        return;
+      }
+
+      // Handle pin/unpin events
       if (event.data.message?.type === "pin-message") {
         const { messageId, isPinned, messageText, senderName, createdAt } = event.data.message;
         if (isPinned) {
@@ -82,11 +91,27 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
           setPinnedMessages(prev => prev.filter(msg => msg.id !== messageId));
         }
       }
+
+      // Handle CTA activation/cancellation
+      if (event.data.message?.type === "cta-activate") {
+        const { ctaIndex } = event.data.message;
+        setActiveCtaIndices(prev => {
+          if (!prev.includes(ctaIndex)) {
+            return [...prev, ctaIndex];
+          }
+          return prev;
+        });
+      }
+
+      if (event.data.message?.type === "cta-cancel") {
+        const { ctaIndex } = event.data.message;
+        setActiveCtaIndices(prev => prev.filter(idx => idx !== ctaIndex));
+      }
     };
 
-    dailyRoom.on('app-message', handlePinEvent);
+    dailyRoom.on('app-message', handleAppMessage);
     return () => {
-      dailyRoom.off('app-message', handlePinEvent);
+      dailyRoom.off('app-message', handleAppMessage);
     };
   }, [dailyRoom]);
 
@@ -96,7 +121,7 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
 
     try {
       await webinarApi.unpinMessage(webinarId, messageId);
-      
+
       // Broadcast unpin event
       (dailyRoom as any).sendAppMessage({
         message: {
@@ -108,14 +133,47 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
 
       // Update local state
       setPinnedMessages(prev => prev.filter(msg => msg.id !== messageId));
-      
+
       // Notify parent to update chat panel
       onPinChange?.();
-      
+
       // Directly update chat box
       onUnpinMessage?.(messageId);
     } catch (error) {
       console.error('Error unpinning message:', error);
+    }
+  };
+
+  // Handle CTA activation/cancellation (toggle)
+  const handleCtaClick = (index: number) => {
+    if (!dailyRoom || !isAdminOrGuest) return;
+
+    const isActive = activeCtaIndices.includes(index);
+
+    if (isActive) {
+      // Cancel the CTA
+      setActiveCtaIndices(prev => prev.filter(idx => idx !== index));
+
+      // Broadcast CTA cancellation
+      (dailyRoom as any).sendAppMessage({
+        message: {
+          type: "cta-cancel",
+          ctaIndex: index,
+        }
+      }, '*');
+    } else {
+      // Activate the CTA
+      setActiveCtaIndices(prev => [...prev, index]);
+
+      // Broadcast CTA activation
+      (dailyRoom as any).sendAppMessage({
+        message: {
+          type: "cta-activate",
+          ctaIndex: index,
+          ctaLabel: ctas[index]?.label,
+          ctaLink: ctas[index]?.link,
+        }
+      }, '*');
     }
   };
 
@@ -128,20 +186,41 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
           {ctas.length === 0 ? (
             <p className="text-xs text-gray-500 text-center py-3">No CTA buttons available</p>
           ) : (
-            ctas.map((cta, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="w-full justify-start text-left h-auto py-2.5 px-3 text-sm font-medium hover:bg-primary hover:text-white hover:border-primary transition-all duration-200 border-gray-300 text-gray-700"
-                onClick={() => {
-                  if (cta.link) {
-                    window.open(cta.link, '_blank', 'noopener,noreferrer');
-                  }
-                }}
-              >
-                {cta.label}
-              </Button>
-            ))
+            ctas.map((cta, index) => {
+              const isActive = activeCtaIndices.includes(index);
+              return (
+                <div key={index} className="relative">
+                  <Button
+                    variant="outline"
+                    className={`w-full justify-start text-left h-auto py-2.5 px-3 text-sm font-medium transition-all duration-200 ${isActive
+                      ? 'bg-red-500 text-white border-red-500 hover:bg-red-600 hover:border-red-600'
+                      : 'bg-green-500 text-white border-green-500 hover:bg-green-600 hover:border-green-600'
+                      }`}
+                    onClick={() => {
+                      if (isAdminOrGuest) {
+                        handleCtaClick(index);
+                      } else if (cta.link) {
+                        window.open(cta.link, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                  >
+                    {cta.label}
+                  </Button>
+                  {isActive && isAdminOrGuest && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCtaClick(index);
+                      }}
+                      className="absolute -top-2 -right-2 p-1 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all"
+                      title="Cancel CTA"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
       </div>

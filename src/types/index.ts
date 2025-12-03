@@ -149,6 +149,7 @@ export interface Webinar {
   line3?: string;
   recording?: string;
   rawRecordingId?: string;
+  ctas?: Array<{ label: string; link: string }>;
   attendees?: WebinarAttendee[];
   createdAt?: string;
   updatedAt?: string;

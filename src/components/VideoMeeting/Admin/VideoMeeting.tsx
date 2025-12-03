@@ -107,8 +107,8 @@ export const VideoMeeting = () => {
       {/* Main Content Area - Uses CSS Grid for modern layout */}
       <main className="flex-1 min-h-0 grid grid-rows-1 grid-cols-1 @[768px]:grid-cols-[1fr_320px] @[1024px]:grid-cols-[1fr_400px] gap-0">
         {/* Video / Room Area - Responsive container */}
-        <section className="p-2 sm:p-4 flex flex-col min-h-0 @container/video">
-          <AdminMeeting webinarId={webinar?._id} />
+        <section className="flex flex-col min-h-0 @container/video">
+          <AdminMeeting webinarId={webinar?._id} webinar={webinar} />
         </section>
       </main>
     </div>

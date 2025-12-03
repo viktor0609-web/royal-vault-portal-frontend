@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Settings, MessageSquare, MessageSquareX, Maximize, Minimize } from "lucide-react";
+import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Settings, Maximize, Minimize } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { SettingsModal } from '../SettingsModal';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../ui/tooltip";
@@ -8,8 +8,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../
 interface MeetingControlsBarProps {
     position: "top" | "bottom";
     togglePeoplePanel: () => void;
-    toggleChatBox: () => void;
-    showChatBox: boolean;
     toggleFullscreen: () => void;
     isFullscreen: boolean;
     localParticipant: any;
@@ -19,8 +17,6 @@ interface MeetingControlsBarProps {
 export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
     position,
     togglePeoplePanel,
-    toggleChatBox,
-    showChatBox,
     toggleFullscreen,
     isFullscreen,
     localParticipant,
@@ -119,28 +115,6 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>Participants</p>
-                            </TooltipContent>
-                        </Tooltip>
-
-                        {/* Chat toggle button - only visible on mobile */}
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    variant="secondary"
-                                    onClick={toggleChatBox}
-                                    className={`sm:hidden rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 ${showChatBox ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'} text-white relative transition-all duration-200`}
-                                >
-                                    {showChatBox ? <MessageSquareX size={20} className="sm:w-6 sm:h-6" /> : <MessageSquare size={20} className="sm:w-6 sm:h-6" />}
-                                    {!showChatBox && chatUnreadCount > 0 && (
-                                        <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full min-w-[18px] h-[18px]">
-                                            {chatUnreadCount}
-                                            <span className="sr-only">unread messages</span>
-                                        </span>
-                                    )}
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{showChatBox ? "Close Chat" : "Open Chat"}</p>
                             </TooltipContent>
                         </Tooltip>
 

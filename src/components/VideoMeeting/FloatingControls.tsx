@@ -6,8 +6,6 @@ import {
   Video,
   VideoOff,
   Users,
-  MessageSquare,
-  MessageSquareX,
   Settings,
   LogOut,
   Maximize,
@@ -24,9 +22,11 @@ import { BottomSheet } from './BottomSheet';
 
 interface FloatingControlsProps {
   togglePeoplePanel: () => void;
-  toggleChatBox: () => void;
+  toggleChatBox?: () => void;
+  toggleLeftPanel?: () => void;
   toggleSettings?: () => void;
-  showChatBox: boolean;
+  showChatBox?: boolean;
+  showLeftPanel?: boolean;
   toggleFullscreen: () => void;
   isFullscreen: boolean;
   chatUnreadCount?: number;
@@ -44,8 +44,10 @@ interface FloatingControlsProps {
 export const FloatingControls: React.FC<FloatingControlsProps> = ({
   togglePeoplePanel,
   toggleChatBox,
+  toggleLeftPanel,
   toggleSettings,
   showChatBox,
+  showLeftPanel = false,
   toggleFullscreen,
   isFullscreen,
   chatUnreadCount = 0,
@@ -180,28 +182,6 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
       >
         <Users size={20} />
         <span className="text-base font-medium">Participants</span>
-      </Button>
-
-      {/* Chat Toggle */}
-      <Button
-        onClick={() => {
-          toggleChatBox();
-          setIsMenuOpen(false);
-        }}
-        className={`w-full h-14 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 relative ${showChatBox
-          ? 'bg-blue-600 hover:bg-blue-700 text-white'
-          : 'bg-gray-700 hover:bg-gray-600 text-white'
-          }`}
-      >
-        {showChatBox ? <MessageSquareX size={20} /> : <MessageSquare size={20} />}
-        <span className="text-base font-medium">
-          {showChatBox ? "Close Chat" : "Open Chat"}
-        </span>
-        {!showChatBox && chatUnreadCount > 0 && (
-          <span className="absolute right-4 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full min-w-[20px] h-[20px]">
-            {chatUnreadCount}
-          </span>
-        )}
       </Button>
 
       {/* Fullscreen Toggle */}

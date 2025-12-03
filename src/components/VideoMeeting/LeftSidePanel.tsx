@@ -245,10 +245,10 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
                 {/* Unpin button */}
                 <button
                   onClick={() => handleUnpin(message.id)}
-                  className="absolute top-2 right-2 p-1 rounded-full bg-gray-200 hover:bg-red-100 text-gray-600 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute top-2 right-2 p-2.5 rounded-full bg-gray-200 hover:bg-red-100 text-gray-600 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
                   title="Unpin message"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-5 w-5" />
                 </button>
 
                 {message.senderName && (

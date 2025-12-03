@@ -382,9 +382,11 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
     };
 
     // Pin/unpin message function - only for Admin and Guest
+    // Admin and Guest can pin/unpin ANY message (not restricted to their own messages)
     const handlePinMessage = async (messageId: string, isCurrentlyPinned: boolean) => {
       if (!dailyRoom || !webinarId) return;
       // Only allow pinning for Admin and Guest, not regular Users
+      // No ownership check - admin/guest can pin any message
       if (!isAdmin && role !== "Guest") return;
 
       // Only allow pinning messages that have been saved to the database (have ObjectId, not UUID)
@@ -548,28 +550,28 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
                       : 'bg-white text-black rounded-bl-none border border-gray-200'
                       }`}
                   >
-                    {/* Pin button - only visible for Admin and Guest, and only for messages saved to database */}
+                    {/* Pin button - visible for Admin and Guest on ALL messages (own and others), only for messages saved to database */}
                     {(isAdmin || role === "Guest") && isValidObjectId(msg.id) && (
                       <button
                         onClick={() => handlePinMessage(msg.id, msg.isPinned || false)}
-                        className={`absolute -top-2 -right-2 p-1 rounded-full transition-all opacity-0 group-hover:opacity-100 ${msg.isPinned
+                        className={`absolute -top-3 -right-3 p-2.5 rounded-full transition-all opacity-0 group-hover:opacity-100 ${msg.isPinned
                           ? 'opacity-100 bg-yellow-400 hover:bg-yellow-500 text-yellow-900'
                           : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
                           }`}
                         title={msg.isPinned ? "Unpin message" : "Pin message"}
                       >
                         {msg.isPinned ? (
-                          <PinOff className="h-3 w-3" />
+                          <PinOff className="h-5 w-5" />
                         ) : (
-                          <Pin className="h-3 w-3" />
+                          <Pin className="h-5 w-5" />
                         )}
                       </button>
                     )}
 
                     {/* Pinned indicator */}
                     {msg.isPinned && (
-                      <div className="absolute -top-1 left-1 flex items-center gap-1">
-                        <Pin className="h-2.5 w-2.5 text-yellow-500 fill-yellow-500" />
+                      <div className="absolute -top-2 left-1 flex items-center gap-1">
+                        <Pin className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                       </div>
                     )}
 

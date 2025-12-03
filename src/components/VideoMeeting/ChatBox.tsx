@@ -64,7 +64,7 @@ export interface ChatBoxRef {
 
 export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
   ({ isVisible = true, onUnreadCountChange, isAdmin = false, webinarId, onPinChange }, ref) => {
-    const { dailyRoom } = useDailyMeeting();
+    const { dailyRoom, role } = useDailyMeeting();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [unreadCount, setUnreadCount] = useState(0);
@@ -357,12 +357,6 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
     const clearChat = async () => {
       if (!dailyRoom || !isAdmin) return;
 
-      // Send clear-chat message to all participants
-      (dailyRoom as any).sendAppMessage({ message: { type: "clear-chat" } }, '*');
-
-      // Clear local messages immediately
-      setMessages([]);
-
       // Clear messages from database if webinarId is available
       if (webinarId) {
         try {
@@ -371,11 +365,33 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
           console.error('Error clearing chat messages from database:', error);
         }
       }
+
+      // Send clear-chat message to all participants (this will also clear pinned messages)
+      (dailyRoom as any).sendAppMessage({ message: { type: "clear-chat" } }, '*');
+
+      // Clear local messages immediately
+      setMessages([]);
+
+      // Notify parent to refresh pinned messages (which will be empty now)
+      onPinChange?.();
     };
 
-    // Pin/unpin message function
+    // Helper function to check if a string is a valid MongoDB ObjectId (24 hex characters)
+    const isValidObjectId = (id: string): boolean => {
+      return /^[0-9a-fA-F]{24}$/.test(id);
+    };
+
+    // Pin/unpin message function - only for Admin and Guest
     const handlePinMessage = async (messageId: string, isCurrentlyPinned: boolean) => {
       if (!dailyRoom || !webinarId) return;
+      // Only allow pinning for Admin and Guest, not regular Users
+      if (!isAdmin && role !== "Guest") return;
+
+      // Only allow pinning messages that have been saved to the database (have ObjectId, not UUID)
+      if (!isValidObjectId(messageId)) {
+        console.warn('Cannot pin message: Message must be saved to database first');
+        return;
+      }
 
       try {
         const message = messages.find(msg => msg.id === messageId);
@@ -427,6 +443,37 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
       }
     };
 
+    const [activeCtas, setActiveCtas] = useState<Array<{ index: number; label: string; link: string }>>([]);
+    const isAdminOrGuest = isAdmin || role === "Guest" || role === "Admin";
+
+    // Listen for CTA activation/cancellation events (only for regular users)
+    useEffect(() => {
+      if (!dailyRoom || isAdminOrGuest) return;
+
+      const handleCtaEvent = (event: any) => {
+        if (event.data.message?.type === "cta-activate") {
+          const { ctaIndex, ctaLabel, ctaLink } = event.data.message;
+          setActiveCtas(prev => {
+            // Check if already exists
+            if (prev.some(cta => cta.index === ctaIndex)) {
+              return prev;
+            }
+            return [...prev, { index: ctaIndex, label: ctaLabel, link: ctaLink }];
+          });
+        }
+
+        if (event.data.message?.type === "cta-cancel") {
+          const { ctaIndex } = event.data.message;
+          setActiveCtas(prev => prev.filter(cta => cta.index !== ctaIndex));
+        }
+      };
+
+      dailyRoom.on('app-message', handleCtaEvent);
+      return () => {
+        dailyRoom.off('app-message', handleCtaEvent);
+      };
+    }, [dailyRoom, isAdminOrGuest]);
+
     return (
       <div className="flex flex-col h-full bg-white relative min-h-0 shadow-sm">
         {/* Sticky header with clear button for admin */}
@@ -443,6 +490,24 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
           )}
         </div>
 
+        {/* Active CTA Buttons - Sticky at top, full width, only for regular users */}
+        {!isAdminOrGuest && activeCtas.length > 0 && (
+          <div className="sticky top-0 z-10 flex flex-col gap-2 px-0 py-2 bg-transparent">
+            {activeCtas.map((cta) => (
+              <button
+                key={cta.index}
+                onClick={() => {
+                  if (cta.link) {
+                    window.open(cta.link, '_blank', 'noopener,noreferrer');
+                  }
+                }}
+                className="bg-red-500 text-white px-3 py-2.5 rounded-none hover:bg-red-600 transition-colors font-medium text-sm text-center w-full"
+              >
+                {cta.label}
+              </button>
+            ))}
+          </div>
+        )}
         {/* Messages Area - WhatsApp style */}
         <div
           className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-1.5 relative min-h-0"
@@ -483,21 +548,23 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
                       : 'bg-white text-black rounded-bl-none border border-gray-200'
                       }`}
                   >
-                    {/* Pin button - visible on hover */}
-                    <button
-                      onClick={() => handlePinMessage(msg.id, msg.isPinned || false)}
-                      className={`absolute -top-2 -right-2 p-1 rounded-full transition-all opacity-0 group-hover:opacity-100 ${msg.isPinned
-                        ? 'opacity-100 bg-yellow-400 hover:bg-yellow-500 text-yellow-900'
-                        : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
-                        }`}
-                      title={msg.isPinned ? "Unpin message" : "Pin message"}
-                    >
-                      {msg.isPinned ? (
-                        <PinOff className="h-3 w-3" />
-                      ) : (
-                        <Pin className="h-3 w-3" />
-                      )}
-                    </button>
+                    {/* Pin button - only visible for Admin and Guest, and only for messages saved to database */}
+                    {(isAdmin || role === "Guest") && isValidObjectId(msg.id) && (
+                      <button
+                        onClick={() => handlePinMessage(msg.id, msg.isPinned || false)}
+                        className={`absolute -top-2 -right-2 p-1 rounded-full transition-all opacity-0 group-hover:opacity-100 ${msg.isPinned
+                          ? 'opacity-100 bg-yellow-400 hover:bg-yellow-500 text-yellow-900'
+                          : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
+                          }`}
+                        title={msg.isPinned ? "Unpin message" : "Pin message"}
+                      >
+                        {msg.isPinned ? (
+                          <PinOff className="h-3 w-3" />
+                        ) : (
+                          <Pin className="h-3 w-3" />
+                        )}
+                      </button>
+                    )}
 
                     {/* Pinned indicator */}
                     {msg.isPinned && (

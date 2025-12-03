@@ -1,7 +1,7 @@
 import { Button } from "../../ui/button";
 import { X } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
-import { ChatBox } from "../ChatBox";
+import { ChatBox, ChatBoxRef } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
 import { FloatingControls } from "../FloatingControls";
@@ -41,10 +41,12 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [showLeftPanel, setShowLeftPanel] = useState<boolean>(false);
     const [showSettings, setShowSettings] = useState<boolean>(false);
+    const [pinnedMessagesRefresh, setPinnedMessagesRefresh] = useState<number>(0);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
     const hasAttemptedJoin = useRef<boolean>(false);
     const videoContainerRef = useRef<HTMLDivElement>(null);
+    const chatBoxRef = useRef<ChatBoxRef>(null);
 
     // On desktop, chat and left panel should always be visible
     useEffect(() => {
@@ -170,7 +172,13 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
                                 {/* Desktop: Sidebar - Always visible on left */}
                                 <div className="hidden md:flex border-r border-gray-200 bg-white">
                                     <div className="w-80 p-0 flex flex-col overflow-hidden">
-                                        <LeftSidePanel webinar={webinar} />
+                                        <LeftSidePanel
+                                            webinar={webinar}
+                                            webinarId={webinarId}
+                                            refreshTrigger={pinnedMessagesRefresh}
+                                            onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
+                                            onUnpinMessage={(messageId) => chatBoxRef.current?.updateMessagePinStatus(messageId, false)}
+                                        />
                                     </div>
                                 </div>
                                 {/* Mobile: BottomSheet - Only show if explicitly opened */}
@@ -182,7 +190,13 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
                                         maxHeight="80vh"
                                     >
                                         <div className="h-full flex flex-col min-h-0" style={{ height: 'calc(80vh - 100px)' }}>
-                                            <LeftSidePanel webinar={webinar} />
+                                            <LeftSidePanel
+                                                webinar={webinar}
+                                                webinarId={webinarId}
+                                                refreshTrigger={pinnedMessagesRefresh}
+                                                onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
+                                                onUnpinMessage={(messageId) => chatBoxRef.current?.updateMessagePinStatus(messageId, false)}
+                                            />
                                         </div>
                                     </BottomSheet>
                                 )}
@@ -271,9 +285,11 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
                                 <div className="hidden md:flex border-l border-gray-200 bg-white">
                                     <div className="w-80 p-0 flex flex-col overflow-visible">
                                         <ChatBox
+                                            ref={chatBoxRef}
                                             isVisible={true}
                                             onUnreadCountChange={setChatUnreadCount}
                                             webinarId={webinarId}
+                                            onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
                                         />
                                     </div>
                                 </div>

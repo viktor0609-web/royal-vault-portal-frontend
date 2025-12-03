@@ -1,7 +1,7 @@
 import { Button } from "../../ui/button";
 import { Loading } from "../../ui/Loading";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
-import { ChatBox } from "../ChatBox";
+import { ChatBox, ChatBoxRef } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
 import { FloatingControls } from "../FloatingControls";
@@ -46,8 +46,10 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }
     const [showChatBox, setShowChatBox] = useState<boolean>(false);
     const [showLeftPanel, setShowLeftPanel] = useState<boolean>(false);
     const [showSettings, setShowSettings] = useState<boolean>(false);
+    const [pinnedMessagesRefresh, setPinnedMessagesRefresh] = useState<number>(0);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
+    const chatBoxRef = useRef<ChatBoxRef>(null);
     const [countdown, setCountdown] = useState<number | null>(null);
     const { toast } = useToast();
     const { slug } = useParams<{ slug: string }>();
@@ -307,7 +309,13 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }
                         {/* Desktop: Sidebar - Always visible on left */}
                         <div className="hidden md:flex border-r border-gray-200 bg-white">
                             <div className="w-80 p-0 flex flex-col overflow-hidden">
-                                <LeftSidePanel webinar={webinar} />
+                                <LeftSidePanel
+                                    webinar={webinar}
+                                    webinarId={webinarId}
+                                    refreshTrigger={pinnedMessagesRefresh}
+                                    onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
+                                    onUnpinMessage={(messageId) => chatBoxRef.current?.updateMessagePinStatus(messageId, false)}
+                                />
                             </div>
                         </div>
                         {/* Mobile: BottomSheet - Only show if explicitly opened */}
@@ -319,7 +327,13 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }
                                 maxHeight="80vh"
                             >
                                 <div className="h-full flex flex-col min-h-0" style={{ height: 'calc(80vh - 100px)' }}>
-                                    <LeftSidePanel webinar={webinar} />
+                                    <LeftSidePanel
+                                        webinar={webinar}
+                                        webinarId={webinarId}
+                                        refreshTrigger={pinnedMessagesRefresh}
+                                        onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
+                                        onUnpinMessage={(messageId) => chatBoxRef.current?.updateMessagePinStatus(messageId, false)}
+                                    />
                                 </div>
                             </BottomSheet>
                         )}
@@ -412,10 +426,12 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }
                         <div className="hidden md:flex border-l border-gray-200 bg-white">
                             <div className="w-80 p-0 flex flex-col overflow-visible">
                                 <ChatBox
+                                    ref={chatBoxRef}
                                     isVisible={true}
                                     onUnreadCountChange={setChatUnreadCount}
                                     isAdmin={true}
                                     webinarId={webinarId}
+                                    onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
                                 />
                             </div>
                         </div>

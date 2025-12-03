@@ -1,19 +1,123 @@
 import { Button } from "@/components/ui/button";
-import { Pin } from "lucide-react";
+import { Pin, PinOff, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useDailyMeeting } from "@/context/DailyMeetingContext";
+import { webinarApi } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 import type { Webinar } from "@/types";
+
+interface PinnedMessage {
+  id: string;
+  text: string;
+  senderName?: string;
+  createdAt?: string;
+}
 
 interface LeftSidePanelProps {
   webinar: Webinar | null;
-  pinnedMessages?: Array<{
-    id: string;
-    text: string;
-    senderName?: string;
-    createdAt?: string;
-  }>;
+  webinarId?: string;
+  refreshTrigger?: number; // Trigger to refresh pinned messages
+  onPinChange?: () => void; // Callback when a message is pinned/unpinned
+  onUnpinMessage?: (messageId: string) => void; // Callback to update chat box when unpinning
 }
 
-export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, pinnedMessages = [] }) => {
+export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId, refreshTrigger, onPinChange, onUnpinMessage }) => {
   const ctas = webinar?.ctas || [];
+  const [pinnedMessages, setPinnedMessages] = useState<PinnedMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { dailyRoom } = useDailyMeeting();
+  const userInfo = useAuth();
+
+  // Fetch pinned messages
+  const fetchPinnedMessages = async () => {
+    if (!webinarId) return;
+    try {
+      setIsLoading(true);
+      const response = await webinarApi.getPinnedMessages(webinarId);
+      const pinned: PinnedMessage[] = response.data.pinnedMessages.map((msg: any) => ({
+        id: msg._id,
+        text: msg.text,
+        senderName: msg.senderName,
+        createdAt: msg.createdAt,
+      }));
+      setPinnedMessages(pinned);
+    } catch (error) {
+      console.error('Error fetching pinned messages:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load pinned messages on mount and when webinarId or refreshTrigger changes
+  useEffect(() => {
+    if (webinarId) {
+      fetchPinnedMessages();
+    }
+  }, [webinarId, refreshTrigger]);
+
+  // Listen for pin/unpin events from Daily.co
+  useEffect(() => {
+    if (!dailyRoom) return;
+
+    const handlePinEvent = (event: any) => {
+      if (event.data.message?.type === "pin-message") {
+        const { messageId, isPinned, messageText, senderName, createdAt } = event.data.message;
+        if (isPinned) {
+          // Message was pinned - add immediately to the list
+          const newPinnedMessage: PinnedMessage = {
+            id: messageId,
+            text: messageText,
+            senderName: senderName,
+            createdAt: createdAt,
+          };
+          setPinnedMessages(prev => {
+            // Check if message already exists to avoid duplicates
+            if (prev.some(msg => msg.id === messageId)) {
+              return prev;
+            }
+            return [newPinnedMessage, ...prev];
+          });
+        } else {
+          // Message was unpinned - remove from list
+          setPinnedMessages(prev => prev.filter(msg => msg.id !== messageId));
+        }
+      }
+    };
+
+    dailyRoom.on('app-message', handlePinEvent);
+    return () => {
+      dailyRoom.off('app-message', handlePinEvent);
+    };
+  }, [dailyRoom]);
+
+  // Handle unpin
+  const handleUnpin = async (messageId: string) => {
+    if (!webinarId || !dailyRoom) return;
+
+    try {
+      await webinarApi.unpinMessage(webinarId, messageId);
+      
+      // Broadcast unpin event
+      (dailyRoom as any).sendAppMessage({
+        message: {
+          type: "pin-message",
+          messageId,
+          isPinned: false,
+        }
+      }, '*');
+
+      // Update local state
+      setPinnedMessages(prev => prev.filter(msg => msg.id !== messageId));
+      
+      // Notify parent to update chat panel
+      onPinChange?.();
+      
+      // Directly update chat box
+      onUnpinMessage?.(messageId);
+    } catch (error) {
+      console.error('Error unpinning message:', error);
+    }
+  };
 
   return (
     <div className="w-full h-full bg-white border-r border-gray-200 flex flex-col overflow-hidden">
@@ -49,25 +153,31 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, pinnedMes
           <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Pinned Messages</h3>
         </div>
         <div className="space-y-3">
-          {pinnedMessages.length === 0 ? (
+          {isLoading ? (
+            <p className="text-xs text-gray-500 text-center py-6">Loading...</p>
+          ) : pinnedMessages.length === 0 ? (
             <p className="text-xs text-gray-500 text-center py-6">No pinned messages</p>
           ) : (
             pinnedMessages.map((message) => (
               <div
                 key={message.id}
-                className="bg-gray-50 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm"
+                className="bg-gray-50 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm relative group"
               >
+                {/* Unpin button */}
+                <button
+                  onClick={() => handleUnpin(message.id)}
+                  className="absolute top-2 right-2 p-1 rounded-full bg-gray-200 hover:bg-red-100 text-gray-600 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
+                  title="Unpin message"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+
                 {message.senderName && (
-                  <div className="text-xs font-semibold text-gray-700 mb-1.5">
+                  <div className="text-xs font-semibold text-gray-700 mb-1.5 pr-6">
                     {message.senderName}
                   </div>
                 )}
-                <p className="text-sm text-gray-800 leading-relaxed">{message.text}</p>
-                {message.createdAt && (
-                  <div className="text-xs text-gray-500 mt-2">
-                    {new Date(message.createdAt).toLocaleString()}
-                  </div>
-                )}
+                <p className="text-sm text-gray-800 leading-relaxed pr-6">{message.text}</p>
               </div>
             ))
           )}

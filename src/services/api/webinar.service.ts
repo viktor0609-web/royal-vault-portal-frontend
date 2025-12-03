@@ -104,5 +104,15 @@ export const webinarService = {
 
   unpinMessage: (webinarId: string, messageId: string) =>
     api.post(`${API_ENDPOINTS.WEBINARS.CHAT}/${webinarId}/chat/${messageId}/unpin`),
+
+  // CTA functions
+  getActiveCtas: (webinarId: string) =>
+    api.get<{ message: string; activeCtaIndices: number[] }>(`${API_ENDPOINTS.WEBINARS.CHAT}/${webinarId}/cta/active`),
+
+  activateCta: (webinarId: string, ctaIndex: number) =>
+    api.post<{ message: string; activeCtaIndices: number[] }>(`${API_ENDPOINTS.WEBINARS.CHAT}/${webinarId}/cta/${ctaIndex}/activate`),
+
+  deactivateCta: (webinarId: string, ctaIndex: number) =>
+    api.post<{ message: string; activeCtaIndices: number[] }>(`${API_ENDPOINTS.WEBINARS.CHAT}/${webinarId}/cta/${ctaIndex}/deactivate`),
 };
 

@@ -73,6 +73,9 @@ export const webinarApi = {
   getPinnedMessages: webinarService.getPinnedMessages,
   pinMessage: webinarService.pinMessage,
   unpinMessage: webinarService.unpinMessage,
+  getActiveCtas: webinarService.getActiveCtas,
+  activateCta: webinarService.activateCta,
+  deactivateCta: webinarService.deactivateCta,
 };
 
 export const userApi = {

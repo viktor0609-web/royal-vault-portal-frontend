@@ -25,7 +25,8 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
   const ctas = webinar?.ctas || [];
   const [pinnedMessages, setPinnedMessages] = useState<PinnedMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeCtaIndices, setActiveCtaIndices] = useState<number[]>([]);
+  // Initialize activeCtaIndices from webinar prop if available, otherwise empty array
+  const [activeCtaIndices, setActiveCtaIndices] = useState<number[]>(webinar?.activeCtaIndices || []);
   const { dailyRoom, role } = useDailyMeeting();
   const userInfo = useAuth();
   const isAdminOrGuest = userInfo?.user?.role === "admin" || role === "Guest" || role === "Admin";
@@ -56,6 +57,24 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
       fetchPinnedMessages();
     }
   }, [webinarId, refreshTrigger]);
+
+  // Fetch active CTAs from backend
+  const fetchActiveCtas = async () => {
+    if (!webinarId) return;
+    try {
+      const response = await webinarApi.getActiveCtas(webinarId);
+      setActiveCtaIndices(response.data.activeCtaIndices || []);
+    } catch (error) {
+      console.error('Error fetching active CTAs:', error);
+    }
+  };
+
+  // Load active CTAs on mount and when webinarId changes
+  useEffect(() => {
+    if (webinarId) {
+      fetchActiveCtas();
+    }
+  }, [webinarId]);
 
   // Listen for pin/unpin events and CTA activation from Daily.co
   useEffect(() => {
@@ -144,28 +163,28 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
     }
   };
 
-  // Handle CTA activation/cancellation (toggle)
-  const handleCtaClick = (index: number) => {
-    if (!dailyRoom || !isAdminOrGuest) return;
+  // Handle CTA activation/cancellation (toggle) - with optimistic updates
+  const handleCtaClick = async (index: number) => {
+    if (!dailyRoom || !isAdminOrGuest || !webinarId) return;
 
     const isActive = activeCtaIndices.includes(index);
+    const newActiveStatus = !isActive;
 
-    if (isActive) {
-      // Cancel the CTA
-      setActiveCtaIndices(prev => prev.filter(idx => idx !== index));
-
-      // Broadcast CTA cancellation
-      (dailyRoom as any).sendAppMessage({
-        message: {
-          type: "cta-cancel",
-          ctaIndex: index,
+    // Optimistic update: Update local state immediately
+    if (newActiveStatus) {
+      setActiveCtaIndices(prev => {
+        if (!prev.includes(index)) {
+          return [...prev, index];
         }
-      }, '*');
+        return prev;
+      });
     } else {
-      // Activate the CTA
-      setActiveCtaIndices(prev => [...prev, index]);
+      setActiveCtaIndices(prev => prev.filter(idx => idx !== index));
+    }
 
-      // Broadcast CTA activation
+    // Broadcast event immediately (don't wait for backend)
+    if (newActiveStatus) {
+      // Activate the CTA
       (dailyRoom as any).sendAppMessage({
         message: {
           type: "cta-activate",
@@ -174,6 +193,38 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
           ctaLink: ctas[index]?.link,
         }
       }, '*');
+    } else {
+      // Cancel the CTA
+      (dailyRoom as any).sendAppMessage({
+        message: {
+          type: "cta-cancel",
+          ctaIndex: index,
+        }
+      }, '*');
+    }
+
+    // Send API request in background (don't wait for response)
+    try {
+      if (newActiveStatus) {
+        webinarApi.activateCta(webinarId, index).catch(error => {
+          console.error('Error activating CTA:', error);
+          // Revert on error
+          setActiveCtaIndices(prev => prev.filter(idx => idx !== index));
+        });
+      } else {
+        webinarApi.deactivateCta(webinarId, index).catch(error => {
+          console.error('Error deactivating CTA:', error);
+          // Revert on error
+          setActiveCtaIndices(prev => {
+            if (!prev.includes(index)) {
+              return [...prev, index];
+            }
+            return prev;
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling CTA:', error);
     }
   };
 

@@ -56,6 +56,7 @@ interface ChatBoxProps {
   isAdmin?: boolean;
   webinarId?: string; // Webinar ID to associate chat messages
   onPinChange?: () => void; // Callback when a message is pinned/unpinned
+  webinar?: { ctas?: Array<{ label: string; link: string }>; activeCtaIndices?: number[] } | null; // Webinar object with CTAs and active indices
 }
 
 export interface ChatBoxRef {
@@ -63,7 +64,7 @@ export interface ChatBoxRef {
 }
 
 export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
-  ({ isVisible = true, onUnreadCountChange, isAdmin = false, webinarId, onPinChange }, ref) => {
+  ({ isVisible = true, onUnreadCountChange, isAdmin = false, webinarId, onPinChange, webinar }, ref) => {
     const { dailyRoom, role } = useDailyMeeting();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
@@ -517,6 +518,55 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
 
     const [activeCtas, setActiveCtas] = useState<Array<{ index: number; label: string; link: string }>>([]);
     const isAdminOrGuest = isAdmin || role === "Guest" || role === "Admin";
+
+    // Fetch active CTAs from backend on mount (only for regular users)
+    useEffect(() => {
+      if (isAdminOrGuest || !webinarId) return;
+
+      const fetchActiveCtas = async () => {
+        try {
+          // If webinar prop is provided, use it directly
+          if (webinar?.activeCtaIndices && webinar?.ctas) {
+            const activeCtasData = webinar.activeCtaIndices
+              .map(index => {
+                const cta = webinar.ctas?.[index];
+                if (cta) {
+                  return { index, label: cta.label, link: cta.link };
+                }
+                return null;
+              })
+              .filter((cta): cta is { index: number; label: string; link: string } => cta !== null);
+            setActiveCtas(activeCtasData);
+            return;
+          }
+
+          // Otherwise, fetch from backend
+          const [activeCtasResponse, webinarResponse] = await Promise.all([
+            webinarApi.getActiveCtas(webinarId),
+            webinarApi.getPublicWebinarById(webinarId)
+          ]);
+
+          const activeIndices = activeCtasResponse.data.activeCtaIndices || [];
+          const ctas = webinarResponse.data.webinar?.ctas || [];
+
+          const activeCtasData = activeIndices
+            .map(index => {
+              const cta = ctas[index];
+              if (cta) {
+                return { index, label: cta.label, link: cta.link };
+              }
+              return null;
+            })
+            .filter((cta): cta is { index: number; label: string; link: string } => cta !== null);
+
+          setActiveCtas(activeCtasData);
+        } catch (error) {
+          console.error('Error fetching active CTAs:', error);
+        }
+      };
+
+      fetchActiveCtas();
+    }, [webinarId, isAdminOrGuest, webinar]);
 
     // Listen for CTA activation/cancellation events (only for regular users)
     useEffect(() => {

@@ -289,6 +289,7 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
                                             isVisible={true}
                                             onUnreadCountChange={setChatUnreadCount}
                                             webinarId={webinarId}
+                                            webinar={webinar}
                                             onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
                                         />
                                     </div>
@@ -306,6 +307,7 @@ export const GuestMeeting: React.FC<GuestMeetingProps> = ({ webinarId, webinarSt
                                                 isVisible={showChatBox}
                                                 onUnreadCountChange={setChatUnreadCount}
                                                 webinarId={webinarId}
+                                                webinar={webinar}
                                             />
                                         </div>
                                     </BottomSheet>

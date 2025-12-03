@@ -150,6 +150,7 @@ export interface Webinar {
   recording?: string;
   rawRecordingId?: string;
   ctas?: Array<{ label: string; link: string }>;
+  activeCtaIndices?: number[];
   attendees?: WebinarAttendee[];
   createdAt?: string;
   updatedAt?: string;

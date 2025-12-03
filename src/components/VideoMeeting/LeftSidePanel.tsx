@@ -227,36 +227,49 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
 
       {/* Pinned Messages Section */}
       <div className="flex-1 overflow-y-auto p-4 bg-white">
-        <div className="flex items-center gap-2 mb-4">
-          <Pin className="h-4 w-4 text-gray-600" />
-          <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide">Pinned Messages</h3>
+        <div className="flex items-center gap-2 mb-4 sticky top-0 bg-white z-10 pb-2 border-b border-gray-200">
+          <Pin className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+          <h3 className="text-base font-bold text-gray-900 uppercase tracking-wide">Pinned Messages</h3>
+          {pinnedMessages.length > 0 && (
+            <span className="ml-auto bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">
+              {pinnedMessages.length}
+            </span>
+          )}
         </div>
-        <div className="space-y-3">
+        <div className="space-y-3 mt-2">
           {isLoading ? (
-            <p className="text-xs text-gray-500 text-center py-6">Loading...</p>
+            <p className="text-sm text-gray-500 text-center py-8">Loading pinned messages...</p>
           ) : pinnedMessages.length === 0 ? (
-            <p className="text-xs text-gray-500 text-center py-6">No pinned messages</p>
+            <div className="text-center py-8">
+              <Pin className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">No pinned messages yet</p>
+            </div>
           ) : (
             pinnedMessages.map((message) => (
               <div
                 key={message.id}
-                className="bg-gray-50 border border-gray-200 rounded-lg p-3 hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 shadow-sm relative group"
+                className="bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-lg p-4 hover:bg-gradient-to-br hover:from-yellow-100 hover:to-amber-100 hover:border-yellow-300 transition-all duration-200 shadow-md relative group"
               >
-                {/* Unpin button */}
+                {/* Unpin button - more visible */}
                 <button
                   onClick={() => handleUnpin(message.id)}
-                  className="absolute top-2 right-2 p-2.5 rounded-full bg-gray-200 hover:bg-red-100 text-gray-600 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute top-3 right-3 p-2.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all shadow-md hover:shadow-lg"
                   title="Unpin message"
                 >
                   <X className="h-5 w-5" />
                 </button>
 
+                {/* Pin icon indicator */}
+                <div className="absolute top-3 left-3">
+                  <Pin className="h-4 w-4 text-yellow-600 fill-yellow-600" />
+                </div>
+
                 {message.senderName && (
-                  <div className="text-xs font-semibold text-gray-700 mb-1.5 pr-6">
+                  <div className="text-sm font-bold text-gray-800 mb-2 pr-12 pl-8">
                     {message.senderName}
                   </div>
                 )}
-                <p className="text-sm text-gray-800 leading-relaxed pr-6">{message.text}</p>
+                <p className="text-base text-gray-900 leading-relaxed pr-12 pl-8 font-medium">{message.text}</p>
               </div>
             ))
           )}

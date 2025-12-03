@@ -276,16 +276,37 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
         const data = event.data;
         if (!data || !data.text || !data.senderName) return;
 
+        // Use database ID if provided, otherwise try to find matching message by text/sender/timestamp
+        let messageId = data.messageId || data._id;
+
+        // If no database ID, try to find matching message in existing messages
+        if (!messageId || !isValidObjectId(messageId)) {
+          const existingMessage = messages.find(msg =>
+            msg.text === data.text &&
+            msg.senderName === data.senderName &&
+            Math.abs(msg.timestamp - (data.timestamp || Date.now())) < 5000 // Within 5 seconds
+          );
+          if (existingMessage && isValidObjectId(existingMessage.id)) {
+            messageId = existingMessage.id;
+          } else {
+            messageId = crypto.randomUUID();
+          }
+        }
+
         const newMessage: Message = {
-          id: crypto.randomUUID(),
+          id: messageId,
           SenderUserId: data.SenderUserId,
           senderName: data.senderName,
           text: data.text,
-          timestamp: Date.now(),
-          isPinned: false,
+          timestamp: data.timestamp || Date.now(),
+          isPinned: data.isPinned || false,
         };
 
         setMessages(prev => {
+          // Check if message already exists (avoid duplicates)
+          if (prev.some(msg => msg.id === messageId || (msg.text === data.text && msg.senderName === data.senderName && Math.abs(msg.timestamp - newMessage.timestamp) < 2000))) {
+            return prev;
+          }
           const updatedMessages = [...prev, newMessage];
           // If chat is not visible, increment unread count
           if (!isVisible) {
@@ -293,6 +314,25 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
           }
           return updatedMessages;
         });
+
+        // If message doesn't have database ID yet, try to save it and update the ID
+        if (webinarId && !isValidObjectId(messageId)) {
+          // Try to save message to get database ID (in background)
+          webinarApi.saveChatMessage(webinarId, {
+            senderUserId: data.SenderUserId || '',
+            senderName: data.senderName,
+            text: data.text,
+          }).then(response => {
+            if (response.data.chatMessage?._id) {
+              // Update message ID with database ID
+              setMessages(prev => prev.map(msg =>
+                msg.id === messageId ? { ...msg, id: response.data.chatMessage._id } : msg
+              ));
+            }
+          }).catch(error => {
+            console.error('Error saving received message to database:', error);
+          });
+        }
       };
 
       dailyRoom.on('app-message', handleMessage);
@@ -313,22 +353,8 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
       };
       console.log(messageData);
 
-      // Send message via Daily app-message
-      (dailyRoom as any).sendAppMessage(messageData, '*');
-
-      // Add message locally immediately (optimistic update)
-      const tempId = crypto.randomUUID();
-      const newMessage: Message = {
-        ...messageData,
-        id: tempId,
-        timestamp: Date.now(),
-        isPinned: false,
-      };
-
-      setMessages(prev => [...prev, newMessage]);
-      setInput('');
-
-      // Save to database if webinarId is available
+      // Save to database first if webinarId is available (so we get the ObjectId)
+      let databaseId: string | null = null;
       if (webinarId) {
         try {
           const response = await webinarApi.saveChatMessage(webinarId, {
@@ -336,17 +362,32 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
             senderName: messageData.senderName,
             text: messageData.text,
           });
-          // Update the message ID with the database ID
-          if (response.data.chatMessage?._id) {
-            setMessages(prev => prev.map(msg =>
-              msg.id === tempId ? { ...msg, id: response.data.chatMessage._id } : msg
-            ));
-          }
+          databaseId = response.data.chatMessage?._id || null;
         } catch (error) {
           console.error('Error saving chat message to database:', error);
-          // Message is still sent via Daily, so we keep it in the UI
+          // Continue even if save fails
         }
       }
+
+      // Send message via Daily app-message with database ID if available
+      (dailyRoom as any).sendAppMessage({
+        ...messageData,
+        messageId: databaseId, // Include database ID so others can pin it
+        _id: databaseId,
+        timestamp: Date.now(),
+      }, '*');
+
+      // Add message locally immediately
+      const messageId = databaseId || crypto.randomUUID();
+      const newMessage: Message = {
+        ...messageData,
+        id: messageId,
+        timestamp: Date.now(),
+        isPinned: false,
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+      setInput('');
     };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

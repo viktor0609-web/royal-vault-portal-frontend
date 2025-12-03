@@ -431,6 +431,7 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }
                                     onUnreadCountChange={setChatUnreadCount}
                                     isAdmin={true}
                                     webinarId={webinarId}
+                                    webinar={webinar}
                                     onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
                                 />
                             </div>
@@ -449,6 +450,7 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }
                                         onUnreadCountChange={setChatUnreadCount}
                                         isAdmin={true}
                                         webinarId={webinarId}
+                                        webinar={webinar}
                                     />
                                 </div>
                             </BottomSheet>

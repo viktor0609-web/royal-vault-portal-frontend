@@ -2,6 +2,7 @@ import { Button } from "../../ui/button";
 import { Loading } from "../../ui/Loading";
 import { X } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
+import { ChatProvider } from "../../../context/ChatContext";
 import { ChatBox } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
@@ -150,8 +151,9 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
 
 
     return (
-        <>
-            {(webinarStatus === "Waiting" || webinarStatus === "Scheduled") && (
+        <ChatProvider webinarId={webinarId}>
+            <>
+                {(webinarStatus === "Waiting" || webinarStatus === "Scheduled") && (
                 <div className="flex flex-1 items-center justify-center bg-gray-800 text-white rounded-lg">
                     <div className="text-center">
                         <h2 className="text-2xl font-bold mb-2">Webinar Is Not Started Yet</h2>
@@ -353,6 +355,7 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
                         </>
                     )}
                 </div>)}
-        </>
+            </>
+        </ChatProvider>
     );
 };

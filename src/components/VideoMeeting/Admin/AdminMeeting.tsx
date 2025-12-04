@@ -1,6 +1,7 @@
 import { Button } from "../../ui/button";
 import { Loading } from "../../ui/Loading";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
+import { ChatProvider } from "../../../context/ChatContext";
 import { ChatBox, ChatBoxRef } from "../ChatBox";
 import { PreJoinScreen } from "../PreJoinScreen";
 import { MeetingControlsBar } from "./MeetingControlsBar";
@@ -266,67 +267,50 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }
 
 
     return (
-        <div className="flex flex-col h-full w-full min-h-0 max-w-full relative">
-            {/* Countdown Overlay */}
-            {countdown !== null && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-                    <div className="text-center">
-                        <div className="text-9xl sm:text-[12rem] font-bold text-white animate-pulse">
-                            {countdown}
-                        </div>
-                        <p className="text-2xl sm:text-3xl text-white mt-4 font-semibold">
-                            Recording will start...
-                        </p>
-                        <p className="text-sm sm:text-base text-white/70 mt-2">
-                            Press ESC to cancel
-                        </p>
-                    </div>
-                </div>
-            )}
-
-            {/* Recording Processing Notification */}
-            {showProcessingNotification && (
-                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div className="flex items-center gap-3 bg-blue-600 text-white px-4 py-2.5 rounded-lg shadow-lg border border-blue-500/50">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-sm font-medium">Processing recording...</span>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowProcessingNotification(false)}
-                            className="h-5 w-5 p-0 hover:bg-blue-700 text-white ml-1"
-                        >
-                            <X className="h-3.5 w-3.5" />
-                        </Button>
-                    </div>
-                </div>
-            )}
-
-            <div className="flex flex-1 overflow-hidden min-h-0 max-w-full">
-                {/* Left Side Panel - CTA Buttons and Pinned Messages - Always visible on desktop */}
-                {joined && (
-                    <>
-                        {/* Desktop: Sidebar - Always visible on left */}
-                        <div className="hidden md:flex border-r border-gray-200 bg-white">
-                            <div className="w-80 p-0 flex flex-col overflow-hidden">
-                                <LeftSidePanel
-                                    webinar={webinar}
-                                    webinarId={webinarId}
-                                    refreshTrigger={pinnedMessagesRefresh}
-                                    onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
-                                    onUnpinMessage={(messageId) => chatBoxRef.current?.updateMessagePinStatus(messageId, false)}
-                                />
+        <ChatProvider webinarId={webinarId}>
+            <div className="flex flex-col h-full w-full min-h-0 max-w-full relative">
+                {/* Countdown Overlay */}
+                {countdown !== null && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                        <div className="text-center">
+                            <div className="text-9xl sm:text-[12rem] font-bold text-white animate-pulse">
+                                {countdown}
                             </div>
+                            <p className="text-2xl sm:text-3xl text-white mt-4 font-semibold">
+                                Recording will start...
+                            </p>
+                            <p className="text-sm sm:text-base text-white/70 mt-2">
+                                Press ESC to cancel
+                            </p>
                         </div>
-                        {/* Mobile: BottomSheet - Only show if explicitly opened */}
-                        {showLeftPanel && (
-                            <BottomSheet
-                                isOpen={showLeftPanel}
-                                onClose={() => setShowLeftPanel(false)}
-                                title="CTA & Pinned Messages"
-                                maxHeight="80vh"
+                    </div>
+                )}
+
+                {/* Recording Processing Notification */}
+                {showProcessingNotification && (
+                    <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="flex items-center gap-3 bg-blue-600 text-white px-4 py-2.5 rounded-lg shadow-lg border border-blue-500/50">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span className="text-sm font-medium">Processing recording...</span>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setShowProcessingNotification(false)}
+                                className="h-5 w-5 p-0 hover:bg-blue-700 text-white ml-1"
                             >
-                                <div className="h-full flex flex-col min-h-0" style={{ height: 'calc(80vh - 100px)' }}>
+                                <X className="h-3.5 w-3.5" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
+                <div className="flex flex-1 overflow-hidden min-h-0 max-w-full">
+                    {/* Left Side Panel - CTA Buttons and Pinned Messages - Always visible on desktop */}
+                    {joined && (
+                        <>
+                            {/* Desktop: Sidebar - Always visible on left */}
+                            <div className="hidden md:flex border-r border-gray-200 bg-white">
+                                <div className="w-80 p-0 flex flex-col overflow-hidden">
                                     <LeftSidePanel
                                         webinar={webinar}
                                         webinarId={webinarId}
@@ -335,189 +319,208 @@ export const AdminMeeting: React.FC<AdminMeetingProps> = ({ webinarId, webinar }
                                         onUnpinMessage={(messageId) => chatBoxRef.current?.updateMessagePinStatus(messageId, false)}
                                     />
                                 </div>
-                            </BottomSheet>
-                        )}
-                    </>
-                )}
-
-                {/* Main Video Container */}
-                <div
-                    ref={videoContainerRef}
-                    id="daily-video-container"
-                    className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full ${joined ? "" : "p-4"
-                        }`}
-                >
-                    {joined && (
-                        <div className="h-full flex flex-col min-h-0 max-w-full">
-                            <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
-                                {/* Screenshare first */}
-                                {screenshareTrack && (
-                                    <VideoPlayer track={screenshareTrack} type="screen" />
-                                )}
-
-                                {/* Main video when no screenshare - show active Guest video */}
-                                {!screenshareTrack && (
-                                    <>
-                                        <VideoPlayer
-                                            track={activeGuest && activeGuest.video ? guestVideoTrack : null}
-                                            type="camera"
-                                            participantName={activeGuest?.name || "Guest"}
-                                            showAvatarWhenOff={true}
-                                        />
-                                        {/* Name label for main video */}
-                                        <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
-                                            {activeGuest?.name || "Guest"}
-                                        </div>
-                                    </>
-                                )}
-
-
                             </div>
-                            {/* Remote participants audio */}
-                            {participants.length > 1 && (
-                                <>
-                                    {participants.filter(p => p.id !== localParticipant?.id).map((p) => (
-                                        <Fragment key={p.id}>
-                                            {p.audioTrack && (
-                                                <audio
-                                                    ref={(audioElement) => {
-                                                        if (audioElement && p.audioTrack) {
-                                                            audioElement.srcObject = new MediaStream([p.audioTrack]);
-                                                        }
-                                                    }}
-                                                    autoPlay
-                                                    playsInline
-                                                />
-                                            )}
-                                        </Fragment>
-                                    ))}
-                                </>
+                            {/* Mobile: BottomSheet - Only show if explicitly opened */}
+                            {showLeftPanel && (
+                                <BottomSheet
+                                    isOpen={showLeftPanel}
+                                    onClose={() => setShowLeftPanel(false)}
+                                    title="CTA & Pinned Messages"
+                                    maxHeight="80vh"
+                                >
+                                    <div className="h-full flex flex-col min-h-0" style={{ height: 'calc(80vh - 100px)' }}>
+                                        <LeftSidePanel
+                                            webinar={webinar}
+                                            webinarId={webinarId}
+                                            refreshTrigger={pinnedMessagesRefresh}
+                                            onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
+                                            onUnpinMessage={(messageId) => chatBoxRef.current?.updateMessagePinStatus(messageId, false)}
+                                        />
+                                    </div>
+                                </BottomSheet>
                             )}
-                        </div>
+                        </>
                     )}
 
-                </div>
+                    {/* Main Video Container */}
+                    <div
+                        ref={videoContainerRef}
+                        id="daily-video-container"
+                        className={`flex-1 flex items-center justify-center bg-black min-h-0 max-w-full ${joined ? "" : "p-4"
+                            }`}
+                    >
+                        {joined && (
+                            <div className="h-full flex flex-col min-h-0 max-w-full">
+                                <div className="flex-grow flex items-center justify-center relative w-full h-full min-h-0 max-w-full">
+                                    {/* Screenshare first */}
+                                    {screenshareTrack && (
+                                        <VideoPlayer track={screenshareTrack} type="screen" />
+                                    )}
 
-                {/* People Panel - BottomSheet on mobile, sidebar on desktop */}
-                {joined && showPeoplePanel && (
-                    <>
-                        {/* Desktop: Sidebar */}
-                        <div className="hidden md:block relative">
-                            <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
-                        </div>
-                        {/* Mobile: BottomSheet */}
-                        <BottomSheet
-                            isOpen={showPeoplePanel}
-                            onClose={() => setShowPeoplePanel(false)}
-                            title="Participants"
-                            maxHeight="80vh"
-                        >
-                            <div className="h-full flex flex-col min-h-0" style={{ height: 'calc(80vh - 100px)' }}>
+                                    {/* Main video when no screenshare - show active Guest video */}
+                                    {!screenshareTrack && (
+                                        <>
+                                            <VideoPlayer
+                                                track={activeGuest && activeGuest.video ? guestVideoTrack : null}
+                                                type="camera"
+                                                participantName={activeGuest?.name || "Guest"}
+                                                showAvatarWhenOff={true}
+                                            />
+                                            {/* Name label for main video */}
+                                            <div className="absolute bottom-2 left-2 text-white bg-black bg-opacity-50 px-2 py-1 rounded text-sm">
+                                                {activeGuest?.name || "Guest"}
+                                            </div>
+                                        </>
+                                    )}
+
+
+                                </div>
+                                {/* Remote participants audio */}
+                                {participants.length > 1 && (
+                                    <>
+                                        {participants.filter(p => p.id !== localParticipant?.id).map((p) => (
+                                            <Fragment key={p.id}>
+                                                {p.audioTrack && (
+                                                    <audio
+                                                        ref={(audioElement) => {
+                                                            if (audioElement && p.audioTrack) {
+                                                                audioElement.srcObject = new MediaStream([p.audioTrack]);
+                                                            }
+                                                        }}
+                                                        autoPlay
+                                                        playsInline
+                                                    />
+                                                )}
+                                            </Fragment>
+                                        ))}
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                    </div>
+
+                    {/* People Panel - BottomSheet on mobile, sidebar on desktop */}
+                    {joined && showPeoplePanel && (
+                        <>
+                            {/* Desktop: Sidebar */}
+                            <div className="hidden md:block relative">
                                 <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
                             </div>
-                        </BottomSheet>
-                    </>
-                )}
-
-                {/* Chat panel - Always visible on desktop, on the right */}
-                {joined && (
-                    <>
-                        {/* Desktop: Sidebar - Always visible on right */}
-                        <div className="hidden md:flex border-l border-gray-200 bg-white">
-                            <div className="w-80 p-0 flex flex-col overflow-visible">
-                                <ChatBox
-                                    ref={chatBoxRef}
-                                    isVisible={true}
-                                    onUnreadCountChange={setChatUnreadCount}
-                                    isAdmin={true}
-                                    webinarId={webinarId}
-                                    webinar={webinar}
-                                    onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
-                                />
-                            </div>
-                        </div>
-                        {/* Mobile: BottomSheet - Only show if explicitly opened */}
-                        {showChatBox && (
+                            {/* Mobile: BottomSheet */}
                             <BottomSheet
-                                isOpen={showChatBox}
-                                onClose={() => setShowChatBox(false)}
-                                title="Chat"
+                                isOpen={showPeoplePanel}
+                                onClose={() => setShowPeoplePanel(false)}
+                                title="Participants"
                                 maxHeight="80vh"
                             >
-                                <div className="h-full flex flex-col min-h-0 p-4" style={{ height: 'calc(80vh - 100px)' }}>
+                                <div className="h-full flex flex-col min-h-0" style={{ height: 'calc(80vh - 100px)' }}>
+                                    <PeoplePanel onClose={() => setShowPeoplePanel(false)} />
+                                </div>
+                            </BottomSheet>
+                        </>
+                    )}
+
+                    {/* Chat panel - Always visible on desktop, on the right */}
+                    {joined && (
+                        <>
+                            {/* Desktop: Sidebar - Always visible on right */}
+                            <div className="hidden md:flex border-l border-gray-200 bg-white">
+                                <div className="w-80 p-0 flex flex-col overflow-visible">
                                     <ChatBox
-                                        isVisible={showChatBox}
+                                        ref={chatBoxRef}
+                                        isVisible={true}
                                         onUnreadCountChange={setChatUnreadCount}
                                         isAdmin={true}
                                         webinarId={webinarId}
                                         webinar={webinar}
+                                        onPinChange={() => setPinnedMessagesRefresh(prev => prev + 1)}
                                     />
                                 </div>
-                            </BottomSheet>
-                        )}
-                    </>
-                )}
+                            </div>
+                            {/* Mobile: BottomSheet - Only show if explicitly opened */}
+                            {showChatBox && (
+                                <BottomSheet
+                                    isOpen={showChatBox}
+                                    onClose={() => setShowChatBox(false)}
+                                    title="Chat"
+                                    maxHeight="80vh"
+                                >
+                                    <div className="h-full flex flex-col min-h-0 p-4" style={{ height: 'calc(80vh - 100px)' }}>
+                                        <ChatBox
+                                            isVisible={showChatBox}
+                                            onUnreadCountChange={setChatUnreadCount}
+                                            isAdmin={true}
+                                            webinarId={webinarId}
+                                            webinar={webinar}
+                                        />
+                                    </div>
+                                </BottomSheet>
+                            )}
+                        </>
+                    )}
 
 
-            </div>
+                </div>
 
-            <MeetingControlsBar
-                position="bottom"
-                togglePeoplePanel={() => {
-                    setShowPeoplePanel((prev) => !prev);
-                }}
-                toggleFullscreen={toggleFullscreen}
-                isFullscreen={isFullscreen}
-                chatUnreadCount={chatUnreadCount}
-                countdown={countdown}
-                setCountdown={setCountdown}
-                handleStartRecording={handleStartRecording}
-            />
-
-            {/* Mobile Floating Controls - Hide when panels are open */}
-            {(!showPeoplePanel && !showSettings) && (
-                <FloatingControls
+                <MeetingControlsBar
+                    position="bottom"
                     togglePeoplePanel={() => {
                         setShowPeoplePanel((prev) => !prev);
-                    }}
-                    toggleSettings={() => {
-                        setShowSettings((prev) => !prev);
-                        if (window.innerWidth < 640) {
-                            if (showPeoplePanel) setShowPeoplePanel(false);
-                        }
                     }}
                     toggleFullscreen={toggleFullscreen}
                     isFullscreen={isFullscreen}
                     chatUnreadCount={chatUnreadCount}
-                    role={role}
-                    isRecording={isRecording}
-                    startRecording={startRecording}
-                    stopRecording={stopRecording}
-                    isScreensharing={isScreensharing}
-                    startScreenshare={startScreenshare}
-                    stopScreenshare={stopScreenshare}
-                    onStartRecordingClick={handleStartRecording}
                     countdown={countdown}
+                    setCountdown={setCountdown}
+                    handleStartRecording={handleStartRecording}
                 />
-            )}
 
-            {/* Settings panel - BottomSheet on mobile, Dialog on desktop */}
-            {joined && showSettings && (
-                <>
-                    {/* Desktop: Dialog (handled by SettingsModal) */}
-                    {/* Mobile: BottomSheet */}
-                    <BottomSheet
-                        isOpen={showSettings}
-                        onClose={() => setShowSettings(false)}
-                        title="Settings"
-                        maxHeight="80vh"
-                    >
-                        <div className="p-4">
-                            <SettingsContent />
-                        </div>
-                    </BottomSheet>
-                </>
-            )}
-        </div>
+                {/* Mobile Floating Controls - Hide when panels are open */}
+                {(!showPeoplePanel && !showSettings) && (
+                    <FloatingControls
+                        togglePeoplePanel={() => {
+                            setShowPeoplePanel((prev) => !prev);
+                        }}
+                        toggleSettings={() => {
+                            setShowSettings((prev) => !prev);
+                            if (window.innerWidth < 640) {
+                                if (showPeoplePanel) setShowPeoplePanel(false);
+                            }
+                        }}
+                        toggleFullscreen={toggleFullscreen}
+                        isFullscreen={isFullscreen}
+                        chatUnreadCount={chatUnreadCount}
+                        role={role}
+                        isRecording={isRecording}
+                        startRecording={startRecording}
+                        stopRecording={stopRecording}
+                        isScreensharing={isScreensharing}
+                        startScreenshare={startScreenshare}
+                        stopScreenshare={stopScreenshare}
+                        onStartRecordingClick={handleStartRecording}
+                        countdown={countdown}
+                    />
+                )}
+
+                {/* Settings panel - BottomSheet on mobile, Dialog on desktop */}
+                {joined && showSettings && (
+                    <>
+                        {/* Desktop: Dialog (handled by SettingsModal) */}
+                        {/* Mobile: BottomSheet */}
+                        <BottomSheet
+                            isOpen={showSettings}
+                            onClose={() => setShowSettings(false)}
+                            title="Settings"
+                            maxHeight="80vh"
+                        >
+                            <div className="p-4">
+                                <SettingsContent />
+                            </div>
+                        </BottomSheet>
+                    </>
+                )}
+            </div>
+        </ChatProvider>
     );
 };

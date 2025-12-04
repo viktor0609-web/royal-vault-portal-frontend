@@ -4,6 +4,7 @@ import { DailyCall } from '@daily-co/daily-js';
 import { useDailyMeeting } from "../../context/DailyMeetingContext";
 import { Smile, Pin, PinOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useChat } from '../../context/ChatContext';
 import { webinarApi } from '../../lib/api';
 
 interface Message {
@@ -66,6 +67,7 @@ export interface ChatBoxRef {
 export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
   ({ isVisible = true, onUnreadCountChange, isAdmin = false, webinarId, onPinChange, webinar }, ref) => {
     const { dailyRoom, role } = useDailyMeeting();
+    const { pinMessage, unpinMessage } = useChat();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [unreadCount, setUnreadCount] = useState(0);
@@ -439,17 +441,11 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
 
     // Pin/unpin message function - only for Admin and Guest
     // Admin and Guest can pin/unpin ANY message (not restricted to their own messages)
-    const handlePinMessage = async (messageId: string, isCurrentlyPinned: boolean) => {
-      if (!dailyRoom || !webinarId) return;
+    const handlePinMessage = (messageId: string, isCurrentlyPinned: boolean) => {
+      if (!dailyRoom) return;
       // Only allow pinning for Admin and Guest, not regular Users
       // No ownership check - admin/guest can pin any message
       if (!isAdmin && role !== "Guest") return;
-
-      // Only allow pinning messages that have been saved to the database (have ObjectId, not UUID)
-      if (!isValidObjectId(messageId)) {
-        console.warn('Cannot pin message: Message must be saved to database first');
-        return;
-      }
 
       const message = messages.find(msg => msg.id === messageId);
       if (!message) return;
@@ -463,57 +459,20 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
           : msg
       ));
 
-      // Broadcast event immediately (don't wait for backend)
+      // Use ChatContext to pin/unpin (uses Daily.co messages only)
       if (newPinnedStatus) {
-        // Pin
-        (dailyRoom as any).sendAppMessage({
-          message: {
-            type: "pin-message",
-            messageId,
-            isPinned: true,
-            messageText: message.text,
-            senderName: message.senderName,
-            createdAt: new Date(message.timestamp).toISOString(),
-          }
-        }, '*');
+        pinMessage(
+          messageId,
+          message.text,
+          message.senderName,
+          new Date(message.timestamp).toISOString()
+        );
       } else {
-        // Unpin
-        (dailyRoom as any).sendAppMessage({
-          message: {
-            type: "pin-message",
-            messageId,
-            isPinned: false,
-          }
-        }, '*');
+        unpinMessage(messageId);
       }
 
-      // Notify parent to refresh pinned messages in left sidebar
+      // Notify parent (for backward compatibility)
       onPinChange?.();
-
-      // Send API request in background (don't wait for response)
-      if (newPinnedStatus) {
-        webinarApi.pinMessage(webinarId, messageId).catch(error => {
-          console.error('Error pinning message:', error);
-          // Revert on error
-          setMessages(prev => prev.map(msg =>
-            msg.id === messageId
-              ? { ...msg, isPinned: isCurrentlyPinned }
-              : msg
-          ));
-          onPinChange?.();
-        });
-      } else {
-        webinarApi.unpinMessage(webinarId, messageId).catch(error => {
-          console.error('Error unpinning message:', error);
-          // Revert on error
-          setMessages(prev => prev.map(msg =>
-            msg.id === messageId
-              ? { ...msg, isPinned: isCurrentlyPinned }
-              : msg
-          ));
-          onPinChange?.();
-        });
-      }
     };
 
     const [activeCtas, setActiveCtas] = useState<Array<{ index: number; label: string; link: string }>>([]);
@@ -670,8 +629,8 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
                       : 'bg-white text-black rounded-bl-none border border-gray-200'
                       }`}
                   >
-                    {/* Pin button - visible for Admin and Guest on ALL messages (own and others), only for messages saved to database */}
-                    {(isAdmin || role === "Guest") && isValidObjectId(msg.id) && (
+                    {/* Pin button - visible for Admin and Guest on ALL messages (own and others) */}
+                    {(isAdmin || role === "Guest") && (
                       <button
                         onClick={() => handlePinMessage(msg.id, msg.isPinned || false)}
                         className={`absolute -top-3 -right-3 p-2.5 rounded-full transition-all opacity-0 group-hover:opacity-100 ${msg.isPinned

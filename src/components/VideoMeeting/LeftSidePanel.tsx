@@ -4,59 +4,26 @@ import { useState, useEffect } from "react";
 import { useDailyMeeting } from "@/context/DailyMeetingContext";
 import { webinarApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useChat } from "@/context/ChatContext";
 import type { Webinar } from "@/types";
-
-interface PinnedMessage {
-  id: string;
-  text: string;
-  senderName?: string;
-  createdAt?: string;
-}
 
 interface LeftSidePanelProps {
   webinar: Webinar | null;
   webinarId?: string;
-  refreshTrigger?: number; // Trigger to refresh pinned messages
-  onPinChange?: () => void; // Callback when a message is pinned/unpinned
-  onUnpinMessage?: (messageId: string) => void; // Callback to update chat box when unpinning
+  refreshTrigger?: number; // Trigger to refresh pinned messages (kept for backward compatibility, but not needed with context)
+  onPinChange?: () => void; // Callback when a message is pinned/unpinned (kept for backward compatibility)
+  onUnpinMessage?: (messageId: string) => void; // Callback to update chat box when unpinning (kept for backward compatibility)
 }
 
 export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId, refreshTrigger, onPinChange, onUnpinMessage }) => {
   const ctas = webinar?.ctas || [];
-  const [pinnedMessages, setPinnedMessages] = useState<PinnedMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // Use ChatContext for pinned messages
+  const { pinnedMessages, isLoadingPinnedMessages, unpinMessage } = useChat();
   // Initialize activeCtaIndices from webinar prop if available, otherwise empty array
   const [activeCtaIndices, setActiveCtaIndices] = useState<number[]>(webinar?.activeCtaIndices || []);
   const { dailyRoom, role } = useDailyMeeting();
   const userInfo = useAuth();
   const isAdminOrGuest = userInfo?.user?.role === "admin" || role === "Guest" || role === "Admin";
-
-  // Fetch pinned messages
-  const fetchPinnedMessages = async () => {
-    if (!webinarId) return;
-    try {
-      setIsLoading(true);
-      const response = await webinarApi.getPinnedMessages(webinarId);
-      const pinned: PinnedMessage[] = response.data.pinnedMessages.map((msg: any) => ({
-        id: msg._id,
-        text: msg.text,
-        senderName: msg.senderName,
-        createdAt: msg.createdAt,
-      }));
-      setPinnedMessages(pinned);
-    } catch (error) {
-      console.error('Error fetching pinned messages:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Load pinned messages on mount and when webinarId or refreshTrigger changes
-  useEffect(() => {
-    if (webinarId) {
-      fetchPinnedMessages();
-    }
-  }, [webinarId, refreshTrigger]);
 
   // Fetch active CTAs from backend
   const fetchActiveCtas = async () => {
@@ -76,41 +43,12 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
     }
   }, [webinarId]);
 
-  // Listen for pin/unpin events and CTA activation from Daily.co
+  // Listen for CTA activation/cancellation from Daily.co
+  // (Pin/unpin events are handled by ChatContext)
   useEffect(() => {
     if (!dailyRoom) return;
 
     const handleAppMessage = (event: any) => {
-      // Handle clear-chat event - clear all pinned messages
-      if (event.data.message?.type === "clear-chat") {
-        setPinnedMessages([]);
-        return;
-      }
-
-      // Handle pin/unpin events
-      if (event.data.message?.type === "pin-message") {
-        const { messageId, isPinned, messageText, senderName, createdAt } = event.data.message;
-        if (isPinned) {
-          // Message was pinned - add immediately to the list
-          const newPinnedMessage: PinnedMessage = {
-            id: messageId,
-            text: messageText,
-            senderName: senderName,
-            createdAt: createdAt,
-          };
-          setPinnedMessages(prev => {
-            // Check if message already exists to avoid duplicates
-            if (prev.some(msg => msg.id === messageId)) {
-              return prev;
-            }
-            return [newPinnedMessage, ...prev];
-          });
-        } else {
-          // Message was unpinned - remove from list
-          setPinnedMessages(prev => prev.filter(msg => msg.id !== messageId));
-        }
-      }
-
       // Handle CTA activation/cancellation
       if (event.data.message?.type === "cta-activate") {
         const { ctaIndex } = event.data.message;
@@ -135,32 +73,17 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
   }, [dailyRoom]);
 
   // Handle unpin
-  const handleUnpin = async (messageId: string) => {
-    if (!webinarId || !dailyRoom) return;
+  const handleUnpin = (messageId: string) => {
+    if (!dailyRoom) return;
 
-    try {
-      await webinarApi.unpinMessage(webinarId, messageId);
+    // Use context's unpinMessage (uses Daily.co messages only)
+    unpinMessage(messageId);
 
-      // Broadcast unpin event
-      (dailyRoom as any).sendAppMessage({
-        message: {
-          type: "pin-message",
-          messageId,
-          isPinned: false,
-        }
-      }, '*');
+    // Notify parent to update chat panel (for backward compatibility)
+    onPinChange?.();
 
-      // Update local state
-      setPinnedMessages(prev => prev.filter(msg => msg.id !== messageId));
-
-      // Notify parent to update chat panel
-      onPinChange?.();
-
-      // Directly update chat box
-      onUnpinMessage?.(messageId);
-    } catch (error) {
-      console.error('Error unpinning message:', error);
-    }
+    // Directly update chat box (for backward compatibility)
+    onUnpinMessage?.(messageId);
   };
 
   // Handle CTA activation/cancellation (toggle) - with optimistic updates
@@ -288,7 +211,7 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
           )}
         </div>
         <div className="space-y-3 mt-2">
-          {isLoading ? (
+          {isLoadingPinnedMessages ? (
             <p className="text-sm text-gray-500 text-center py-8">Loading pinned messages...</p>
           ) : pinnedMessages.length === 0 ? (
             <div className="text-center py-8">

@@ -459,16 +459,17 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
           : msg
       ));
 
-      // Use ChatContext to pin/unpin (uses Daily.co messages only)
+      // Use ChatContext to pin/unpin (uses Daily.co messages and saves to database in background)
       if (newPinnedStatus) {
         pinMessage(
+          webinarId!,
           messageId,
           message.text,
           message.senderName,
           new Date(message.timestamp).toISOString()
         );
       } else {
-        unpinMessage(messageId);
+        unpinMessage(webinarId!, messageId);
       }
 
       // Notify parent (for backward compatibility)

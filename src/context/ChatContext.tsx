@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useDailyMeeting } from './DailyMeetingContext';
+import { webinarApi } from '@/lib/api';
 
 interface PinnedMessage {
     id: string;
@@ -11,8 +12,8 @@ interface PinnedMessage {
 interface ChatContextType {
     pinnedMessages: PinnedMessage[];
     isLoadingPinnedMessages: boolean;
-    pinMessage: (messageId: string, messageText: string, senderName: string, createdAt: string) => void;
-    unpinMessage: (messageId: string) => void;
+    pinMessage: (webinarId: string, messageId: string, messageText: string, senderName: string, createdAt: string) => void;
+    unpinMessage: (webinarId: string, messageId: string) => void;
     clearPinnedMessages: () => void;
 }
 
@@ -33,11 +34,32 @@ interface ChatProviderProps {
 
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children, webinarId }) => {
     const [pinnedMessages, setPinnedMessages] = useState<PinnedMessage[]>([]);
-    const [isLoadingPinnedMessages] = useState(false);
+    const [isLoadingPinnedMessages, setIsLoadingPinnedMessages] = useState(false);
     const { dailyRoom } = useDailyMeeting();
 
-    // Pin a message - only broadcasts via Daily.co, no database
+    // Load pinned messages from database on mount
+    const loadPinnedMessages = useCallback(async () => {
+        if (!webinarId) return;
+        try {
+            setIsLoadingPinnedMessages(true);
+            const response = await webinarApi.getPinnedMessages(webinarId);
+            const pinned: PinnedMessage[] = response.data.pinnedMessages.map((msg: any) => ({
+                id: msg._id,
+                text: msg.text,
+                senderName: msg.senderName,
+                createdAt: msg.createdAt,
+            }));
+            setPinnedMessages(pinned);
+        } catch (error) {
+            console.error('Error loading pinned messages from database:', error);
+        } finally {
+            setIsLoadingPinnedMessages(false);
+        }
+    }, [webinarId]);
+
+    // Pin a message - broadcasts via Daily.co and saves to database in background
     const pinMessage = useCallback((
+        webinarId: string,
         messageId: string,
         messageText: string,
         senderName: string,
@@ -62,7 +84,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children, webinarId 
             return [newPinnedMessage, ...prev];
         });
 
-        // Broadcast pin event via Daily.co
+        // Broadcast pin event via Daily.co (for real-time sync)
         (dailyRoom as any).sendAppMessage({
             message: {
                 type: "pin-message",
@@ -73,16 +95,24 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children, webinarId 
                 createdAt,
             }
         }, '*');
+
+        // Save to database in background (don't wait for response)
+        if (webinarId) {
+            webinarApi.pinMessage(webinarId, messageId).catch(error => {
+                console.error('Error saving pin status to database:', error);
+                // Optionally revert on error, but usually we keep the optimistic update
+            });
+        }
     }, [dailyRoom]);
 
-    // Unpin a message - only broadcasts via Daily.co, no database
-    const unpinMessage = useCallback((messageId: string) => {
+    // Unpin a message - broadcasts via Daily.co and saves to database in background
+    const unpinMessage = useCallback((webinarId: string, messageId: string) => {
         if (!dailyRoom) return;
 
         // Remove from local state immediately (optimistic update)
         setPinnedMessages(prev => prev.filter(msg => msg.id !== messageId));
 
-        // Broadcast unpin event via Daily.co
+        // Broadcast unpin event via Daily.co (for real-time sync)
         (dailyRoom as any).sendAppMessage({
             message: {
                 type: "pin-message",
@@ -90,6 +120,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children, webinarId 
                 isPinned: false,
             }
         }, '*');
+
+        // Save to database in background (don't wait for response)
+        if (webinarId) {
+            webinarApi.unpinMessage(webinarId, messageId).catch(error => {
+                console.error('Error saving unpin status to database:', error);
+                // Optionally revert on error, but usually we keep the optimistic update
+            });
+        }
     }, [dailyRoom]);
 
     // Clear all pinned messages
@@ -142,10 +180,14 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children, webinarId 
         };
     }, [dailyRoom, clearPinnedMessages]);
 
-    // Clear pinned messages when webinarId changes
+    // Load pinned messages from database on mount and when webinarId changes
     useEffect(() => {
-        setPinnedMessages([]);
-    }, [webinarId]);
+        if (webinarId) {
+            loadPinnedMessages();
+        } else {
+            setPinnedMessages([]);
+        }
+    }, [webinarId, loadPinnedMessages]);
 
     const value: ChatContextType = {
         pinnedMessages,

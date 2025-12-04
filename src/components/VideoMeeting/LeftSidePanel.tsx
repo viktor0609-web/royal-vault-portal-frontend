@@ -74,10 +74,10 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
 
   // Handle unpin
   const handleUnpin = (messageId: string) => {
-    if (!dailyRoom) return;
+    if (!dailyRoom || !webinarId) return;
 
-    // Use context's unpinMessage (uses Daily.co messages only)
-    unpinMessage(messageId);
+    // Use context's unpinMessage (uses Daily.co messages and saves to database in background)
+    unpinMessage(webinarId, messageId);
 
     // Notify parent to update chat panel (for backward compatibility)
     onPinChange?.();

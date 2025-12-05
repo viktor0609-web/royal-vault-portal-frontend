@@ -30,7 +30,7 @@ const linkifyText = (text: string, isOwnMessage: boolean = false) => {
           target="_blank"
           rel="noopener noreferrer"
           className={`underline ${isOwnMessage
-            ? 'text-blue-100 hover:text-white'
+            ? 'text-blue-600 hover:text-blue-800'
             : 'text-blue-600 hover:text-blue-800'
             }`}
         >
@@ -626,7 +626,7 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
                   {/* Message bubble */}
                   <div
                     className={`rounded-lg px-2.5 py-1.5 shadow-sm relative group ${isOwnMessage
-                      ? 'bg-blue-500 text-white rounded-br-none'
+                      ? 'bg-gray-50 text-gray-800 rounded-br-none border border-gray-200'
                       : 'bg-white text-black rounded-bl-none border border-gray-200'
                       }`}
                   >
@@ -662,7 +662,7 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
                     </p>
 
                     {/* Timestamp at bottom right of bubble */}
-                    <div className={`text-[10px] mt-1 text-right ${isOwnMessage ? 'text-blue-100' : 'text-gray-600'
+                    <div className={`text-[10px] mt-1 text-right ${isOwnMessage ? 'text-gray-600' : 'text-gray-600'
                       }`}>
                       {new Date(msg.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',

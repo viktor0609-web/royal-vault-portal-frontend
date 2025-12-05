@@ -626,7 +626,7 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
                   {/* Message bubble */}
                   <div
                     className={`rounded-lg px-2.5 py-1.5 shadow-sm relative group ${isOwnMessage
-                      ? 'bg-gray-50 text-gray-800 rounded-br-none border border-gray-200'
+                      ? 'bg-white text-gray-800 rounded-br-none border border-gray-200'
                       : 'bg-white text-black rounded-bl-none border border-gray-200'
                       }`}
                   >

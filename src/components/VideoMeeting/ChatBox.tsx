@@ -574,7 +574,7 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
 
         {/* Active CTA Buttons - Sticky at top, full width, only for regular users */}
         {!isAdminOrGuest && activeCtas.length > 0 && (
-          <div className="sticky top-0 z-10 flex flex-col gap-2 px-0 py-2 bg-transparent">
+          <div className="sticky top-0 z-10 flex flex-col gap-1.5 px-2 py-1.5 bg-transparent">
             {activeCtas.map((cta) => (
               <button
                 key={cta.index}
@@ -583,7 +583,7 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
                     window.open(cta.link, '_blank', 'noopener,noreferrer');
                   }
                 }}
-                className="bg-red-500 text-white px-3 py-2.5 rounded-none hover:bg-red-600 transition-colors font-medium text-sm text-center w-full"
+                className="bg-red-500 text-white px-2.5 py-1.5 rounded-md hover:bg-red-600 transition-colors font-medium text-xs text-center w-full shadow-sm"
               >
                 {cta.label}
               </button>

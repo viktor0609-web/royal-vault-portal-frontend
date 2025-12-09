@@ -21,6 +21,8 @@ export const API_ENDPOINTS = {
   DEALS: {
     BASE: "/api/deals",
     FILTER: "/api/deals/filter",
+    STAR: "/api/deals/star",
+    STARRED: "/api/deals/starred",
   },
   COURSES: {
     GROUPS: "/api/courses/groups",

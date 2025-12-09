@@ -270,7 +270,7 @@ export function DealsSection() {
       const options = filterOptions[config.key] || [];
       return (
         <div key={config.key}>
-          <div className="text-royal-gray mb-1 font-bold">{config.label}</div>
+          <div className="text-royal-gray mb-1 text-xs font-bold">{config.label}</div>
           <Select
             value={
               selectedFilters[config.key as keyof typeof selectedFilters] || "all"
@@ -279,7 +279,7 @@ export function DealsSection() {
               handleFilterChange(config.key, value === "all" ? null : value)
             }
           >
-            <SelectTrigger className="border-royal-light-gray">
+            <SelectTrigger className="border-royal-light-gray h-9 text-xs">
               <SelectValue placeholder={config.placeholder} />
             </SelectTrigger>
             <SelectContent>
@@ -501,8 +501,8 @@ export function DealsSection() {
       </div>
 
       {/* Desktop Filters */}
-      <div className="hidden min-[800px]:block bg-white p-2 sm:p-3 rounded-lg border border-royal-light-gray mb-6 sm:mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-4">
+      <div className="hidden min-[800px]:block bg-white p-2 rounded-lg border border-royal-light-gray mb-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2">
           {renderFilters()}
         </div>
       </div>

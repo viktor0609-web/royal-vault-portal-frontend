@@ -56,6 +56,8 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
     image: "",
     source: "",
     displayOnPublicPage: false,
+    isRoyalVetted: false,
+    currentOffering: "" as "Open" | "Closed" | "",
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -123,6 +125,8 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         image: editingDeal.image || "",
         source: editingDeal.source?._id || "",
         displayOnPublicPage: (editingDeal as any).displayOnPublicPage || false,
+        isRoyalVetted: editingDeal.isRoyalVetted || false,
+        currentOffering: editingDeal.currentOffering || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -149,6 +153,8 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         image: "",
         source: "",
         displayOnPublicPage: false,
+        isRoyalVetted: false,
+        currentOffering: "",
       };
       setFormData(emptyData);
       setInitialFormData(emptyData);
@@ -243,6 +249,8 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         requirementIds: formData.requirements,
         sourceId: formData.source,
         displayOnPublicPage: formData.displayOnPublicPage,
+        isRoyalVetted: formData.isRoyalVetted,
+        currentOffering: formData.currentOffering || undefined,
         createdBy: "user_id_here", // TODO: Get from auth context
       };
 
@@ -506,8 +514,55 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
               ))}
             </div>
 
+            {/* Royal Vetted and Current Offering */}
+            <div className="space-y-4 border-t border-gray-200 pt-4">
+              <h3 className="text-sm font-semibold text-royal-dark-gray mb-4 uppercase tracking-wide">Deal Status</h3>
+              
+              {/* Royal Vetted Checkbox */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isRoyalVetted"
+                  checked={formData.isRoyalVetted}
+                  onCheckedChange={(checked) => {
+                    setFormData(prev => ({ ...prev, isRoyalVetted: checked === true }));
+                  }}
+                />
+                <Label
+                  htmlFor="isRoyalVetted"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Royal Vetted Deal
+                </Label>
+              </div>
+
+              {/* Current Offering Select */}
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold text-royal-dark-gray">
+                  Current Offering Status
+                </Label>
+                <Select
+                  value={formData.currentOffering || undefined}
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, currentOffering: value as "Open" | "Closed" | "" }));
+                  }}
+                >
+                  <SelectTrigger className="h-11 text-base">
+                    <SelectValue placeholder="Select offering status (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="Open">Open</SelectItem>
+                    <SelectItem value="Closed">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-500">
+                  Mark whether this deal is currently open or closed for investment
+                </p>
+              </div>
+            </div>
+
             {/* Display on Public Pages */}
-            <div className="flex items-center space-x-2 pt-2">
+            <div className="flex items-center space-x-2 pt-2 border-t border-gray-200">
               <Checkbox
                 id="displayOnPublicPage"
                 checked={formData.displayOnPublicPage}

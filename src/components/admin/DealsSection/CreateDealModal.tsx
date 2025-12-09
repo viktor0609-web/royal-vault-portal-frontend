@@ -541,16 +541,19 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                   Current Offering Status
                 </Label>
                 <Select
-                  value={formData.currentOffering || undefined}
+                  value={formData.currentOffering || "none"}
                   onValueChange={(value) => {
-                    setFormData(prev => ({ ...prev, currentOffering: value as "Open" | "Closed" | "" }));
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      currentOffering: value === "none" ? "" : (value as "Open" | "Closed")
+                    }));
                   }}
                 >
                   <SelectTrigger className="h-11 text-base">
                     <SelectValue placeholder="Select offering status (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="Open">Open</SelectItem>
                     <SelectItem value="Closed">Closed</SelectItem>
                   </SelectContent>

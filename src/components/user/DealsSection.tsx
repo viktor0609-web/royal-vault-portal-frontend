@@ -300,36 +300,17 @@ export function DealsSection() {
             title={isStarred ? "Remove from favourites" : "Add to favourites"}
           >
             <Star
-              className={`h-4 w-4 transition-all ${
-                isStarred ? "fill-yellow-400 text-yellow-400" : "text-white"
-              }`}
+              className={`h-4 w-4 transition-all ${isStarred ? "fill-yellow-400 text-yellow-400" : "text-white"
+                }`}
             />
           </button>
         )}
 
-        {/* Royal Vetted Badge */}
-        {deal.isRoyalVetted && (
+        {/* Current Offering Badge - Only show "Open for Investment", placed in top-left where Royal Vetted badge was */}
+        {hasCurrentOffering && deal.currentOffering === "Open" && (
           <div className="absolute top-2 left-2 z-20">
-            <span className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg">
-              Royal Vetted
-            </span>
-          </div>
-        )}
-
-        {/* Current Offering Badge */}
-        {hasCurrentOffering && (
-          <div
-            className="absolute top-2 z-20"
-            style={{ right: hasStarButton ? "3rem" : "0.5rem" }}
-          >
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg ${
-                deal.currentOffering === "Open"
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-500 text-white"
-              }`}
-            >
-              {deal.currentOffering === "Open" ? "Open for Investment" : "Closed"}
+            <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-lg bg-green-500 text-white">
+              Open for Investment
             </span>
           </div>
         )}

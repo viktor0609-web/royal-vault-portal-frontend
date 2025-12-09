@@ -316,7 +316,7 @@ export function DealsSection() {
         target="_blank"
         key={deal._id}
         to={deal.url || "#"}
-        className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block relative group"
+        className="bg-white rounded-lg border-2 border-gray-300 hover:border-gray-400 hover:shadow-lg transition-all duration-200 cursor-pointer block relative group overflow-hidden"
       >
         {/* Star button - Bigger for easier clicking */}
         {hasStarButton && (
@@ -575,7 +575,7 @@ export function DealsSection() {
 
               {/* Deals Grid */}
               {getTabCount() > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {getDealsForTab().map((deal) => renderDealCard(deal))}
                 </div>
               ) : (

@@ -41,5 +41,20 @@ export const dealService = {
     if (publicOnly) params.publicOnly = "true";
     return api.get<{ message: string; deals: Deal[] }>(API_ENDPOINTS.DEALS.FILTER, { params });
   },
+
+  // Get user's starred deals
+  getStarredDeals: (fields: FieldSelection = "basic") => {
+    const params = new URLSearchParams();
+    params.append("fields", fields);
+    return api.get<{ message: string; deals: Deal[] }>(`${API_ENDPOINTS.DEALS.STARRED}?${params.toString()}`);
+  },
+
+  // Star a deal
+  starDeal: (dealId: string) =>
+    api.post<{ message: string; data: Deal }>(`${API_ENDPOINTS.DEALS.STAR}/${dealId}`),
+
+  // Unstar a deal
+  unstarDeal: (dealId: string) =>
+    api.delete<{ message: string }>(`${API_ENDPOINTS.DEALS.STAR}/${dealId}`),
 };
 

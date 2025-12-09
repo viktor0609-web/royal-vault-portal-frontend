@@ -42,6 +42,8 @@ export interface Deal {
   createdAt?: string;
   updatedAt: string;
   displayOnPublicPage?: boolean;
+  isRoyalVetted?: boolean;
+  currentOffering?: "Open" | "Closed";
 }
 
 export interface FilterOptions {

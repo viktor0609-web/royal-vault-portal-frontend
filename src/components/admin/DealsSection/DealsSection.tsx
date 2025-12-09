@@ -198,8 +198,6 @@ export function DealsSection() {
                                     <TableHead className="hidden 2xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray py-2 px-2">Strategies</TableHead>
                                     <TableHead className="hidden 2xl:table-cell min-w-[150px] font-semibold text-royal-dark-gray py-2 px-2">Requirements</TableHead>
                                     <TableHead className="hidden md:table-cell min-w-[100px] font-semibold text-royal-dark-gray py-2 px-2">URL</TableHead>
-                                    <TableHead className="min-w-[120px] font-semibold text-royal-dark-gray py-2 px-2">Royal Vetted</TableHead>
-                                    <TableHead className="min-w-[120px] font-semibold text-royal-dark-gray py-2 px-2">Offering</TableHead>
                                     <TableHead className="min-w-[100px] font-semibold text-royal-dark-gray py-2 px-2">Display</TableHead>
                                     <TableHead className="sticky right-0 bg-gray-50 min-w-[100px] text-right font-semibold text-royal-dark-gray z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] py-2 px-2">Actions</TableHead>
                                 </TableRow>
@@ -207,13 +205,13 @@ export function DealsSection() {
                             <TableBody>
                                 {loading ? (
                                     <TableRow>
-                                        <TableCell colSpan={12} className="text-center py-12">
+                                        <TableCell colSpan={10} className="text-center py-12">
                                             <Loading message="Loading deals..." size="md" />
                                         </TableCell>
                                     </TableRow>
                                 ) : filteredDeals.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={12} className="text-center py-12">
+                                        <TableCell colSpan={10} className="text-center py-12">
                                             <div className="flex flex-col items-center gap-2">
                                                 <TagIcon className="h-12 w-12 text-gray-300" />
                                                 <p className="text-gray-500 font-medium">
@@ -248,30 +246,6 @@ export function DealsSection() {
                                                     </a>
                                                 ) : (
                                                     <span className="text-gray-400">N/A</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                {deal.isRoyalVetted ? (
-                                                    <span className="inline-flex items-center px-2.5 py-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full text-xs font-semibold uppercase tracking-wide">
-                                                        Royal Vetted
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-gray-400 text-sm">No</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                {deal.currentOffering ? (
-                                                    <span
-                                                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${
-                                                            deal.currentOffering === "Open"
-                                                                ? "bg-green-500 text-white"
-                                                                : "bg-gray-500 text-white"
-                                                        }`}
-                                                    >
-                                                        {deal.currentOffering}
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-gray-400 text-sm">N/A</span>
                                                 )}
                                             </TableCell>
                                             <TableCell>
@@ -371,26 +345,6 @@ export function DealsSection() {
                                             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white rounded-full border border-gray-200 shadow-sm">
                                                 <span className="text-xs font-medium text-gray-500">Source:</span>
                                                 <span className="text-xs font-semibold text-royal-gray">{deal.source?.name || 'N/A'}</span>
-                                            </div>
-                                            
-                                            {/* Status Badges */}
-                                            <div className="flex flex-wrap items-center gap-2 mt-2">
-                                                {deal.isRoyalVetted && (
-                                                    <span className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full text-xs font-semibold uppercase tracking-wide shadow-sm">
-                                                        Royal Vetted
-                                                    </span>
-                                                )}
-                                                {deal.currentOffering && (
-                                                    <span
-                                                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide shadow-sm ${
-                                                            deal.currentOffering === "Open"
-                                                                ? "bg-green-500 text-white"
-                                                                : "bg-gray-500 text-white"
-                                                        }`}
-                                                    >
-                                                        {deal.currentOffering === "Open" ? "Open for Investment" : "Closed"}
-                                                    </span>
-                                                )}
                                             </div>
                                         </div>
 

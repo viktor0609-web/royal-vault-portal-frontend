@@ -9,6 +9,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TagIcon, FilterIcon, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { optionsApi, dealApi } from "@/lib/api";
@@ -52,6 +53,7 @@ export function DealsSection() {
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [starredDealIds, setStarredDealIds] = useState<Set<string>>(new Set());
   const [loadingStarred, setLoadingStarred] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("royal");
   const [selectedFilters, setSelectedFilters] = useState({
     categories: null,
     subCategories: null,
@@ -217,24 +219,49 @@ export function DealsSection() {
   // Organize deals into sections
   const organizedDeals = useMemo(() => {
     const royalVetted = deals.filter((d) => d.isRoyalVetted);
-    const starred = deals.filter((d) => starredDealIds.has(d._id) && !d.isRoyalVetted);
+    const allStarred = deals.filter((d) => starredDealIds.has(d._id)); // All starred deals including Royal Vetted
     const regular = deals.filter((d) => !d.isRoyalVetted && !starredDealIds.has(d._id));
+    const allDeals = [...deals]; // All deals for "All" tab
 
-    // Sort: Within each group, starred deals come first
+    // Sort function: Royal Vetted first, then by source (Royal Sourced > Client Sourced), then starred deals, then by name
     const sortDeals = (dealsList: Deal[]) => {
       return [...dealsList].sort((a, b) => {
+        // First priority: Royal Vetted deals come first
+        if (a.isRoyalVetted && !b.isRoyalVetted) return -1;
+        if (!a.isRoyalVetted && b.isRoyalVetted) return 1;
+
+        // Second priority: Source priority (Royal Sourced > Client Sourced > others)
+        const getSourcePriority = (sourceName?: string) => {
+          if (sourceName === 'Royal Sourced') return 0;
+          if (sourceName === 'Client Sourced') return 1;
+          return 2;
+        };
+        const sourceA = a.source?.name || '';
+        const sourceB = b.source?.name || '';
+        const priorityA = getSourcePriority(sourceA);
+        const priorityB = getSourcePriority(sourceB);
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+
+        // Third priority: Starred deals come first within same source
         const aStarred = starredDealIds.has(a._id);
         const bStarred = starredDealIds.has(b._id);
         if (aStarred && !bStarred) return -1;
         if (!aStarred && bStarred) return 1;
-        return 0;
+
+        // Fourth priority: Sort by name
+        const nameA = (a.name || '').toLowerCase();
+        const nameB = (b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
       });
     };
 
     return {
       royalVetted: sortDeals(royalVetted),
-      starred: sortDeals(starred),
+      starred: sortDeals(allStarred),
       regular: sortDeals(regular),
+      all: sortDeals(allDeals),
     };
   }, [deals, starredDealIds]);
 
@@ -291,16 +318,16 @@ export function DealsSection() {
         to={deal.url || "#"}
         className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block relative group"
       >
-        {/* Star button */}
+        {/* Star button - Bigger for easier clicking */}
         {hasStarButton && (
           <button
             onClick={(e) => handleToggleStar(deal._id, e)}
-            className="absolute top-2 right-2 z-20 p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors backdrop-blur-sm"
+            className="absolute top-2 right-2 z-20 p-3 rounded-full bg-black/50 hover:bg-black/70 transition-colors backdrop-blur-sm"
             aria-label={isStarred ? "Unstar deal" : "Star deal"}
             title={isStarred ? "Remove from favourites" : "Add to favourites"}
           >
             <Star
-              className={`h-4 w-4 transition-all ${isStarred ? "fill-yellow-400 text-yellow-400" : "text-white"
+              className={`h-5 w-5 transition-all ${isStarred ? "fill-yellow-400 text-yellow-400" : "text-white"
                 }`}
             />
           </button>
@@ -373,17 +400,103 @@ export function DealsSection() {
     );
   };
 
+  // Determine which tab to show based on activeTab
+  const getDealsForTab = () => {
+    switch (activeTab) {
+      case "royal":
+        return organizedDeals.royalVetted;
+      case "favourites":
+        return organizedDeals.starred;
+      case "all":
+      default:
+        return organizedDeals.all;
+    }
+  };
+
+  const getTabTitle = () => {
+    switch (activeTab) {
+      case "royal":
+        return "Royal Vetted Deals";
+      case "favourites":
+        return "My Favourites";
+      case "all":
+      default:
+        return "All Deals";
+    }
+  };
+
+  const getTabCount = () => {
+    switch (activeTab) {
+      case "royal":
+        return organizedDeals.royalVetted.length;
+      case "favourites":
+        return organizedDeals.starred.length;
+      case "all":
+      default:
+        return organizedDeals.all.length;
+    }
+  };
+
   return (
     <div className="flex flex-col h-full p-2 sm:p-4">
-      <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-        <TagIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
-        <div>
-          <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">
-            DEALS
-          </h1>
-          <p className="text-xs sm:text-base text-royal-gray">
-            Explore our network of asset backed businesses.
-          </p>
+      <div className="bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+        <div className="flex items-start sm:items-center justify-between gap-2 sm:gap-4 flex-wrap">
+          <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+            <TagIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">
+                DEALS
+              </h1>
+              <p className="text-xs sm:text-base text-royal-gray">
+                Explore our network of asset backed businesses.
+              </p>
+            </div>
+          </div>
+
+          {/* Compact Tabs for Navigation - Positioned on the right */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+              <TabsList className="h-auto p-0.5 bg-gray-100 inline-flex">
+                <TabsTrigger
+                  value="royal"
+                  className="text-xs px-2 sm:px-3 py-1 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  disabled={organizedDeals.royalVetted.length === 0}
+                >
+                  Royal
+                  {organizedDeals.royalVetted.length > 0 && (
+                    <span className="ml-1 px-1 py-0.5 bg-primary/10 text-primary rounded text-xs font-semibold">
+                      {organizedDeals.royalVetted.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+                {user && (
+                  <TabsTrigger
+                    value="favourites"
+                    className="text-xs px-2 sm:px-3 py-1 data-[state=active]:bg-white data-[state=active]:shadow-sm flex items-center gap-1"
+                    disabled={organizedDeals.starred.length === 0}
+                  >
+                    <Star className="h-3 w-3" />
+                    {organizedDeals.starred.length > 0 && (
+                      <span className="px-1 py-0.5 bg-primary/10 text-primary rounded text-xs font-semibold">
+                        {organizedDeals.starred.length}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                )}
+                <TabsTrigger
+                  value="all"
+                  className="text-xs px-2 sm:px-3 py-1 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
+                  All
+                  {organizedDeals.all.length > 0 && (
+                    <span className="ml-1 px-1 py-0.5 bg-primary/10 text-primary rounded text-xs font-semibold">
+                      {organizedDeals.all.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </div>
       </div>
 
@@ -451,61 +564,32 @@ export function DealsSection() {
               <Loading message="Loading deals..." />
             </div>
           ) : (
-            <>
-              {/* Royal Vetted Deals Section */}
-              {organizedDeals.royalVetted.length > 0 && (
-                <div className="mb-8 sm:mb-12">
-                  <h2 className="text-xl sm:text-2xl font-bold text-royal-dark-gray mb-4 sm:mb-6">
-                    Royal Vetted Deals
-                    <span className="ml-2 text-sm sm:text-base font-normal text-royal-gray">
-                      ({organizedDeals.royalVetted.length})
-                    </span>
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-                    {organizedDeals.royalVetted.map((deal) => renderDealCard(deal))}
-                  </div>
-                </div>
-              )}
+            <div>
+              {/* Section Title */}
+              <h2 className="text-xl sm:text-2xl font-bold text-royal-dark-gray mb-4 sm:mb-6">
+                {getTabTitle()}
+                <span className="ml-2 text-sm sm:text-base font-normal text-royal-gray">
+                  ({getTabCount()})
+                </span>
+              </h2>
 
-              {/* My Favourites Section */}
-              {user && organizedDeals.starred.length > 0 && (
-                <div className="mb-8 sm:mb-12">
-                  <h2 className="text-xl sm:text-2xl font-bold text-royal-dark-gray mb-4 sm:mb-6">
-                    My Favourites
-                    <span className="ml-2 text-sm sm:text-base font-normal text-royal-gray">
-                      ({organizedDeals.starred.length})
-                    </span>
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-                    {organizedDeals.starred.map((deal) => renderDealCard(deal))}
-                  </div>
+              {/* Deals Grid */}
+              {getTabCount() > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                  {getDealsForTab().map((deal) => renderDealCard(deal))}
                 </div>
-              )}
-
-              {/* Deal Network Section */}
-              {organizedDeals.regular.length > 0 && (
-                <div className="mb-8 sm:mb-12">
-                  <h2 className="text-xl sm:text-2xl font-bold text-royal-dark-gray mb-4 sm:mb-6">
-                    Deal Network
-                    <span className="ml-2 text-sm sm:text-base font-normal text-royal-gray">
-                      ({organizedDeals.regular.length})
-                    </span>
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-                    {organizedDeals.regular.map((deal) => renderDealCard(deal))}
-                  </div>
-                </div>
-              )}
-
-              {/* Empty State */}
-              {deals.length === 0 && (
-                <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
+              ) : (
+                <div className="flex justify-center items-center h-24 sm:h-32">
                   <div className="text-sm sm:text-base text-royal-gray">
-                    No deals found matching your filters.
+                    {activeTab === "favourites"
+                      ? "No favourite deals yet. Star deals to add them here."
+                      : activeTab === "royal"
+                        ? "No Royal Vetted deals available."
+                        : "No deals found matching your filters."}
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
 

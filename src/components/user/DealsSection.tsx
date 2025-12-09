@@ -9,7 +9,8 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { TagIcon, FilterIcon } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { FilterIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { optionsApi, dealApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -21,7 +22,6 @@ const filterConfig = [
   { key: "types", label: "Types", placeholder: "Types" },
   { key: "strategies", label: "Strategies", placeholder: "Strategies" },
   { key: "requirements", label: "Requirements", placeholder: "Requirements" },
-  { key: "sources", label: "Sources", placeholder: "Sources" },
 ];
 
 interface FilterOptions {
@@ -52,6 +52,7 @@ export function DealsSection() {
   const { user } = useAuth();
   const [showSalesModal, setShowSalesModal] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [activeSourceTab, setActiveSourceTab] = useState<string>("all");
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     categories: [],
     subCategories: [],
@@ -162,6 +163,12 @@ export function DealsSection() {
     setSelectedFilters({ ...selectedFilters, [filterType]: value });
   };
 
+  // Handle source tab change
+  const handleSourceTabChange = (value: string) => {
+    setActiveSourceTab(value);
+    setSelectedFilters({ ...selectedFilters, sources: value === "all" ? null : value });
+  };
+
   const formatArrayData = (data: any) => {
     if (!data) return "";
     if (Array.isArray(data)) return data.map((item) => item?.name).join(", ");
@@ -211,26 +218,35 @@ export function DealsSection() {
 
   return (
     <div className="flex flex-col h-full p-2 sm:p-4">
-      <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-        <TagIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
-        <div>
-          <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">
-            DEALS
-          </h1>
-          <p className="text-xs sm:text-base text-royal-gray">
-            Explore our network of asset backed businesses.
-          </p>
-        </div>
-      </div>
-
-      {/* Desktop Filters */}
+      {/* Desktop Filters with Source Tabs */}
       <div className="hidden min-[800px]:block bg-white p-2 sm:p-3 rounded-lg border border-royal-light-gray mb-6 sm:mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-4">
-          {renderFilters()}
-        </div>
+        <Tabs value={activeSourceTab} onValueChange={handleSourceTabChange} className="w-full">
+          <TabsList className="flex flex-wrap w-full mb-4 bg-royal-light-gray">
+            <TabsTrigger value="all" className="text-xs sm:text-sm">
+              All Sources
+            </TabsTrigger>
+            {filterOptions.sources.map((source) => (
+              <TabsTrigger key={source._id} value={source._id} className="text-xs sm:text-sm">
+                {source.name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <TabsContent value="all" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
+              {renderFilters()}
+            </div>
+          </TabsContent>
+          {filterOptions.sources.map((source) => (
+            <TabsContent key={source._id} value={source._id} className="mt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
+                {renderFilters()}
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
 
-      {/* Mobile Filters */}
+      {/* Mobile Filters with Source Tabs */}
       <div className="min-[800px]:hidden mb-3 sm:mb-4">
         <Dialog open={showFilterModal} onOpenChange={setShowFilterModal}>
           <DialogTrigger asChild>
@@ -249,7 +265,26 @@ export function DealsSection() {
                 Filter Deals
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-1 py-1">{renderFilters()}</div>
+            <Tabs value={activeSourceTab} onValueChange={handleSourceTabChange} className="w-full">
+              <TabsList className="flex flex-wrap w-full mb-4 bg-royal-light-gray">
+                <TabsTrigger value="all" className="text-xs sm:text-sm">
+                  All Sources
+                </TabsTrigger>
+                {filterOptions.sources.map((source) => (
+                  <TabsTrigger key={source._id} value={source._id} className="text-xs sm:text-sm">
+                    {source.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <TabsContent value="all" className="mt-0">
+                <div className="space-y-1 py-1">{renderFilters()}</div>
+              </TabsContent>
+              {filterOptions.sources.map((source) => (
+                <TabsContent key={source._id} value={source._id} className="mt-0">
+                  <div className="space-y-1 py-1">{renderFilters()}</div>
+                </TabsContent>
+              ))}
+            </Tabs>
             <div className="flex gap-1 pt-2 border-t">
               <Button
                 variant="outline"
@@ -268,6 +303,7 @@ export function DealsSection() {
                     requirements: null,
                     sources: null
                   });
+                  setActiveSourceTab("all");
                   setShowFilterModal(false);
                 }}
                 className="flex-1 text-xs sm:text-sm"

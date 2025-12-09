@@ -53,7 +53,7 @@ export function DealsSection() {
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [starredDealIds, setStarredDealIds] = useState<Set<string>>(new Set());
   const [loadingStarred, setLoadingStarred] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("royal");
+  const [activeTab, setActiveTab] = useState<string>("all");
   const [selectedFilters, setSelectedFilters] = useState({
     categories: null,
     subCategories: null,
@@ -458,6 +458,17 @@ export function DealsSection() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
               <TabsList className="h-auto p-0.5 bg-gray-100 inline-flex">
                 <TabsTrigger
+                  value="all"
+                  className="text-xs px-2 sm:px-3 py-1 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                >
+                  All
+                  {organizedDeals.all.length > 0 && (
+                    <span className="ml-1 px-1 py-0.5 bg-primary/10 text-primary rounded text-xs font-semibold">
+                      {organizedDeals.all.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger
                   value="royal"
                   className="text-xs px-2 sm:px-3 py-1 data-[state=active]:bg-white data-[state=active]:shadow-sm"
                   disabled={organizedDeals.royalVetted.length === 0}
@@ -483,17 +494,6 @@ export function DealsSection() {
                     )}
                   </TabsTrigger>
                 )}
-                <TabsTrigger
-                  value="all"
-                  className="text-xs px-2 sm:px-3 py-1 data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                >
-                  All
-                  {organizedDeals.all.length > 0 && (
-                    <span className="ml-1 px-1 py-0.5 bg-primary/10 text-primary rounded text-xs font-semibold">
-                      {organizedDeals.all.length}
-                    </span>
-                  )}
-                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

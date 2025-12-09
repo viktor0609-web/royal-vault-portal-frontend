@@ -12,6 +12,7 @@ import { CourseDetailSection } from "@/components/user/CourseDetailSection";
 import { CourseGroupDetailSection } from "@/components/user/CourseGroupDetailSection";
 import { ProfileSection } from "@/components/user/ProfileSection";
 import { WebinarRegistrationPage } from "@/components/user/WebinarRegistrationPage";
+import { WebinarReplayPage } from "@/components/user/WebinarReplayPage";
 
 // Admin Components
 import { RoyalVaultLayout as AdminLayout } from "@/components/admin/RoyalVaultLayout";
@@ -109,6 +110,10 @@ export function AppRoutes() {
         }
       />
       <Route path="/webinar-register" element={<WebinarRegistrationPage />} />
+      <Route
+        path="/replay/:slug"
+        element={<WebinarReplayPage />}
+      />
       <Route
         path="/profile"
         element={

@@ -486,15 +486,15 @@ export function WebinarsSection() {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-center bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-        <p className="text-xs sm:text-base text-royal-gray hidden sm:block">Filter by:</p>
-        <div className="flex gap-1 sm:gap-2 justify-center w-full sm:w-auto">
+      <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 items-center bg-white p-2 rounded-lg border border-royal-light-gray mb-2">
+        <p className="text-xs text-royal-gray hidden sm:block">Filter by:</p>
+        <div className="flex gap-1 justify-center w-full sm:w-auto">
           {filterTabs.map((tab, index) => (
             <Button
               key={index}
               variant={index == filterIndex ? "default" : "outline"}
               size="sm"
-              className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${index == filterIndex
+              className={`text-xs px-2 py-1 h-7 ${index == filterIndex
                 ? "bg-primary hover:bg-royal-blue-dark text-white"
                 : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
                 }`}

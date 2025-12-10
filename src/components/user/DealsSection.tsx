@@ -46,6 +46,8 @@ interface Deal {
   source: { _id: string; name: string };
   createdBy: { _id: string; name: string };
   updatedAt: string;
+  isRoyalVetted?: boolean;
+  currentOffering?: "Open" | "Closed" | null;
 }
 
 export function DealsSection() {
@@ -184,8 +186,16 @@ export function DealsSection() {
         }
 
         response = { data: { deals: savedDeals } };
+      } else if (activeSourceTab === "royal") {
+        // Fetch Royal Vetted deals
+        filterParams.isRoyalVetted = "true";
+        response = await dealApi.filterDeals(filterParams, "basic", true);
+        // Client-side safety filter: ensure only Royal Vetted deals are shown
+        if (response.data.deals) {
+          response.data.deals = response.data.deals.filter((deal: Deal) => (deal as Deal).isRoyalVetted === true);
+        }
       } else {
-        // Fetch regular deals
+        // Fetch regular deals (all deals)
         response =
           Object.keys(filterParams).length > 0
             ? await dealApi.filterDeals(filterParams, "basic", true)
@@ -227,11 +237,11 @@ export function DealsSection() {
   // Handle source tab change
   const handleSourceTabChange = (value: string) => {
     setActiveSourceTab(value);
-    if (value === "favourite") {
-      // Don't filter by source when on favourite tab
+    // Clear source filter for special tabs (favourite, royal, all)
+    if (value === "favourite" || value === "royal" || value === "all") {
       setSelectedFilters({ ...selectedFilters, sources: null });
     } else {
-      setSelectedFilters({ ...selectedFilters, sources: value === "all" ? null : value });
+      setSelectedFilters({ ...selectedFilters, sources: value });
     }
   };
 
@@ -340,20 +350,23 @@ export function DealsSection() {
         <Tabs value={activeSourceTab} onValueChange={handleSourceTabChange} className="w-full">
           <TabsList className="flex flex-wrap w-full mb-4 bg-royal-light-gray">
             <TabsTrigger value="all" className="text-xs sm:text-sm">
-              All Sources
+              All
+            </TabsTrigger>
+            <TabsTrigger value="royal" className="text-xs sm:text-sm">
+              Royal
             </TabsTrigger>
             {user && (
               <TabsTrigger value="favourite" className="text-xs sm:text-sm">
                 Favourite
               </TabsTrigger>
             )}
-            {filterOptions.sources.map((source) => (
-              <TabsTrigger key={source._id} value={source._id} className="text-xs sm:text-sm">
-                {source.name}
-              </TabsTrigger>
-            ))}
           </TabsList>
           <TabsContent value="all" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
+              {renderFilters()}
+            </div>
+          </TabsContent>
+          <TabsContent value="royal" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
               {renderFilters()}
             </div>
@@ -365,13 +378,6 @@ export function DealsSection() {
               </div>
             </TabsContent>
           )}
-          {filterOptions.sources.map((source) => (
-            <TabsContent key={source._id} value={source._id} className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
-                {renderFilters()}
-              </div>
-            </TabsContent>
-          ))}
         </Tabs>
       </div>
 
@@ -397,20 +403,21 @@ export function DealsSection() {
             <Tabs value={activeSourceTab} onValueChange={handleSourceTabChange} className="w-full">
               <TabsList className="flex flex-wrap w-full mb-4 bg-royal-light-gray">
                 <TabsTrigger value="all" className="text-xs sm:text-sm">
-                  All Sources
+                  All
+                </TabsTrigger>
+                <TabsTrigger value="royal" className="text-xs sm:text-sm">
+                  Royal
                 </TabsTrigger>
                 {user && (
                   <TabsTrigger value="favourite" className="text-xs sm:text-sm">
                     Favourite
                   </TabsTrigger>
                 )}
-                {filterOptions.sources.map((source) => (
-                  <TabsTrigger key={source._id} value={source._id} className="text-xs sm:text-sm">
-                    {source.name}
-                  </TabsTrigger>
-                ))}
               </TabsList>
               <TabsContent value="all" className="mt-0">
+                <div className="space-y-1 py-1">{renderFilters()}</div>
+              </TabsContent>
+              <TabsContent value="royal" className="mt-0">
                 <div className="space-y-1 py-1">{renderFilters()}</div>
               </TabsContent>
               {user && (
@@ -418,11 +425,6 @@ export function DealsSection() {
                   <div className="space-y-1 py-1">{renderFilters()}</div>
                 </TabsContent>
               )}
-              {filterOptions.sources.map((source) => (
-                <TabsContent key={source._id} value={source._id} className="mt-0">
-                  <div className="space-y-1 py-1">{renderFilters()}</div>
-                </TabsContent>
-              ))}
             </Tabs>
             <div className="flex gap-1 pt-2 border-t">
               <Button
@@ -442,8 +444,8 @@ export function DealsSection() {
                     requirements: null,
                     sources: null
                   });
-                  if (activeSourceTab === "favourite") {
-                    // Keep favourite tab active when clearing filters
+                  if (activeSourceTab === "favourite" || activeSourceTab === "royal") {
+                    // Keep favourite or royal tab active when clearing filters
                   } else {
                     setActiveSourceTab("all");
                   }
@@ -487,6 +489,17 @@ export function DealsSection() {
                           "linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(0,0,0,0.8))"
                       }}
                     />
+                    {/* Investment Status Tag - Top Left */}
+                    {(item as Deal).isRoyalVetted && (item as Deal).currentOffering && (
+                      <div className="absolute top-2 left-2 z-20">
+                        <span className={`inline-block px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide backdrop-blur-sm ${(item as Deal).currentOffering === "Open"
+                          ? "bg-green-500/90 text-white border-2 border-green-300"
+                          : "bg-red-500/90 text-white border-2 border-red-300"
+                          }`}>
+                          {(item as Deal).currentOffering === "Open" ? "Open for Investment" : "Closed for Investment"}
+                        </span>
+                      </div>
+                    )}
                     {/* Star Button */}
                     {user && (
                       <button
@@ -512,19 +525,30 @@ export function DealsSection() {
                   </div>
                   <div className="text-xs sm:text-sm text-royal-gray p-3 sm:p-6">
                     <div className="leading-relaxed mb-2">
-                      {item.source?.name == "Client Sourced" && (
-                        <span className="inline-block bg-yellow-100 border border-yellow-300 text-yellow-500 px-4 py-0.5 rounded-sm border-2">
+                      {/* Show Royal Vetted tag if deal is Royal Vetted */}
+                      {(item as Deal).isRoyalVetted ? (
+                        <span className="inline-block bg-purple-100 border border-purple-300 text-purple-600 px-4 py-0.5 rounded-sm border-2">
                           <span className="font-bold uppercase text-xs tracking-wide">
-                            {item.source?.name}
+                            Royal Vetted
                           </span>
                         </span>
-                      )}
-                      {item.source?.name == "Royal Sourced" && (
-                        <span className="inline-block bg-blue-100 border border-blue-300 text-blue-500 px-4 py-0.5 rounded-sm border-2">
-                          <span className="font-bold uppercase text-xs tracking-wide">
-                            {item.source?.name}
-                          </span>
-                        </span>
+                      ) : (
+                        <>
+                          {item.source?.name == "Client Sourced" && (
+                            <span className="inline-block bg-yellow-100 border border-yellow-300 text-yellow-500 px-4 py-0.5 rounded-sm border-2">
+                              <span className="font-bold uppercase text-xs tracking-wide">
+                                {item.source?.name}
+                              </span>
+                            </span>
+                          )}
+                          {item.source?.name == "Royal Sourced" && (
+                            <span className="inline-block bg-blue-100 border border-blue-300 text-blue-500 px-4 py-0.5 rounded-sm border-2">
+                              <span className="font-bold uppercase text-xs tracking-wide">
+                                {item.source?.name}
+                              </span>
+                            </span>
+                          )}
+                        </>
                       )}
                     </div>
                     <p className="leading-relaxed">
@@ -551,7 +575,9 @@ export function DealsSection() {
                 <div className="text-sm sm:text-base text-royal-gray">
                   {activeSourceTab === "favourite"
                     ? "You haven't saved any deals yet. Star deals to add them to your favourites."
-                    : "No deals found matching your filters."}
+                    : activeSourceTab === "royal"
+                      ? "No Royal Vetted deals found matching your filters."
+                      : "No deals found matching your filters."}
                 </div>
               </div>
             )}

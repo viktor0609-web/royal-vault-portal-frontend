@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { FilterIcon, Star } from "lucide-react";
+import { FilterIcon, Star, TagIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { optionsApi, dealApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -314,8 +314,8 @@ export function DealsSection() {
     filterConfig.map((config) => {
       const options = filterOptions[config.key] || [];
       return (
-        <div key={config.key}>
-          <div className="text-royal-gray mb-1 font-bold">{config.label}</div>
+        <div key={config.key} className="space-y-2">
+          <label className="text-sm font-semibold text-royal-dark-gray">{config.label}</label>
           <Select
             value={
               selectedFilters[config.key as keyof typeof selectedFilters] || "all"
@@ -324,7 +324,7 @@ export function DealsSection() {
               handleFilterChange(config.key, value === "all" ? null : value)
             }
           >
-            <SelectTrigger className="border-royal-light-gray">
+            <SelectTrigger className="h-10 border-royal-light-gray hover:border-royal-gray transition-colors">
               <SelectValue placeholder={config.placeholder} />
             </SelectTrigger>
             <SelectContent>
@@ -351,19 +351,44 @@ export function DealsSection() {
     });
 
   return (
-    <div className="flex flex-col h-full p-2 sm:p-4">
+    <div className="flex flex-col h-full p-2 sm:p-4 animate-in fade-in duration-100">
+      {/* Header Section */}
+      <div className="flex items-center justify-between gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <TagIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
+          <div>
+            <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">DEALS</h1>
+            <p className="text-xs sm:text-base text-royal-gray">
+              Discover exclusive investment opportunities and deals.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Desktop Filters with Source Tabs */}
-      <div className="hidden min-[800px]:block bg-white p-2 sm:p-3 rounded-lg border border-royal-light-gray mb-6 sm:mb-8">
+      <div className="hidden min-[800px]:block bg-white p-4 sm:p-6 rounded-lg border border-royal-light-gray mb-6 sm:mb-8 shadow-sm">
         <Tabs value={activeSourceTab} onValueChange={handleSourceTabChange} className="w-full">
-          <TabsList className="flex flex-wrap w-full mb-4 bg-royal-light-gray">
-            <TabsTrigger value="all" className="text-xs sm:text-sm">
+          <TabsList className="flex flex-wrap w-full mb-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-md">
+            <TabsTrigger
+              value="all"
+              className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "all" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
+                }`}
+            >
               All
             </TabsTrigger>
-            <TabsTrigger value="royal" className="text-xs sm:text-sm">
+            <TabsTrigger
+              value="royal"
+              className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "royal" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
+                }`}
+            >
               Royal
             </TabsTrigger>
             {user && (
-              <TabsTrigger value="favourite" className="text-xs sm:text-sm">
+              <TabsTrigger
+                value="favourite"
+                className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "favourite" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
+                  }`}
+              >
                 Favourite
               </TabsTrigger>
             )}
@@ -394,9 +419,9 @@ export function DealsSection() {
           <DialogTrigger asChild>
             <Button
               variant="outline"
-              className="w-full flex items-center gap-2 bg-white border-royal-light-gray text-xs sm:text-sm"
+              className="w-full flex items-center justify-center gap-2 bg-white border-royal-light-gray text-xs sm:text-sm font-medium shadow-sm hover:shadow-md transition-all h-11"
             >
-              <FilterIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+              <FilterIcon className="h-4 w-4" />
               Filter Deals
             </Button>
           </DialogTrigger>
@@ -408,15 +433,27 @@ export function DealsSection() {
               </DialogTitle>
             </DialogHeader>
             <Tabs value={activeSourceTab} onValueChange={handleSourceTabChange} className="w-full">
-              <TabsList className="flex flex-wrap w-full mb-4 bg-royal-light-gray">
-                <TabsTrigger value="all" className="text-xs sm:text-sm">
+              <TabsList className="flex flex-wrap w-full mb-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-md">
+                <TabsTrigger
+                  value="all"
+                  className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "all" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
+                    }`}
+                >
                   All
                 </TabsTrigger>
-                <TabsTrigger value="royal" className="text-xs sm:text-sm">
+                <TabsTrigger
+                  value="royal"
+                  className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "royal" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
+                    }`}
+                >
                   Royal
                 </TabsTrigger>
                 {user && (
-                  <TabsTrigger value="favourite" className="text-xs sm:text-sm">
+                  <TabsTrigger
+                    value="favourite"
+                    className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "favourite" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
+                      }`}
+                  >
                     Favourite
                   </TabsTrigger>
                 )}
@@ -468,9 +505,9 @@ export function DealsSection() {
       </div>
 
       {/* Deals Grid */}
-      <div className=" min-h-0">
-        <div className="h-full overflow-y-auto mb-2 rounded-lg ">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
+      <div className="flex-1 min-h-0">
+        <div className="h-full overflow-y-auto mb-2 rounded-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
             {loading ? (
               <div className="col-span-full">
                 <Loading message="Loading deals..." />
@@ -481,76 +518,88 @@ export function DealsSection() {
                   target="_blank"
                   key={index}
                   to={item.url}
-                  className="bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
+                  className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 cursor-pointer block overflow-hidden group"
                 >
-                  <div className="relative h-48 sm:h-64 w-full">
+                  {/* Image Section */}
+                  <div className="relative h-56 sm:h-72 w-full overflow-hidden">
                     <img
                       src={item.image}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       alt={item.name}
-                    />
-                    <div
-                      className="absolute inset-0"
-                      style={{
-                        background:
-                          "linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(0,0,0,0.8))"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Deal+Image';
                       }}
                     />
+                    <div
+                      className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"
+                    />
+
                     {/* Investment Status Tag - Top Left */}
                     {(item as Deal).isRoyalVetted && (item as Deal).currentOffering && (
-                      <div className="absolute top-2 left-2 z-20">
-                        <span className={`inline-block px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide backdrop-blur-sm ${(item as Deal).currentOffering === "Open"
-                          ? "bg-green-500/90 text-white border-2 border-green-300"
-                          : "bg-red-500/90 text-white border-2 border-red-300"
+                      <div className="absolute top-3 left-3 z-20">
+                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg backdrop-blur-md ${(item as Deal).currentOffering === "Open"
+                          ? "bg-green-500/95 text-white border border-green-300"
+                          : "bg-red-500/95 text-white border border-red-300"
                           }`}>
                           {(item as Deal).currentOffering === "Open" ? "Open for Investment" : "Closed for Investment"}
                         </span>
                       </div>
                     )}
+
                     {/* Star Button */}
                     {user && (
                       <button
                         onClick={(e) => handleStarToggle(item._id, e)}
                         disabled={starringDealId === item._id}
-                        className="absolute top-2 right-2 z-20 p-2 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="absolute top-3 right-3 z-20 p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                         aria-label={starredDealIds.has(item._id) ? "Unstar deal" : "Star deal"}
                       >
                         <Star
                           className={`h-5 w-5 transition-all ${starredDealIds.has(item._id)
-                            ? "fill-yellow-400 text-yellow-400"
+                            ? "fill-yellow-400 text-yellow-400 scale-110"
                             : "text-white hover:text-yellow-300"
                             }`}
                         />
                       </button>
                     )}
-                    <h3 className="absolute bottom-6 sm:bottom-8 text-sm sm:text-xl left-2 text-white font-bold z-10 uppercase line-clamp-2">
-                      {item.name}
-                    </h3>
-                    <div className="text-xs pl-2 sm:pl-3 left-0 right-0 rounded-md absolute bottom-0 m-2 sm:m-3 bg-card uppercase">
-                      {formatArrayData(item.type)}
+
+                    {/* Deal Name Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10">
+                      <h3 className="text-base sm:text-xl lg:text-2xl text-white font-bold mb-2 line-clamp-2 drop-shadow-lg">
+                        {item.name}
+                      </h3>
+                      {formatArrayData(item.type) && (
+                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
+                          <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
+                            {formatArrayData(item.type)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="text-xs sm:text-sm text-royal-gray p-3 sm:p-6">
-                    <div className="leading-relaxed mb-2">
-                      {/* Show Royal Vetted tag if deal is Royal Vetted */}
+
+                  {/* Card Content */}
+                  <div className="p-4 sm:p-6 space-y-4">
+                    {/* Status Badge */}
+                    <div>
                       {(item as Deal).isRoyalVetted ? (
-                        <span className="inline-block bg-purple-100 border border-purple-300 text-purple-600 px-4 py-0.5 rounded-sm border-2">
-                          <span className="font-bold uppercase text-xs tracking-wide">
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30 border-2 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300">
+                          <span className="text-xs font-bold uppercase tracking-wide">
                             Royal Vetted
                           </span>
                         </span>
                       ) : (
                         <>
                           {item.source?.name == "Client Sourced" && (
-                            <span className="inline-block bg-yellow-100 border border-yellow-300 text-yellow-500 px-4 py-0.5 rounded-sm border-2">
-                              <span className="font-bold uppercase text-xs tracking-wide">
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 border-2 border-yellow-300 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300">
+                              <span className="text-xs font-bold uppercase tracking-wide">
                                 {item.source?.name}
                               </span>
                             </span>
                           )}
                           {item.source?.name == "Royal Sourced" && (
-                            <span className="inline-block bg-blue-100 border border-blue-300 text-blue-500 px-4 py-0.5 rounded-sm border-2">
-                              <span className="font-bold uppercase text-xs tracking-wide">
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300">
+                              <span className="text-xs font-bold uppercase tracking-wide">
                                 {item.source?.name}
                               </span>
                             </span>
@@ -558,33 +607,55 @@ export function DealsSection() {
                         </>
                       )}
                     </div>
-                    <p className="leading-relaxed">
-                      <span className="font-bold">Category: </span>
-                      {formatArrayData(item.category)}
-                    </p>
-                    <p className="leading-relaxed">
-                      <span className="font-bold">Sub-Category: </span>
-                      {formatArrayData(item.subCategory)}
-                    </p>
-                    <p className="leading-relaxed">
-                      <span className="font-bold">Strategy: </span>
-                      {formatArrayData(item.strategy)}
-                    </p>
-                    <p className="leading-relaxed">
-                      <span className="font-bold">Requirements: </span>
-                      {formatArrayData(item.requirement)}
-                    </p>
+
+                    {/* Deal Details */}
+                    <div className="space-y-3 text-sm">
+                      {formatArrayData(item.category) && (
+                        <div className="flex items-start gap-2">
+                          <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Category:</span>
+                          <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.category)}</span>
+                        </div>
+                      )}
+                      {formatArrayData(item.subCategory) && (
+                        <div className="flex items-start gap-2">
+                          <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Sub-Category:</span>
+                          <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.subCategory)}</span>
+                        </div>
+                      )}
+                      {formatArrayData(item.strategy) && (
+                        <div className="flex items-start gap-2">
+                          <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Strategy:</span>
+                          <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.strategy)}</span>
+                        </div>
+                      )}
+                      {formatArrayData(item.requirement) && (
+                        <div className="flex items-start gap-2">
+                          <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Requirements:</span>
+                          <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.requirement)}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </Link>
               ))
             ) : (
-              <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
-                <div className="text-sm sm:text-base text-royal-gray">
-                  {activeSourceTab === "favourite"
-                    ? "You haven't saved any deals yet. Star deals to add them to your favourites."
-                    : activeSourceTab === "royal"
-                      ? "No Royal Vetted deals found matching your filters."
-                      : "No deals found matching your filters."}
+              <div className="col-span-full flex flex-col justify-center items-center h-48 sm:h-64 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <TagIcon className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 dark:text-gray-600 mb-4" />
+                <div className="text-center px-4">
+                  <p className="text-base sm:text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">
+                    {activeSourceTab === "favourite"
+                      ? "No favourite deals yet"
+                      : activeSourceTab === "royal"
+                        ? "No Royal Vetted deals found"
+                        : "No deals found"}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                    {activeSourceTab === "favourite"
+                      ? "Star deals to add them to your favourites"
+                      : activeSourceTab === "royal"
+                        ? "Try adjusting your filters to see more results"
+                        : "Try adjusting your filters to see more results"}
+                  </p>
                 </div>
               </div>
             )}

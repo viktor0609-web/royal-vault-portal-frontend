@@ -155,7 +155,7 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
     <div className="w-full h-full bg-white border-r border-gray-200 flex flex-col overflow-hidden">
       {/* CTA Buttons Section */}
       <div className="flex-shrink-0 border-b border-gray-200 p-4 bg-gray-50">
-        <h3 className="text-sm font-semibold text-gray-800 mb-3 uppercase tracking-wide">Call to Action</h3>
+        <h3 className="text-base font-semibold text-gray-800 mb-3 uppercase tracking-wide">CTA Buttons</h3>
         <div className="space-y-2">
           {ctas.length === 0 ? (
             <p className="text-xs text-gray-500 text-center py-3">No CTA buttons available</p>
@@ -201,16 +201,7 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
 
       {/* Pinned Messages Section */}
       <div className="flex-1 overflow-y-auto p-4 bg-white">
-        <div className="flex items-center gap-2 mb-4 sticky top-0 bg-white z-10 pb-2 border-b border-gray-200">
-          <Pin className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-          <h3 className="text-base font-bold text-gray-900 uppercase tracking-wide">Pinned Messages</h3>
-          {pinnedMessages.length > 0 && (
-            <span className="ml-auto bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">
-              {pinnedMessages.length}
-            </span>
-          )}
-        </div>
-        <div className="space-y-3 mt-2">
+        <div className="space-y-3">
           {isLoadingPinnedMessages ? (
             <p className="text-sm text-gray-500 text-center py-8">Loading pinned messages...</p>
           ) : pinnedMessages.length === 0 ? (

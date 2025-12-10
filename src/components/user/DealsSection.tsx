@@ -202,7 +202,40 @@ export function DealsSection() {
             : await dealApi.getAllDeals("basic", true);
       }
 
-      setDeals(response.data.deals || []);
+      let dealsList = response.data.deals || [];
+
+      // Sort deals: Royal Vetted first, then Royal Sourced, then Client Sourced, then by name
+      dealsList.sort((a: Deal, b: Deal) => {
+        // First priority: Royal Vetted deals come first
+        if (a.isRoyalVetted && !b.isRoyalVetted) return -1;
+        if (!a.isRoyalVetted && b.isRoyalVetted) return 1;
+
+        // Get source names (handle null/undefined sources)
+        const sourceA = a.source?.name || '';
+        const sourceB = b.source?.name || '';
+
+        // Define source priority: Royal Sourced = 0, Client Sourced = 1, others = 2
+        const getSourcePriority = (sourceName: string) => {
+          if (sourceName === 'Royal Sourced') return 0;
+          if (sourceName === 'Client Sourced') return 1;
+          return 2;
+        };
+
+        const priorityA = getSourcePriority(sourceA);
+        const priorityB = getSourcePriority(sourceB);
+
+        // Second priority: sort by source priority
+        if (priorityA !== priorityB) {
+          return priorityA - priorityB;
+        }
+
+        // If same source priority, sort by name
+        const nameA = (a.name || '').toLowerCase();
+        const nameB = (b.name || '').toLowerCase();
+        return nameA.localeCompare(nameB);
+      });
+
+      setDeals(dealsList);
     } catch (error) {
       console.error("Error fetching deals:", error);
       setDeals([]);

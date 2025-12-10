@@ -245,7 +245,7 @@ export function DealsSection() {
     }
   };
 
-  // Handle star/unstar deal
+  // Handle star/unstar deal with optimistic updates
   const handleStarToggle = async (dealId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -261,36 +261,43 @@ export function DealsSection() {
     setStarringDealId(dealId);
     const isStarred = starredDealIds.has(dealId);
 
+    // Optimistic update: update UI immediately for instant feedback
+    const previousStarredIds = starredDealIds;
+    const previousDeals = [...deals]; // Create a copy for potential rollback
+
+    if (isStarred) {
+      // Optimistically remove from starred set
+      setStarredDealIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(dealId);
+        return newSet;
+      });
+      // If on favourite tab, optimistically remove from deals list
+      if (activeSourceTab === "favourite") {
+        setDeals((prev) => prev.filter((deal) => deal._id !== dealId));
+      }
+    } else {
+      // Optimistically add to starred set
+      setStarredDealIds((prev) => new Set(prev).add(dealId));
+      // Note: If on favourite tab, the deal will appear when user refreshes or switches tabs
+      // We don't add it here because we'd need to fetch the full deal data
+    }
+
+    // Perform API call in background
     try {
       if (isStarred) {
         await dealApi.unstarDeal(dealId);
-        setStarredDealIds((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(dealId);
-          return newSet;
-        });
-        // If on favourite tab, remove from deals list
-        if (activeSourceTab === "favourite") {
-          setDeals((prev) => prev.filter((deal) => deal._id !== dealId));
-        }
       } else {
         await dealApi.starDeal(dealId);
-        setStarredDealIds((prev) => new Set(prev).add(dealId));
-        // If on favourite tab, refresh the deals list
-        if (activeSourceTab === "favourite") {
-          fetchDeals();
-        }
       }
     } catch (error) {
       console.error("Error toggling star:", error);
-      // Refresh starred deals on error to ensure consistency
-      try {
-        const response = await dealApi.getStarredDeals("basic");
-        const starredIds = new Set((response.data.deals || []).map((deal: Deal) => deal._id));
-        setStarredDealIds(starredIds);
-      } catch (refreshError) {
-        console.error("Error refreshing starred deals:", refreshError);
+      // Revert optimistic update on error
+      setStarredDealIds(previousStarredIds);
+      if (activeSourceTab === "favourite") {
+        setDeals(previousDeals);
       }
+      // Optionally show error toast here
     } finally {
       setStarringDealId(null);
     }

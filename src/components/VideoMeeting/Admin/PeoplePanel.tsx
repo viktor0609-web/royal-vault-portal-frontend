@@ -161,57 +161,70 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                       participantName={participantName}
                       showAvatarWhenOff={true}
                     />
-                    {/* Status indicators - top right corner */}
-                    <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
-                      <div className={`flex items-center justify-center w-6 h-6 rounded-full backdrop-blur-sm ${participant.audio ? 'bg-green-500/80' : 'bg-red-500/80'}`}>
-                        {participant.audio ? <Mic size={12} className="text-white" /> : <MicOff size={12} className="text-white" />}
+                    {/* Control buttons - top right corner (Admin only) */}
+                    {role === "Admin" && (isGuest || isUser) && (
+                      <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleParticipantAudio(participant.id);
+                          }}
+                          variant="outline"
+                          className={`h-7 w-7 p-0 backdrop-blur-sm border-2 ${
+                            participant.audio 
+                              ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400' 
+                              : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
+                          }`}
+                          title={participant.audio ? "Mute" : "Unmute"}
+                        >
+                          {participant.audio ? <Mic size={14} className="text-white" /> : <MicOff size={14} className="text-white" />}
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleParticipantVideo(participant.id);
+                          }}
+                          variant="outline"
+                          className={`h-7 w-7 p-0 backdrop-blur-sm border-2 ${
+                            participant.video 
+                              ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400' 
+                              : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
+                          }`}
+                          title={participant.video ? "Turn off camera" : "Turn on camera"}
+                        >
+                          {participant.video ? <Video size={14} className="text-white" /> : <VideoOff size={14} className="text-white" />}
+                        </Button>
                       </div>
-                      <div className={`flex items-center justify-center w-6 h-6 rounded-full backdrop-blur-sm ${participant.video ? 'bg-green-500/80' : 'bg-red-500/80'}`}>
-                        {participant.video ? <Video size={12} className="text-white" /> : <VideoOff size={12} className="text-white" />}
+                    )}
+                    {/* Status indicators - top right corner (for Admin viewing themselves) */}
+                    {role === "Admin" && isAdmin && (
+                      <div className="absolute top-2 right-2 flex items-center gap-1.5 z-10">
+                        <div className={`flex items-center justify-center w-6 h-6 rounded-full backdrop-blur-sm ${participant.audio ? 'bg-green-500/80' : 'bg-red-500/80'}`}>
+                          {participant.audio ? <Mic size={12} className="text-white" /> : <MicOff size={12} className="text-white" />}
+                        </div>
+                        <div className={`flex items-center justify-center w-6 h-6 rounded-full backdrop-blur-sm ${participant.video ? 'bg-green-500/80' : 'bg-red-500/80'}`}>
+                          {participant.video ? <Video size={12} className="text-white" /> : <VideoOff size={12} className="text-white" />}
+                        </div>
                       </div>
-                    </div>
-                    {/* Bottom overlay with name and controls */}
+                    )}
+                    {/* Bottom overlay with name and eject button */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent px-2 py-2 flex items-center justify-between gap-2">
                       <span className="text-white text-xs font-medium truncate flex-1">{displayName}</span>
-                      {/* Control buttons for Admin - bottom right */}
+                      {/* Eject button for Admin - bottom right */}
                       {role === "Admin" && (isGuest || isUser) && (
-                        <div className="flex gap-1 flex-shrink-0">
-                          <Button
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleParticipantAudio(participant.id);
-                            }}
-                            variant="outline"
-                            className="h-6 w-6 p-0 bg-black/50 hover:bg-black/70 border-gray-600"
-                            title={participant.audio ? "Mute" : "Unmute"}
-                          >
-                            {participant.audio ? <Mic size={12} className="text-white" /> : <MicOff size={12} className="text-white" />}
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleParticipantVideo(participant.id);
-                            }}
-                            variant="outline"
-                            className="h-6 w-6 p-0 bg-black/50 hover:bg-black/70 border-gray-600"
-                            title={participant.video ? "Turn off camera" : "Turn on camera"}
-                          >
-                            {participant.video ? <Video size={12} className="text-white" /> : <VideoOff size={12} className="text-white" />}
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              ejectParticipant(participant.id);
-                            }}
-                            variant="destructive"
-                            className="bg-red-600 hover:bg-red-700 h-6 px-2 text-xs flex-shrink-0"
-                          >
-                            Eject
-                          </Button>
-                        </div>
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            ejectParticipant(participant.id);
+                          }}
+                          variant="destructive"
+                          className="bg-red-600 hover:bg-red-700 h-6 px-2 text-xs flex-shrink-0"
+                        >
+                          Eject
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -236,10 +249,6 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                   <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 @container/participant">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <span className="font-medium text-xs sm:text-sm truncate" title={displayName}>{displayName}</span>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        {p.audio ? <Mic size={12} className="sm:w-3 sm:h-3 text-green-500" /> : <MicOff size={12} className="sm:w-3 sm:h-3 text-red-500" />}
-                        {p.video ? <Video size={12} className="sm:w-3 sm:h-3 text-green-500" /> : <VideoOff size={12} className="sm:w-3 sm:h-3 text-red-500" />}
-                      </div>
                     </div>
                     {role === "Admin" && (
                       <div className="flex gap-1 flex-shrink-0">
@@ -247,7 +256,11 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                           size="sm"
                           onClick={() => toggleParticipantAudio(p.id)}
                           variant="outline"
-                          className="h-6 w-6 p-0 bg-gray-700 hover:bg-gray-600 border-gray-600"
+                          className={`h-6 w-6 p-0 border-2 ${
+                            p.audio 
+                              ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400' 
+                              : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
+                          }`}
                           title={p.audio ? "Mute" : "Unmute"}
                         >
                           {p.audio ? <Mic size={12} className="text-white" /> : <MicOff size={12} className="text-white" />}
@@ -256,7 +269,11 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                           size="sm"
                           onClick={() => toggleParticipantVideo(p.id)}
                           variant="outline"
-                          className="h-6 w-6 p-0 bg-gray-700 hover:bg-gray-600 border-gray-600"
+                          className={`h-6 w-6 p-0 border-2 ${
+                            p.video 
+                              ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400' 
+                              : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
+                          }`}
                           title={p.video ? "Turn off camera" : "Turn on camera"}
                         >
                           {p.video ? <Video size={12} className="text-white" /> : <VideoOff size={12} className="text-white" />}

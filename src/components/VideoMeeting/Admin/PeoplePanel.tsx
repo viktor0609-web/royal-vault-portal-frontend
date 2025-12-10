@@ -10,7 +10,7 @@ interface PeoplePanelProps {
 }
 
 export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
-  const { participants, role, ejectParticipant, toggleParticipantAudioPermission } = useDailyMeeting();
+  const { participants, role, ejectParticipant, toggleParticipantAudioPermission, toggleParticipantAudio, toggleParticipantVideo } = useDailyMeeting();
   const [activeTab, setActiveTab] = useState("thumbnails");
   const thumbnailContainerRef = useRef<HTMLDivElement>(null);
   const speakingUserRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -170,19 +170,48 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                         {participant.video ? <Video size={12} className="text-white" /> : <VideoOff size={12} className="text-white" />}
                       </div>
                     </div>
-                    {/* Bottom overlay with name and eject button */}
+                    {/* Bottom overlay with name and controls */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent px-2 py-2 flex items-center justify-between gap-2">
                       <span className="text-white text-xs font-medium truncate flex-1">{displayName}</span>
-                      {/* Eject button for Admin/Guest - bottom right */}
+                      {/* Control buttons for Admin - bottom right */}
                       {role === "Admin" && (isGuest || isUser) && (
-                        <Button
-                          size="sm"
-                          onClick={() => ejectParticipant(participant.id)}
-                          variant="destructive"
-                          className="bg-red-600 hover:bg-red-700 h-6 px-2 text-xs flex-shrink-0"
-                        >
-                          Eject
-                        </Button>
+                        <div className="flex gap-1 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleParticipantAudio(participant.id);
+                            }}
+                            variant="outline"
+                            className="h-6 w-6 p-0 bg-black/50 hover:bg-black/70 border-gray-600"
+                            title={participant.audio ? "Mute" : "Unmute"}
+                          >
+                            {participant.audio ? <Mic size={12} className="text-white" /> : <MicOff size={12} className="text-white" />}
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleParticipantVideo(participant.id);
+                            }}
+                            variant="outline"
+                            className="h-6 w-6 p-0 bg-black/50 hover:bg-black/70 border-gray-600"
+                            title={participant.video ? "Turn off camera" : "Turn on camera"}
+                          >
+                            {participant.video ? <Video size={12} className="text-white" /> : <VideoOff size={12} className="text-white" />}
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              ejectParticipant(participant.id);
+                            }}
+                            variant="destructive"
+                            className="bg-red-600 hover:bg-red-700 h-6 px-2 text-xs flex-shrink-0"
+                          >
+                            Eject
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -214,6 +243,24 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                     </div>
                     {role === "Admin" && (
                       <div className="flex gap-1 flex-shrink-0">
+                        <Button
+                          size="sm"
+                          onClick={() => toggleParticipantAudio(p.id)}
+                          variant="outline"
+                          className="h-6 w-6 p-0 bg-gray-700 hover:bg-gray-600 border-gray-600"
+                          title={p.audio ? "Mute" : "Unmute"}
+                        >
+                          {p.audio ? <Mic size={12} className="text-white" /> : <MicOff size={12} className="text-white" />}
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => toggleParticipantVideo(p.id)}
+                          variant="outline"
+                          className="h-6 w-6 p-0 bg-gray-700 hover:bg-gray-600 border-gray-600"
+                          title={p.video ? "Turn off camera" : "Turn on camera"}
+                        >
+                          {p.video ? <Video size={12} className="text-white" /> : <VideoOff size={12} className="text-white" />}
+                        </Button>
                         <Button
                           size="sm"
                           onClick={() => ejectParticipant(p.id)}

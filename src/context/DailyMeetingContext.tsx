@@ -16,6 +16,7 @@ interface DailyMeetingContextType {
   stopRecording: () => Promise<void>;
   ejectParticipant: (sessionId: string) => Promise<void>;
   toggleParticipantAudio: (sessionId: string) => Promise<void>;
+  toggleParticipantVideo: (sessionId: string) => Promise<void>;
   toggleParticipantAudioPermission: (sessionId: string) => Promise<void>;
   isPermissionModalOpen: boolean;
   hasMicPermission: boolean;
@@ -532,7 +533,33 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       else if (e.data.type === 'webinar-status-changed') {
         setWebinarStatus(e.data.status);
       }
-
+      else if (e.data.type === 'admin-control') {
+        // Handle admin control messages (mic/camera control)
+        const { control, sessionId, enabled } = e.data;
+        const localParticipantId = dailyRoom.participants().local?.session_id;
+        
+        // If this control affects the local participant, apply it
+        if (sessionId === localParticipantId) {
+          if (control === 'audio') {
+            dailyRoom.setLocalAudio(enabled);
+            setIsMicrophoneMuted(!enabled);
+            // Update local stream if available
+            if (localStream) {
+              localStream.getAudioTracks().forEach((t) => (t.enabled = enabled));
+            }
+          } else if (control === 'video') {
+            dailyRoom.setLocalVideo(enabled);
+            setIsCameraOff(!enabled);
+            // Update local stream if available
+            if (localStream) {
+              localStream.getVideoTracks().forEach((t) => (t.enabled = enabled));
+            }
+          }
+        }
+        
+        // Force participant update to reflect changes in UI
+        updateParticipants();
+      }
     };
     dailyRoom.on('app-message', handleAppMessage);
 
@@ -659,9 +686,41 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (!participant) return;
       const newAudioState = !participant?.audio;
       await dailyRoom.updateParticipant(sessionId, { setAudio: newAudioState });
-      console.log(`Participant ${sessionId}  audio toggled to ${newAudioState}`);
+      console.log(`Participant ${sessionId} audio toggled to ${newAudioState}`);
+      
+      // Broadcast control change via app message for real-time sync
+      (dailyRoom as any).sendAppMessage({
+        type: 'admin-control',
+        control: 'audio',
+        sessionId: sessionId,
+        enabled: newAudioState,
+        participantName: participant.user_name,
+      }, '*');
     } catch (err) {
       console.error('Error toggling participant audio:', err);
+    }
+  };
+
+  const toggleParticipantVideo = async (sessionId: string) => {
+    if (!dailyRoom || !joined) return;
+    try {
+      const pObj = await dailyRoom.participants();
+      const participant = pObj[sessionId];
+      if (!participant) return;
+      const newVideoState = !participant?.video;
+      await dailyRoom.updateParticipant(sessionId, { setVideo: newVideoState });
+      console.log(`Participant ${sessionId} video toggled to ${newVideoState}`);
+      
+      // Broadcast control change via app message for real-time sync
+      (dailyRoom as any).sendAppMessage({
+        type: 'admin-control',
+        control: 'video',
+        sessionId: sessionId,
+        enabled: newVideoState,
+        participantName: participant.user_name,
+      }, '*');
+    } catch (err) {
+      console.error('Error toggling participant video:', err);
     }
   };
 
@@ -928,6 +987,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         stopRecording,
         ejectParticipant,
         toggleParticipantAudio,
+        toggleParticipantVideo,
         isPermissionModalOpen,
         hasMicPermission,
         hasCamPermission,

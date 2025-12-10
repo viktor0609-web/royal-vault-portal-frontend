@@ -1,15 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
+import type { MultiSelectOption } from "@/components/ui/multi-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { FilterIcon, Star, TagIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { optionsApi, dealApi } from "@/lib/api";
@@ -17,18 +11,12 @@ import { useAuth } from "@/context/AuthContext";
 import type { Option } from "@/services/api/options.service";
 
 const filterConfig = [
-  { key: "categories", label: "Categories", placeholder: "Categories" },
-  { key: "subCategories", label: "Sub-Categories", placeholder: "Sub-Categories" },
-  { key: "types", label: "Types", placeholder: "Types" },
-  { key: "strategies", label: "Strategies", placeholder: "Strategies" },
+  { key: "subCategories", label: "Categories", placeholder: "Categories" },
   { key: "requirements", label: "Requirements", placeholder: "Requirements" },
 ];
 
 interface FilterOptions {
-  categories: Option[];
   subCategories: Option[];
-  types: Option[];
-  strategies: Option[];
   requirements: Option[];
   sources: Option[];
 }
@@ -56,10 +44,7 @@ export function DealsSection() {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [activeSourceTab, setActiveSourceTab] = useState<string>("all");
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    categories: [],
     subCategories: [],
-    types: [],
-    strategies: [],
     requirements: [],
     sources: []
   });
@@ -68,13 +53,14 @@ export function DealsSection() {
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
   const [starredDealIds, setStarredDealIds] = useState<Set<string>>(new Set());
   const [starringDealId, setStarringDealId] = useState<string | null>(null);
-  const [selectedFilters, setSelectedFilters] = useState({
-    categories: null,
-    subCategories: null,
-    types: null,
-    strategies: null,
-    requirements: null,
-    sources: null
+  const [selectedFilters, setSelectedFilters] = useState<{
+    subCategories: string[];
+    requirements: string[];
+    sources: string[];
+  }>({
+    subCategories: [],
+    requirements: [],
+    sources: []
   });
 
   // Fetch filter options once
@@ -84,26 +70,17 @@ export function DealsSection() {
         setFilterOptionsLoading(true);
 
         const [
-          categoriesResponse,
           subCategoriesResponse,
-          typesResponse,
-          strategiesResponse,
           requirementsResponse,
           sourcesResponse
         ] = await Promise.all([
-          optionsApi.getCategories(),
           optionsApi.getSubCategories(),
-          optionsApi.getTypes(),
-          optionsApi.getStrategies(),
           optionsApi.getRequirements(),
           optionsApi.getSources()
         ]);
 
         setFilterOptions({
-          categories: categoriesResponse.data.categories || [],
           subCategories: subCategoriesResponse.data.subCategories || [],
-          types: typesResponse.data.types || [],
-          strategies: strategiesResponse.data.strategies || [],
           requirements: requirementsResponse.data.requirements || [],
           sources: sourcesResponse.data.sources || []
         });
@@ -139,12 +116,15 @@ export function DealsSection() {
       setLoading(true);
       const filterParams: any = {};
 
-      if (filters.categories) filterParams.categoryId = filters.categories;
-      if (filters.subCategories) filterParams.subCategoryId = filters.subCategories;
-      if (filters.types) filterParams.typeId = filters.types;
-      if (filters.strategies) filterParams.strategyId = filters.strategies;
-      if (filters.requirements) filterParams.requirementId = filters.requirements;
-      if (filters.sources) filterParams.sourceId = filters.sources;
+      if (filters.subCategories && filters.subCategories.length > 0) {
+        filterParams.subCategoryIds = filters.subCategories;
+      }
+      if (filters.requirements && filters.requirements.length > 0) {
+        filterParams.requirementIds = filters.requirements;
+      }
+      if (filters.sources && filters.sources.length > 0) {
+        filterParams.sourceIds = filters.sources;
+      }
 
       let response;
 
@@ -154,34 +134,19 @@ export function DealsSection() {
         let savedDeals = savedResponse.data.deals || [];
 
         // Apply filters to saved deals (client-side filtering)
-        if (filterParams.categoryId) {
+        if (filterParams.subCategoryIds && filterParams.subCategoryIds.length > 0) {
           savedDeals = savedDeals.filter((deal: Deal) =>
-            deal.category?.some((cat) => cat._id === filterParams.categoryId)
+            deal.subCategory?.some((sub) => filterParams.subCategoryIds.includes(sub._id))
           );
         }
-        if (filterParams.subCategoryId) {
+        if (filterParams.requirementIds && filterParams.requirementIds.length > 0) {
           savedDeals = savedDeals.filter((deal: Deal) =>
-            deal.subCategory?.some((sub) => sub._id === filterParams.subCategoryId)
+            deal.requirement?.some((req) => filterParams.requirementIds.includes(req._id))
           );
         }
-        if (filterParams.typeId) {
+        if (filterParams.sourceIds && filterParams.sourceIds.length > 0) {
           savedDeals = savedDeals.filter((deal: Deal) =>
-            deal.type?.some((type) => type._id === filterParams.typeId)
-          );
-        }
-        if (filterParams.strategyId) {
-          savedDeals = savedDeals.filter((deal: Deal) =>
-            deal.strategy?.some((strategy) => strategy._id === filterParams.strategyId)
-          );
-        }
-        if (filterParams.requirementId) {
-          savedDeals = savedDeals.filter((deal: Deal) =>
-            deal.requirement?.some((req) => req._id === filterParams.requirementId)
-          );
-        }
-        if (filterParams.sourceId) {
-          savedDeals = savedDeals.filter((deal: Deal) =>
-            deal.source?._id === filterParams.sourceId
+            filterParams.sourceIds.includes(deal.source?._id)
           );
         }
 
@@ -263,19 +228,15 @@ export function DealsSection() {
   }, [showSalesModal]);
 
   // Handle filter changes
-  const handleFilterChange = (filterType: string, value: string | null) => {
+  const handleFilterChange = (filterType: string, value: string[]) => {
     setSelectedFilters({ ...selectedFilters, [filterType]: value });
   };
 
   // Handle source tab change
   const handleSourceTabChange = (value: string) => {
     setActiveSourceTab(value);
-    // Clear source filter for special tabs (favourite, royal, all)
-    if (value === "favourite" || value === "royal" || value === "all") {
-      setSelectedFilters({ ...selectedFilters, sources: null });
-    } else {
-      setSelectedFilters({ ...selectedFilters, sources: value });
-    }
+    // Clear source filter when switching tabs
+    setSelectedFilters({ ...selectedFilters, sources: [] });
   };
 
   // Handle star/unstar deal with optimistic updates
@@ -345,40 +306,23 @@ export function DealsSection() {
 
   const renderFilters = () =>
     filterConfig.map((config) => {
-      const options = filterOptions[config.key] || [];
+      const options: MultiSelectOption[] = (filterOptions[config.key as keyof typeof filterOptions] || []).map((option: Option) => ({
+        label: option.name,
+        value: option._id
+      }));
+      const selected = selectedFilters[config.key as keyof typeof selectedFilters] || [];
+
       return (
         <div key={config.key} className="space-y-2">
           <label className="text-sm font-semibold text-royal-dark-gray">{config.label}</label>
-          <Select
-            value={
-              selectedFilters[config.key as keyof typeof selectedFilters] || "all"
-            }
-            onValueChange={(value) =>
-              handleFilterChange(config.key, value === "all" ? null : value)
-            }
-          >
-            <SelectTrigger className="h-10 border-royal-light-gray hover:border-royal-gray transition-colors">
-              <SelectValue placeholder={config.placeholder} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {filterOptionsLoading ? (
-                <SelectItem value="loading" disabled>
-                  Loading...
-                </SelectItem>
-              ) : options.length > 0 ? (
-                options.map((option, index) => (
-                  <SelectItem key={index} value={option._id}>
-                    {option.name}
-                  </SelectItem>
-                ))
-              ) : (
-                <SelectItem value="no-options" disabled>
-                  No options available
-                </SelectItem>
-              )}
-            </SelectContent>
-          </Select>
+          <MultiSelect
+            options={options}
+            selected={selected}
+            onChange={(value) => handleFilterChange(config.key, value)}
+            placeholder={filterOptionsLoading ? "Loading..." : config.placeholder}
+            disabled={filterOptionsLoading}
+            className="h-10 border-royal-light-gray hover:border-royal-gray transition-colors"
+          />
         </div>
       );
     });
@@ -387,50 +331,51 @@ export function DealsSection() {
     <div className="flex flex-col h-full p-2 sm:p-4 animate-in fade-in duration-100">
       {/* Desktop Filters with Source Tabs */}
       <div className="hidden min-[800px]:block bg-white p-4 sm:p-6 rounded-lg border border-royal-light-gray mb-6 sm:mb-8 shadow-sm">
-        <Tabs value={activeSourceTab} onValueChange={handleSourceTabChange} className="w-full">
-          <TabsList className="flex flex-wrap w-full mb-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-md">
-            <TabsTrigger
-              value="all"
-              className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "all" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
-                }`}
-            >
-              All
-            </TabsTrigger>
-            <TabsTrigger
-              value="royal"
-              className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "royal" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
-                }`}
-            >
-              Royal
-            </TabsTrigger>
-            {user && (
-              <TabsTrigger
-                value="favourite"
-                className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "favourite" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-center justify-between">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-center w-full sm:w-auto">
+            <p className="text-xs sm:text-base text-royal-gray hidden sm:block">Filter by:</p>
+            <div className="flex gap-1 sm:gap-2 justify-center w-full sm:w-auto">
+              <Button
+                variant={activeSourceTab === "all" ? "default" : "outline"}
+                size="sm"
+                className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "all"
+                  ? "bg-primary hover:bg-royal-blue-dark text-white"
+                  : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
                   }`}
+                onClick={() => handleSourceTabChange("all")}
               >
-                Favourite
-              </TabsTrigger>
-            )}
-          </TabsList>
-          <TabsContent value="all" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
-              {renderFilters()}
+                All
+              </Button>
+              <Button
+                variant={activeSourceTab === "royal" ? "default" : "outline"}
+                size="sm"
+                className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "royal"
+                  ? "bg-primary hover:bg-royal-blue-dark text-white"
+                  : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
+                  }`}
+                onClick={() => handleSourceTabChange("royal")}
+              >
+                Royal
+              </Button>
+              {user && (
+                <Button
+                  variant={activeSourceTab === "favourite" ? "default" : "outline"}
+                  size="sm"
+                  className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "favourite"
+                    ? "bg-primary hover:bg-royal-blue-dark text-white"
+                    : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
+                    }`}
+                  onClick={() => handleSourceTabChange("favourite")}
+                >
+                  Favourite
+                </Button>
+              )}
             </div>
-          </TabsContent>
-          <TabsContent value="royal" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
-              {renderFilters()}
-            </div>
-          </TabsContent>
-          {user && (
-            <TabsContent value="favourite" className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
-                {renderFilters()}
-              </div>
-            </TabsContent>
-          )}
-        </Tabs>
+          </div>
+          <div className="flex gap-2 sm:gap-4 w-full sm:w-auto">
+            {renderFilters()}
+          </div>
+        </div>
       </div>
 
       {/* Mobile Filters with Source Tabs */}
@@ -452,44 +397,47 @@ export function DealsSection() {
                 Filter Deals
               </DialogTitle>
             </DialogHeader>
-            <Tabs value={activeSourceTab} onValueChange={handleSourceTabChange} className="w-full">
-              <TabsList className="flex flex-wrap w-full mb-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-md">
-                <TabsTrigger
-                  value="all"
-                  className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "all" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
+            <div className="flex flex-col gap-2 mb-4">
+              <p className="text-xs sm:text-base text-royal-gray">Filter by:</p>
+              <div className="flex gap-1 sm:gap-2">
+                <Button
+                  variant={activeSourceTab === "all" ? "default" : "outline"}
+                  size="sm"
+                  className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "all"
+                    ? "bg-primary hover:bg-royal-blue-dark text-white"
+                    : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
                     }`}
+                  onClick={() => handleSourceTabChange("all")}
                 >
                   All
-                </TabsTrigger>
-                <TabsTrigger
-                  value="royal"
-                  className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "royal" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
+                </Button>
+                <Button
+                  variant={activeSourceTab === "royal" ? "default" : "outline"}
+                  size="sm"
+                  className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "royal"
+                    ? "bg-primary hover:bg-royal-blue-dark text-white"
+                    : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
                     }`}
+                  onClick={() => handleSourceTabChange("royal")}
                 >
                   Royal
-                </TabsTrigger>
+                </Button>
                 {user && (
-                  <TabsTrigger
-                    value="favourite"
-                    className={`text-xs sm:text-sm px-3 sm:px-4 py-2 data-[state=active]:bg-white data-[state=active]:text-royal-dark-gray data-[state=active]:shadow-sm transition-all ${activeSourceTab === "favourite" ? "bg-white text-royal-dark-gray shadow-sm" : "text-gray-600"
+                  <Button
+                    variant={activeSourceTab === "favourite" ? "default" : "outline"}
+                    size="sm"
+                    className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "favourite"
+                      ? "bg-primary hover:bg-royal-blue-dark text-white"
+                      : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
                       }`}
+                    onClick={() => handleSourceTabChange("favourite")}
                   >
                     Favourite
-                  </TabsTrigger>
+                  </Button>
                 )}
-              </TabsList>
-              <TabsContent value="all" className="mt-0">
-                <div className="space-y-1 py-1">{renderFilters()}</div>
-              </TabsContent>
-              <TabsContent value="royal" className="mt-0">
-                <div className="space-y-1 py-1">{renderFilters()}</div>
-              </TabsContent>
-              {user && (
-                <TabsContent value="favourite" className="mt-0">
-                  <div className="space-y-1 py-1">{renderFilters()}</div>
-                </TabsContent>
-              )}
-            </Tabs>
+              </div>
+            </div>
+            <div className="space-y-1 py-1">{renderFilters()}</div>
             <div className="flex gap-1 pt-2 border-t">
               <Button
                 variant="outline"
@@ -501,12 +449,9 @@ export function DealsSection() {
               <Button
                 onClick={() => {
                   setSelectedFilters({
-                    categories: null,
-                    subCategories: null,
-                    types: null,
-                    strategies: null,
-                    requirements: null,
-                    sources: null
+                    subCategories: [],
+                    requirements: [],
+                    sources: []
                   });
                   if (activeSourceTab === "favourite" || activeSourceTab === "royal") {
                     // Keep favourite or royal tab active when clearing filters
@@ -588,46 +533,34 @@ export function DealsSection() {
                       <h3 className="text-base sm:text-xl lg:text-2xl text-white font-bold mb-2 line-clamp-2 drop-shadow-lg">
                         {item.name}
                       </h3>
-                      {formatArrayData(item.type) && (
-                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
-                          <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
-                            {formatArrayData(item.type)}
-                          </span>
-                        </div>
-                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {/* Royal Vetted Tag */}
+                        {(item as Deal).isRoyalVetted && (
+                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-500/90 backdrop-blur-sm border border-purple-300 shadow-lg">
+                            <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
+                              Royal Vetted
+                            </span>
+                          </div>
+                        )}
+                        {/* Source Tag with color styles */}
+                        {item.source?.name && (
+                          <div className={`inline-flex items-center px-3 py-1 rounded-full backdrop-blur-sm border shadow-lg ${item.source.name === "Client Sourced"
+                            ? "bg-yellow-500/90 border-yellow-300"
+                            : item.source.name === "Royal Sourced"
+                              ? "bg-blue-500/90 border-blue-300"
+                              : "bg-white/20 border-white/30"
+                            }`}>
+                            <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
+                              {item.source.name}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
                   {/* Card Content */}
                   <div className="p-4 sm:p-6 space-y-4">
-                    {/* Status Badge */}
-                    <div>
-                      {(item as Deal).isRoyalVetted ? (
-                        <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30 border-2 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300">
-                          <span className="text-xs font-bold uppercase tracking-wide">
-                            Royal Vetted
-                          </span>
-                        </span>
-                      ) : (
-                        <>
-                          {item.source?.name == "Client Sourced" && (
-                            <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30 border-2 border-yellow-300 dark:border-yellow-700 text-yellow-700 dark:text-yellow-300">
-                              <span className="text-xs font-bold uppercase tracking-wide">
-                                {item.source?.name}
-                              </span>
-                            </span>
-                          )}
-                          {item.source?.name == "Royal Sourced" && (
-                            <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300">
-                              <span className="text-xs font-bold uppercase tracking-wide">
-                                {item.source?.name}
-                              </span>
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </div>
-
                     {/* Deal Details */}
                     <div className="space-y-3 text-sm">
                       {formatArrayData(item.category) && (

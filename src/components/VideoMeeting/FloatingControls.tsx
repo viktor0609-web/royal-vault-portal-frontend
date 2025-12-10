@@ -69,6 +69,9 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
     isCameraOff,
     leaveRoom,
     hasLocalAudioPermission,
+    raiseHand,
+    raisedHands,
+    localParticipant,
   } = useDailyMeeting();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -161,14 +164,17 @@ export const FloatingControls: React.FC<FloatingControlsProps> = ({
       {/* Raise Hand - for User */}
       {role === "User" && (
         <Button
-          onClick={() => {
-            // Simple hand button - you can add your own logic here
-            console.log('Hand button clicked');
-          }}
-          className="w-full h-14 rounded-lg bg-gray-700 hover:bg-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
+          onClick={raiseHand}
+          className={`w-full h-14 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 ${
+            raisedHands.has(localParticipant?.id || '')
+              ? 'bg-yellow-600 hover:bg-yellow-700'
+              : 'bg-gray-700 hover:bg-gray-600'
+          }`}
         >
           <Hand size={20} />
-          <span className="text-base font-medium">Raise Hand</span>
+          <span className="text-base font-medium">
+            {raisedHands.has(localParticipant?.id || '') ? "Lower Hand" : "Raise Hand"}
+          </span>
         </Button>
       )}
 

@@ -63,6 +63,9 @@ interface DailyMeetingContextType {
   sendWebinarStatusChange: (status: string) => Promise<void>;
   webinarStatus: string;
   setWebinarStatus: (status: string) => void;
+  raiseHand: () => void;
+  lowerHand: (sessionId: string) => void;
+  raisedHands: Set<string>;
 }
 
 const DailyMeetingContext = createContext<DailyMeetingContextType | undefined>(undefined);
@@ -80,6 +83,7 @@ export type ParticipantType = {
   audio: boolean;
   video: boolean;
   speaking: boolean;
+  handRaised?: boolean;
 }
 
 export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -89,6 +93,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [dailyRoom, setDailyRoom] = useState<DailyCall | null>(null);
   const [participants, setParticipants] = useState<ParticipantType[]>([]);
   const [speakingParticipants, setSpeakingParticipants] = useState<Set<string>>(new Set());
+  const [raisedHands, setRaisedHands] = useState<Set<string>>(new Set());
   const [role, setRole] = useState<RoleType>("User"); // replace with real logic
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isPermissionModalOpen, setIsPermissionModalOpen] = useState<boolean>(false);
@@ -443,6 +448,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
             audio: participant.audio,
             video: participant.video,
             speaking: !!isSpeaking, // Ensure boolean
+            handRaised: raisedHands.has(sessionId), // Add hand raised status
           };
         });
         setParticipants(pList);
@@ -508,6 +514,12 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         next.delete(e.participant.session_id);
         return next;
       });
+      // Remove from raised hands when participant leaves
+      setRaisedHands(prev => {
+        const next = new Set(prev);
+        next.delete(e.participant.session_id);
+        return next;
+      });
       updateParticipants();
     });
     dailyRoom.on('track-started', updateParticipants);
@@ -558,6 +570,22 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
         
         // Force participant update to reflect changes in UI
+        updateParticipants();
+      }
+      else if (e.data.type === 'hand-raise') {
+        const { sessionId, raised } = e.data;
+        
+        setRaisedHands(prev => {
+          const next = new Set(prev);
+          if (raised) {
+            next.add(sessionId);
+          } else {
+            next.delete(sessionId);
+          }
+          return next;
+        });
+        
+        // Update participants to reflect hand state
         updateParticipants();
       }
     };
@@ -721,6 +749,61 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }, '*');
     } catch (err) {
       console.error('Error toggling participant video:', err);
+    }
+  };
+
+  const raiseHand = () => {
+    if (!dailyRoom || !joined) return;
+    const localParticipant = dailyRoom.participants().local;
+    if (!localParticipant) return;
+    
+    const sessionId = localParticipant.session_id;
+    const participantName = localParticipant.user_name;
+    const isCurrentlyRaised = raisedHands.has(sessionId);
+    
+    // Toggle hand state
+    if (isCurrentlyRaised) {
+      setRaisedHands(prev => {
+        const next = new Set(prev);
+        next.delete(sessionId);
+        return next;
+      });
+    } else {
+      setRaisedHands(prev => new Set(prev).add(sessionId));
+    }
+    
+    // Broadcast hand raise/lower via app message
+    (dailyRoom as any).sendAppMessage({
+      type: 'hand-raise',
+      sessionId: sessionId,
+      participantName: participantName,
+      raised: !isCurrentlyRaised,
+    }, '*');
+  };
+
+  const lowerHand = (sessionId: string) => {
+    if (!dailyRoom || !joined) return;
+    try {
+      const pObj = dailyRoom.participants();
+      const participant = pObj[sessionId];
+      if (!participant) return;
+      
+      // Remove from raised hands
+      setRaisedHands(prev => {
+        const next = new Set(prev);
+        next.delete(sessionId);
+        return next;
+      });
+      
+      // Broadcast hand lower via app message
+      (dailyRoom as any).sendAppMessage({
+        type: 'hand-raise',
+        sessionId: sessionId,
+        participantName: participant.user_name,
+        raised: false,
+      }, '*');
+    } catch (err) {
+      console.error('Error lowering hand:', err);
     }
   };
 
@@ -1032,6 +1115,9 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         hasLocalAudioPermission, // Provide hasLocalAudioPermission
         webinarStatus,
         setWebinarStatus,
+        raiseHand,
+        lowerHand,
+        raisedHands,
       }}
     >
       {children}

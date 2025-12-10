@@ -7,6 +7,9 @@ export const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  paramsSerializer: {
+    indexes: null, // Send arrays as param=value1&param=value2 instead of param[]=value1&param[]=value2
+  },
 });
 
 // Callback to notify when tokens are cleared (for AuthContext)

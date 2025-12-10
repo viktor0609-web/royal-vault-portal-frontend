@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { FilterIcon } from "lucide-react";
+import { FilterIcon, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { optionsApi, dealApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -64,6 +64,8 @@ export function DealsSection() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterOptionsLoading, setFilterOptionsLoading] = useState(true);
+  const [starredDealIds, setStarredDealIds] = useState<Set<string>>(new Set());
+  const [starringDealId, setStarringDealId] = useState<string | null>(null);
   const [selectedFilters, setSelectedFilters] = useState({
     categories: null,
     subCategories: null,
@@ -113,6 +115,22 @@ export function DealsSection() {
     fetchFilterOptions();
   }, []);
 
+  // Fetch starred deals to know which ones are starred
+  useEffect(() => {
+    const fetchStarredDeals = async () => {
+      if (!user) return;
+      try {
+        const response = await dealApi.getStarredDeals("basic");
+        const starredIds = new Set((response.data.deals || []).map((deal: Deal) => deal._id));
+        setStarredDealIds(starredIds);
+      } catch (error) {
+        console.error("Error fetching starred deals:", error);
+      }
+    };
+
+    fetchStarredDeals();
+  }, [user]);
+
   // Fetch deals
   const fetchDeals = async (filters = selectedFilters) => {
     try {
@@ -126,10 +144,53 @@ export function DealsSection() {
       if (filters.requirements) filterParams.requirementId = filters.requirements;
       if (filters.sources) filterParams.sourceId = filters.sources;
 
-      const response =
-        Object.keys(filterParams).length > 0
-          ? await dealApi.filterDeals(filterParams, "basic", true)
-          : await dealApi.getAllDeals("basic", true);
+      let response;
+
+      if (activeSourceTab === "favourite") {
+        // Fetch favourite/starred deals
+        const savedResponse = await dealApi.getStarredDeals("basic");
+        let savedDeals = savedResponse.data.deals || [];
+
+        // Apply filters to saved deals (client-side filtering)
+        if (filterParams.categoryId) {
+          savedDeals = savedDeals.filter((deal: Deal) =>
+            deal.category?.some((cat) => cat._id === filterParams.categoryId)
+          );
+        }
+        if (filterParams.subCategoryId) {
+          savedDeals = savedDeals.filter((deal: Deal) =>
+            deal.subCategory?.some((sub) => sub._id === filterParams.subCategoryId)
+          );
+        }
+        if (filterParams.typeId) {
+          savedDeals = savedDeals.filter((deal: Deal) =>
+            deal.type?.some((type) => type._id === filterParams.typeId)
+          );
+        }
+        if (filterParams.strategyId) {
+          savedDeals = savedDeals.filter((deal: Deal) =>
+            deal.strategy?.some((strategy) => strategy._id === filterParams.strategyId)
+          );
+        }
+        if (filterParams.requirementId) {
+          savedDeals = savedDeals.filter((deal: Deal) =>
+            deal.requirement?.some((req) => req._id === filterParams.requirementId)
+          );
+        }
+        if (filterParams.sourceId) {
+          savedDeals = savedDeals.filter((deal: Deal) =>
+            deal.source?._id === filterParams.sourceId
+          );
+        }
+
+        response = { data: { deals: savedDeals } };
+      } else {
+        // Fetch regular deals
+        response =
+          Object.keys(filterParams).length > 0
+            ? await dealApi.filterDeals(filterParams, "basic", true)
+            : await dealApi.getAllDeals("basic", true);
+      }
 
       setDeals(response.data.deals || []);
     } catch (error) {
@@ -140,10 +201,10 @@ export function DealsSection() {
     }
   };
 
-  // Update deals when filters change or user authentication state changes
+  // Update deals when filters, tab, or user changes
   useEffect(() => {
     fetchDeals();
-  }, [selectedFilters, user]);
+  }, [selectedFilters, activeSourceTab, user]);
 
   // Load HubSpot script dynamically when modal opens
   useEffect(() => {
@@ -166,7 +227,63 @@ export function DealsSection() {
   // Handle source tab change
   const handleSourceTabChange = (value: string) => {
     setActiveSourceTab(value);
-    setSelectedFilters({ ...selectedFilters, sources: value === "all" ? null : value });
+    if (value === "favourite") {
+      // Don't filter by source when on favourite tab
+      setSelectedFilters({ ...selectedFilters, sources: null });
+    } else {
+      setSelectedFilters({ ...selectedFilters, sources: value === "all" ? null : value });
+    }
+  };
+
+  // Handle star/unstar deal
+  const handleStarToggle = async (dealId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      return;
+    }
+
+    if (starringDealId === dealId) {
+      return; // Prevent double clicks
+    }
+
+    setStarringDealId(dealId);
+    const isStarred = starredDealIds.has(dealId);
+
+    try {
+      if (isStarred) {
+        await dealApi.unstarDeal(dealId);
+        setStarredDealIds((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(dealId);
+          return newSet;
+        });
+        // If on favourite tab, remove from deals list
+        if (activeSourceTab === "favourite") {
+          setDeals((prev) => prev.filter((deal) => deal._id !== dealId));
+        }
+      } else {
+        await dealApi.starDeal(dealId);
+        setStarredDealIds((prev) => new Set(prev).add(dealId));
+        // If on favourite tab, refresh the deals list
+        if (activeSourceTab === "favourite") {
+          fetchDeals();
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling star:", error);
+      // Refresh starred deals on error to ensure consistency
+      try {
+        const response = await dealApi.getStarredDeals("basic");
+        const starredIds = new Set((response.data.deals || []).map((deal: Deal) => deal._id));
+        setStarredDealIds(starredIds);
+      } catch (refreshError) {
+        console.error("Error refreshing starred deals:", refreshError);
+      }
+    } finally {
+      setStarringDealId(null);
+    }
   };
 
   const formatArrayData = (data: any) => {
@@ -225,6 +342,11 @@ export function DealsSection() {
             <TabsTrigger value="all" className="text-xs sm:text-sm">
               All Sources
             </TabsTrigger>
+            {user && (
+              <TabsTrigger value="favourite" className="text-xs sm:text-sm">
+                Favourite
+              </TabsTrigger>
+            )}
             {filterOptions.sources.map((source) => (
               <TabsTrigger key={source._id} value={source._id} className="text-xs sm:text-sm">
                 {source.name}
@@ -236,6 +358,13 @@ export function DealsSection() {
               {renderFilters()}
             </div>
           </TabsContent>
+          {user && (
+            <TabsContent value="favourite" className="mt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
+                {renderFilters()}
+              </div>
+            </TabsContent>
+          )}
           {filterOptions.sources.map((source) => (
             <TabsContent key={source._id} value={source._id} className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
@@ -270,6 +399,11 @@ export function DealsSection() {
                 <TabsTrigger value="all" className="text-xs sm:text-sm">
                   All Sources
                 </TabsTrigger>
+                {user && (
+                  <TabsTrigger value="favourite" className="text-xs sm:text-sm">
+                    Favourite
+                  </TabsTrigger>
+                )}
                 {filterOptions.sources.map((source) => (
                   <TabsTrigger key={source._id} value={source._id} className="text-xs sm:text-sm">
                     {source.name}
@@ -279,6 +413,11 @@ export function DealsSection() {
               <TabsContent value="all" className="mt-0">
                 <div className="space-y-1 py-1">{renderFilters()}</div>
               </TabsContent>
+              {user && (
+                <TabsContent value="favourite" className="mt-0">
+                  <div className="space-y-1 py-1">{renderFilters()}</div>
+                </TabsContent>
+              )}
               {filterOptions.sources.map((source) => (
                 <TabsContent key={source._id} value={source._id} className="mt-0">
                   <div className="space-y-1 py-1">{renderFilters()}</div>
@@ -303,7 +442,11 @@ export function DealsSection() {
                     requirements: null,
                     sources: null
                   });
-                  setActiveSourceTab("all");
+                  if (activeSourceTab === "favourite") {
+                    // Keep favourite tab active when clearing filters
+                  } else {
+                    setActiveSourceTab("all");
+                  }
                   setShowFilterModal(false);
                 }}
                 className="flex-1 text-xs sm:text-sm"
@@ -344,6 +487,22 @@ export function DealsSection() {
                           "linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(0,0,0,0.8))"
                       }}
                     />
+                    {/* Star Button */}
+                    {user && (
+                      <button
+                        onClick={(e) => handleStarToggle(item._id, e)}
+                        disabled={starringDealId === item._id}
+                        className="absolute top-2 right-2 z-20 p-2 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={starredDealIds.has(item._id) ? "Unstar deal" : "Star deal"}
+                      >
+                        <Star
+                          className={`h-5 w-5 transition-all ${starredDealIds.has(item._id)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-white hover:text-yellow-300"
+                            }`}
+                        />
+                      </button>
+                    )}
                     <h3 className="absolute bottom-6 sm:bottom-8 text-sm sm:text-xl left-2 text-white font-bold z-10 uppercase line-clamp-2">
                       {item.name}
                     </h3>
@@ -390,7 +549,9 @@ export function DealsSection() {
             ) : (
               <div className="col-span-full flex justify-center items-center h-24 sm:h-32">
                 <div className="text-sm sm:text-base text-royal-gray">
-                  No deals found matching your filters.
+                  {activeSourceTab === "favourite"
+                    ? "You haven't saved any deals yet. Star deals to add them to your favourites."
+                    : "No deals found matching your filters."}
                 </div>
               </div>
             )}

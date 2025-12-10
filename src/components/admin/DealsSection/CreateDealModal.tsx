@@ -56,6 +56,8 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
     image: "",
     source: "",
     displayOnPublicPage: false,
+    isRoyalVetted: false,
+    currentOffering: "",
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -112,6 +114,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   // Populate form when editing
   useEffect(() => {
     if (editingDeal) {
+      const isRoyalVetted = (editingDeal as any).isRoyalVetted || false;
       const initialData = {
         name: editingDeal.name || "",
         url: editingDeal.url || "",
@@ -121,8 +124,11 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         strategies: editingDeal.strategy?.map((strategy: any) => strategy._id) || [],
         requirements: editingDeal.requirement?.map((req: any) => req._id) || [],
         image: editingDeal.image || "",
-        source: editingDeal.source?._id || "",
+        // If Royal Vetted, set source to "royal_vetted_special", otherwise use actual source
+        source: isRoyalVetted ? "royal_vetted_special" : (editingDeal.source?._id || ""),
         displayOnPublicPage: (editingDeal as any).displayOnPublicPage || false,
+        isRoyalVetted: isRoyalVetted,
+        currentOffering: (editingDeal as any).currentOffering || "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -149,6 +155,8 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         image: "",
         source: "",
         displayOnPublicPage: false,
+        isRoyalVetted: false,
+        currentOffering: "",
       };
       setFormData(emptyData);
       setInitialFormData(emptyData);
@@ -161,14 +169,16 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
 
   // Ensure source value is set after options are loaded when editing
   useEffect(() => {
-    if (editingDeal && options.sources.length > 0 && editingDeal.source?._id) {
-      // Ensure source is set after options are loaded
-      // This handles the case where formData was set before options loaded
+    if (editingDeal && options.sources.length > 0) {
+      const isRoyalVetted = (editingDeal as any).isRoyalVetted || false;
       setFormData(prev => {
-        if (prev.source !== editingDeal.source._id) {
+        // If Royal Vetted, ensure source is set to "royal_vetted_special"
+        // Otherwise, set to actual source ID if it exists
+        const expectedSource = isRoyalVetted ? "royal_vetted_special" : (editingDeal.source?._id || "");
+        if (prev.source !== expectedSource) {
           return {
             ...prev,
-            source: editingDeal.source._id
+            source: expectedSource
           };
         }
         return prev;
@@ -189,13 +199,21 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         optionsApi.getSources(),
       ]);
 
+      // Add "Royal Vetted" as a special source option
+      const sourcesList = sourcesRes.data.sources.map((item: any) => ({ label: item.name, value: item._id }));
+      // Check if "Royal Vetted" already exists, if not add it as a special option
+      const hasRoyalVetted = sourcesList.some((s: any) => s.label === "Royal Vetted");
+      if (!hasRoyalVetted) {
+        sourcesList.unshift({ label: "Royal Vetted", value: "royal_vetted_special" });
+      }
+
       const optionsData = {
         categories: categoriesRes.data.categories.map((item: any) => ({ label: item.name, value: item._id })),
         subCategories: subCategoriesRes.data.subCategories.map((item: any) => ({ label: item.name, value: item._id })),
         types: typesRes.data.types.map((item: any) => ({ label: item.name, value: item._id })),
         strategies: strategiesRes.data.strategies.map((item: any) => ({ label: item.name, value: item._id })),
         requirements: requirementsRes.data.requirements.map((item: any) => ({ label: item.name, value: item._id })),
-        sources: sourcesRes.data.sources.map((item: any) => ({ label: item.name, value: item._id })),
+        sources: sourcesList,
       };
 
       console.log(
@@ -241,8 +259,13 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         typeIds: formData.types,
         strategyIds: formData.strategies,
         requirementIds: formData.requirements,
-        sourceId: formData.source,
+        // Determine if Royal Vetted based on source selection
+        isRoyalVetted: formData.source === "royal_vetted_special" || formData.isRoyalVetted,
+        // Only send sourceId if not Royal Vetted (royal_vetted_special is not a real source ID)
+        sourceId: (formData.source === "royal_vetted_special" || formData.isRoyalVetted) ? null : (formData.source || null),
         displayOnPublicPage: formData.displayOnPublicPage,
+        // Only send currentOffering if Royal Vetted
+        currentOffering: (formData.source === "royal_vetted_special" || formData.isRoyalVetted) ? (formData.currentOffering || null) : null,
         createdBy: "user_id_here", // TODO: Get from auth context
       };
 
@@ -265,7 +288,27 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === "source") {
+      // Check if "Royal Vetted" is selected
+      const selectedSource = options.sources.find((s: any) => s.value === value);
+      const isRoyalVettedSource = value === "royal_vetted_special" ||
+        (selectedSource && selectedSource.label === "Royal Vetted");
+
+      setFormData(prev => {
+        const newData = { ...prev, [field]: value };
+        if (isRoyalVettedSource) {
+          newData.isRoyalVetted = true;
+          // Keep existing offering if any, or leave empty
+          newData.currentOffering = newData.currentOffering || "";
+        } else {
+          newData.isRoyalVetted = false;
+          newData.currentOffering = ""; // Clear offering when not Royal Vetted
+        }
+        return newData;
+      });
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleMultiSelectChange = (field: string, selectedValues: string[]) => {
@@ -471,7 +514,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
               </div>
             </div>
 
-            {/* Single Select Fields */}
+            {/* Single Select Fields - Source is always visible, includes Royal Vetted option */}
             <div className="space-y-4">
               {singleSelectFields.map((item) => (
                 <div key={item.id} className="space-y-2">
@@ -506,21 +549,47 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
               ))}
             </div>
 
-            {/* Display on Public Pages */}
-            <div className="flex items-center space-x-2 pt-2">
-              <Checkbox
-                id="displayOnPublicPage"
-                checked={formData.displayOnPublicPage}
-                onCheckedChange={(checked) => {
-                  setFormData(prev => ({ ...prev, displayOnPublicPage: checked === true }));
-                }}
-              />
-              <Label
-                htmlFor="displayOnPublicPage"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-              >
-                Display on public pages
-              </Label>
+            {/* Deal Status Options */}
+            <div className="space-y-4 pt-4 border-t-2 border-gray-300">
+              {/* Current Offering - Only shown when Royal Vetted source is selected */}
+              {formData.isRoyalVetted && (
+                <div className="space-y-2 py-2 bg-blue-50/50 p-4 rounded-lg border border-blue-200">
+                  <Label className="text-sm font-semibold text-royal-dark-gray">
+                    Current Offering
+                  </Label>
+                  <Select
+                    value={formData.currentOffering || "none"}
+                    onValueChange={(value) => handleInputChange("currentOffering", value === "none" ? "" : value)}
+                    disabled={loading}
+                  >
+                    <SelectTrigger className="h-11 text-base">
+                      <SelectValue placeholder="Select offering status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="Open">Open</SelectItem>
+                      <SelectItem value="Closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Display on Public Pages - Last item */}
+              <div className="flex items-center space-x-2 py-2">
+                <Checkbox
+                  id="displayOnPublicPage"
+                  checked={formData.displayOnPublicPage}
+                  onCheckedChange={(checked) => {
+                    setFormData(prev => ({ ...prev, displayOnPublicPage: checked === true }));
+                  }}
+                />
+                <Label
+                  htmlFor="displayOnPublicPage"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Display on public pages
+                </Label>
+              </div>
             </div>
 
             {/* Submit Button */}

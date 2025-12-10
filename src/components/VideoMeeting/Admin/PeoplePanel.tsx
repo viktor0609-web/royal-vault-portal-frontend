@@ -251,7 +251,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                       <span className="font-medium text-xs sm:text-sm truncate" title={displayName}>{displayName}</span>
                     </div>
                     {role === "Admin" && (
-                      <div className="flex gap-1 flex-shrink-0">
+                      <div className="flex items-center gap-1 flex-shrink-0">
                         <Button
                           size="sm"
                           onClick={() => toggleParticipantAudio(p.id)}
@@ -282,7 +282,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                           size="sm"
                           onClick={() => ejectParticipant(p.id)}
                           variant="destructive"
-                          className="bg-opacity-50 p-1 h-5 w-auto text-xs"
+                          className="bg-opacity-50 p-1 h-6 w-auto text-xs flex items-center"
                         >
                           Eject
                         </Button>

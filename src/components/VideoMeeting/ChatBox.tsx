@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
 import { DailyCall } from '@daily-co/daily-js';
 import { useDailyMeeting } from "../../context/DailyMeetingContext";
-import { Smile, Pin, PinOff } from 'lucide-react';
+import { Smile, Pin } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useChat } from '../../context/ChatContext';
 import { webinarApi } from '../../lib/api';
@@ -625,29 +625,21 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
 
                   {/* Message bubble */}
                   <div
+                    onClick={(e) => {
+                      // Only allow pinning for Admin and Guest
+                      if (isAdmin || role === "Guest") {
+                        // Don't pin if clicking on a link
+                        if ((e.target as HTMLElement).tagName !== 'A') {
+                          handlePinMessage(msg.id, msg.isPinned || false);
+                        }
+                      }
+                    }}
                     className={`rounded-lg px-2.5 py-1.5 shadow-sm relative group ${isOwnMessage
                       ? 'bg-white text-gray-800 rounded-br-none border border-gray-200'
                       : 'bg-white text-black rounded-bl-none border border-gray-200'
-                      }`}
+                      } ${(isAdmin || role === "Guest") ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+                    title={(isAdmin || role === "Guest") ? (msg.isPinned ? "Click to unpin message" : "Click to pin message") : undefined}
                   >
-                    {/* Pin button - visible for Admin and Guest on ALL messages (own and others) */}
-                    {(isAdmin || role === "Guest") && (
-                      <button
-                        onClick={() => handlePinMessage(msg.id, msg.isPinned || false)}
-                        className={`absolute -top-3 -right-3 p-2.5 rounded-full transition-all opacity-0 group-hover:opacity-100 ${msg.isPinned
-                          ? 'opacity-100 bg-yellow-400 hover:bg-yellow-500 text-yellow-900'
-                          : 'bg-gray-200 hover:bg-gray-300 text-gray-600'
-                          }`}
-                        title={msg.isPinned ? "Unpin message" : "Pin message"}
-                      >
-                        {msg.isPinned ? (
-                          <PinOff className="h-5 w-5" />
-                        ) : (
-                          <Pin className="h-5 w-5" />
-                        )}
-                      </button>
-                    )}
-
                     {/* Pinned indicator - only visible for Admin and Guest */}
                     {msg.isPinned && (isAdmin || role === "Guest") && (
                       <div className="absolute -top-2 left-1 flex items-center gap-1">

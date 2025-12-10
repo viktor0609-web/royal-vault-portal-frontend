@@ -24,6 +24,9 @@ export const dealApi = {
   updateDeal: dealService.updateDeal,
   deleteDeal: dealService.deleteDeal,
   filterDeals: dealService.filterDeals,
+  getStarredDeals: dealService.getStarredDeals,
+  starDeal: dealService.starDeal,
+  unstarDeal: dealService.unstarDeal,
 };
 
 export const courseApi = {

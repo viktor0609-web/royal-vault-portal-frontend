@@ -41,6 +41,8 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
     startScreenshare,
     stopScreenshare,
     hasLocalAudioPermission, // ✅ use context directly
+    raiseHand,
+    raisedHands,
   } = useDailyMeeting();
 
   if (!joined) return null;
@@ -165,17 +167,18 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
                 <TooltipTrigger asChild>
                   <Button
                     variant="secondary"
-                    onClick={() => {
-                      // Simple hand button - you can add your own logic here
-                      console.log('Hand button clicked');
-                    }}
-                    className="bg-gray-700 hover:bg-gray-600 text-white rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 transition-all duration-200"
+                    onClick={raiseHand}
+                    className={`rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 transition-all duration-200 ${
+                      raisedHands.has(localParticipant?.id || '')
+                        ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                        : 'bg-gray-700 hover:bg-gray-600 text-white'
+                    }`}
                   >
                     <Hand size={20} className="sm:w-6 sm:h-6" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Raise Hand</p>
+                  <p>{raisedHands.has(localParticipant?.id || '') ? "Lower Hand" : "Raise Hand"}</p>
                 </TooltipContent>
               </Tooltip>
 

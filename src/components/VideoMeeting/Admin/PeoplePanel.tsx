@@ -10,7 +10,7 @@ interface PeoplePanelProps {
 }
 
 export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
-  const { participants, role, ejectParticipant, toggleParticipantAudioPermission, toggleParticipantAudio, toggleParticipantVideo } = useDailyMeeting();
+  const { participants, role, ejectParticipant, toggleParticipantAudioPermission, toggleParticipantAudio, toggleParticipantVideo, lowerHand, raisedHands } = useDailyMeeting();
   const [activeTab, setActiveTab] = useState("thumbnails");
   const thumbnailContainerRef = useRef<HTMLDivElement>(null);
   const speakingUserRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -22,11 +22,11 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
   // Get main video track to avoid duplication
   const mainVideoTrack = guestVideoTrack || adminVideoTrack;
 
-  // Get participants for thumbnails: Admin, Guest, and Users who are speaking
+  // Get participants for thumbnails: Admin, Guest, Users who are speaking, and Users with raised hands
   const thumbnailParticipants = participants.filter(p =>
     p.permissions?.canAdmin ||
     (p.name.includes("Guest") && !p.permissions?.canAdmin) ||
-    (!p.permissions?.canAdmin && !p.name.includes("Guest") && p.speaking)
+    (!p.permissions?.canAdmin && !p.name.includes("Guest") && (p.speaking || p.handRaised))
   );
 
   // Find the active speaker (person currently speaking)
@@ -64,7 +64,10 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
     return () => clearTimeout(timeoutId);
   }, [activeSpeaker?.id, activeTab]);
 
+  // Debug: log participants with raised hands
   console.log("participants", participants)
+  console.log("participants with raised hands", participants.filter(p => p.handRaised))
+  console.log("role", role)
 
   return (
     <div className="w-full sm:w-48 lg:w-56 bg-gray-900 text-white flex flex-col h-full min-h-0 @container/panel relative">
@@ -126,6 +129,11 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                 const isUser = !isAdmin && !isGuest;
                 const isActiveSpeaker = activeSpeaker?.id === participant.id;
 
+                // Debug: log hand raised status
+                if (participant.handRaised) {
+                  console.log('Participant with raised hand:', participant.name, participant.id, 'isAdmin:', isAdmin, 'isGuest:', isGuest, 'isUser:', isUser, 'role:', role);
+                }
+
                 const participantName = participant.name || (isAdmin ? "Admin" : isGuest ? "Guest" : "User");
                 // Extract name and role from format like "John (Admin)" or just use the name
                 const nameMatch = participantName.match(/^(.+?)\s*\((.+?)\)$/);
@@ -154,6 +162,12 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                     {isActiveSpeaker && (
                       <div className="absolute inset-0 border-4 border-red-500 z-20 pointer-events-none animate-pulse" />
                     )}
+                    {/* Hand raised indicator - top left corner */}
+                    {participant.handRaised && (
+                      <div className="absolute top-2 left-2 z-10 bg-yellow-500 rounded-full p-1.5 shadow-lg">
+                        <Hand size={14} className="text-white" />
+                      </div>
+                    )}
                     <VideoPlayer
                       track={participant.video ? participant.videoTrack : null}
                       type="camera"
@@ -171,11 +185,10 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                             toggleParticipantAudio(participant.id);
                           }}
                           variant="outline"
-                          className={`h-7 w-7 p-0 backdrop-blur-sm border-2 ${
-                            participant.audio 
-                              ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400' 
-                              : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
-                          }`}
+                          className={`h-7 w-7 p-0 backdrop-blur-sm border-2 ${participant.audio
+                            ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400'
+                            : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
+                            }`}
                           title={participant.audio ? "Mute" : "Unmute"}
                         >
                           {participant.audio ? <Mic size={14} className="text-white" /> : <MicOff size={14} className="text-white" />}
@@ -187,11 +200,10 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                             toggleParticipantVideo(participant.id);
                           }}
                           variant="outline"
-                          className={`h-7 w-7 p-0 backdrop-blur-sm border-2 ${
-                            participant.video 
-                              ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400' 
-                              : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
-                          }`}
+                          className={`h-7 w-7 p-0 backdrop-blur-sm border-2 ${participant.video
+                            ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400'
+                            : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
+                            }`}
                           title={participant.video ? "Turn off camera" : "Turn on camera"}
                         >
                           {participant.video ? <Video size={14} className="text-white" /> : <VideoOff size={14} className="text-white" />}
@@ -209,22 +221,41 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                         </div>
                       </div>
                     )}
-                    {/* Bottom overlay with name and eject button */}
+                    {/* Bottom overlay with name and controls */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent px-2 py-2 flex items-center justify-between gap-2">
                       <span className="text-white text-xs font-medium truncate flex-1">{displayName}</span>
-                      {/* Eject button for Admin - bottom right */}
+                      {/* Control buttons for Admin - bottom right */}
                       {role === "Admin" && (isGuest || isUser) && (
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            ejectParticipant(participant.id);
-                          }}
-                          variant="destructive"
-                          className="bg-red-600 hover:bg-red-700 h-6 px-2 text-xs flex-shrink-0"
-                        >
-                          Eject
-                        </Button>
+                        <div className="flex gap-1 flex-shrink-0 items-center">
+                          {(participant.handRaised || raisedHands.has(participant.id)) && lowerHand && (
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.log('Lowering hand for:', participant.id, participant.name);
+                                if (lowerHand) {
+                                  lowerHand(participant.id);
+                                }
+                              }}
+                              variant="outline"
+                              className="bg-yellow-600 hover:bg-yellow-700 border-yellow-400 h-7 w-7 p-0 backdrop-blur-sm border-2 z-20"
+                              title="Lower Hand"
+                            >
+                              <Hand size={14} className="text-white" />
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              ejectParticipant(participant.id);
+                            }}
+                            variant="destructive"
+                            className="bg-red-600 hover:bg-red-700 h-6 px-2 text-xs flex-shrink-0"
+                          >
+                            Eject
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -246,8 +277,14 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                 const displayName = nameMatch ? nameMatch[1] : p.name;
 
                 return (
-                  <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 @container/participant">
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div key={p.id} className="flex items-center justify-between bg-gray-800 p-2 @container/participant relative">
+                    {/* Hand raised indicator - left side */}
+                    {p.handRaised && (
+                      <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-yellow-500 rounded-full p-1 shadow-lg">
+                        <Hand size={12} className="text-white" />
+                      </div>
+                    )}
+                    <div className={`flex items-center gap-2 min-w-0 flex-1 ${p.handRaised ? 'pl-8' : ''}`}>
                       <span className="font-medium text-xs sm:text-sm truncate" title={displayName}>{displayName}</span>
                     </div>
                     {role === "Admin" && (
@@ -256,11 +293,10 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                           size="sm"
                           onClick={() => toggleParticipantAudio(p.id)}
                           variant="outline"
-                          className={`h-6 w-6 p-0 border-2 ${
-                            p.audio 
-                              ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400' 
-                              : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
-                          }`}
+                          className={`h-6 w-6 p-0 border-2 ${p.audio
+                            ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400'
+                            : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
+                            }`}
                           title={p.audio ? "Mute" : "Unmute"}
                         >
                           {p.audio ? <Mic size={12} className="text-white" /> : <MicOff size={12} className="text-white" />}
@@ -269,15 +305,28 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
                           size="sm"
                           onClick={() => toggleParticipantVideo(p.id)}
                           variant="outline"
-                          className={`h-6 w-6 p-0 border-2 ${
-                            p.video 
-                              ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400' 
-                              : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
-                          }`}
+                          className={`h-6 w-6 p-0 border-2 ${p.video
+                            ? 'bg-green-500/80 hover:bg-green-600/80 border-green-400'
+                            : 'bg-red-500/80 hover:bg-red-600/80 border-red-400'
+                            }`}
                           title={p.video ? "Turn off camera" : "Turn on camera"}
                         >
                           {p.video ? <Video size={12} className="text-white" /> : <VideoOff size={12} className="text-white" />}
                         </Button>
+                        {(p.handRaised || raisedHands.has(p.id)) && lowerHand && (
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              console.log('Lowering hand for (list):', p.id, p.name);
+                              lowerHand(p.id);
+                            }}
+                            variant="outline"
+                            className="bg-yellow-600 hover:bg-yellow-700 border-yellow-400 h-6 w-6 p-0 border-2 z-20"
+                            title="Lower Hand"
+                          >
+                            <Hand size={12} className="text-white" />
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           onClick={() => ejectParticipant(p.id)}

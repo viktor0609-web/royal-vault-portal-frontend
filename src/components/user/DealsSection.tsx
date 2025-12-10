@@ -352,19 +352,6 @@ export function DealsSection() {
 
   return (
     <div className="flex flex-col h-full p-2 sm:p-4 animate-in fade-in duration-100">
-      {/* Header Section */}
-      <div className="flex items-center justify-between gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-        <div className="flex items-center gap-2 sm:gap-4">
-          <TagIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
-          <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">DEALS</h1>
-            <p className="text-xs sm:text-base text-royal-gray">
-              Discover exclusive investment opportunities and deals.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Desktop Filters with Source Tabs */}
       <div className="hidden min-[800px]:block bg-white p-4 sm:p-6 rounded-lg border border-royal-light-gray mb-6 sm:mb-8 shadow-sm">
         <Tabs value={activeSourceTab} onValueChange={handleSourceTabChange} className="w-full">

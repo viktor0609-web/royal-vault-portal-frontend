@@ -23,14 +23,26 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
   const mainVideoTrack = guestVideoTrack || adminVideoTrack;
 
   // Get participants for thumbnails: Admin, Guest, Users who are speaking, and Users with raised hands
-  const thumbnailParticipants = participants.filter(p =>
-    p.permissions?.canAdmin ||
-    (p.name.includes("Guest") && !p.permissions?.canAdmin) ||
-    (!p.permissions?.canAdmin && !p.name.includes("Guest") && (p.speaking || p.handRaised))
-  );
+  // Exclude developer: Viktor Lypianets (viktor@royallegalsolutions.com)
+  const thumbnailParticipants = participants.filter(p => {
+    const participantName = p.name?.toLowerCase() || "";
+    const isDeveloper = participantName.includes("viktor lypianets") ||
+      participantName.includes("viktor@royallegalsolutions.com");
+    if (isDeveloper) return false;
+
+    return p.permissions?.canAdmin ||
+      (p.name.includes("Guest") && !p.permissions?.canAdmin) ||
+      (!p.permissions?.canAdmin && !p.name.includes("Guest") && (p.speaking || p.handRaised));
+  });
 
   // Find the active speaker (person currently speaking)
-  const activeSpeaker = participants.find(p => p.speaking);
+  // Exclude developer: Viktor Lypianets (viktor@royallegalsolutions.com)
+  const activeSpeaker = participants.find(p => {
+    const participantName = p.name?.toLowerCase() || "";
+    const isDeveloper = participantName.includes("viktor lypianets") ||
+      participantName.includes("viktor@royallegalsolutions.com");
+    return p.speaking && !isDeveloper;
+  });
 
   // Count Admin and Guest participants (for layout purposes)
   const adminAndGuestCount = participants.filter(p =>
@@ -38,7 +50,15 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
   ).length;
 
   // Count Users (attendees) for the list
-  const userParticipants = participants.filter(p => !p.permissions?.canAdmin && !p.name.includes("Guest"));
+  // Exclude developer: Viktor Lypianets (viktor@royallegalsolutions.com)
+  const userParticipants = participants.filter(p => {
+    const participantName = p.name?.toLowerCase() || "";
+    const isDeveloper = participantName.includes("viktor lypianets") ||
+      participantName.includes("viktor@royallegalsolutions.com");
+    if (isDeveloper) return false;
+
+    return !p.permissions?.canAdmin && !p.name.includes("Guest");
+  });
   const attendeeCount = userParticipants.length;
 
   // Auto-scroll to speaking user when they start speaking
@@ -274,6 +294,7 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
               .map((p) => {
                 // Extract name without role (remove "(User)" or similar)
                 const nameMatch = p.name.match(/^(.+?)\s*\(.+?\)$/);
+                console.log("nameMatch", p.email)
                 const displayName = nameMatch ? nameMatch[1] : p.name;
 
                 return (

@@ -486,10 +486,10 @@ export function DealsSection() {
                   className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 cursor-pointer block overflow-hidden group"
                 >
                   {/* Image Section */}
-                  <div className="relative h-56 sm:h-72 w-full overflow-hidden">
+                  <div className="relative h-56 sm:h-72 w-full overflow-hidden bg-white">
                     <img
                       src={item.image}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
                       alt={item.name}
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Deal+Image';

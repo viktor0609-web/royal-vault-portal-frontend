@@ -413,11 +413,11 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                   {editingDeal && formData.image && !formData.image.startsWith('http') && (
                     <div>
                       <Label className="text-xs font-medium text-gray-600 mb-2 block">Current Image</Label>
-                      <div className="relative inline-block">
+                      <div className="relative inline-block bg-white rounded-lg border-2 border-gray-200 shadow-sm p-2">
                         <img
                           src={import.meta.env.VITE_BACKEND_URL + formData.image}
                           alt="Current deal image"
-                          className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                          className="w-28 h-28 sm:w-32 sm:h-32 object-contain"
                         />
                       </div>
                     </div>
@@ -431,11 +431,11 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                   {imagePreviewUrl && (
                     <div>
                       <Label className="text-xs font-medium text-gray-600 mb-2 block">New Image Preview</Label>
-                      <div className="relative inline-block">
+                      <div className="relative inline-block bg-white rounded-lg border-2 border-primary shadow-sm p-2">
                         <img
                           src={imagePreviewUrl}
                           alt="New image preview"
-                          className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-lg border-2 border-primary shadow-sm"
+                          className="w-28 h-28 sm:w-32 sm:h-32 object-contain"
                         />
                       </div>
                     </div>
@@ -452,11 +452,11 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                   {editingDeal && formData.image && formData.image.startsWith('http') && (
                     <div>
                       <Label className="text-xs font-medium text-gray-600 mb-2 block">Current Image</Label>
-                      <div className="relative inline-block">
+                      <div className="relative inline-block bg-white rounded-lg border-2 border-gray-200 shadow-sm p-2">
                         <img
                           src={formData.image}
                           alt="Current deal image"
-                          className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                          className="w-28 h-28 sm:w-32 sm:h-32 object-contain"
                         />
                       </div>
                     </div>
@@ -471,11 +471,11 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
                   {imageUrl && (
                     <div>
                       <Label className="text-xs font-medium text-gray-600 mb-2 block">Image Preview</Label>
-                      <div className="relative inline-block">
+                      <div className="relative inline-block bg-white rounded-lg border-2 border-primary shadow-sm p-2">
                         <img
                           src={imageUrl}
                           alt="Image preview"
-                          className="w-28 h-28 sm:w-32 sm:h-32 object-cover rounded-lg border-2 border-primary shadow-sm"
+                          className="w-28 h-28 sm:w-32 sm:h-32 object-contain"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
                           }}

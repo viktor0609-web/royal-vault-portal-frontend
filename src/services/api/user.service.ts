@@ -44,7 +44,7 @@ export const userService = {
 
   // Reset user password
   resetUserPassword: (userId: string, data?: { newPassword?: string; sendEmail?: boolean }) =>
-    api.post(`${API_ENDPOINTS.USERS.BASE}/${userId}/reset-password`, data || {}),
+    api.post<{ message: string; resetUrl?: string }>(`${API_ENDPOINTS.USERS.BASE}/${userId}/reset-password`, data || {}),
 
   // Toggle user verification
   toggleUserVerification: (userId: string, isVerified: boolean) =>

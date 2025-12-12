@@ -256,10 +256,29 @@ export function UsersSection() {
   const handleResetPassword = async (userId: string) => {
     try {
       const response = await userApi.resetUserPassword(userId, { sendEmail: true });
-      toast({
-        title: "Success",
-        description: "Password reset email sent successfully",
-      });
+      const resetUrl = response.data?.resetUrl;
+      
+      if (resetUrl) {
+        // Copy URL to clipboard
+        try {
+          await navigator.clipboard.writeText(resetUrl);
+          toast({
+            title: "Success",
+            description: "Password reset email sent. Reset URL copied to clipboard!",
+          });
+        } catch (clipboardError) {
+          // Fallback if clipboard API fails
+          toast({
+            title: "Success",
+            description: `Password reset email sent. Reset URL: ${resetUrl}`,
+          });
+        }
+      } else {
+        toast({
+          title: "Success",
+          description: "Password reset email sent successfully",
+        });
+      }
     } catch (error: any) {
       console.error("Error resetting password:", error);
       toast({

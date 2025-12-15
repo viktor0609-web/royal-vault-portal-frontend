@@ -530,14 +530,14 @@ export function DealsSection() {
 
                     {/* Deal Name Overlay */}
                     <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10">
-                      <h3 className="text-base sm:text-xl lg:text-2xl text-white font-bold mb-2 line-clamp-2 drop-shadow-lg">
+                      <h3 className="text-base sm:text-lg lg:text-xl text-white font-bold mb-2 line-clamp-2 drop-shadow-lg">
                         {item.name}
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {/* Royal Vetted Tag */}
                         {(item as Deal).isRoyalVetted && (
                           <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-500/90 backdrop-blur-sm border border-purple-300 shadow-lg">
-                            <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
+                            <span className="text-xxs sm:text-xs text-white font-semibold uppercase tracking-wide">
                               Royal Vetted
                             </span>
                           </div>
@@ -563,22 +563,10 @@ export function DealsSection() {
                   <div className="p-4 sm:p-6 space-y-4">
                     {/* Deal Details */}
                     <div className="space-y-3 text-sm">
-                      {formatArrayData(item.category) && (
-                        <div className="flex items-start gap-2">
-                          <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Category:</span>
-                          <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.category)}</span>
-                        </div>
-                      )}
                       {formatArrayData(item.subCategory) && (
                         <div className="flex items-start gap-2">
-                          <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Sub-Category:</span>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Category:</span>
                           <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.subCategory)}</span>
-                        </div>
-                      )}
-                      {formatArrayData(item.strategy) && (
-                        <div className="flex items-start gap-2">
-                          <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Strategy:</span>
-                          <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.strategy)}</span>
                         </div>
                       )}
                       {formatArrayData(item.requirement) && (

@@ -537,7 +537,7 @@ export function DealsSection() {
                         {/* Royal Vetted Tag */}
                         {(item as Deal).isRoyalVetted && (
                           <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-500/90 backdrop-blur-sm border border-purple-300 shadow-lg">
-                            <span className="text-xxs sm:text-xs text-white font-semibold uppercase tracking-wide">
+                            <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
                               Royal Vetted
                             </span>
                           </div>

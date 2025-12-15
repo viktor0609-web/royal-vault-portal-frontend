@@ -367,7 +367,7 @@ export function DealsSection() {
                     }`}
                   onClick={() => handleSourceTabChange("favourite")}
                 >
-                  Favourite
+                  Saved
                 </Button>
               )}
             </div>

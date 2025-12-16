@@ -175,10 +175,10 @@ export function WebinarsSection() {
     }
 
     // Open shareable replay URL in a new tab
-    const replayUrl = webinar.slug 
+    const replayUrl = webinar.slug
       ? `/replay/${webinar.slug}`
       : `/replay/${webinar._id}`;
-    
+
     window.open(replayUrl, '_blank');
   };
 
@@ -366,8 +366,9 @@ export function WebinarsSection() {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-center bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
-        <p className="text-xs sm:text-base text-royal-gray hidden sm:block">Filter by:</p>
+      {/* Desktop Filter */}
+      <div className="hidden sm:flex sm:flex-row gap-2 sm:gap-3 items-center bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+        <p className="text-xs sm:text-base text-royal-gray">Filter by:</p>
         <div className="flex gap-1 sm:gap-2 justify-center w-full sm:w-auto">
           {filterTabs.map((tab, index) => (
             <Button
@@ -375,6 +376,26 @@ export function WebinarsSection() {
               variant={index == filterIndex ? "default" : "outline"}
               size="sm"
               className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${index == filterIndex
+                ? "bg-primary hover:bg-royal-blue-dark text-white"
+                : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
+                }`}
+              onClick={() => changeFilter(index)}
+            >
+              {tab.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Mobile Filter */}
+      <div className="sm:hidden mb-1.5">
+        <div className="flex gap-0.5 bg-white p-0.5 rounded-lg border border-royal-light-gray">
+          {filterTabs.map((tab, index) => (
+            <Button
+              key={index}
+              variant={index == filterIndex ? "default" : "outline"}
+              size="sm"
+              className={`flex-1 text-xs py-0.5 h-7 ${index == filterIndex
                 ? "bg-primary hover:bg-royal-blue-dark text-white"
                 : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
                 }`}

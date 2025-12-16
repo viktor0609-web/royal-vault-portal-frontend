@@ -4,7 +4,7 @@ import { Loading } from "@/components/ui/Loading";
 import { MultiSelect } from "@/components/ui/multi-select";
 import type { MultiSelectOption } from "@/components/ui/multi-select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { FilterIcon, Star, TagIcon } from "lucide-react";
+import { Star, TagIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { optionsApi, dealApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -41,7 +41,6 @@ interface Deal {
 export function DealsSection() {
   const { user } = useAuth();
   const [showSalesModal, setShowSalesModal] = useState(false);
-  const [showFilterModal, setShowFilterModal] = useState(false);
   const [activeSourceTab, setActiveSourceTab] = useState<string>("all");
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     subCategories: [],
@@ -378,95 +377,48 @@ export function DealsSection() {
         </div>
       </div>
 
-      {/* Mobile Filters with Source Tabs */}
+      {/* Mobile Filters with Source Tabs Only */}
       <div className="min-[800px]:hidden mb-3 sm:mb-4">
-        <Dialog open={showFilterModal} onOpenChange={setShowFilterModal}>
-          <DialogTrigger asChild>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-center bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray">
+          <p className="text-xs sm:text-base text-royal-gray hidden sm:block">Filter by:</p>
+          <div className="flex gap-1 sm:gap-2 justify-center w-full sm:w-auto">
             <Button
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2 bg-white border-royal-light-gray text-xs sm:text-sm font-medium shadow-sm hover:shadow-md transition-all h-11"
+              variant={activeSourceTab === "all" ? "default" : "outline"}
+              size="sm"
+              className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "all"
+                ? "bg-primary hover:bg-royal-blue-dark text-white"
+                : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
+                }`}
+              onClick={() => handleSourceTabChange("all")}
             >
-              <FilterIcon className="h-4 w-4" />
-              Filter Deals
+              All
             </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-sm sm:text-base">
-                <FilterIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                Filter Deals
-              </DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col gap-2 mb-4">
-              <p className="text-xs sm:text-base text-royal-gray">Filter by:</p>
-              <div className="flex gap-1 sm:gap-2">
-                <Button
-                  variant={activeSourceTab === "all" ? "default" : "outline"}
-                  size="sm"
-                  className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "all"
-                    ? "bg-primary hover:bg-royal-blue-dark text-white"
-                    : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
-                    }`}
-                  onClick={() => handleSourceTabChange("all")}
-                >
-                  All
-                </Button>
-                <Button
-                  variant={activeSourceTab === "royal" ? "default" : "outline"}
-                  size="sm"
-                  className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "royal"
-                    ? "bg-primary hover:bg-royal-blue-dark text-white"
-                    : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
-                    }`}
-                  onClick={() => handleSourceTabChange("royal")}
-                >
-                  Royal
-                </Button>
-                {user && (
-                  <Button
-                    variant={activeSourceTab === "favourite" ? "default" : "outline"}
-                    size="sm"
-                    className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "favourite"
-                      ? "bg-primary hover:bg-royal-blue-dark text-white"
-                      : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
-                      }`}
-                    onClick={() => handleSourceTabChange("favourite")}
-                  >
-                    Favourite
-                  </Button>
-                )}
-              </div>
-            </div>
-            <div className="space-y-1 py-1">{renderFilters()}</div>
-            <div className="flex gap-1 pt-2 border-t">
+            <Button
+              variant={activeSourceTab === "royal" ? "default" : "outline"}
+              size="sm"
+              className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "royal"
+                ? "bg-primary hover:bg-royal-blue-dark text-white"
+                : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
+                }`}
+              onClick={() => handleSourceTabChange("royal")}
+            >
+              Royal
+            </Button>
+            {user && (
               <Button
-                variant="outline"
-                onClick={() => setShowFilterModal(false)}
-                className="flex-1 text-xs sm:text-sm"
+                variant={activeSourceTab === "favourite" ? "default" : "outline"}
+                size="sm"
+                className={`text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 ${activeSourceTab === "favourite"
+                  ? "bg-primary hover:bg-royal-blue-dark text-white"
+                  : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
+                  }`}
+                onClick={() => handleSourceTabChange("favourite")}
               >
-                Close
+                Saved
               </Button>
-              <Button
-                onClick={() => {
-                  setSelectedFilters({
-                    subCategories: [],
-                    requirements: [],
-                    sources: []
-                  });
-                  if (activeSourceTab === "favourite" || activeSourceTab === "royal") {
-                    // Keep favourite or royal tab active when clearing filters
-                  } else {
-                    setActiveSourceTab("all");
-                  }
-                  setShowFilterModal(false);
-                }}
-                className="flex-1 text-xs sm:text-sm"
-              >
-                Clear All
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Deals Grid */}

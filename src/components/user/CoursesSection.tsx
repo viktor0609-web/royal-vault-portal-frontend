@@ -74,7 +74,7 @@ export function CoursesSection() {
   if (loading) {
     return (
       <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
-        <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+        <div className="hidden sm:flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
           <GraduationCapIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
           <div>
             <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">COURSES</h1>
@@ -91,7 +91,7 @@ export function CoursesSection() {
   if (error) {
     return (
       <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
-        <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+        <div className="hidden sm:flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
           <GraduationCapIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
           <div>
             <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">COURSES</h1>
@@ -107,7 +107,7 @@ export function CoursesSection() {
 
   return (
     <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-300">
-      <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+      <div className="hidden sm:flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
         <GraduationCapIcon className="h-8 w-8 sm:h-12 sm:w-12 text-royal-gray hidden min-[700px]:block" />
         <div>
           <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">COURSES</h1>

@@ -477,11 +477,10 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
     };
 
     const [activeCtas, setActiveCtas] = useState<Array<{ index: number; label: string; link: string }>>([]);
-    const isAdminOrGuest = isAdmin || role === "Guest" || role === "Admin";
 
-    // Fetch active CTAs from backend on mount (only for regular users)
+    // Fetch active CTAs from backend on mount (all users)
     useEffect(() => {
-      if (isAdminOrGuest || !webinarId) return;
+      if (!webinarId) return;
 
       const fetchActiveCtas = async () => {
         try {
@@ -526,13 +525,14 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
       };
 
       fetchActiveCtas();
-    }, [webinarId, isAdminOrGuest, webinar]);
+    }, [webinarId, webinar]);
 
-    // Listen for CTA activation/cancellation events (only for regular users)
+    // Listen for CTA activation/cancellation events (all users)
     useEffect(() => {
-      if (!dailyRoom || isAdminOrGuest) return;
+      if (!dailyRoom) return;
 
       const handleCtaEvent = (event: any) => {
+        console.log('CTA event received:', event.data.message);
         if (event.data.message?.type === "cta-activate") {
           const { ctaIndex, ctaLabel, ctaLink } = event.data.message;
           setActiveCtas(prev => {
@@ -554,7 +554,7 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
       return () => {
         dailyRoom.off('app-message', handleCtaEvent);
       };
-    }, [dailyRoom, isAdminOrGuest]);
+    }, [dailyRoom]);
 
     return (
       <div className="flex flex-col h-full bg-white relative min-h-0 shadow-sm">
@@ -572,8 +572,8 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
           )}
         </div>
 
-        {/* Active CTA Buttons - Sticky at top, full width, only for regular users */}
-        {!isAdminOrGuest && activeCtas.length > 0 && (
+        {/* Active CTA Buttons - Sticky at top, full width, all users */}
+        {activeCtas.length > 0 && (
           <div className="sticky top-0 z-10 flex flex-col gap-1.5 px-2 py-1.5 bg-transparent">
             {activeCtas.map((cta) => (
               <button

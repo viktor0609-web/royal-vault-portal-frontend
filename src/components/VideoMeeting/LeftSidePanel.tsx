@@ -93,6 +93,23 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
     const isActive = activeCtaIndices.includes(index);
     const newActiveStatus = !isActive;
 
+    // Prepare the message data
+    const messageData = newActiveStatus
+      ? {
+        message: {
+          type: "cta-activate",
+          ctaIndex: index,
+          ctaLabel: ctas[index]?.label,
+          ctaLink: ctas[index]?.link,
+        }
+      }
+      : {
+        message: {
+          type: "cta-cancel",
+          ctaIndex: index,
+        }
+      };
+
     // Optimistic update: Update local state immediately
     if (newActiveStatus) {
       setActiveCtaIndices(prev => {
@@ -105,26 +122,24 @@ export const LeftSidePanel: React.FC<LeftSidePanelProps> = ({ webinar, webinarId
       setActiveCtaIndices(prev => prev.filter(idx => idx !== index));
     }
 
-    // Broadcast event immediately (don't wait for backend)
-    if (newActiveStatus) {
-      // Activate the CTA
-      (dailyRoom as any).sendAppMessage({
-        message: {
-          type: "cta-activate",
-          ctaIndex: index,
-          ctaLabel: ctas[index]?.label,
-          ctaLink: ctas[index]?.link,
-        }
-      }, '*');
-    } else {
-      // Cancel the CTA
-      (dailyRoom as any).sendAppMessage({
-        message: {
-          type: "cta-cancel",
-          ctaIndex: index,
-        }
-      }, '*');
-    }
+    // Broadcast event to other participants
+    (dailyRoom as any).sendAppMessage(messageData, '*');
+
+    // Manually trigger the event locally for the sender (Daily.co doesn't send back to sender)
+    // Use setTimeout to ensure this happens after the broadcast
+    setTimeout(() => {
+      // Create synthetic event object matching Daily.co's format
+      const syntheticEvent = {
+        data: messageData,
+        participant: dailyRoom.participants().local,
+      };
+
+      // Manually emit the event to trigger local listeners (ChatBox, etc.)
+      // Check if dailyRoom has an emit method (it should be an EventEmitter)
+      if (typeof (dailyRoom as any).emit === 'function') {
+        (dailyRoom as any).emit('app-message', syntheticEvent);
+      }
+    }, 0);
 
     // Send API request in background (don't wait for response)
     try {

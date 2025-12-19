@@ -583,7 +583,7 @@ export const ChatBox = React.forwardRef<ChatBoxRef, ChatBoxProps>(
                     window.open(cta.link, '_blank', 'noopener,noreferrer');
                   }
                 }}
-                className="bg-[#38B2DD] text-white px-2.5 py-1.5 rounded-md hover:bg-[#2D9CC0] transition-colors font-medium text-xs text-center w-full shadow-sm"
+                className="bg-[#38B2DD] text-white px-3 py-2 rounded-md hover:bg-[#2D9CC0] transition-colors font-medium text-base text-center w-full shadow-sm leading-normal"
               >
                 {cta.label}
               </button>

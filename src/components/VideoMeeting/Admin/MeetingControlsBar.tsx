@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "../../ui/button";
-import { LayoutGrid, Users, MonitorPlay, LogOut, Mic, MicOff, Video, VideoOff, Settings, Maximize, Minimize, Circle } from "lucide-react";
+import { LayoutGrid, Users, MonitorPlay, Mic, MicOff, Video, VideoOff, Settings, Maximize, Minimize, Circle } from "lucide-react";
 import { useDailyMeeting } from "../../../context/DailyMeetingContext";
 import { SettingsModal } from '../SettingsModal';
 import axios from 'axios';
@@ -36,7 +36,6 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
     isRecording,
     startRecording,
     stopRecording,
-    leaveRoom,
     toggleCamera,
     toggleMicrophone,
     isMicrophoneMuted,
@@ -270,31 +269,6 @@ export const MeetingControlsBar: React.FC<MeetingControlsBarProps> = ({
                   </TooltipContent>
                 </Tooltip>
               )}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => { 
-                      console.log("Leave Room Clicked"); 
-                      leaveRoom();
-                      // Try to close the browser tab
-                      setTimeout(() => {
-                        window.close();
-                        // Fallback: if window.close() doesn't work, navigate away
-                        if (!document.hidden) {
-                          window.location.href = '/';
-                        }
-                      }, 500);
-                    }}
-                    variant="destructive"
-                    className="bg-red-600 hover:bg-red-700 text-white rounded-full p-2 sm:p-3 h-10 w-10 sm:h-12 sm:w-12 @[480px]/controls:h-14 @[480px]/controls:w-14 transition-all duration-200"
-                  >
-                    <LogOut size={20} className="sm:w-6 sm:h-6" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Leave Meeting</p>
-                </TooltipContent>
-              </Tooltip>
             </>
           )}
         </div>

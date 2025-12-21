@@ -41,6 +41,7 @@ interface Deal {
 export function DealsSection() {
   const { user } = useAuth();
   const [showSalesModal, setShowSalesModal] = useState(false);
+  const [salesModalUrl, setSalesModalUrl] = useState<string>("https://meetings.hubspot.com/meet-rls/sales-demo-free?embed=true");
   const [activeSourceTab, setActiveSourceTab] = useState<string>("all");
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     subCategories: [],
@@ -303,6 +304,31 @@ export function DealsSection() {
     return String(data);
   };
 
+  // Check if user has full Elite access
+  const hasFullAccess = user?.client_type === "Elite" || user?.email?.toLowerCase().includes('royallegalsolutions.com');
+
+  // Check if deal should show restricted view (Royal Sourced or Client Sourced for non-Elite)
+  const isRestrictedDeal = (deal: Deal) => {
+    if (hasFullAccess) return false;
+    const sourceName = deal.source?.name || '';
+    return sourceName === 'Royal Sourced' || sourceName === 'Client Sourced';
+  };
+
+  // Handle deal click - Royal Vetted should open meeting scheduler for non-Elite users
+  const handleDealClick = (e: React.MouseEvent, deal: Deal) => {
+    if (!hasFullAccess && deal.isRoyalVetted) {
+      e.preventDefault();
+      e.stopPropagation();
+      setSalesModalUrl("https://meetings.hubspot.com/allen-lomax/keystone-and-rise-avalon?embed=true");
+      setShowSalesModal(true);
+    } else if (isRestrictedDeal(deal)) {
+      e.preventDefault();
+      e.stopPropagation();
+      // For restricted deals, the flip card will handle the click
+    }
+    // For Elite users or deals with full access, allow normal navigation
+  };
+
   const renderFilters = () =>
     filterConfig.map((config) => {
       const options: MultiSelectOption[] = (filterOptions[config.key as keyof typeof filterOptions] || []).map((option: Option) => ({
@@ -427,107 +453,222 @@ export function DealsSection() {
                 <Loading message="Loading deals..." />
               </div>
             ) : deals.length > 0 ? (
-              deals.map((item, index) => (
-                <Link
-                  target="_blank"
-                  key={index}
-                  to={item.url}
-                  className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 cursor-pointer block overflow-hidden group"
-                >
-                  {/* Image Section */}
-                  <div className="relative h-56 sm:h-72 w-full overflow-hidden bg-white">
-                    <img
-                      src={item.image}
-                      className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
-                      alt={item.name}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Deal+Image';
-                      }}
-                    />
+              deals.map((item, index) => {
+                const deal = item as Deal;
+                const restricted = isRestrictedDeal(deal);
+                const isRoyalVetted = deal.isRoyalVetted;
+
+                // For restricted deals (Royal Sourced/Client Sourced for non-Elite), show flip card
+                if (restricted) {
+                  return (
                     <div
-                      className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"
-                    />
-
-                    {/* Investment Status Tag - Top Left */}
-                    {(item as Deal).isRoyalVetted && (item as Deal).currentOffering && (
-                      <div className="absolute top-3 left-3 z-20">
-                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg backdrop-blur-md ${(item as Deal).currentOffering === "Open"
-                          ? "bg-green-500/95 text-white border border-green-300"
-                          : "bg-red-500/95 text-white border border-red-300"
-                          }`}>
-                          {(item as Deal).currentOffering === "Open" ? "Open for Investment" : "Closed for Investment"}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Star Button */}
-                    {user && (
-                      <button
-                        onClick={(e) => handleStarToggle(item._id, e)}
-                        disabled={starringDealId === item._id}
-                        className="absolute top-3 right-3 z-20 p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-                        aria-label={starredDealIds.has(item._id) ? "Unstar deal" : "Star deal"}
+                      key={index}
+                      className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-xl transition-all duration-300 cursor-pointer block overflow-hidden group relative"
+                      style={{ perspective: '1000px' }}
+                    >
+                      {/* Flip Card Container */}
+                      <div
+                        className="relative w-full h-56 sm:h-72 group-hover:[transform:rotateY(180deg)] transition-transform duration-[600ms]"
+                        style={{ transformStyle: 'preserve-3d' }}
                       >
-                        <Star
-                          className={`h-5 w-5 transition-all ${starredDealIds.has(item._id)
-                            ? "fill-yellow-400 text-yellow-400 scale-110"
-                            : "text-white hover:text-yellow-300"
-                            }`}
-                        />
-                      </button>
-                    )}
+                        {/* Front of Card - Basic Info (No Image) */}
+                        <div
+                          className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-t-xl"
+                          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
+                        >
+                          <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+                            <h3 className="text-base sm:text-lg lg:text-xl text-gray-700 dark:text-gray-300 font-bold mb-4 text-center line-clamp-2">
+                              {item.name}
+                            </h3>
+                            <div className="flex flex-wrap gap-2 justify-center">
+                              {/* Source Tag */}
+                              {item.source?.name && (
+                                <div className={`inline-flex items-center px-3 py-1 rounded-full ${item.source.name === "Client Sourced"
+                                  ? "bg-yellow-500/90 border-yellow-300"
+                                  : "bg-blue-500/90 border-blue-300"
+                                  } border shadow-lg`}>
+                                  <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
+                                    {item.source.name}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
 
-                    {/* Deal Name Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10">
-                      <h3 className="text-base sm:text-lg lg:text-xl text-white font-bold mb-2 line-clamp-2 drop-shadow-lg">
-                        {item.name}
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {/* Royal Vetted Tag */}
-                        {(item as Deal).isRoyalVetted && (
-                          <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-500/90 backdrop-blur-sm border border-purple-300 shadow-lg">
-                            <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
-                              Royal Vetted
-                            </span>
+                          {/* Star Button */}
+                          {user && (
+                            <button
+                              onClick={(e) => handleStarToggle(item._id, e)}
+                              disabled={starringDealId === item._id}
+                              className="absolute top-3 right-3 z-20 p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                              aria-label={starredDealIds.has(item._id) ? "Unstar deal" : "Star deal"}
+                            >
+                              <Star
+                                className={`h-5 w-5 transition-all ${starredDealIds.has(item._id)
+                                  ? "fill-yellow-400 text-yellow-400 scale-110"
+                                  : "text-white hover:text-yellow-300"
+                                  }`}
+                              />
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Back of Card - Membership Message (Shown on Hover) */}
+                        <div
+                          className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary to-royal-blue-dark text-white p-6 flex flex-col items-center justify-center rounded-t-xl"
+                          style={{
+                            backfaceVisibility: 'hidden',
+                            WebkitBackfaceVisibility: 'hidden',
+                            transform: 'rotateY(180deg)'
+                          }}
+                        >
+                          <div className="text-center space-y-4">
+                            <h3 className="text-xl sm:text-2xl font-bold mb-2">
+                              Deal Club Members Only
+                            </h3>
+                            <p className="text-sm sm:text-base opacity-90 mb-6">
+                              Upgrade to Elite membership to access this deal and view full details.
+                            </p>
+                            <Button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSalesModalUrl("https://meetings.hubspot.com/meet-rls/sales-demo-free?embed=true");
+                                setShowSalesModal(true);
+                              }}
+                              className="bg-white text-primary hover:bg-gray-100 px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base font-bold"
+                            >
+                              TALK TO SALES
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card Content Below (Always Visible) */}
+                      <div className="p-4 sm:p-6 space-y-4">
+                        <div className="space-y-3 text-sm">
+                          {formatArrayData(item.subCategory) && (
+                            <div className="flex items-start gap-2">
+                              <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Category:</span>
+                              <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.subCategory)}</span>
+                            </div>
+                          )}
+                          {formatArrayData(item.requirement) && (
+                            <div className="flex items-start gap-2">
+                              <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Requirements:</span>
+                              <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.requirement)}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // For Royal Vetted or Elite users - show full card
+                return (
+                  <Link
+                    target={hasFullAccess ? "_blank" : undefined}
+                    key={index}
+                    to={hasFullAccess ? item.url : "#"}
+                    onClick={(e) => handleDealClick(e, deal)}
+                    className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 cursor-pointer block overflow-hidden group"
+                  >
+                    {/* Image Section */}
+                    <div className="relative h-56 sm:h-72 w-full overflow-hidden bg-white">
+                      <img
+                        src={item.image}
+                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+                        alt={item.name}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Deal+Image';
+                        }}
+                      />
+                      <div
+                        className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"
+                      />
+
+                      {/* Investment Status Tag - Top Left */}
+                      {isRoyalVetted && deal.currentOffering && (
+                        <div className="absolute top-3 left-3 z-20">
+                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide shadow-lg backdrop-blur-md ${deal.currentOffering === "Open"
+                            ? "bg-green-500/95 text-white border border-green-300"
+                            : "bg-red-500/95 text-white border border-red-300"
+                            }`}>
+                            {deal.currentOffering === "Open" ? "Open for Investment" : "Closed for Investment"}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Star Button */}
+                      {user && (
+                        <button
+                          onClick={(e) => handleStarToggle(item._id, e)}
+                          disabled={starringDealId === item._id}
+                          className="absolute top-3 right-3 z-20 p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                          aria-label={starredDealIds.has(item._id) ? "Unstar deal" : "Star deal"}
+                        >
+                          <Star
+                            className={`h-5 w-5 transition-all ${starredDealIds.has(item._id)
+                              ? "fill-yellow-400 text-yellow-400 scale-110"
+                              : "text-white hover:text-yellow-300"
+                              }`}
+                          />
+                        </button>
+                      )}
+
+                      {/* Deal Name Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10">
+                        <h3 className="text-base sm:text-lg lg:text-xl text-white font-bold mb-2 line-clamp-2 drop-shadow-lg">
+                          {item.name}
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {/* Royal Vetted Tag */}
+                          {isRoyalVetted && (
+                            <div className="inline-flex items-center px-3 py-1 rounded-full bg-purple-500/90 backdrop-blur-sm border border-purple-300 shadow-lg">
+                              <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
+                                Royal Vetted
+                              </span>
+                            </div>
+                          )}
+                          {/* Source Tag with color styles */}
+                          {item.source?.name && (
+                            <div className={`inline-flex items-center px-3 py-1 rounded-full backdrop-blur-sm border shadow-lg ${item.source.name === "Client Sourced"
+                              ? "bg-yellow-500/90 border-yellow-300"
+                              : item.source.name === "Royal Sourced"
+                                ? "bg-blue-500/90 border-blue-300"
+                                : "bg-white/20 border-white/30"
+                              }`}>
+                              <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
+                                {item.source.name}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-4 sm:p-6 space-y-4">
+                      {/* Deal Details */}
+                      <div className="space-y-3 text-sm">
+                        {formatArrayData(item.subCategory) && (
+                          <div className="flex items-start gap-2">
+                            <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Category:</span>
+                            <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.subCategory)}</span>
                           </div>
                         )}
-                        {/* Source Tag with color styles */}
-                        {item.source?.name && (
-                          <div className={`inline-flex items-center px-3 py-1 rounded-full backdrop-blur-sm border shadow-lg ${item.source.name === "Client Sourced"
-                            ? "bg-yellow-500/90 border-yellow-300"
-                            : item.source.name === "Royal Sourced"
-                              ? "bg-blue-500/90 border-blue-300"
-                              : "bg-white/20 border-white/30"
-                            }`}>
-                            <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
-                              {item.source.name}
-                            </span>
+                        {formatArrayData(item.requirement) && (
+                          <div className="flex items-start gap-2">
+                            <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Requirements:</span>
+                            <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.requirement)}</span>
                           </div>
                         )}
                       </div>
                     </div>
-                  </div>
-
-                  {/* Card Content */}
-                  <div className="p-4 sm:p-6 space-y-4">
-                    {/* Deal Details */}
-                    <div className="space-y-3 text-sm">
-                      {formatArrayData(item.subCategory) && (
-                        <div className="flex items-start gap-2">
-                          <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Category:</span>
-                          <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.subCategory)}</span>
-                        </div>
-                      )}
-                      {formatArrayData(item.requirement) && (
-                        <div className="flex items-start gap-2">
-                          <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Requirements:</span>
-                          <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.requirement)}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              ))
+                  </Link>
+                );
+              })
             ) : (
               <div className="col-span-full flex flex-col justify-center items-center h-48 sm:h-64 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                 <TagIcon className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 dark:text-gray-600 mb-4" />
@@ -552,29 +693,6 @@ export function DealsSection() {
           </div>
         </div>
 
-        {/* Overlay for non-logged-in users */}
-
-        {user?.client_type !== "Elite" && !(user?.email?.toLowerCase().includes('royallegalsolutions.com')) && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur z-20">
-            <div className="text-center text-white max-w-3xl px-3 sm:px-4">
-              <h2 className="text-2xl sm:text-4xl font-bold mb-4 sm:mb-6 leading-tight">
-                Access high performance investments in real estate, oil & gas,
-                machinery, and more.
-              </h2>
-              <p className="text-sm sm:text-xl mb-6 sm:mb-8 opacity-90">
-                Discover exclusive investment opportunities from our curated
-                network of vetted partners.
-              </p>
-              <Button
-                onClick={() => setShowSalesModal(true)}
-                className="bg-primary hover:bg-royal-blue-dark text-white px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-lg font-bold"
-              >
-                TALK TO SALES
-              </Button>
-            </div>
-          </div>
-        )}
-
         {/* HubSpot "Talk to Sales" Modal */}
         <Dialog open={showSalesModal} onOpenChange={setShowSalesModal}>
           <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto p-0">
@@ -583,7 +701,7 @@ export function DealsSection() {
             </DialogHeader>
             <div
               className="meetings-iframe-container w-full h-full"
-              data-src="https://meetings.hubspot.com/meet-rls/sales-demo-free?embed=true"
+              data-src={salesModalUrl}
             ></div>
           </DialogContent>
         </Dialog>

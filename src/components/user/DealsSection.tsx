@@ -476,24 +476,10 @@ export function DealsSection() {
                           className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-t-xl"
                           style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
                         >
-                          <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-                            <h3 className="text-base sm:text-lg lg:text-xl text-gray-700 dark:text-gray-300 font-bold mb-4 text-center line-clamp-2">
-                              {item.name}
-                            </h3>
-                            <div className="flex flex-wrap gap-2 justify-center">
-                              {/* Source Tag */}
-                              {item.source?.name && (
-                                <div className={`inline-flex items-center px-3 py-1 rounded-full ${item.source.name === "Client Sourced"
-                                  ? "bg-yellow-500/90 border-yellow-300"
-                                  : "bg-blue-500/90 border-blue-300"
-                                  } border shadow-lg`}>
-                                  <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
-                                    {item.source.name}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                          {/* Gradient Overlay */}
+                          <div
+                            className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"
+                          />
 
                           {/* Star Button */}
                           {user && (
@@ -511,6 +497,28 @@ export function DealsSection() {
                               />
                             </button>
                           )}
+
+                          {/* Deal Name Overlay */}
+                          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10">
+                            <h3 className="text-base sm:text-lg lg:text-xl text-white font-bold mb-2 line-clamp-2 drop-shadow-lg">
+                              {item.name}
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
+                              {/* Source Tag with color styles */}
+                              {item.source?.name && (
+                                <div className={`inline-flex items-center px-3 py-1 rounded-full backdrop-blur-sm border shadow-lg ${item.source.name === "Client Sourced"
+                                  ? "bg-yellow-500/90 border-yellow-300"
+                                  : item.source.name === "Royal Sourced"
+                                    ? "bg-blue-500/90 border-blue-300"
+                                    : "bg-white/20 border-white/30"
+                                  }`}>
+                                  <span className="text-xs sm:text-sm text-white font-semibold uppercase tracking-wide">
+                                    {item.source.name}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
 
                         {/* Back of Card - Membership Message (Shown on Hover) */}
@@ -522,6 +530,23 @@ export function DealsSection() {
                             transform: 'rotateY(180deg)'
                           }}
                         >
+                          {/* Star Button on Back */}
+                          {user && (
+                            <button
+                              onClick={(e) => handleStarToggle(item._id, e)}
+                              disabled={starringDealId === item._id}
+                              className="absolute top-3 right-3 z-20 p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                              aria-label={starredDealIds.has(item._id) ? "Unstar deal" : "Star deal"}
+                            >
+                              <Star
+                                className={`h-5 w-5 transition-all ${starredDealIds.has(item._id)
+                                  ? "fill-yellow-400 text-yellow-400 scale-110"
+                                  : "text-white hover:text-yellow-300"
+                                  }`}
+                              />
+                            </button>
+                          )}
+
                           <div className="text-center space-y-4">
                             <h3 className="text-xl sm:text-2xl font-bold mb-2">
                               Deal Club Members Only

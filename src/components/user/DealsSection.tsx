@@ -473,7 +473,7 @@ export function DealsSection() {
                       >
                         {/* Front of Card - Basic Info (No Image) */}
                         <div
-                          className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-t-xl"
+                          className="absolute inset-0 w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-t-xl group-hover:pointer-events-none"
                           style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
                         >
                           {/* Gradient Overlay */}
@@ -527,15 +527,20 @@ export function DealsSection() {
                           style={{
                             backfaceVisibility: 'hidden',
                             WebkitBackfaceVisibility: 'hidden',
-                            transform: 'rotateY(180deg)'
+                            transform: 'rotateY(180deg)',
+                            pointerEvents: 'auto'
                           }}
                         >
                           {/* Star Button on Back */}
                           {user && (
                             <button
-                              onClick={(e) => handleStarToggle(item._id, e)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleStarToggle(item._id, e);
+                              }}
                               disabled={starringDealId === item._id}
-                              className="absolute top-3 right-3 z-20 p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                              className="absolute top-3 right-3 z-30 p-2.5 rounded-full bg-black/50 hover:bg-black/70 backdrop-blur-md transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg pointer-events-auto"
                               aria-label={starredDealIds.has(item._id) ? "Unstar deal" : "Star deal"}
                             >
                               <Star
@@ -547,7 +552,7 @@ export function DealsSection() {
                             </button>
                           )}
 
-                          <div className="text-center space-y-4">
+                          <div className="text-center space-y-4 pointer-events-auto">
                             <h3 className="text-xl sm:text-2xl font-bold mb-2">
                               Deal Club Members Only
                             </h3>
@@ -561,7 +566,7 @@ export function DealsSection() {
                                 setSalesModalUrl("https://meetings.hubspot.com/meet-rls/sales-demo-free?embed=true");
                                 setShowSalesModal(true);
                               }}
-                              className="bg-white text-primary hover:bg-gray-100 px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base font-bold"
+                              className="bg-white text-primary hover:bg-gray-100 px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base font-bold pointer-events-auto z-30 relative"
                             >
                               TALK TO SALES
                             </Button>

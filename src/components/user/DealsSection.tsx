@@ -575,15 +575,15 @@ export function DealsSection() {
                       <div className="p-4 sm:p-6 space-y-4">
                         <div className="space-y-3 text-sm">
                           {formatArrayData(item.subCategory) && (
-                            <div className="flex items-start gap-2">
-                              <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Category:</span>
-                              <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.subCategory)}</span>
+                            <div className="space-y-1">
+                              <span className="font-semibold text-gray-700 dark:text-gray-300 block">Category:</span>
+                              <span className="text-gray-600 dark:text-gray-400 block">{formatArrayData(item.subCategory)}</span>
                             </div>
                           )}
                           {formatArrayData(item.requirement) && (
-                            <div className="flex items-start gap-2">
-                              <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Requirements:</span>
-                              <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.requirement)}</span>
+                            <div className="space-y-1">
+                              <span className="font-semibold text-gray-700 dark:text-gray-300 block">Requirements:</span>
+                              <span className="text-gray-600 dark:text-gray-400 block">{formatArrayData(item.requirement)}</span>
                             </div>
                           )}
                         </div>
@@ -680,15 +680,15 @@ export function DealsSection() {
                       {/* Deal Details */}
                       <div className="space-y-3 text-sm">
                         {formatArrayData(item.subCategory) && (
-                          <div className="flex items-start gap-2">
-                            <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Category:</span>
-                            <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.subCategory)}</span>
+                          <div className="space-y-1">
+                            <span className="font-semibold text-gray-700 dark:text-gray-300 block">Category:</span>
+                            <span className="text-gray-600 dark:text-gray-400 block">{formatArrayData(item.subCategory)}</span>
                           </div>
                         )}
                         {formatArrayData(item.requirement) && (
-                          <div className="flex items-start gap-2">
-                            <span className="font-semibold text-gray-700 dark:text-gray-300 min-w-[80px]">Requirements:</span>
-                            <span className="text-gray-600 dark:text-gray-400 flex-1">{formatArrayData(item.requirement)}</span>
+                          <div className="space-y-1">
+                            <span className="font-semibold text-gray-700 dark:text-gray-300 block">Requirements:</span>
+                            <span className="text-gray-600 dark:text-gray-400 block">{formatArrayData(item.requirement)}</span>
                           </div>
                         )}
                       </div>

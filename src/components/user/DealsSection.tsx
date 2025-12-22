@@ -500,9 +500,6 @@ export function DealsSection() {
 
                           {/* Deal Name Overlay */}
                           <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10">
-                            <h3 className="text-base sm:text-lg lg:text-xl text-white font-bold mb-2 line-clamp-2 drop-shadow-lg">
-                              {item.name}
-                            </h3>
                             <div className="flex flex-wrap gap-2">
                               {/* Source Tag with color styles */}
                               {item.source?.name && (

@@ -47,6 +47,11 @@ export const API_ENDPOINTS = {
     REQUIREMENTS: "/api/requirements",
     SOURCES: "/api/sources",
   },
+  ORDERS: {
+    BASE: "/api/orders",
+    PAYMENTS: "/api/orders/payments",
+    SUBSCRIPTIONS: "/api/orders/subscriptions",
+  },
 } as const;
 
 // ==================== Local Storage Keys ====================

@@ -13,7 +13,8 @@ import {
   AxeIcon,
   MessageCircleQuestionIcon,
   UserIcon,
-  ArrowLeftIcon
+  ArrowLeftIcon,
+  ReceiptIcon
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,6 +33,10 @@ const navigationItems = [
   { title: "Royal TV", icon: TvIcon, path: "/royal-tv" },
   { title: "Courses", icon: GraduationCapIcon, path: "/courses" },
   { title: "Deals", icon: TagIcon, path: "/deals" },
+];
+
+const userOnlyNavigationItems = [
+  { title: "Orders", icon: ReceiptIcon, path: "/orders" },
 ];
 
 const bottomItemsForGuest = [
@@ -55,6 +60,7 @@ export function RoyalVaultSidebar() {
 
   const menuItems = [
     ...navigationItems,
+    ...(user ? userOnlyNavigationItems : []),
   ];
 
   const isActive = (path: string) => {

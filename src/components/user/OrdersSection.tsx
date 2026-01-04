@@ -9,7 +9,6 @@ import { ordersService, type Order, type Payment, type Subscription } from "@/se
 export function OrdersSection() {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [payments, setPayments] = useState<Payment[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,14 +22,12 @@ export function OrdersSection() {
         setLoading(true);
         setError(null);
 
-        const [ordersResponse, paymentsResponse, subscriptionsResponse] = await Promise.all([
+        const [ordersResponse, subscriptionsResponse] = await Promise.all([
           ordersService.getOrders(),
-          ordersService.getPayments(),
           ordersService.getSubscriptions(),
         ]);
 
         setOrders(ordersResponse.data.orders || []);
-        setPayments(paymentsResponse.data.payments || []);
         setSubscriptions(subscriptionsResponse.data.subscriptions || []);
       } catch (err: any) {
         console.error("Error fetching orders data:", err);
@@ -42,17 +39,6 @@ export function OrdersSection() {
 
     fetchData();
   }, [user]);
-
-  // Group payments by deal ID
-  const getPaymentsForOrder = (orderId: string): Payment[] => {
-    return payments
-      .filter((payment) => payment.dealIds.includes(orderId))
-      .sort((a, b) => {
-        const dateA = new Date(a.createDate || 0).getTime();
-        const dateB = new Date(b.createDate || 0).getTime();
-        return dateB - dateA;
-      });
-  };
 
   // Format date
   const formatDate = (dateString?: string): string => {
@@ -145,7 +131,7 @@ export function OrdersSection() {
               </Card>
             ) : (
               orders.map((order) => {
-                const orderPayments = getPaymentsForOrder(order.dealId);
+                const orderPayments = order.payments || [];
                 return (
                   <Card key={order.id} className="overflow-hidden">
                     <CardHeader className="bg-gray-50 dark:bg-gray-800">
@@ -155,7 +141,7 @@ export function OrdersSection() {
                             {order.name}
                           </CardTitle>
                           <div className="flex flex-wrap items-center gap-2 mt-2">
-                            {getStatusBadge(order.status)}
+                            {order.status && getStatusBadge(order.status)}
                             <span className="text-sm text-royal-gray">
                               {formatCurrency(order.amount)}
                             </span>
@@ -172,7 +158,7 @@ export function OrdersSection() {
                           <h3 className="text-sm font-semibold text-royal-dark-gray mb-3">
                             Payments
                           </h3>
-                          {orderPayments.map((payment, index) => (
+                          {orderPayments.map((payment) => (
                             <div
                               key={payment.id}
                               className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
@@ -184,10 +170,16 @@ export function OrdersSection() {
                                     <span className="font-medium text-sm text-royal-dark-gray">
                                       {payment.paymentNumber}
                                     </span>
-                                    {getStatusBadge(payment.status)}
+                                    {payment.status && getStatusBadge(payment.status)}
                                   </div>
                                   <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-royal-gray">
                                     <span>{formatCurrency(payment.amount)}</span>
+                                    {payment.last4 && (
+                                      <>
+                                        <span>•</span>
+                                        <span>**** {payment.last4}</span>
+                                      </>
+                                    )}
                                     {payment.createDate && (
                                       <>
                                         <span>•</span>
@@ -234,6 +226,11 @@ export function OrdersSection() {
                         key={subscription.id}
                         className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-2"
                       >
+                        {subscription.name && (
+                          <h4 className="font-semibold text-royal-dark-gray text-sm">
+                            {subscription.name}
+                          </h4>
+                        )}
                         <div className="flex items-center justify-between">
                           {getStatusBadge(subscription.status)}
                         </div>
@@ -242,6 +239,11 @@ export function OrdersSection() {
                             <CreditCard className="h-3 w-3" />
                             <span>**** {subscription.last4}</span>
                           </div>
+                          {subscription.amount && parseFloat(subscription.amount) > 0 && (
+                            <div className="flex items-center gap-2 text-royal-gray">
+                              <span>{formatCurrency(subscription.amount)}</span>
+                            </div>
+                          )}
                           {subscription.nextBillingDate && (
                             <div className="flex items-center gap-2 text-royal-gray">
                               <Calendar className="h-3 w-3" />

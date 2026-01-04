@@ -7,10 +7,11 @@ export interface Order {
   dealId: string;
   name: string;
   amount: string;
-  status: "Paid" | "Refunded";
+  status: string;
   dealStage: string;
   closeDate?: string;
   createDate?: string;
+  payments?: Payment[];
 }
 
 export interface Payment {
@@ -20,14 +21,17 @@ export interface Payment {
   amount: string;
   status: string;
   createDate?: string;
+  last4: string;
   dealIds: string[];
 }
 
 export interface Subscription {
   id: string;
   subscriptionId: string;
+  name: string;
   status: string;
   last4: string;
+  amount: string;
   nextBillingDate?: string;
 }
 

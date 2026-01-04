@@ -35,16 +35,13 @@ const navigationItems = [
   { title: "Deals", icon: TagIcon, path: "/deals" },
 ];
 
-const userOnlyNavigationItems = [
-  { title: "Orders", icon: ReceiptIcon, path: "/orders" },
-];
-
 const bottomItemsForGuest = [
   // { title: "FAQ", icon: HelpCircleIcon, action: null },
   { title: "Log In", icon: LogInIcon, action: 'login' },
 ];
 const bottomItemsForUser = [
   // { title: "FAQ", icon: HelpCircleIcon, action: null },
+  { title: "Orders", icon: ReceiptIcon, path: "/orders" },
   { title: "Profile", icon: UserIcon, path: "/profile" },
   { title: "Log Out", icon: LogOutIcon, action: 'logout' },
 ];
@@ -60,7 +57,6 @@ export function RoyalVaultSidebar() {
 
   const menuItems = [
     ...navigationItems,
-    ...(user ? userOnlyNavigationItems : []),
   ];
 
   const isActive = (path: string) => {

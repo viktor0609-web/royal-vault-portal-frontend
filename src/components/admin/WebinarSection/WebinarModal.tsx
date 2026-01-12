@@ -37,7 +37,6 @@ const formFields = [
   { title: 'Promotional SMS', id: 'proSms', desc: 'Sent 24 Hours In Advance', placeholder: 'Type here...', type: 'textarea', required: false },
   { title: 'Promotional SMS Time Advance', id: 'proSmsTime', desc: 'In Minutes', placeholder: '60', type: 'input', required: false },
   { title: 'Attend Overwrite', id: 'attendOverwrite', placeholder: '100', type: 'input', required: false },
-  { title: 'Recording', id: 'recording', desc: 'For Replay', placeholder: 'recordingName.mp4', type: 'file', required: false },
 ]
 
 interface WebinarModalProps {
@@ -66,7 +65,6 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
     proSms: "",
     proSmsTime: "",
     attendOverwrite: "",
-    recording: "",
   });
 
   const [promotionalSmsLists, setPromotionalSmsLists] = useState([]);
@@ -133,7 +131,6 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
         proSms: editingWebinar.proSms || "",
         proSmsTime: editingWebinar.proSmsTime || "",
         attendOverwrite: editingWebinar.attendOverwrite || "",
-        recording: editingWebinar.recording || "",
       };
       const initialCtasData = editingWebinar.ctas || [];
       setFormData(initialData);
@@ -160,7 +157,6 @@ export function WebinarModal({ isOpen, closeDialog, editingWebinar, onWebinarSav
         proSms: "",
         proSmsTime: "",
         attendOverwrite: "",
-        recording: "",
       };
       setFormData(emptyData);
       setInitialFormData(emptyData);

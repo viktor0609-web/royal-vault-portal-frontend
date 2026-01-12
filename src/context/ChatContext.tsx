@@ -80,8 +80,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children, webinarId 
             if (prev.some(msg => msg.id === messageId)) {
                 return prev;
             }
-            // Add new pinned message at the beginning (newest first)
-            return [newPinnedMessage, ...prev];
+            // Add new pinned message at the end (newest at bottom)
+            return [...prev, newPinnedMessage];
         });
 
         // Broadcast pin event via Daily.co (for real-time sync)
@@ -164,8 +164,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children, webinarId 
                         if (prev.some(msg => msg.id === messageId)) {
                             return prev;
                         }
-                        // Add new pinned message at the beginning (newest first)
-                        return [newPinnedMessage, ...prev];
+                        // Add new pinned message at the end (newest at bottom)
+                        return [...prev, newPinnedMessage];
                     });
                 } else {
                     // Message was unpinned - remove from list

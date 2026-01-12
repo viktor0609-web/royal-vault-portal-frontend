@@ -22,8 +22,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, ArrowUp, ArrowDown, BarChart3, ChevronsLeft, ChevronsRight, Download } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
+import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, ArrowUp, ArrowDown, BarChart3, ChevronsLeft, ChevronsRight, Download, Eye, Receipt, ArrowLeft } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
 import { CreateUserModal } from "./CreateUserModal";
 import { HubSpotMigrationModal } from "./HubSpotMigrationModal";
 import { userApi } from "@/lib/api";
@@ -35,6 +35,7 @@ import type { RowComponentProps } from "react-window";
 import type { UserStatistics } from "@/types";
 import { BottomSheet } from "@/components/VideoMeeting/BottomSheet";
 import { Menu } from "lucide-react";
+import { OrdersSection as UserOrdersSection } from "@/components/user/OrdersSection";
 
 interface User {
   _id: string;
@@ -78,6 +79,8 @@ export function UsersSection() {
   const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [isMigrationModalOpen, setIsMigrationModalOpen] = useState(false);
+  const [viewingOrdersForUserId, setViewingOrdersForUserId] = useState<string | null>(null);
+  const [viewingOrdersForUserName, setViewingOrdersForUserName] = useState<string | null>(null);
 
   // Pagination and filters
   const [page, setPage] = useState(1);
@@ -257,7 +260,7 @@ export function UsersSection() {
     try {
       const response = await userApi.resetUserPassword(userId, { sendEmail: true });
       const resetUrl = response.data?.resetUrl;
-      
+
       if (resetUrl) {
         // Copy URL to clipboard
         try {
@@ -335,6 +338,16 @@ export function UsersSection() {
     }
   };
 
+  const handleViewOrders = (user: User) => {
+    setViewingOrdersForUserId(user._id);
+    setViewingOrdersForUserName(`${user.firstName} ${user.lastName}`);
+  };
+
+  const handleBackToUsers = () => {
+    setViewingOrdersForUserId(null);
+    setViewingOrdersForUserName(null);
+  };
+
   const handleSearch = (value: string) => {
     setSearch(value);
     setPage(1); // Reset to first page on new search
@@ -404,6 +417,10 @@ export function UsersSection() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => handleViewOrders(user)} className="text-sm">
+                  <Receipt className="mr-2 h-4 w-4" />
+                  View Orders
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleEditUser(user)} className="text-sm">
                   <Edit className="mr-2 h-4 w-4" />
                   Edit
@@ -466,7 +483,8 @@ export function UsersSection() {
         </div>
       </div>
     );
-  }, [allUsers, handleEditUser, handleResetPassword, handleToggleVerification, handleChangeRole, handleDeleteClick]);
+  }, [allUsers, handleViewOrders, handleEditUser, handleResetPassword, handleToggleVerification, handleChangeRole, handleDeleteClick]);
+
 
   return (
     <div className="flex-1 p-2 sm:p-4 lg:p-6 flex flex-col h-full overflow-hidden">
@@ -669,6 +687,10 @@ export function UsersSection() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewOrders(user)}>
+                            <Receipt className="mr-2 h-4 w-4" />
+                            View Orders
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleEditUser(user)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
@@ -1054,6 +1076,30 @@ export function UsersSection() {
           </div>
         </BottomSheet>
       )}
+
+      {/* Orders Modal */}
+      <Dialog open={!!viewingOrdersForUserId} onOpenChange={(open) => {
+        if (!open) {
+          handleBackToUsers();
+        }
+      }}>
+        <DialogContent className="sm:max-w-6xl max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b">
+            <DialogTitle className="text-xl font-semibold">
+              Orders - {viewingOrdersForUserName || 'User'}
+            </DialogTitle>
+            <DialogDescription>
+              Viewing order history for {viewingOrdersForUserName || 'this user'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto px-6 py-4">
+            <UserOrdersSection
+              viewAsUserId={viewingOrdersForUserId || undefined}
+              viewAsUserName={viewingOrdersForUserName || undefined}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

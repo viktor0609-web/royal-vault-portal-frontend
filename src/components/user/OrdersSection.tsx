@@ -6,26 +6,43 @@ import { Receipt, CreditCard, Calendar, CheckCircle2, XCircle, Package } from "l
 import { useAuth } from "@/context/AuthContext";
 import { ordersService, type Order, type Payment, type Subscription } from "@/services/api/orders.service";
 
-export function OrdersSection() {
+interface OrdersSectionProps {
+  viewAsUserId?: string; // Optional prop for admin viewing as user
+  viewAsUserName?: string; // Optional prop for displaying the user's name
+}
+
+export function OrdersSection({ viewAsUserId, viewAsUserName }: OrdersSectionProps = {} as OrdersSectionProps) {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isAdminView = !!viewAsUserId;
 
   // Fetch all data
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return;
+      if (!user && !viewAsUserId) return;
 
       try {
         setLoading(true);
         setError(null);
 
-        const [ordersResponse, subscriptionsResponse] = await Promise.all([
-          ordersService.getOrders(),
-          ordersService.getSubscriptions(),
-        ]);
+        let ordersResponse, subscriptionsResponse;
+
+        if (viewAsUserId) {
+          // Admin viewing as user
+          [ordersResponse, subscriptionsResponse] = await Promise.all([
+            ordersService.getAdminUserOrders(viewAsUserId),
+            ordersService.getAdminUserSubscriptions(viewAsUserId),
+          ]);
+        } else {
+          // Regular user view
+          [ordersResponse, subscriptionsResponse] = await Promise.all([
+            ordersService.getOrders(),
+            ordersService.getSubscriptions(),
+          ]);
+        }
 
         setOrders(ordersResponse.data.orders || []);
         setSubscriptions(subscriptionsResponse.data.subscriptions || []);
@@ -38,7 +55,7 @@ export function OrdersSection() {
     };
 
     fetchData();
-  }, [user]);
+  }, [user, viewAsUserId]);
 
   // Format date
   const formatDate = (dateString?: string): string => {
@@ -110,16 +127,20 @@ export function OrdersSection() {
   }
 
   return (
-    <div className="flex flex-col h-full p-2 sm:p-4 animate-in fade-in duration-100">
-      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 h-full">
+    <div className="flex flex-col w-full animate-in fade-in duration-100">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
         {/* Main Body - Orders */}
         <div className="flex-1 min-w-0">
-          <div className="mb-4 sm:mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-royal-dark-gray">Orders</h1>
-            <p className="text-sm sm:text-base text-royal-gray mt-1">
-              View your order history and payments
-            </p>
-          </div>
+          {!isAdminView && (
+            <div className="mb-4 sm:mb-6">
+              <h1 className="text-2xl sm:text-3xl font-bold text-royal-dark-gray">
+                Orders
+              </h1>
+              <p className="text-sm sm:text-base text-royal-gray mt-1">
+                View your order history and payments
+              </p>
+            </div>
+          )}
 
           <div className="space-y-4 sm:space-y-6">
             {orders.length === 0 ? (

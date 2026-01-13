@@ -1,55 +1,24 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAdminState } from "@/hooks/useAdminState";
-import { Button } from "@/components/ui/button";
-import { Loading } from "@/components/ui/Loading";
-import { Input } from "@/components/ui/input";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { UsersIcon, PlusIcon, Search, MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, ArrowUp, ArrowDown, BarChart3, ChevronsLeft, ChevronsRight, Download, Eye, Receipt, ArrowLeft } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { userApi } from "@/lib/api";
+import { Menu } from "lucide-react";
 import { CreateUserModal } from "./CreateUserModal";
 import { HubSpotMigrationModal } from "./HubSpotMigrationModal";
-import { userApi } from "@/lib/api";
-import { useToast } from "@/hooks/use-toast";
-import { formatDate } from "@/utils/dateUtils";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { List } from "react-window";
-import type { RowComponentProps } from "react-window";
+import { useUsersData } from "./hooks/useUsersData";
+import { useUserActions } from "./hooks/useUserActions";
+import { UsersHeader } from "./components/UsersHeader";
+import { UsersFilters } from "./components/UsersFilters";
+import { UsersTable } from "./components/UsersTable";
+import { UsersMobileView } from "./components/UsersMobileView";
+import { UsersPagination } from "./components/UsersPagination";
+import { UserStatisticsModal } from "./components/UserStatisticsModal";
+import { OrdersModal } from "./components/OrdersModal";
+import { UserDeleteDialog } from "./components/UserDeleteDialog";
+import { MobileBottomSheet } from "./components/MobileBottomSheet";
+import type { User, UsersFilters as FiltersType } from "./types";
 import type { UserStatistics } from "@/types";
-import { BottomSheet } from "@/components/VideoMeeting/BottomSheet";
-import { Menu } from "lucide-react";
-import { OrdersSection as UserOrdersSection } from "@/components/user/OrdersSection";
-
-interface User {
-  _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  role: "user" | "admin";
-  supaadmin?: boolean;
-  isVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastLoginAt?: string;
-}
 
 export function UsersSection() {
   const { toast } = useToast();
@@ -63,12 +32,6 @@ export function UsersSection() {
     error,
     setError,
   } = useAdminState<User[]>([], 'users');
-
-  // For mobile virtualization - store all users
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [isLoadingAllUsers, setIsLoadingAllUsers] = useState(false);
-  const [listHeight, setListHeight] = useState(600);
-  const listContainerRef = useRef<HTMLDivElement>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -85,94 +48,53 @@ export function UsersSection() {
   // Pagination and filters
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string>("all");
-  const [verificationFilter, setVerificationFilter] = useState<string>("all");
-  const [orderBy, setOrderBy] = useState<string>("firstName");
-  const [order, setOrder] = useState<"asc" | "desc">("asc");
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    totalUsers: 0,
-    limit: 10,
+  const [filters, setFilters] = useState<FiltersType>({
+    search: "",
+    roleFilter: "all",
+    verificationFilter: "all",
+    orderBy: "firstName",
+    order: "asc",
   });
 
-  const fetchUsers = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const params: any = {
-        page,
-        limit,
-        sortBy: orderBy,
-        order,
-      };
-      if (search) params.search = search;
-      if (roleFilter && roleFilter !== "all") params.role = roleFilter;
-      if (verificationFilter && verificationFilter !== "all") params.isVerified = verificationFilter;
+  const [listHeight, setListHeight] = useState(600);
+  const listContainerRef = useRef<HTMLDivElement>(null);
 
-      const response = await userApi.getAllUsers(params);
-      setUsers(response.data.users || []);
-      setPagination(response.data.pagination || pagination);
-    } catch (error: any) {
-      console.error("Error fetching users:", error);
-      setError(error.response?.data?.message || "Failed to fetch users");
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to fetch users",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Use custom hooks for data fetching
+  const {
+    users: fetchedUsers,
+    allUsers,
+    loading: dataLoading,
+    loadingAllUsers,
+    error: dataError,
+    pagination,
+    refetch,
+  } = useUsersData({
+    page,
+    limit,
+    filters,
+    isMobile,
+  });
 
-  // Fetch all users for mobile virtualization
-  const fetchAllUsers = async () => {
-    try {
-      setIsLoadingAllUsers(true);
-      setError(null);
-      const params: any = {
-        page: 1,
-        limit: 10000, // Large limit to get all users
-        sortBy: orderBy,
-        order,
-      };
-      if (search) params.search = search;
-      if (roleFilter && roleFilter !== "all") params.role = roleFilter;
-      if (verificationFilter && verificationFilter !== "all") params.isVerified = verificationFilter;
-
-      const response = await userApi.getAllUsers(params);
-      setAllUsers(response.data.users || []);
-    } catch (error: any) {
-      console.error("Error fetching all users:", error);
-      setError(error.response?.data?.message || "Failed to fetch users");
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to fetch users",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingAllUsers(false);
-    }
-  };
-
-  const fetchStatistics = async () => {
-    try {
-      const response = await userApi.getUserStatistics();
-      setStatistics(response.data.statistics);
-    } catch (error: any) {
-      console.error("Error fetching statistics:", error);
-    }
-  };
-
+  // Update users state when fetched
   useEffect(() => {
     if (isMobile) {
-      fetchAllUsers();
+      setUsers(allUsers);
     } else {
-      fetchUsers();
+      setUsers(fetchedUsers);
     }
-  }, [page, limit, search, roleFilter, verificationFilter, orderBy, order, isMobile]);
+  }, [fetchedUsers, allUsers, isMobile, setUsers]);
+
+  // Update error state
+  useEffect(() => {
+    if (dataError) {
+      setError(dataError);
+    }
+  }, [dataError, setError]);
+
+  // Update loading state
+  useEffect(() => {
+    setIsLoading(isMobile ? loadingAllUsers : dataLoading);
+  }, [dataLoading, loadingAllUsers, isMobile, setIsLoading]);
 
   // Calculate list height for mobile virtualization
   useEffect(() => {
@@ -180,26 +102,46 @@ export function UsersSection() {
       const updateHeight = () => {
         if (listContainerRef.current) {
           const rect = listContainerRef.current.getBoundingClientRect();
-          // Account for padding and margins
           const availableHeight = window.innerHeight - rect.top - 16;
           setListHeight(Math.max(400, availableHeight));
         }
       };
       updateHeight();
       window.addEventListener('resize', updateHeight);
-      // Also update when filters/search change
       const timeoutId = setTimeout(updateHeight, 100);
       return () => {
         window.removeEventListener('resize', updateHeight);
         clearTimeout(timeoutId);
       };
     }
-  }, [isMobile, search, roleFilter, verificationFilter]);
+  }, [isMobile, filters.search, filters.roleFilter, filters.verificationFilter]);
 
+  // Fetch statistics
   useEffect(() => {
+    const fetchStatistics = async () => {
+      try {
+        const response = await userApi.getUserStatistics();
+        setStatistics(response.data.statistics);
+      } catch (error: any) {
+        console.error("Error fetching statistics:", error);
+      }
+    };
     fetchStatistics();
   }, []);
 
+  // User actions hook
+  const {
+    handleResetPassword,
+    handleToggleVerification,
+    handleChangeRole,
+    handleDelete,
+  } = useUserActions({
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  // Handlers
   const handleCreateUser = () => {
     setEditingUser(null);
     setIsModalOpen(true);
@@ -213,12 +155,7 @@ export function UsersSection() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingUser(null);
-    if (isMobile) {
-      fetchAllUsers();
-    } else {
-      fetchUsers();
-    }
-    fetchStatistics();
+    refetch();
   };
 
   const handleDeleteClick = (user: User) => {
@@ -228,113 +165,15 @@ export function UsersSection() {
 
   const confirmDelete = async () => {
     if (!userToDelete) return;
-
     setIsDeleting(true);
     try {
-      await userApi.deleteUser(userToDelete._id);
+      await handleDelete(userToDelete);
       setDeleteDialogOpen(false);
       setUserToDelete(null);
-      toast({
-        title: "Success",
-        description: "User deleted successfully",
-      });
-      if (isMobile) {
-        fetchAllUsers();
-      } else {
-        fetchUsers();
-      }
-      fetchStatistics();
-    } catch (error: any) {
-      console.error("Error deleting user:", error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to delete user",
-        variant: "destructive",
-      });
+    } catch (error) {
+      // Error already handled in hook
     } finally {
       setIsDeleting(false);
-    }
-  };
-
-  const handleResetPassword = async (userId: string) => {
-    try {
-      const response = await userApi.resetUserPassword(userId, { sendEmail: true });
-      const resetUrl = response.data?.resetUrl;
-
-      if (resetUrl) {
-        // Copy URL to clipboard
-        try {
-          await navigator.clipboard.writeText(resetUrl);
-          toast({
-            title: "Success",
-            description: "Password reset email sent. Reset URL copied to clipboard!",
-          });
-        } catch (clipboardError) {
-          // Fallback if clipboard API fails
-          toast({
-            title: "Success",
-            description: `Password reset email sent. Reset URL: ${resetUrl}`,
-          });
-        }
-      } else {
-        toast({
-          title: "Success",
-          description: "Password reset email sent successfully",
-        });
-      }
-    } catch (error: any) {
-      console.error("Error resetting password:", error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to reset password",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleToggleVerification = async (user: User) => {
-    try {
-      await userApi.toggleUserVerification(user._id, !user.isVerified);
-      toast({
-        title: "Success",
-        description: `User ${!user.isVerified ? "activated" : "deactivated"} successfully`,
-      });
-      if (isMobile) {
-        fetchAllUsers();
-      } else {
-        fetchUsers();
-      }
-      fetchStatistics();
-    } catch (error: any) {
-      console.error("Error toggling verification:", error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to update user",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleChangeRole = async (user: User, newRole: "user" | "admin") => {
-    try {
-      await userApi.changeUserRole(user._id, newRole);
-      toast({
-        title: "Success",
-        description: `User role changed to ${newRole} successfully`,
-      });
-      if (isMobile) {
-        fetchAllUsers();
-      } else {
-        fetchUsers();
-      }
-      fetchStatistics();
-    } catch (error: any) {
-      console.error("Error changing role:", error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to change role",
-        variant: "destructive",
-      });
     }
   };
 
@@ -349,634 +188,161 @@ export function UsersSection() {
   };
 
   const handleSearch = (value: string) => {
-    setSearch(value);
-    setPage(1); // Reset to first page on new search
+    setFilters(prev => ({ ...prev, search: value }));
+    setPage(1);
   };
 
   const handleSort = (field: string) => {
-    if (orderBy === field) {
-      // Toggle order if clicking the same field
-      setOrder(order === "asc" ? "desc" : "asc");
-    } else {
-      // Set new field and default to ascending
-      setOrderBy(field);
-      setOrder("asc");
-    }
-    setPage(1); // Reset to first page on sort change
+    setFilters(prev => {
+      if (prev.orderBy === field) {
+        return {
+          ...prev,
+          order: prev.order === "asc" ? "desc" : "asc",
+        };
+      }
+      return {
+        ...prev,
+        orderBy: field,
+        order: "asc",
+      };
+    });
+    setPage(1);
   };
 
   const handleLimitChange = (value: string) => {
     setLimit(parseInt(value));
-    setPage(1); // Reset to first page when changing items per page
+    setPage(1);
   };
 
-  const getSortIcon = (field: string) => {
-    if (orderBy !== field) {
-      return null;
-    }
-    return order === "asc" ? (
-      <ArrowUp className="h-3 w-3 inline-block ml-1" />
-    ) : (
-      <ArrowDown className="h-3 w-3 inline-block ml-1" />
-    );
+  const handleRoleFilterChange = (value: string) => {
+    setFilters(prev => ({ ...prev, roleFilter: value }));
+    setPage(1);
   };
 
-  // User card component for virtualization
-  const UserCard = useCallback(({ index, style, ariaAttributes }: RowComponentProps) => {
-    const user = allUsers[index];
-    if (!user) return null;
-
-    return (
-      <div style={style} className="px-1.5 sm:px-3 pb-1.5" {...ariaAttributes}>
-        <div className="bg-white p-2.5 sm:p-5 rounded-lg border border-royal-light-gray shadow-sm hover:shadow-md transition-shadow h-full">
-          {/* Header Section */}
-          <div className="flex justify-between items-start mb-2">
-            <div className="flex-1 min-w-0 pr-2">
-              <h3 className="text-sm sm:text-lg font-semibold text-royal-dark-gray mb-1 leading-tight">
-                {user.firstName} {user.lastName}
-              </h3>
-              <div className="space-y-0.5">
-                <p className="text-xs sm:text-sm text-royal-gray truncate" title={user.email}>
-                  {user.email}
-                </p>
-                {user.phone && (
-                  <p className="text-xs sm:text-sm text-royal-gray">
-                    {user.phone}
-                  </p>
-                )}
-              </div>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 flex-shrink-0 hover:bg-gray-100"
-                >
-                  <MoreVertical className="h-4 w-4 text-royal-gray" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => handleViewOrders(user)} className="text-sm">
-                  <Receipt className="mr-2 h-4 w-4" />
-                  View Orders
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleEditUser(user)} className="text-sm">
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleResetPassword(user._id)} className="text-sm">
-                  <KeyRound className="mr-2 h-4 w-4" />
-                  Reset Password
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleToggleVerification(user)} className="text-sm">
-                  {user.isVerified ? (
-                    <>
-                      <ShieldOff className="mr-2 h-4 w-4" />
-                      Deactivate
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="mr-2 h-4 w-4" />
-                      Activate
-                    </>
-                  )}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
-                  className="text-sm"
-                >
-                  <Shield className="mr-2 h-4 w-4" />
-                  Change to {user.role === "admin" ? "User" : "Admin"}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleDeleteClick(user)}
-                  className="text-red-600 text-sm"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Badges and Metadata Section */}
-          <div className="flex flex-col gap-1.5 pt-2 border-t border-gray-100">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <Badge
-                variant={user.role === "admin" ? "default" : "secondary"}
-                className="text-[10px] sm:text-xs font-medium px-1.5 py-0.5"
-              >
-                {user.role === "admin" ? "Admin" : "User"}
-              </Badge>
-              <Badge
-                variant={user.isVerified ? "default" : "destructive"}
-                className="text-[10px] sm:text-xs font-medium px-1.5 py-0.5"
-              >
-                {user.isVerified ? "Verified" : "Unverified"}
-              </Badge>
-            </div>
-            <div className="text-[10px] sm:text-xs text-royal-gray font-medium">
-              Created: {formatDate(user.createdAt)}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }, [allUsers, handleViewOrders, handleEditUser, handleResetPassword, handleToggleVerification, handleChangeRole, handleDeleteClick]);
-
+  const handleVerificationFilterChange = (value: string) => {
+    setFilters(prev => ({ ...prev, verificationFilter: value }));
+    setPage(1);
+  };
 
   return (
     <div className="flex-1 p-2 sm:p-4 lg:p-6 flex flex-col h-full overflow-hidden">
-      {/* Header Section - Fixed */}
-      <div className={`flex flex-col ${isMobile ? 'gap-2 p-3' : 'gap-3 p-4 sm:p-5 lg:p-6'} bg-white rounded-xl border border-royal-light-gray shadow-sm flex-shrink-0`}>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
-          <div className="flex gap-2 sm:gap-3 items-center">
-            <div className={`flex-shrink-0 ${isMobile ? 'p-1.5' : 'p-2.5'} bg-royal-gray/10 rounded-lg`}>
-              <UsersIcon className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5 sm:h-6 sm:w-6'} text-royal-gray`} />
-            </div>
-            <h1 className={`${isMobile ? 'text-lg' : 'text-xl sm:text-2xl lg:text-3xl'} font-bold text-royal-dark-gray`}>Users</h1>
-          </div>
-          {/* Desktop Actions */}
-          <div className="hidden sm:flex gap-2">
-            <Button
-              onClick={() => setIsStatisticsModalOpen(true)}
-              variant="outline"
-              className="flex items-center justify-center gap-2 h-10 text-sm font-medium"
-            >
-              <BarChart3 className="h-4 w-4" />
-              Analytics
-            </Button>
-            <Button
-              onClick={() => setIsMigrationModalOpen(true)}
-              variant="outline"
-              className="flex items-center justify-center gap-2 h-10 text-sm font-medium"
-            >
-              <Download className="h-4 w-4" />
-              Migrate HubSpot
-            </Button>
-            <Button
-              onClick={handleCreateUser}
-              className="flex items-center justify-center gap-2 h-10 text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
-            >
-              <PlusIcon className="h-4 w-4" />
-              Create New User
-            </Button>
-          </div>
-        </div>
-        {/* Mobile Search - Real-time search in header */}
-        {isMobile && (
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-royal-gray z-10" />
-            <Input
-              placeholder="Search by name, email, or phone..."
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-9 h-8 text-xs"
-            />
-          </div>
-        )}
-      </div>
+      {/* Header */}
+      <UsersHeader
+        isMobile={isMobile}
+        onCreateUser={handleCreateUser}
+        onViewAnalytics={() => setIsStatisticsModalOpen(true)}
+        onMigrateHubSpot={() => setIsMigrationModalOpen(true)}
+      />
 
-      {/* Filters and Search - Desktop Only */}
-      <div className="hidden sm:block bg-white p-4 sm:p-5 rounded-xl border border-royal-light-gray shadow-sm flex-shrink-0">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray z-10" />
-            <Input
-              placeholder="Search by name, email, or phone..."
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 h-10 text-sm"
-            />
-          </div>
-          <div className="flex gap-2 sm:gap-3">
-            <Select value={roleFilter} onValueChange={(value) => { setRoleFilter(value); setPage(1); }}>
-              <SelectTrigger className="w-full sm:w-[140px] h-10 text-sm">
-                <SelectValue placeholder="All Roles" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="user">User</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={verificationFilter} onValueChange={(value) => { setVerificationFilter(value); setPage(1); }}>
-              <SelectTrigger className="w-full sm:w-[140px] h-10 text-sm">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="true">Verified</SelectItem>
-                <SelectItem value="false">Unverified</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      {/* Mobile Search in Header */}
+      {isMobile && (
+        <div className="mt-2">
+          <UsersFilters
+            isMobile={true}
+            filters={filters}
+            onSearchChange={handleSearch}
+            onRoleFilterChange={handleRoleFilterChange}
+            onVerificationFilterChange={handleVerificationFilterChange}
+          />
         </div>
-      </div>
+      )}
 
+      {/* Desktop Filters */}
+      <UsersFilters
+        isMobile={false}
+        filters={filters}
+        onSearchChange={handleSearch}
+        onRoleFilterChange={handleRoleFilterChange}
+        onVerificationFilterChange={handleVerificationFilterChange}
+      />
+
+      {/* Error Display */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm">
           <p className="font-medium text-sm sm:text-base">{error}</p>
         </div>
       )}
 
-      {/* Scrollable Content Area - Lists */}
+      {/* Scrollable Content Area */}
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
         {/* Desktop Table View */}
-        <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm">
-          <Table className="w-full">
-            <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
-              <TableRow className="bg-gray-50 hover:bg-gray-50 border-b">
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('firstName')}
-                >
-                  <div className="flex items-center">
-                    Name
-                    {getSortIcon('firstName')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('email')}
-                >
-                  <div className="flex items-center">
-                    Email
-                    {getSortIcon('email')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('phone')}
-                >
-                  <div className="flex items-center">
-                    Phone
-                    {getSortIcon('phone')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('role')}
-                >
-                  <div className="flex items-center">
-                    Role
-                    {getSortIcon('role')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('isVerified')}
-                >
-                  <div className="flex items-center">
-                    Status
-                    {getSortIcon('isVerified')}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
-                  onClick={() => handleSort('createdAt')}
-                >
-                  <div className="flex items-center">
-                    Created
-                    {getSortIcon('createdAt')}
-                  </div>
-                </TableHead>
-                <TableHead className="font-semibold text-royal-dark-gray text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    <Loading message="Loading users..." size="md" />
-                  </TableCell>
-                </TableRow>
-              ) : users.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-royal-gray">
-                    No users found
-                  </TableCell>
-                </TableRow>
-              ) : (
-                users.map((user) => (
-                  <TableRow key={user._id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium">
-                      {user.firstName} {user.lastName}
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.phone}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.isVerified ? "default" : "destructive"}>
-                        {user.isVerified ? "Verified" : "Unverified"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm text-royal-gray">
-                      {formatDate(user.createdAt)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleViewOrders(user)}>
-                            <Receipt className="mr-2 h-4 w-4" />
-                            View Orders
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleResetPassword(user._id)}>
-                            <KeyRound className="mr-2 h-4 w-4" />
-                            Reset Password
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleToggleVerification(user)}>
-                            {user.isVerified ? (
-                              <>
-                                <ShieldOff className="mr-2 h-4 w-4" />
-                                Deactivate
-                              </>
-                            ) : (
-                              <>
-                                <Shield className="mr-2 h-4 w-4" />
-                                Activate
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleChangeRole(user, user.role === "admin" ? "user" : "admin")}
-                          >
-                            <Shield className="mr-2 h-4 w-4" />
-                            Change to {user.role === "admin" ? "User" : "Admin"}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteClick(user)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <UsersTable
+          users={users}
+          loading={loading}
+          orderBy={filters.orderBy}
+          order={filters.order}
+          onSort={handleSort}
+          onViewOrders={handleViewOrders}
+          onEdit={handleEditUser}
+          onResetPassword={handleResetPassword}
+          onToggleVerification={handleToggleVerification}
+          onChangeRole={handleChangeRole}
+          onDelete={handleDeleteClick}
+        />
 
-        {/* Mobile Card View with Virtualization */}
-        <div ref={listContainerRef} className="lg:hidden flex-1 min-h-0 py-1">
-          {isLoadingAllUsers ? (
-            <div className="flex items-center justify-center h-full">
-              <Loading message="Loading users..." />
-            </div>
-          ) : allUsers.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full py-12">
-              <UsersIcon className="h-12 w-12 text-royal-gray/40 mb-4" />
-              <p className="text-base font-medium text-royal-gray">No users found</p>
-              <p className="text-sm text-royal-gray/70 mt-1">Try adjusting your filters</p>
-            </div>
-          ) : (
-            <List
-              rowCount={allUsers.length}
-              rowHeight={140} // Adjusted height to prevent overlap
-              style={{ height: listHeight, width: '100%' }}
-              className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-              rowComponent={UserCard}
-              rowProps={{}}
-            />
-          )}
+        {/* Mobile Card View */}
+        <div ref={listContainerRef} className="lg:hidden">
+          <UsersMobileView
+            users={allUsers}
+            loading={loadingAllUsers}
+            listHeight={listHeight}
+            onViewOrders={handleViewOrders}
+            onEdit={handleEditUser}
+            onResetPassword={handleResetPassword}
+            onToggleVerification={handleToggleVerification}
+            onChangeRole={handleChangeRole}
+            onDelete={handleDeleteClick}
+          />
         </div>
       </div>
 
-      {/* Pagination - Fixed (Hidden on Mobile) */}
+      {/* Pagination */}
       {!isMobile && (
-        <div className="bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray flex-shrink-0">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="text-xs sm:text-sm text-royal-gray text-center sm:text-left">
-                Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, pagination.totalUsers)} of {pagination.totalUsers} users
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs sm:text-sm text-royal-gray">Items per page:</span>
-                <Select value={limit.toString()} onValueChange={handleLimitChange}>
-                  <SelectTrigger className="w-[80px] h-8 text-xs sm:text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="25">25</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                    <SelectItem value="100">100</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            {pagination.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-1 sm:gap-2">
-                {/* First Page Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(1)}
-                  disabled={page === 1}
-                  className="text-xs sm:text-sm px-2 sm:px-3"
-                  title="First page"
-                >
-                  <ChevronsLeft className="h-4 w-4" />
-                  <span className="hidden lg:inline ml-1">First</span>
-                </Button>
-                {/* Previous Page Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page - 1)}
-                  disabled={page === 1}
-                  className="text-xs sm:text-sm px-2 sm:px-3"
-                >
-                  <span className="hidden sm:inline">Previous</span>
-                  <span className="sm:hidden">Prev</span>
-                </Button>
-                {/* Page Number Selector */}
-                <div className="hidden md:flex items-center gap-2">
-                  <span className="text-xs sm:text-sm text-royal-gray">Page</span>
-                  <Select
-                    value={page.toString()}
-                    onValueChange={(value) => setPage(parseInt(value))}
-                  >
-                    <SelectTrigger className="w-[70px] h-8 text-xs sm:text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pageNum) => (
-                        <SelectItem key={pageNum} value={pageNum.toString()}>
-                          {pageNum}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <span className="text-xs sm:text-sm text-royal-gray">of {pagination.totalPages}</span>
-                </div>
-                {/* Mobile: Show current page and total */}
-                <div className="flex md:hidden items-center gap-1">
-                  <Button
-                    variant="default"
-                    size="sm"
-                    className="min-w-[32px] text-xs px-2"
-                    disabled
-                  >
-                    {page}
-                  </Button>
-                  <span className="text-xs text-royal-gray">/</span>
-                  <span className="text-xs text-royal-gray">{pagination.totalPages}</span>
-                </div>
-                {/* Desktop: Show page number buttons */}
-                <div className="hidden sm:flex md:hidden items-center gap-1">
-                  {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                    let pageNum;
-                    if (pagination.totalPages <= 5) {
-                      pageNum = i + 1;
-                    } else if (page <= 3) {
-                      pageNum = i + 1;
-                    } else if (page >= pagination.totalPages - 2) {
-                      pageNum = pagination.totalPages - 4 + i;
-                    } else {
-                      pageNum = page - 2 + i;
-                    }
-                    return (
-                      <Button
-                        key={pageNum}
-                        variant={page === pageNum ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setPage(pageNum)}
-                        className="min-w-[36px] text-sm px-2"
-                      >
-                        {pageNum}
-                      </Button>
-                    );
-                  })}
-                </div>
-                {/* Next Page Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(page + 1)}
-                  disabled={page === pagination.totalPages}
-                  className="text-xs sm:text-sm px-2 sm:px-3"
-                >
-                  Next
-                </Button>
-                {/* Last Page Button */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPage(pagination.totalPages)}
-                  disabled={page === pagination.totalPages}
-                  className="text-xs sm:text-sm px-2 sm:px-3"
-                  title="Last page"
-                >
-                  <span className="hidden lg:inline mr-1">Last</span>
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+        <UsersPagination
+          page={page}
+          limit={limit}
+          pagination={pagination}
+          onPageChange={setPage}
+          onLimitChange={handleLimitChange}
+        />
       )}
 
-      {/* Create/Edit User Modal */}
+      {/* Modals and Dialogs */}
       <CreateUserModal
         isOpen={isModalOpen}
         closeDialog={handleCloseModal}
         editingUser={editingUser}
       />
 
-      {/* HubSpot Migration Modal */}
       <HubSpotMigrationModal
         isOpen={isMigrationModalOpen}
         onClose={() => setIsMigrationModalOpen(false)}
-        onComplete={() => {
-          fetchUsers();
-          if (isMobile) fetchAllUsers();
-        }}
+        onComplete={refetch}
       />
 
-      {/* User Statistics Modal */}
-      <Dialog open={isStatisticsModalOpen} onOpenChange={setIsStatisticsModalOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-royal-dark-gray">User Analytics</DialogTitle>
-          </DialogHeader>
-          {statistics && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                <div className="text-sm text-blue-700 mb-2 font-medium">Total Users</div>
-                <div className="text-3xl font-bold text-blue-900">{statistics.total}</div>
-              </div>
-              <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
-                <div className="text-sm text-green-700 mb-2 font-medium">Verified</div>
-                <div className="text-3xl font-bold text-green-900">{statistics.verified}</div>
-              </div>
-              <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
-                <div className="text-sm text-red-700 mb-2 font-medium">Unverified</div>
-                <div className="text-3xl font-bold text-red-900">{statistics.unverified}</div>
-              </div>
-              <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
-                <div className="text-sm text-indigo-700 mb-2 font-medium">Admins</div>
-                <div className="text-3xl font-bold text-indigo-900">{statistics.admins}</div>
-              </div>
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200">
-                <div className="text-sm text-gray-700 mb-2 font-medium">Regular Users</div>
-                <div className="text-3xl font-bold text-gray-900">{statistics.users}</div>
-              </div>
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
-                <div className="text-sm text-purple-700 mb-2 font-medium">Recent (30d)</div>
-                <div className="text-3xl font-bold text-purple-900">{statistics.recentUsers}</div>
-                <div className="text-xs text-purple-600 mt-1">New users in last month</div>
-              </div>
-              <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200 md:col-span-3">
-                <div className="text-sm text-orange-700 mb-2 font-medium">Active Users (30d)</div>
-                <div className="text-3xl font-bold text-orange-900">{statistics.recentActiveUsers}</div>
-                <div className="text-xs text-orange-600 mt-1">Users who logged in during the last 30 days</div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <UserStatisticsModal
+        isOpen={isStatisticsModalOpen}
+        onClose={() => setIsStatisticsModalOpen(false)}
+        statistics={statistics}
+      />
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the user{" "}
-              <strong>{userToDelete?.firstName} {userToDelete?.lastName}</strong> ({userToDelete?.email}).
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <UserDeleteDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setUserToDelete(null);
+        }}
+        user={userToDelete}
+        isDeleting={isDeleting}
+        onConfirm={confirmDelete}
+      />
+
+      <OrdersModal
+        isOpen={!!viewingOrdersForUserId}
+        onClose={handleBackToUsers}
+        userId={viewingOrdersForUserId}
+        userName={viewingOrdersForUserName}
+      />
 
       {/* Mobile Floating Action Button */}
       {isMobile && (
@@ -989,118 +355,28 @@ export function UsersSection() {
         </button>
       )}
 
-
-      {/* Mobile Bottom Sheet for Search, Filters, and Actions */}
+      {/* Mobile Bottom Sheet */}
       {isMobile && (
-        <BottomSheet
+        <MobileBottomSheet
           isOpen={isBottomSheetOpen}
           onClose={() => setIsBottomSheetOpen(false)}
-          title="Users"
-          maxHeight="85vh"
-        >
-          <div className="p-4 space-y-4">
-            {/* Filters */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Filters</label>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-gray-400 mb-1.5 block">Role</label>
-                  <Select value={roleFilter} onValueChange={(value) => { setRoleFilter(value); setPage(1); }}>
-                    <SelectTrigger className="w-full h-11 bg-gray-800 border-gray-700 text-white hover:bg-gray-750">
-                      <SelectValue placeholder="All Roles" />
-                    </SelectTrigger>
-                    <SelectContent className="!z-[70] bg-gray-800 border-gray-700 text-white">
-                      <SelectItem value="all" className="text-white focus:bg-gray-700">All Roles</SelectItem>
-                      <SelectItem value="admin" className="text-white focus:bg-gray-700">Admin</SelectItem>
-                      <SelectItem value="user" className="text-white focus:bg-gray-700">User</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-xs text-gray-400 mb-1.5 block">Status</label>
-                  <Select value={verificationFilter} onValueChange={(value) => { setVerificationFilter(value); setPage(1); }}>
-                    <SelectTrigger className="w-full h-11 bg-gray-800 border-gray-700 text-white hover:bg-gray-750">
-                      <SelectValue placeholder="All Status" />
-                    </SelectTrigger>
-                    <SelectContent className="!z-[70] bg-gray-800 border-gray-700 text-white">
-                      <SelectItem value="all" className="text-white focus:bg-gray-700">All Status</SelectItem>
-                      <SelectItem value="true" className="text-white focus:bg-gray-700">Verified</SelectItem>
-                      <SelectItem value="false" className="text-white focus:bg-gray-700">Unverified</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="border-t border-gray-700 my-2" />
-
-            {/* Actions */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300">Actions</label>
-              <div className="space-y-2">
-                <Button
-                  onClick={() => {
-                    setIsStatisticsModalOpen(true);
-                    setIsBottomSheetOpen(false);
-                  }}
-                  variant="outline"
-                  className="w-full h-11 bg-gray-800 border-gray-700 text-white hover:bg-gray-700 justify-start"
-                >
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  View Analytics
-                </Button>
-                <Button
-                  onClick={() => {
-                    handleCreateUser();
-                    setIsBottomSheetOpen(false);
-                  }}
-                  className="w-full h-11 bg-primary hover:bg-primary/90 text-white justify-start"
-                >
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Create New User
-                </Button>
-                <Button
-                  onClick={() => {
-                    setIsMigrationModalOpen(true);
-                    setIsBottomSheetOpen(false);
-                  }}
-                  variant="outline"
-                  className="w-full h-11 bg-gray-800 border-gray-700 text-white hover:bg-gray-700 justify-start"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Migrate HubSpot
-                </Button>
-              </div>
-            </div>
-          </div>
-        </BottomSheet>
+          filters={filters}
+          onRoleFilterChange={handleRoleFilterChange}
+          onVerificationFilterChange={handleVerificationFilterChange}
+          onViewAnalytics={() => {
+            setIsStatisticsModalOpen(true);
+            setIsBottomSheetOpen(false);
+          }}
+          onCreateUser={() => {
+            handleCreateUser();
+            setIsBottomSheetOpen(false);
+          }}
+          onMigrateHubSpot={() => {
+            setIsMigrationModalOpen(true);
+            setIsBottomSheetOpen(false);
+          }}
+        />
       )}
-
-      {/* Orders Modal */}
-      <Dialog open={!!viewingOrdersForUserId} onOpenChange={(open) => {
-        if (!open) {
-          handleBackToUsers();
-        }
-      }}>
-        <DialogContent className="sm:max-w-6xl max-w-[95vw] max-h-[90vh] overflow-hidden flex flex-col p-0">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b">
-            <DialogTitle className="text-xl font-semibold">
-              Orders - {viewingOrdersForUserName || 'User'}
-            </DialogTitle>
-            <DialogDescription>
-              Viewing order history for {viewingOrdersForUserName || 'this user'}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto px-6 py-4">
-            <UserOrdersSection
-              viewAsUserId={viewingOrdersForUserId || undefined}
-              viewAsUserName={viewingOrdersForUserName || undefined}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
-

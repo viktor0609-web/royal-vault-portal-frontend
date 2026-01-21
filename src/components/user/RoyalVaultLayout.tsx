@@ -4,6 +4,7 @@ import { RoyalVaultSidebar } from "./RoyalVaultSidebar";
 import { UserBreadcrumb } from "@/components/ui/user-breadcrumb";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { courseApi } from "@/lib/api";
+import { ExternalLinkIcon } from "lucide-react";
 
 interface RoyalVaultLayoutProps {
   children: ReactNode;
@@ -157,14 +158,29 @@ export function RoyalVaultLayout({ children }: RoyalVaultLayoutProps) {
                 {/* Breadcrumb Navigation - Sticky */}
                 {(breadcrumbs.length > 1 || breadcrumbLoading) && (
                   <div className="sticky top-0 z-40 px-2 sm:px-4 py-1.5 bg-white border-b border-royal-light-gray shadow-sm overflow-x-auto flex-shrink-0">
-                    {breadcrumbLoading && breadcrumbs.length <= 1 ? (
-                      <div className="flex items-center space-x-1 text-[10px] sm:text-xs text-royal-gray">
-                        <div className="animate-spin h-2.5 w-2.5 sm:h-3 sm:w-3 border-2 border-royal-light-gray border-t-royal-blue rounded-full"></div>
-                        <span>Loading...</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        {breadcrumbLoading && breadcrumbs.length <= 1 ? (
+                          <div className="flex items-center space-x-1 text-[10px] sm:text-xs text-royal-gray">
+                            <div className="animate-spin h-2.5 w-2.5 sm:h-3 sm:w-3 border-2 border-royal-light-gray border-t-royal-blue rounded-full"></div>
+                            <span>Loading...</span>
+                          </div>
+                        ) : (
+                          <UserBreadcrumb items={breadcrumbs} />
+                        )}
                       </div>
-                    ) : (
-                      <UserBreadcrumb items={breadcrumbs} />
-                    )}
+                      {location.pathname === '/deals' && (
+                        <a
+                          href="https://investor.avestorinc.com/rlswealthfund"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[#1DA1F2] hover:text-[#1a8dd9] hover:underline transition-colors flex-shrink-0"
+                        >
+                          <span>Investor Portal</span>
+                          <ExternalLinkIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        </a>
+                      )}
+                    </div>
                   </div>
                 )}
 

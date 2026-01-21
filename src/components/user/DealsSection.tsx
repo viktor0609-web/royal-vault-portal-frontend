@@ -405,7 +405,8 @@ export function DealsSection() {
 
       {/* Mobile Filters with Source Tabs Only */}
       <div className="min-[800px]:hidden mb-1.5">
-        <div className="flex gap-0.5 bg-white p-0.5 rounded-lg border border-royal-light-gray">
+        <div className="flex items-center justify-between gap-2 mb-1.5">
+          <div className="flex gap-0.5 bg-white p-0.5 rounded-lg border border-royal-light-gray flex-1">
           <Button
             variant={activeSourceTab === "all" ? "default" : "outline"}
             size="sm"
@@ -440,7 +441,8 @@ export function DealsSection() {
             >
               Saved
             </Button>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

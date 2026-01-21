@@ -6,6 +6,7 @@ import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableC
 import { ReceiptRussianRuble, VideoIcon, Users, Eye, Edit, BarChart3, Calendar, UserCheck, Trash2, Loader2, RefreshCw, Menu, MoreVertical, ArrowUp, ArrowDown } from "lucide-react";
 import { WebinarModal } from "./WebinarModal";
 import { RecsModal } from "./RecsModal";
+import { RegistrationsModal } from "./RegistrationsModal";
 import { webinarApi, api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -36,8 +37,10 @@ export function WebinarSection() {
     const [error, setError] = useState<string | null>(null);
     const [open, setOpen] = useState(false);
     const [recsOpen, setRecsOpen] = useState(false);
+    const [registrationsOpen, setRegistrationsOpen] = useState(false);
     const [editingWebinar, setEditingWebinar] = useState<Webinar | null>(null);
     const [recsWebinar, setRecsWebinar] = useState<Webinar | null>(null);
+    const [registrationsWebinar, setRegistrationsWebinar] = useState<Webinar | null>(null);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [orderBy, setOrderBy] = useState<string>('date');
     const [order, setOrder] = useState<'asc' | 'desc'>('desc');
@@ -111,8 +114,10 @@ export function WebinarSection() {
     const closeModal = () => {
         setOpen(false);
         setRecsOpen(false);
+        setRegistrationsOpen(false);
         setEditingWebinar(null);
         setRecsWebinar(null);
+        setRegistrationsWebinar(null);
     }
     const handleWebinarSaved = async (webinarData: Webinar, isUpdate: boolean) => {
         // Similar to UsersSection - just refetch, let fetchWebinars handle smart merging
@@ -235,6 +240,11 @@ export function WebinarSection() {
                         title: "Recordings",
                         description: "Opening webinar recordings panel",
                     });
+                    break;
+                }
+                case 'registrations': {
+                    setRegistrationsWebinar(item!);
+                    setRegistrationsOpen(true);
                     break;
                 }
             }
@@ -474,6 +484,14 @@ export function WebinarSection() {
                                         </Button>
                                         <Button
                                             size="sm"
+                                            className="h-8 px-3 text-sm bg-cyan-600 hover:bg-cyan-700 text-white"
+                                            onClick={() => handlebtnClick('registrations', webinar)}
+                                            disabled={actionLoading === 'registrations'}
+                                        >
+                                            {actionLoading === 'registrations' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Users className="h-4 w-4" />}
+                                        </Button>
+                                        <Button
+                                            size="sm"
                                             className="h-8 w-8 p-0 bg-red-600 hover:bg-red-700 text-white"
                                             onClick={() => handlebtnClick('delete', webinar)}
                                             disabled={actionLoading === 'delete'}
@@ -515,6 +533,9 @@ export function WebinarSection() {
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem onClick={() => handlebtnClick('guest', webinar)} className="cursor-pointer">
                                                     <span className="text-teal-700 font-medium">Guest</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handlebtnClick('registrations', webinar)} className="cursor-pointer">
+                                                    <span className="text-cyan-700 font-medium">Registrations</span>
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
@@ -654,6 +675,15 @@ export function WebinarSection() {
                             >
                                 Recs
                             </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlebtnClick('registrations', webinar)}
+                                className="text-xs px-2 py-1 h-7 flex-shrink-0"
+                            >
+                                <Users className="h-3 w-3 mr-1" />
+                                Registrations
+                            </Button>
                         </div>
                     </div>
                 ))}
@@ -666,6 +696,7 @@ export function WebinarSection() {
                 onWebinarSaved={handleWebinarSaved}
             />
             <RecsModal isOpen={recsOpen} closeDialog={closeModal} webinar={recsWebinar} onRecordingSaved={fetchWebinars} />
+            <RegistrationsModal isOpen={registrationsOpen} closeDialog={closeModal} webinar={registrationsWebinar} />
 
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>

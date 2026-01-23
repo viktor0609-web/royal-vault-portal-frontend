@@ -137,11 +137,6 @@ export function WebinarSection() {
         }
     };
 
-    const handleDeleteWebinar = (webinarId: string) => {
-        setWebinarToDelete(webinarId);
-        setDeleteDialogOpen(true);
-    };
-
     const confirmDeleteWebinar = async () => {
         if (!webinarToDelete) return;
 
@@ -167,6 +162,50 @@ export function WebinarSection() {
     };
 
     const handlebtnClick = async (action: string, item?: Webinar) => {
+        // Handle window.open actions synchronously (no loading state needed)
+        if (action === 'register' || action === 'web' || action === 'host' || action === 'guest') {
+            try {
+                let url = '';
+                switch (action) {
+                    case 'register':
+                        url = `/webinar-register?id=${item!._id}&title=${encodeURIComponent(item!.name)}&date=${encodeURIComponent(item!.date)}`;
+                        break;
+                    case 'web':
+                        url = `/royal-tv/${item!.slug}/user`;
+                        break;
+                    case 'host':
+                        url = `/royal-tv/${item!.slug}/admin`;
+                        break;
+                    case 'guest':
+                        url = `/royal-tv/${item!.slug}/guest`;
+                        break;
+                }
+                const newWindow = window.open(url, "_blank");
+                if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                    toast({
+                        title: "Popup Blocked",
+                        description: "Please allow popups for this site to open the link",
+                        variant: "destructive",
+                    });
+                }
+            } catch (error: any) {
+                toast({
+                    title: "Error",
+                    description: `Failed to open ${action} page`,
+                    variant: "destructive",
+                });
+            }
+            return;
+        }
+
+        // Handle delete action (just opens dialog, no loading needed)
+        if (action === 'delete') {
+            setWebinarToDelete(item!._id);
+            setDeleteDialogOpen(true);
+            return;
+        }
+
+        // Handle async actions with loading states
         setActionLoading(action);
 
         try {
@@ -206,26 +245,6 @@ export function WebinarSection() {
                         title: "Edit Webinar",
                         description: "Loading webinar details for editing",
                     });
-                    break;
-                }
-                case 'delete': {
-                    await handleDeleteWebinar(item!._id);
-                    break;
-                }
-                case 'register': {
-                    window.open(`/webinar-register?id=${item!._id}&title=${encodeURIComponent(item!.name)}&date=${encodeURIComponent(item!.date)}`, "_blank");
-                    break;
-                }
-                case 'web': {
-                    window.open(`/royal-tv/${item!.slug}/user`, "_blank");
-                    break;
-                }
-                case 'host': {
-                    window.open(`/royal-tv/${item!.slug}/admin`, "_blank");
-                    break;
-                }
-                case 'guest': {
-                    window.open(`/royal-tv/${item!.slug}/guest`, "_blank");
                     break;
                 }
                 case 'recs': {
@@ -409,7 +428,16 @@ export function WebinarSection() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {webinars.map((webinar) => (
+                        {webinars.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                                    <VideoIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                                    <p className="text-lg font-medium">No webinars found</p>
+                                    <p className="text-sm mt-2">Create your first webinar to get started</p>
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            webinars.map((webinar) => (
                             <TableRow key={webinar._id}>
                                 <TableCell className="px-1 py-1.5 max-w-[200px] truncate text-sm font-medium">{webinar.name}</TableCell>
                                 <TableCell className="px-1 py-1.5">
@@ -446,33 +474,29 @@ export function WebinarSection() {
                                             size="sm"
                                             className="h-8 px-3 text-sm bg-emerald-600 hover:bg-emerald-700 text-white"
                                             onClick={() => handlebtnClick('register', webinar)}
-                                            disabled={actionLoading === 'register'}
                                         >
-                                            {actionLoading === 'register' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reg'}
+                                            Reg
                                         </Button>
                                         <Button
                                             size="sm"
                                             className="h-8 px-3 text-sm bg-purple-600 hover:bg-purple-700 text-white"
                                             onClick={() => handlebtnClick('web', webinar)}
-                                            disabled={actionLoading === 'web'}
                                         >
-                                            {actionLoading === 'web' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Web'}
+                                            Web
                                         </Button>
                                         <Button
                                             size="sm"
                                             className="h-8 px-3 text-sm bg-amber-600 hover:bg-amber-700 text-white"
                                             onClick={() => handlebtnClick('host', webinar)}
-                                            disabled={actionLoading === 'host'}
                                         >
-                                            {actionLoading === 'host' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Host'}
+                                            Host
                                         </Button>
                                         <Button
                                             size="sm"
                                             className="h-8 px-3 text-sm bg-teal-600 hover:bg-teal-700 text-white"
                                             onClick={() => handlebtnClick('guest', webinar)}
-                                            disabled={actionLoading === 'guest'}
                                         >
-                                            {actionLoading === 'guest' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Guest'}
+                                            Guest
                                         </Button>
                                         <Button
                                             size="sm"
@@ -494,9 +518,8 @@ export function WebinarSection() {
                                             size="sm"
                                             className="h-8 w-8 p-0 bg-red-600 hover:bg-red-700 text-white"
                                             onClick={() => handlebtnClick('delete', webinar)}
-                                            disabled={actionLoading === 'delete'}
                                         >
-                                            {actionLoading === 'delete' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                            <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
 
@@ -551,22 +574,29 @@ export function WebinarSection() {
                                             size="sm"
                                             className="h-8 w-8 p-0 bg-red-600 hover:bg-red-700 text-white"
                                             onClick={() => handlebtnClick('delete', webinar)}
-                                            disabled={actionLoading === 'delete'}
                                         >
-                                            {actionLoading === 'delete' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                            <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
                                 </TableCell>
                             </TableRow>
-                        ))}
+                            ))
+                        )}
                     </TableBody>
                 </Table>
             </div>
 
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden space-y-3 sm:space-y-4 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-                {webinars.map((webinar) => (
-                    <div key={webinar._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm min-w-0">
+                {webinars.length === 0 ? (
+                    <div className="bg-white rounded-lg border border-royal-light-gray p-8 text-center">
+                        <VideoIcon className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p className="text-lg font-medium text-gray-700">No webinars found</p>
+                        <p className="text-sm mt-2 text-gray-500">Create your first webinar to get started</p>
+                    </div>
+                ) : (
+                    webinars.map((webinar) => (
+                        <div key={webinar._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm min-w-0">
                         <div className="flex items-start justify-between mb-2 min-w-0">
                             <div className="flex-1 min-w-0 mr-2">
                                 <h3 className="font-semibold text-royal-dark-gray text-sm sm:text-base mb-1 line-clamp-2">{webinar.name}</h3>
@@ -601,9 +631,8 @@ export function WebinarSection() {
                                     onClick={() => handlebtnClick('delete', webinar)}
                                     className="h-6 w-6 sm:h-7 sm:w-7 p-0 bg-red-500 hover:bg-red-600"
                                     title="Delete"
-                                    disabled={actionLoading === 'delete'}
                                 >
-                                    {actionLoading === 'delete' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                                    <Trash2 className="h-3 w-3" />
                                 </Button>
                             </div>
                         </div>
@@ -686,7 +715,8 @@ export function WebinarSection() {
                             </Button>
                         </div>
                     </div>
-                ))}
+                    ))
+                )}
             </div>
 
             <WebinarModal

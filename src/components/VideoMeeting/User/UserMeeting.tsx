@@ -12,6 +12,7 @@ import { PeoplePanel } from "./PeoplePanel";
 import { SettingsContent } from "../SettingsModal";
 import { VideoPlayer } from "../VideoPlayer";
 import { useState, useEffect, useRef, Fragment } from "react";
+import { webinarApi } from "@/lib/api";
 
 
 interface UserMeetingProps {
@@ -34,6 +35,7 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
         hasLocalAudioPermission,
         startScreenshare,
         stopScreenshare,
+        dailyRoom,
     } = useDailyMeeting();
 
     const [showPeoplePanel, setShowPeoplePanel] = useState<boolean>(true);
@@ -42,6 +44,7 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [chatUnreadCount, setChatUnreadCount] = useState<number>(0);
     const hasAttemptedJoin = useRef<boolean>(false);
+    const hasMarkedAttendance = useRef<boolean>(false);
     const videoContainerRef = useRef<HTMLDivElement>(null);
 
     // On desktop, chat should always be visible
@@ -87,6 +90,59 @@ export const UserMeeting: React.FC<UserMeetingProps> = ({ webinarId, webinarStat
             joinRoom();
         }
     }, [roomUrl, joined, isLoading, joinRoom]);
+
+    // Automatically mark user as attended when they join an "In Progress" meeting
+    // or when status changes to "In Progress" while they're already in the room
+    useEffect(() => {
+        const markAttendance = async () => {
+            if (
+                webinarId &&
+                joined &&
+                webinarStatus === "In Progress" &&
+                !hasMarkedAttendance.current
+            ) {
+                try {
+                    hasMarkedAttendance.current = true;
+                    await webinarApi.markAsAttended(webinarId);
+                    console.log("User automatically marked as attended for In Progress meeting");
+                } catch (error) {
+                    console.error("Error marking attendance:", error);
+                    // Reset flag on error so we can retry
+                    hasMarkedAttendance.current = false;
+                }
+            }
+        };
+
+        markAttendance();
+    }, [webinarId, joined, webinarStatus]);
+
+    // Listen for status change messages from admin (when status changes while user is in room)
+    useEffect(() => {
+        if (!dailyRoom || !joined || !webinarId) return;
+
+        const handleAppMessage = async (event: any) => {
+            if (event.data.type === 'webinar-status-changed' && event.data.status === 'In Progress') {
+                // Status changed to "In Progress" while user is in the room
+                // Mark them as attended if not already marked
+                if (!hasMarkedAttendance.current) {
+                    try {
+                        hasMarkedAttendance.current = true;
+                        await webinarApi.markAsAttended(webinarId);
+                        console.log("User automatically marked as attended when status changed to In Progress");
+                    } catch (error) {
+                        console.error("Error marking attendance:", error);
+                        // Reset flag on error so we can retry
+                        hasMarkedAttendance.current = false;
+                    }
+                }
+            }
+        };
+
+        dailyRoom.on('app-message', handleAppMessage);
+        return () => {
+            dailyRoom.off('app-message', handleAppMessage);
+        };
+    }, [dailyRoom, joined, webinarId]);
 
     const toggleFullscreen = async () => {
         if (!videoContainerRef.current) return;

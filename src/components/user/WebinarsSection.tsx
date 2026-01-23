@@ -57,10 +57,18 @@ export function WebinarsSection() {
       // Initialize registered webinars state
       if (user && user._id) {
         const registeredIds = new Set<string>();
+        const currentUserId = String(user._id);
         (Array.isArray(webinarsData) ? webinarsData : []).forEach((webinar: Webinar) => {
           if (webinar.attendees?.some(attendee => {
-            const attendeeUserId = attendee.user.toString();
-            const currentUserId = user._id.toString();
+            // Handle both string IDs and populated user objects
+            let attendeeUserId: string;
+            if (typeof attendee.user === 'string') {
+              attendeeUserId = attendee.user;
+            } else if (attendee.user && typeof attendee.user === 'object' && '_id' in attendee.user) {
+              attendeeUserId = String(attendee.user._id);
+            } else {
+              attendeeUserId = String(attendee.user);
+            }
             return attendeeUserId === currentUserId;
           })) {
             registeredIds.add(webinar._id);
@@ -261,14 +269,30 @@ export function WebinarsSection() {
           return dateB - dateA;
         });
         break;
-      case 2: // WATCHED - Show Ended webinars where user attended
+      case 2: // WATCHED - Show Ended webinars where user attended or watched
         filtered = currentWebinars.filter(webinar => {
-          return webinar.status === 'Ended' &&
-            webinar.attendees?.some(attendee => {
-              const attendeeUserId = attendee.user?.toString() || attendee.user;
-              const currentUserId = user?._id?.toString();
-              return attendeeUserId === currentUserId && attendee.attendanceStatus === 'attended';
-            });
+          if (!user?._id || webinar.status !== 'Ended' || !webinar.attendees || webinar.attendees.length === 0) {
+            return false;
+          }
+
+          const currentUserId = String(user._id);
+
+          return webinar.attendees.some(attendee => {
+            // Handle both string IDs and populated user objects
+            let attendeeUserId: string;
+            if (typeof attendee.user === 'string') {
+              attendeeUserId = attendee.user;
+            } else if (attendee.user && typeof attendee.user === 'object' && '_id' in attendee.user) {
+              attendeeUserId = String(attendee.user._id);
+            } else {
+              attendeeUserId = String(attendee.user);
+            }
+
+            const isMatchingUser = attendeeUserId === currentUserId;
+            const hasWatchedStatus = attendee.attendanceStatus === 'attended' || attendee.attendanceStatus === 'watched';
+
+            return isMatchingUser && hasWatchedStatus;
+          });
         });
         // Sort by date descending (most recent first)
         filtered.sort((a, b) => {
@@ -294,9 +318,17 @@ export function WebinarsSection() {
 
     // Check database state
     if (webinar.attendees) {
+      const currentUserId = String(user._id);
       return webinar.attendees.some(attendee => {
-        const attendeeUserId = attendee.user.toString();
-        const currentUserId = user._id.toString();
+        // Handle both string IDs and populated user objects
+        let attendeeUserId: string;
+        if (typeof attendee.user === 'string') {
+          attendeeUserId = attendee.user;
+        } else if (attendee.user && typeof attendee.user === 'object' && '_id' in attendee.user) {
+          attendeeUserId = String(attendee.user._id);
+        } else {
+          attendeeUserId = String(attendee.user);
+        }
         return attendeeUserId === currentUserId;
       });
     }
@@ -637,7 +669,7 @@ export function WebinarsSection() {
                   <div className="text-sm sm:text-base text-royal-gray">
                     {filterIndex === 0 ? 'No upcoming webinars (Scheduled, Waiting, or In Progress)' :
                       filterIndex === 1 ? 'No replay webinars available' :
-                        'No watched webinars (Ended webinars you attended)'}
+                        'No watched webinars (Ended webinars you attended or watched)'}
                   </div>
                 </div>
               )}

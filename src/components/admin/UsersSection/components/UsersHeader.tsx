@@ -1,18 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { UsersIcon, PlusIcon, BarChart3, Download } from "lucide-react";
+import { UsersIcon, PlusIcon, BarChart3 } from "lucide-react";
 
 interface UsersHeaderProps {
   isMobile: boolean;
   onCreateUser: () => void;
   onViewAnalytics: () => void;
-  onMigrateHubSpot: () => void;
 }
 
 export function UsersHeader({
   isMobile,
   onCreateUser,
   onViewAnalytics,
-  onMigrateHubSpot,
 }: UsersHeaderProps) {
   return (
     <div className={`flex flex-col ${isMobile ? 'gap-2 p-3' : 'gap-3 p-4 sm:p-5 lg:p-6'} bg-white rounded-xl border border-royal-light-gray shadow-sm flex-shrink-0`}>
@@ -34,14 +32,6 @@ export function UsersHeader({
           >
             <BarChart3 className="h-4 w-4" />
             Analytics
-          </Button>
-          <Button
-            onClick={onMigrateHubSpot}
-            variant="outline"
-            className="flex items-center justify-center gap-2 h-10 text-sm font-medium"
-          >
-            <Download className="h-4 w-4" />
-            Migrate HubSpot
           </Button>
           <Button
             onClick={onCreateUser}

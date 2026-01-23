@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { Loader2, Users, Mail, Phone, Calendar, UserCheck, XCircle, Clock } from "lucide-react";
+import { Loader2, Users, Mail, Phone, Calendar, UserCheck, PlayCircle, Clock } from "lucide-react";
 import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import type { WebinarAttendee, User } from "@/types";
@@ -75,7 +75,7 @@ export function RegistrationsModal({ isOpen, closeDialog, webinar }: Registratio
         const statusConfig = {
             registered: { label: "Registered", className: "bg-blue-100 text-blue-800", icon: Clock },
             attended: { label: "Attended", className: "bg-green-100 text-green-800", icon: UserCheck },
-            missed: { label: "Missed", className: "bg-red-100 text-red-800", icon: XCircle },
+            watched: { label: "Watched", className: "bg-purple-100 text-purple-800", icon: PlayCircle },
         };
 
         const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.registered;
@@ -99,7 +99,7 @@ export function RegistrationsModal({ isOpen, closeDialog, webinar }: Registratio
 
     const registeredCount = attendees.filter(a => a.attendanceStatus === 'registered').length;
     const attendedCount = attendees.filter(a => a.attendanceStatus === 'attended').length;
-    const missedCount = attendees.filter(a => a.attendanceStatus === 'missed').length;
+    const watchedCount = attendees.filter(a => a.attendanceStatus === 'watched').length;
 
     return (
         <Dialog open={isOpen} onOpenChange={closeDialog}>
@@ -139,8 +139,8 @@ export function RegistrationsModal({ isOpen, closeDialog, webinar }: Registratio
                                 <div className="text-sm text-muted-foreground">Attended</div>
                             </div>
                             <div className="text-center">
-                                <div className="text-2xl font-bold text-red-600">{missedCount}</div>
-                                <div className="text-sm text-muted-foreground">Missed</div>
+                                <div className="text-2xl font-bold text-purple-600">{watchedCount}</div>
+                                <div className="text-sm text-muted-foreground">Watched</div>
                             </div>
                         </div>
 

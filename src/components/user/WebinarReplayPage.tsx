@@ -4,12 +4,14 @@ import { Loading } from "@/components/ui/Loading";
 import { VideoPlayer } from "@/components/ui/VideoPlayer";
 import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 import type { Webinar } from "@/types";
 
 export function WebinarReplayPage() {
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { user } = useAuth();
     const [webinar, setWebinar] = useState<Webinar | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -56,6 +58,22 @@ export function WebinarReplayPage() {
 
         fetchWebinar();
     }, [slug, navigate, toast]);
+
+    // Mark as watched when recording loads and user is logged in
+    useEffect(() => {
+        const markWatched = async () => {
+            if (webinar && user) {
+                try {
+                    await webinarApi.markAsWatched(webinar._id);
+                } catch (error: any) {
+                    // Silently fail - don't show error to user
+                    console.error("Error marking as watched:", error);
+                }
+            }
+        };
+
+        markWatched();
+    }, [webinar, user]);
 
 
     if (loading) {

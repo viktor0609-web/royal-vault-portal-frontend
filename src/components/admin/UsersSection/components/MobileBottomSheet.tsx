@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BottomSheet } from "@/components/VideoMeeting/BottomSheet";
-import { BarChart3, PlusIcon, Download } from "lucide-react";
+import { BarChart3, PlusIcon } from "lucide-react";
 import type { UsersFilters } from "../types";
 
 interface MobileBottomSheetProps {
@@ -12,7 +12,6 @@ interface MobileBottomSheetProps {
   onVerificationFilterChange: (value: string) => void;
   onViewAnalytics: () => void;
   onCreateUser: () => void;
-  onMigrateHubSpot: () => void;
 }
 
 export function MobileBottomSheet({
@@ -23,7 +22,6 @@ export function MobileBottomSheet({
   onVerificationFilterChange,
   onViewAnalytics,
   onCreateUser,
-  onMigrateHubSpot,
 }: MobileBottomSheetProps) {
   return (
     <BottomSheet
@@ -93,17 +91,6 @@ export function MobileBottomSheet({
             >
               <PlusIcon className="h-4 w-4 mr-2" />
               Create New User
-            </Button>
-            <Button
-              onClick={() => {
-                onMigrateHubSpot();
-                onClose();
-              }}
-              variant="outline"
-              className="w-full h-11 bg-gray-800 border-gray-700 text-white hover:bg-gray-700 justify-start"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Migrate HubSpot
             </Button>
           </div>
         </div>

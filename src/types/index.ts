@@ -58,7 +58,7 @@ export interface FilterOptions {
 export type Status = "Scheduled" | "Waiting" | "In Progress" | "Ended";
 export type PortalDisplay = "Yes" | "No";
 export type StreamType = "Live Call" | "Webinar";
-export type AttendanceStatus = "registered" | "attended" | "missed";
+export type AttendanceStatus = "registered" | "attended" | "watched";
 export type Role = "user" | "admin";
 export type ClientType = "individual" | "business";
 export type VerificationStatus = "verified" | "unverified";
@@ -160,7 +160,7 @@ export interface Webinar {
 
 export interface WebinarAttendee {
   user: string | User;
-  attendanceStatus: "registered" | "attended" | "missed";
+  attendanceStatus: "registered" | "attended" | "watched";
   registeredAt: string;
 }
 

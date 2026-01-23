@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { userApi } from "@/lib/api";
 import { Menu } from "lucide-react";
 import { CreateUserModal } from "./CreateUserModal";
-import { HubSpotMigrationModal } from "./HubSpotMigrationModal";
 import { useUsersData } from "./hooks/useUsersData";
 import { useUserActions } from "./hooks/useUserActions";
 import { UsersHeader } from "./components/UsersHeader";
@@ -41,7 +40,6 @@ export function UsersSection() {
   const [statistics, setStatistics] = useState<UserStatistics | null>(null);
   const [isStatisticsModalOpen, setIsStatisticsModalOpen] = useState(false);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
-  const [isMigrationModalOpen, setIsMigrationModalOpen] = useState(false);
   const [viewingOrdersForUserId, setViewingOrdersForUserId] = useState<string | null>(null);
   const [viewingOrdersForUserName, setViewingOrdersForUserName] = useState<string | null>(null);
 
@@ -231,7 +229,6 @@ export function UsersSection() {
         isMobile={isMobile}
         onCreateUser={handleCreateUser}
         onViewAnalytics={() => setIsStatisticsModalOpen(true)}
-        onMigrateHubSpot={() => setIsMigrationModalOpen(true)}
       />
 
       {/* Mobile Search in Header */}
@@ -314,12 +311,6 @@ export function UsersSection() {
         editingUser={editingUser}
       />
 
-      <HubSpotMigrationModal
-        isOpen={isMigrationModalOpen}
-        onClose={() => setIsMigrationModalOpen(false)}
-        onComplete={refetch}
-      />
-
       <UserStatisticsModal
         isOpen={isStatisticsModalOpen}
         onClose={() => setIsStatisticsModalOpen(false)}
@@ -369,10 +360,6 @@ export function UsersSection() {
           }}
           onCreateUser={() => {
             handleCreateUser();
-            setIsBottomSheetOpen(false);
-          }}
-          onMigrateHubSpot={() => {
-            setIsMigrationModalOpen(true);
             setIsBottomSheetOpen(false);
           }}
         />

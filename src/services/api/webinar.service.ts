@@ -41,9 +41,6 @@ export const webinarService = {
   markUserAsAttended: (webinarId: string, userId: string) =>
     api.post(`${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}/user/${userId}/attend`),
 
-  markUserAsMissed: (webinarId: string, userId: string) =>
-    api.post(`${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}/user/${userId}/missed`),
-
   endWebinar: (webinarId: string) =>
     api.post(`${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}/end`),
 
@@ -82,6 +79,9 @@ export const webinarService = {
 
   markAsAttended: (webinarId: string) =>
     api.post(`${API_ENDPOINTS.WEBINARS.REGISTER}/${webinarId}/attend`),
+
+  markAsWatched: (webinarId: string) =>
+    api.post(`${API_ENDPOINTS.WEBINARS.REGISTER}/${webinarId}/watch`),
 
   // Chat functions
   saveChatMessage: (

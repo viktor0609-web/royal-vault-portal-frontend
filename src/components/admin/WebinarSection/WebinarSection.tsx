@@ -293,16 +293,21 @@ export function WebinarSection() {
     };
 
     const getRegistrantsCount = (attendees: any[]) => {
-        return attendees?.length || 0;
+        // Total count of all people who registered (all attendees regardless of status)
+        if (!attendees || !Array.isArray(attendees)) return 0;
+        return attendees.length;
     };
 
     const getAttendeesCount = (attendees: any[]) => {
-        return attendees?.filter(a => a.attendanceStatus === 'attended').length || 0;
+        // Count of attendees who actually attended (attendanceStatus === 'attended')
+        if (!attendees || !Array.isArray(attendees)) return 0;
+        return attendees.filter(a => a && a.attendanceStatus === 'attended').length;
     };
 
     const getReWatchCount = (attendees: any[]) => {
-        // This would need to be tracked separately in the backend
-        return 0;
+        // Count of attendees who watched the replay (attendanceStatus === 'watched')
+        if (!attendees || !Array.isArray(attendees)) return 0;
+        return attendees.filter(a => a && a.attendanceStatus === 'watched').length;
     };
 
     const handleSort = (field: string) => {

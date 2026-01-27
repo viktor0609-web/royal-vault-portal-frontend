@@ -549,7 +549,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // Handle admin control messages (mic/camera control)
         const { control, sessionId, enabled } = e.data;
         const localParticipantId = dailyRoom.participants().local?.session_id;
-        
+
         // If this control affects the local participant, apply it
         if (sessionId === localParticipantId) {
           if (control === 'audio') {
@@ -568,13 +568,13 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
             }
           }
         }
-        
+
         // Force participant update to reflect changes in UI
         updateParticipants();
       }
       else if (e.data.type === 'hand-raise') {
         const { sessionId, raised } = e.data;
-        
+
         setRaisedHands(prev => {
           const next = new Set(prev);
           if (raised) {
@@ -584,7 +584,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
           }
           return next;
         });
-        
+
         // Update participants to reflect hand state
         updateParticipants();
       }
@@ -633,7 +633,6 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const startRecording = async () => {
     if (!dailyRoom) return;
-    const adminAndGuest = participants.filter((p: any) => { return p.name.includes('Guest') || p.name.includes('Admin') }).map((p: any) => p.id)
     try {
       await dailyRoom.startRecording({
         type: "cloud",
@@ -664,7 +663,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
             'videoSettings.labels.strokeColor': 'rgba(0, 0, 0, 0.9)',
           },
           participants: {
-            video: adminAndGuest,
+            video: ["*"],
             audio: ["*"],
           },
         },
@@ -715,7 +714,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const newAudioState = !participant?.audio;
       await dailyRoom.updateParticipant(sessionId, { setAudio: newAudioState });
       console.log(`Participant ${sessionId} audio toggled to ${newAudioState}`);
-      
+
       // Broadcast control change via app message for real-time sync
       (dailyRoom as any).sendAppMessage({
         type: 'admin-control',
@@ -738,7 +737,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const newVideoState = !participant?.video;
       await dailyRoom.updateParticipant(sessionId, { setVideo: newVideoState });
       console.log(`Participant ${sessionId} video toggled to ${newVideoState}`);
-      
+
       // Broadcast control change via app message for real-time sync
       (dailyRoom as any).sendAppMessage({
         type: 'admin-control',
@@ -756,11 +755,11 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!dailyRoom || !joined) return;
     const localParticipant = dailyRoom.participants().local;
     if (!localParticipant) return;
-    
+
     const sessionId = localParticipant.session_id;
     const participantName = localParticipant.user_name;
     const isCurrentlyRaised = raisedHands.has(sessionId);
-    
+
     // Toggle hand state
     if (isCurrentlyRaised) {
       setRaisedHands(prev => {
@@ -771,7 +770,7 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
     } else {
       setRaisedHands(prev => new Set(prev).add(sessionId));
     }
-    
+
     // Broadcast hand raise/lower via app message
     (dailyRoom as any).sendAppMessage({
       type: 'hand-raise',
@@ -787,14 +786,14 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const pObj = dailyRoom.participants();
       const participant = pObj[sessionId];
       if (!participant) return;
-      
+
       // Remove from raised hands
       setRaisedHands(prev => {
         const next = new Set(prev);
         next.delete(sessionId);
         return next;
       });
-      
+
       // Broadcast hand lower via app message
       (dailyRoom as any).sendAppMessage({
         type: 'hand-raise',

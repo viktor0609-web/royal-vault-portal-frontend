@@ -45,12 +45,33 @@ export function WebinarRegistrationPage() {
 
     useEffect(() => {
         const checkRegistration = async () => {
-            const response = await webinarApi.getWebinarAttendees(webinarId);
-            setIsRegistered(response.data.attendees.some(attendee => attendee.user === user?._id));
-
+            if (!webinarId || !user?._id) {
+                setIsRegistered(false);
+                return;
+            }
+            try {
+                const response = await webinarApi.getWebinarAttendees(webinarId);
+                const currentUserId = String(user._id);
+                const registered = response.data.attendees.some(attendee => {
+                    // Handle both string IDs and populated user objects
+                    let attendeeUserId: string;
+                    if (typeof attendee.user === 'string') {
+                        attendeeUserId = attendee.user;
+                    } else if (attendee.user && typeof attendee.user === 'object' && '_id' in attendee.user) {
+                        attendeeUserId = String(attendee.user._id);
+                    } else {
+                        attendeeUserId = String(attendee.user);
+                    }
+                    return attendeeUserId === currentUserId;
+                });
+                setIsRegistered(registered);
+            } catch (error) {
+                console.error('Error checking registration:', error);
+                setIsRegistered(false);
+            }
         };
         checkRegistration();
-    }, [webinar, user]);
+    }, [webinarId, user]);
 
 
     useEffect(() => {

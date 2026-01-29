@@ -112,9 +112,14 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
   }, [imageFile]);
 
   // Populate form when editing
+  // Normalize currentOffering from DB: only "Open" and "Closed" are valid
+  const normalizeCurrentOffering = (value: unknown): "Open" | "Closed" =>
+    value === "Open" || value === "Closed" ? value : "Open";
+
   useEffect(() => {
     if (editingDeal) {
       const isRoyalVetted = (editingDeal as any).isRoyalVetted || false;
+      const dbOffering = (editingDeal as any).currentOffering;
       const initialData = {
         name: editingDeal.name || "",
         url: editingDeal.url || "",
@@ -128,7 +133,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         source: isRoyalVetted ? "royal_vetted_special" : (editingDeal.source?._id || ""),
         displayOnPublicPage: (editingDeal as any).displayOnPublicPage || false,
         isRoyalVetted: isRoyalVetted,
-        currentOffering: (editingDeal as any).currentOffering || "",
+        currentOffering: isRoyalVetted ? normalizeCurrentOffering(dbOffering) : "",
       };
       setFormData(initialData);
       setInitialFormData(initialData);
@@ -156,7 +161,7 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         source: "",
         displayOnPublicPage: false,
         isRoyalVetted: false,
-        currentOffering: "",
+        currentOffering: "" as "" | "Open" | "Closed",
       };
       setFormData(emptyData);
       setInitialFormData(emptyData);
@@ -167,18 +172,21 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
     }
   }, [editingDeal, isOpen]);
 
-  // Ensure source value is set after options are loaded when editing
+  // Ensure source and currentOffering are synced from DB after options are loaded when editing
   useEffect(() => {
     if (editingDeal && options.sources.length > 0) {
       const isRoyalVetted = (editingDeal as any).isRoyalVetted || false;
+      const dbOffering = (editingDeal as any).currentOffering;
       setFormData(prev => {
-        // If Royal Vetted, ensure source is set to "royal_vetted_special"
-        // Otherwise, set to actual source ID if it exists
         const expectedSource = isRoyalVetted ? "royal_vetted_special" : (editingDeal.source?._id || "");
-        if (prev.source !== expectedSource) {
+        const expectedOffering = isRoyalVetted ? normalizeCurrentOffering(dbOffering) : "";
+        const sourceChanged = prev.source !== expectedSource;
+        const offeringChanged = isRoyalVetted && prev.currentOffering !== expectedOffering;
+        if (sourceChanged || offeringChanged) {
           return {
             ...prev,
-            source: expectedSource
+            ...(sourceChanged && { source: expectedSource }),
+            ...(offeringChanged && { currentOffering: expectedOffering }),
           };
         }
         return prev;
@@ -264,8 +272,10 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         // Only send sourceId if not Royal Vetted (royal_vetted_special is not a real source ID)
         sourceId: (formData.source === "royal_vetted_special" || formData.isRoyalVetted) ? null : (formData.source || null),
         displayOnPublicPage: formData.displayOnPublicPage,
-        // Only send currentOffering if Royal Vetted
-        currentOffering: (formData.source === "royal_vetted_special" || formData.isRoyalVetted) ? (formData.currentOffering || null) : null,
+        // Only send currentOffering if Royal Vetted; must be "Open" or "Closed"
+        currentOffering: (formData.source === "royal_vetted_special" || formData.isRoyalVetted)
+          ? (formData.currentOffering === "Open" || formData.currentOffering === "Closed" ? formData.currentOffering : "Open")
+          : null,
         createdBy: "user_id_here", // TODO: Get from auth context
       };
 
@@ -298,8 +308,10 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
         const newData = { ...prev, [field]: value };
         if (isRoyalVettedSource) {
           newData.isRoyalVetted = true;
-          // Keep existing offering if any, or leave empty
-          newData.currentOffering = newData.currentOffering || "";
+          // Keep existing offering if valid (Open/Closed), otherwise default to Open
+          newData.currentOffering = (newData.currentOffering === "Open" || newData.currentOffering === "Closed")
+            ? newData.currentOffering
+            : "Open";
         } else {
           newData.isRoyalVetted = false;
           newData.currentOffering = ""; // Clear offering when not Royal Vetted
@@ -551,22 +563,21 @@ export function CreateDealModal({ isOpen, closeDialog, editingDeal, onDealSaved 
 
             {/* Deal Status Options */}
             <div className="space-y-4 pt-4 border-t-2 border-gray-300">
-              {/* Current Offering - Only shown when Royal Vetted source is selected */}
-              {formData.isRoyalVetted && (
+              {/* Current Offering - Shown always when source is Royal Vetted */}
+              {(formData.source === "royal_vetted_special" || formData.isRoyalVetted) && (
                 <div className="space-y-2 py-2 bg-blue-50/50 p-4 rounded-lg border border-blue-200">
                   <Label className="text-sm font-semibold text-royal-dark-gray">
                     Current Offering
                   </Label>
                   <Select
-                    value={formData.currentOffering || "none"}
-                    onValueChange={(value) => handleInputChange("currentOffering", value === "none" ? "" : value)}
+                    value={formData.currentOffering === "Open" || formData.currentOffering === "Closed" ? formData.currentOffering : "Open"}
+                    onValueChange={(value) => handleInputChange("currentOffering", value as "Open" | "Closed")}
                     disabled={loading}
                   >
                     <SelectTrigger className="h-11 text-base">
                       <SelectValue placeholder="Select offering status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
                       <SelectItem value="Open">Open</SelectItem>
                       <SelectItem value="Closed">Closed</SelectItem>
                     </SelectContent>

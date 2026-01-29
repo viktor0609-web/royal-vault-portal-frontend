@@ -107,6 +107,10 @@ export function DealsSection() {
         return data.map(item => item.name).join(', ');
     };
 
+    // Source label: Royal Vetted deals show "Royal Vetted"; others show source name
+    const getSourceLabel = (deal: Deal) =>
+        deal.isRoyalVetted ? 'Royal Vetted' : (deal.source?.name || 'N/A');
+
     // Filter deals based on search query
     const filteredDeals = useMemo(() => {
         if (!search.trim()) {
@@ -115,7 +119,7 @@ export function DealsSection() {
         const searchLower = search.toLowerCase().trim();
         return deals.filter(deal =>
             deal.name.toLowerCase().includes(searchLower) ||
-            deal.source?.name?.toLowerCase().includes(searchLower) ||
+            getSourceLabel(deal).toLowerCase().includes(searchLower) ||
             formatArrayData(deal.category).toLowerCase().includes(searchLower) ||
             formatArrayData(deal.subCategory).toLowerCase().includes(searchLower) ||
             formatArrayData(deal.type).toLowerCase().includes(searchLower) ||
@@ -227,7 +231,7 @@ export function DealsSection() {
                                     filteredDeals.map((deal) => (
                                         <TableRow key={deal._id} className="hover:bg-gray-50 transition-colors">
                                             <TableCell className="font-medium text-royal-dark-gray">{deal.name}</TableCell>
-                                            <TableCell className="hidden md:table-cell text-gray-700">{deal.source?.name || 'N/A'}</TableCell>
+                                            <TableCell className="hidden md:table-cell text-gray-700">{getSourceLabel(deal)}</TableCell>
                                             <TableCell className="hidden lg:table-cell text-gray-700">{formatArrayData(deal.category)}</TableCell>
                                             <TableCell className="hidden xl:table-cell text-gray-700">{formatArrayData(deal.subCategory)}</TableCell>
                                             <TableCell className="hidden xl:table-cell text-gray-700">{formatArrayData(deal.type)}</TableCell>
@@ -344,7 +348,7 @@ export function DealsSection() {
                                             {/* Source Badge */}
                                             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white rounded-full border border-gray-200 shadow-sm">
                                                 <span className="text-xs font-medium text-gray-500">Source:</span>
-                                                <span className="text-xs font-semibold text-royal-gray">{deal.source?.name || 'N/A'}</span>
+                                                <span className="text-xs font-semibold text-royal-gray">{getSourceLabel(deal)}</span>
                                             </div>
                                         </div>
 

@@ -169,6 +169,9 @@ export function DealsSection() {
 
       let dealsList = response.data.deals || [];
 
+      // Hide closed deals from client display; only show deals where actions are available
+      dealsList = dealsList.filter((d: Deal) => d.currentOffering !== "Closed");
+
       // Sort deals: Royal Vetted first, then Royal Sourced, then Client Sourced, then by name
       dealsList.sort((a: Deal, b: Deal) => {
         // First priority: Royal Vetted deals come first
@@ -407,40 +410,40 @@ export function DealsSection() {
       <div className="min-[800px]:hidden mb-1.5">
         <div className="flex items-center justify-between gap-2 mb-1.5">
           <div className="flex gap-0.5 bg-white p-0.5 rounded-lg border border-royal-light-gray flex-1">
-          <Button
-            variant={activeSourceTab === "all" ? "default" : "outline"}
-            size="sm"
-            className={`flex-1 text-xs py-0.5 h-7 ${activeSourceTab === "all"
-              ? "bg-primary hover:bg-royal-blue-dark text-white"
-              : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
-              }`}
-            onClick={() => handleSourceTabChange("all")}
-          >
-            All
-          </Button>
-          <Button
-            variant={activeSourceTab === "royal" ? "default" : "outline"}
-            size="sm"
-            className={`flex-1 text-xs py-0.5 h-7 ${activeSourceTab === "royal"
-              ? "bg-primary hover:bg-royal-blue-dark text-white"
-              : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
-              }`}
-            onClick={() => handleSourceTabChange("royal")}
-          >
-            Royal
-          </Button>
-          {user && (
             <Button
-              variant={activeSourceTab === "favourite" ? "default" : "outline"}
+              variant={activeSourceTab === "all" ? "default" : "outline"}
               size="sm"
-              className={`flex-1 text-xs py-0.5 h-7 ${activeSourceTab === "favourite"
+              className={`flex-1 text-xs py-0.5 h-7 ${activeSourceTab === "all"
                 ? "bg-primary hover:bg-royal-blue-dark text-white"
                 : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
                 }`}
-              onClick={() => handleSourceTabChange("favourite")}
+              onClick={() => handleSourceTabChange("all")}
             >
-              Saved
+              All
             </Button>
+            <Button
+              variant={activeSourceTab === "royal" ? "default" : "outline"}
+              size="sm"
+              className={`flex-1 text-xs py-0.5 h-7 ${activeSourceTab === "royal"
+                ? "bg-primary hover:bg-royal-blue-dark text-white"
+                : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
+                }`}
+              onClick={() => handleSourceTabChange("royal")}
+            >
+              Royal
+            </Button>
+            {user && (
+              <Button
+                variant={activeSourceTab === "favourite" ? "default" : "outline"}
+                size="sm"
+                className={`flex-1 text-xs py-0.5 h-7 ${activeSourceTab === "favourite"
+                  ? "bg-primary hover:bg-royal-blue-dark text-white"
+                  : "border-royal-light-gray text-royal-gray hover:bg-royal-light-gray"
+                  }`}
+                onClick={() => handleSourceTabChange("favourite")}
+              >
+                Saved
+              </Button>
             )}
           </div>
         </div>

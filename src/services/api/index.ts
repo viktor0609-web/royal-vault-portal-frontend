@@ -58,6 +58,7 @@ export const webinarApi = {
   updateWebinar: webinarService.updateWebinar,
   deleteWebinar: webinarService.deleteWebinar,
   getWebinarAttendees: webinarService.getWebinarAttendees,
+  syncAttendeesToHubSpot: webinarService.syncAttendeesToHubSpot,
   markUserAsAttended: webinarService.markUserAsAttended,
   endWebinar: webinarService.endWebinar,
   getDownloadLink: webinarService.getDownloadLink,

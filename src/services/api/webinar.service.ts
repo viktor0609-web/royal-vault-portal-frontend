@@ -38,6 +38,11 @@ export const webinarService = {
   getWebinarAttendees: (webinarId: string) =>
     api.get(`${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}/attendees`),
 
+  syncAttendeesToHubSpot: (webinarId: string) =>
+    api.post<{ message: string; listId?: string; added?: number; removed?: number; totalContacts?: number }>(
+      `${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}/attendees/sync-hubspot`
+    ),
+
   markUserAsAttended: (webinarId: string, userId: string) =>
     api.post(`${API_ENDPOINTS.WEBINARS.ADMIN}/${webinarId}/user/${userId}/attend`),
 

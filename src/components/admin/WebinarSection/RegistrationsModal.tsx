@@ -160,13 +160,13 @@ export function RegistrationsModal({ isOpen, closeDialog, webinar }: Registratio
 
     return (
         <Dialog open={isOpen} onOpenChange={closeDialog}>
-            <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <Users className="h-5 w-5" />
-                        Webinar Registrations
+            <DialogContent className="w-[95vw] max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden p-3 sm:p-6 flex flex-col">
+                <DialogHeader className="space-y-1 sm:space-y-2">
+                    <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                        <Users className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                        <span className="truncate">Webinar Registrations</span>
                     </DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription className="line-clamp-2 sm:line-clamp-none">
                         {webinar?.name && (
                             <span className="font-medium text-foreground">{webinar.name}</span>
                         )}
@@ -184,87 +184,99 @@ export function RegistrationsModal({ isOpen, closeDialog, webinar }: Registratio
                         <p className="text-sm text-muted-foreground mt-2">No one has registered for this webinar.</p>
                     </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-4 min-w-0 overflow-hidden max-w-full">
                         {/* Actions: Download CSV + Sync to HubSpot */}
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-2">
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={handleDownloadCsv}
-                                className="gap-2"
+                                className="gap-2 w-full sm:w-auto"
                             >
-                                <Download className="h-4 w-4" />
-                                Download CSV
+                                <Download className="h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">Download CSV</span>
                             </Button>
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={handleSyncToHubSpot}
                                 disabled={syncingHubSpot || attendees.length === 0}
-                                className="gap-2"
+                                className="gap-2 w-full sm:w-auto"
                             >
                                 {syncingHubSpot ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    <Loader2 className="h-4 w-4 animate-spin flex-shrink-0" />
                                 ) : (
-                                    <RefreshCw className="h-4 w-4" />
+                                    <RefreshCw className="h-4 w-4 flex-shrink-0" />
                                 )}
-                                {syncingHubSpot ? "Syncing…" : "Sync to HubSpot"}
+                                <span className="truncate">{syncingHubSpot ? "Syncing…" : "Sync to HubSpot"}</span>
                             </Button>
                         </div>
 
                         {/* Statistics */}
-                        <div className="grid grid-cols-3 gap-4 p-4 bg-muted rounded-lg">
-                            <div className="text-center">
-                                <div className="text-2xl font-bold text-blue-600">{registeredCount}</div>
-                                <div className="text-sm text-muted-foreground">Registered</div>
+                        <div className="grid grid-cols-3 gap-2 sm:gap-4 p-3 sm:p-4 bg-muted rounded-lg">
+                            <div className="text-center min-w-0">
+                                <div className="text-xl sm:text-2xl font-bold text-blue-600 tabular-nums">{registeredCount}</div>
+                                <div className="text-xs sm:text-sm text-muted-foreground truncate">Registered</div>
                             </div>
-                            <div className="text-center">
-                                <div className="text-2xl font-bold text-green-600">{attendedCount}</div>
-                                <div className="text-sm text-muted-foreground">Attended</div>
+                            <div className="text-center min-w-0">
+                                <div className="text-xl sm:text-2xl font-bold text-green-600 tabular-nums">{attendedCount}</div>
+                                <div className="text-xs sm:text-sm text-muted-foreground truncate">Attended</div>
                             </div>
-                            <div className="text-center">
-                                <div className="text-2xl font-bold text-purple-600">{watchedCount}</div>
-                                <div className="text-sm text-muted-foreground">Watched</div>
+                            <div className="text-center min-w-0">
+                                <div className="text-xl sm:text-2xl font-bold text-purple-600 tabular-nums">{watchedCount}</div>
+                                <div className="text-xs sm:text-sm text-muted-foreground truncate">Watched</div>
                             </div>
                         </div>
 
-                        {/* Table */}
-                        <div className="border rounded-lg overflow-hidden">
-                            <Table>
+                        {/* Mobile: card list */}
+                        <div className="space-y-2 md:hidden">
+                            <p className="text-xs text-muted-foreground font-medium">Participants</p>
+                            <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+                                {attendees.map((attendee, index) => (
+                                    <AttendeeCard key={index} attendee={attendee} getStatusBadge={getStatusBadge} formatDate={formatDate} />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Desktop: table - scrollable body only; header stays visible */}
+                        <div className="hidden md:block border rounded-lg min-w-0 w-full overflow-x-auto overflow-y-auto max-h-[50vh]">
+                            <Table className="table-fixed w-full min-w-0">
                                 <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-[200px]">Name</TableHead>
-                                        <TableHead className="w-[250px]">Email</TableHead>
-                                        <TableHead className="w-[150px]">Phone</TableHead>
-                                        <TableHead className="w-[150px]">Status</TableHead>
-                                        <TableHead className="w-[200px]">Registered At</TableHead>
+                                    <TableRow className="sticky top-0 z-10 bg-muted hover:bg-muted border-b">
+                                        <TableHead className="w-[18%] bg-muted">Name</TableHead>
+                                        <TableHead className="w-[28%] bg-muted">Email</TableHead>
+                                        <TableHead className="w-[14%] bg-muted">Phone</TableHead>
+                                        <TableHead className="w-[14%] bg-muted">Status</TableHead>
+                                        <TableHead className="w-[26%] bg-muted">Registered At</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {attendees.map((attendee, index) => (
                                         <TableRow key={index}>
-                                            <TableCell className="font-medium">
-                                                {attendee.user?.firstName} {attendee.user?.lastName}
+                                            <TableCell className="font-medium max-w-0">
+                                                <span className="block truncate min-w-0" title={`${attendee.user?.firstName ?? ''} ${attendee.user?.lastName ?? ''}`.trim()}>
+                                                    {attendee.user?.firstName} {attendee.user?.lastName}
+                                                </span>
                                             </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    <Mail className="h-4 w-4 text-muted-foreground" />
-                                                    <span className="text-sm">{attendee.user?.email || 'N/A'}</span>
+                                            <TableCell className="max-w-0">
+                                                <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                                                    <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                                    <span className="text-sm truncate block min-w-0" title={attendee.user?.email || undefined}>{attendee.user?.email || 'N/A'}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    <Phone className="h-4 w-4 text-muted-foreground" />
-                                                    <span className="text-sm">{attendee.user?.phone || 'N/A'}</span>
+                                            <TableCell className="max-w-0">
+                                                <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+                                                    <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                                    <span className="text-sm truncate block min-w-0" title={attendee.user?.phone || undefined}>{attendee.user?.phone || 'N/A'}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>
-                                                {getStatusBadge(attendee.attendanceStatus)}
+                                            <TableCell className="max-w-0">
+                                                <div className="min-w-0 overflow-hidden">{getStatusBadge(attendee.attendanceStatus)}</div>
                                             </TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                    <Calendar className="h-4 w-4" />
-                                                    {formatDate(attendee.registeredAt)}
+                                            <TableCell className="max-w-0">
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0 overflow-hidden" title={formatDate(attendee.registeredAt)}>
+                                                    <Calendar className="h-4 w-4 flex-shrink-0" />
+                                                    <span className="truncate block min-w-0">{formatDate(attendee.registeredAt)}</span>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -274,18 +286,43 @@ export function RegistrationsModal({ isOpen, closeDialog, webinar }: Registratio
                         </div>
 
                         {/* Total count */}
-                        <div className="text-sm text-muted-foreground text-center">
+                        <div className="text-xs sm:text-sm text-muted-foreground text-center">
                             Total: <span className="font-medium text-foreground">{attendees.length}</span> registration{attendees.length !== 1 ? 's' : ''}
                         </div>
                     </div>
                 )}
 
-                <div className="flex justify-end gap-2 pt-4 border-t">
-                    <Button variant="outline" onClick={closeDialog}>
+                <div className="flex justify-end gap-2 pt-3 sm:pt-4 border-t mt-3 sm:mt-4">
+                    <Button variant="outline" size="sm" className="sm:size-default" onClick={closeDialog}>
                         Close
                     </Button>
                 </div>
             </DialogContent>
         </Dialog>
+    );
+}
+
+function AttendeeCard({ attendee, getStatusBadge, formatDate }: { attendee: PopulatedAttendee; getStatusBadge: (s: string) => JSX.Element; formatDate: (s: string) => string }) {
+    return (
+        <div className="border rounded-lg p-3 sm:p-4 space-y-2 bg-card">
+            <div className="font-medium text-sm sm:text-base">
+                {attendee.user?.firstName} {attendee.user?.lastName}
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm">
+                <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <a href={`mailto:${attendee.user?.email}`} className="truncate hover:underline">{attendee.user?.email || 'N/A'}</a>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground text-xs sm:text-sm">
+                <Phone className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                <span>{attendee.user?.phone || 'N/A'}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+                {getStatusBadge(attendee.attendanceStatus)}
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDate(attendee.registeredAt)}
+                </span>
+            </div>
+        </div>
     );
 }

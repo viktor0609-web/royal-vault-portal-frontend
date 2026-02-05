@@ -7,6 +7,7 @@ import type { User } from "../types";
 interface UserTableRowProps {
   user: User;
   onViewOrders: (user: User) => void;
+  onViewAsUser: (user: User) => void;
   onEdit: (user: User) => void;
   onResetPassword: (userId: string) => void;
   onToggleVerification: (user: User) => void;
@@ -17,6 +18,7 @@ interface UserTableRowProps {
 export function UserTableRow({
   user,
   onViewOrders,
+  onViewAsUser,
   onEdit,
   onResetPassword,
   onToggleVerification,
@@ -47,6 +49,7 @@ export function UserTableRow({
         <UserActionsDropdown
           user={user}
           onViewOrders={onViewOrders}
+          onViewAsUser={onViewAsUser}
           onEdit={onEdit}
           onResetPassword={onResetPassword}
           onToggleVerification={onToggleVerification}

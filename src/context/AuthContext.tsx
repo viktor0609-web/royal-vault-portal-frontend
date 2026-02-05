@@ -1,6 +1,7 @@
 // src/context/AuthContext.tsx
 import { createContext, useEffect, useState, ReactNode, useContext } from "react";
 import { api, setOnTokensCleared, authService } from "@/services/api";
+import { STORAGE_KEYS } from "@/constants";
 import type { User } from "@/types";
 
 // User type is now imported from @/types
@@ -34,15 +35,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 throw new Error('Login failed: No access token received');
             }
             
-            // Store token
-            localStorage.setItem("accessToken", data.accessToken);
+            // Store token (normal login always uses localStorage)
+            localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, data.accessToken);
             
             console.log('Access token stored successfully');
             await fetchProfile();
         } catch (error: any) {
             console.error('Login error:', error);
             // Clear token on error
-            localStorage.removeItem("accessToken");
+            localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
             throw error;
         }
     };
@@ -51,7 +52,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         try {
             await authService.logout();
         } finally {
-            localStorage.removeItem("accessToken");
+            // Only clear this tab's token: view-as tab uses sessionStorage, normal login uses localStorage
+            if (sessionStorage.getItem(STORAGE_KEYS.VIEW_AS_SESSION)) {
+                sessionStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+                sessionStorage.removeItem(STORAGE_KEYS.VIEW_AS_SESSION);
+            } else {
+                localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+            }
             setUser(null);
         }
     };
@@ -65,11 +72,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
     };
 
-    // Initialize auth on page load
+    // Initialize auth on page load (sessionStorage first for view-as tab, else localStorage)
     useEffect(() => {
         const initializeAuth = async () => {
-            const accessToken = localStorage.getItem("accessToken");
-            
+            const accessToken =
+                sessionStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN) ??
+                localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+
             if (!accessToken) {
                 setUser(null);
                 return;

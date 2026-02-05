@@ -94,6 +94,7 @@ export const userApi = {
   getUserStatistics: userService.getUserStatistics,
   bulkUpdateUsers: userService.bulkUpdateUsers,
   bulkDeleteUsers: userService.bulkDeleteUsers,
+  getViewAsUserUrl: userService.getViewAsUserUrl,
 };
 
 export const optionsApi = {

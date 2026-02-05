@@ -67,5 +67,11 @@ export const userService = {
   // Bulk delete users
   bulkDeleteUsers: (userIds: string[]) =>
     api.post(API_ENDPOINTS.USERS.BULK_DELETE, { userIds }),
+
+  // Get "View as User" URL (Supaadmin only) - open in new tab to see app as that user
+  getViewAsUserUrl: (userId: string) =>
+    api.post<{ viewAsUrl: string; expiresIn: number }>(
+      `${API_ENDPOINTS.USERS.BASE}/${userId}/view-as`
+    ),
 };
 

@@ -5,12 +5,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, Receipt } from "lucide-react";
+import { MoreVertical, Edit, Trash2, KeyRound, Shield, ShieldOff, Receipt, UserCircle } from "lucide-react";
 import type { User } from "../types";
 
 interface UserActionsDropdownProps {
   user: User;
   onViewOrders: (user: User) => void;
+  onViewAsUser: (user: User) => void;
   onEdit: (user: User) => void;
   onResetPassword: (userId: string) => void;
   onToggleVerification: (user: User) => void;
@@ -23,6 +24,7 @@ interface UserActionsDropdownProps {
 export function UserActionsDropdown({
   user,
   onViewOrders,
+  onViewAsUser,
   onEdit,
   onResetPassword,
   onToggleVerification,
@@ -43,6 +45,10 @@ export function UserActionsDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={() => onViewAsUser(user)} className="text-sm">
+          <UserCircle className="mr-2 h-4 w-4" />
+          View as User
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onViewOrders(user)} className="text-sm">
           <Receipt className="mr-2 h-4 w-4" />
           View Orders

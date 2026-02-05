@@ -18,6 +18,7 @@ interface UsersTableProps {
   order: "asc" | "desc";
   onSort: (field: string) => void;
   onViewOrders: (user: User) => void;
+  onViewAsUser: (user: User) => void;
   onEdit: (user: User) => void;
   onResetPassword: (userId: string) => void;
   onToggleVerification: (user: User) => void;
@@ -41,6 +42,7 @@ export function UsersTable({
   order,
   onSort,
   onViewOrders,
+  onViewAsUser,
   onEdit,
   onResetPassword,
   onToggleVerification,
@@ -128,6 +130,7 @@ export function UsersTable({
                 key={user._id}
                 user={user}
                 onViewOrders={onViewOrders}
+                onViewAsUser={onViewAsUser}
                 onEdit={onEdit}
                 onResetPassword={onResetPassword}
                 onToggleVerification={onToggleVerification}

@@ -9,6 +9,7 @@ interface UserCardProps {
   ariaAttributes?: any;
   user: User;
   onViewOrders: (user: User) => void;
+  onViewAsUser: (user: User) => void;
   onEdit: (user: User) => void;
   onResetPassword: (userId: string) => void;
   onToggleVerification: (user: User) => void;
@@ -21,6 +22,7 @@ export function UserCard({
   ariaAttributes,
   user,
   onViewOrders,
+  onViewAsUser,
   onEdit,
   onResetPassword,
   onToggleVerification,
@@ -50,6 +52,7 @@ export function UserCard({
           <UserActionsDropdown
             user={user}
             onViewOrders={onViewOrders}
+            onViewAsUser={onViewAsUser}
             onEdit={onEdit}
             onResetPassword={onResetPassword}
             onToggleVerification={onToggleVerification}

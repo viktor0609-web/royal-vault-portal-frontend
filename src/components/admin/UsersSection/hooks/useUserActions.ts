@@ -99,10 +99,38 @@ export function useUserActions({ onSuccess }: UseUserActionsProps) {
     }
   }, [toast, onSuccess]);
 
+  const handleViewAsUser = useCallback(async (user: User) => {
+    try {
+      const response = await userApi.getViewAsUserUrl(user._id);
+      const viewAsUrl = response.data?.viewAsUrl;
+      if (viewAsUrl) {
+        window.open(viewAsUrl, "_blank", "noopener,noreferrer");
+        toast({
+          title: "View as User",
+          description: `Opening new tab as ${user.firstName} ${user.lastName}...`,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Could not generate view-as link",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error getting view-as link:", error);
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to open view as user",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
+
   return {
     handleResetPassword,
     handleToggleVerification,
     handleChangeRole,
     handleDelete,
+    handleViewAsUser,
   };
 }

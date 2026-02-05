@@ -96,7 +96,7 @@ const ScrollableTable = React.forwardRef<HTMLDivElement, ScrollableTableProps>(
       {...props}
     >
       <div
-        className="overflow-auto overflow-x-auto flex-1 min-h-0 [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10 [&_thead]:bg-white [&_thead]:shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]"
+        className="overflow-auto overflow-x-auto flex-1 min-h-0 [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-20 [&_thead]:bg-white [&_thead]:shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]"
         style={{ maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight }}
       >
         <table className={cn("w-full caption-bottom text-sm border-collapse", tableClassName)}>{children}</table>

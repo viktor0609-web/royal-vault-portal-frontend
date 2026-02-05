@@ -33,7 +33,7 @@ export function UsersFilters({
   }
 
   return (
-    <div className="hidden sm:block bg-white p-4 sm:p-5 rounded-xl border border-royal-light-gray shadow-sm flex-shrink-0">
+    <div className="hidden sm:block bg-white p-3 sm:p-4 rounded-lg border border-royal-light-gray shadow-sm flex-shrink-0">
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-royal-gray z-10" />

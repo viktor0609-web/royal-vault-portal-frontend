@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 import { FileUploadWithProgress } from "@/components/ui/file-upload-with-progress";
 import { courseApi } from "@/lib/api";
@@ -404,8 +404,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                             <Label className="text-royal-dark-gray font-bold text-base">
                                 Related Files/Resources <span className="text-gray-500 font-normal">(Optional - Upload files only)</span>
                             </Label>
-                            <div className="mt-2 bg-white border border-gray-200 rounded-lg overflow-hidden overflow-x-auto">
-                                <Table className="min-w-full">
+                            <ScrollableTable maxHeight="320px" className="mt-2 border-gray-200">
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead className="w-1/3">Name (Optional)</TableHead>
@@ -471,8 +470,7 @@ export function LectureModal({ isOpen, closeDialog, editingLecture, onLectureSav
                                             </TableCell>
                                         </TableRow>
                                     </TableBody>
-                                </Table>
-                            </div>
+                            </ScrollableTable>
                         </div>
 
                         {error && (

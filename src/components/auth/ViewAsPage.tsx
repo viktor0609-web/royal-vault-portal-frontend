@@ -56,7 +56,7 @@ export function ViewAsPage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4 safe-area-padding">
         <Loading message="Opening view as user..." size="md" />
       </div>
     );
@@ -64,7 +64,7 @@ export function ViewAsPage() {
 
   if (status === "error") {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4 safe-area-padding">
         <div className="bg-white rounded-lg border border-royal-light-gray shadow-sm p-6 max-w-md text-center">
           <h1 className="text-lg font-semibold text-royal-dark-gray mb-2">
             Cannot open view as user
@@ -82,7 +82,7 @@ export function ViewAsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4 safe-area-padding">
       <Loading message={message} size="md" />
     </div>
   );

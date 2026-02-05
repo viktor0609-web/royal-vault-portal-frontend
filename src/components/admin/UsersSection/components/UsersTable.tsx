@@ -1,5 +1,5 @@
 import {
-  Table,
+  ScrollableTable,
   TableHeader,
   TableBody,
   TableHead,
@@ -50,10 +50,9 @@ export function UsersTable({
   onDelete,
 }: UsersTableProps) {
   return (
-    <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm">
-      <Table className="w-full">
-        <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
-          <TableRow className="bg-gray-50 hover:bg-gray-50 border-b">
+    <ScrollableTable className="hidden lg:block">
+      <TableHeader>
+        <TableRow className="bg-gray-50 hover:bg-gray-50 border-b">
             <TableHead
               className="font-semibold text-royal-dark-gray cursor-pointer hover:bg-gray-100 select-none"
               onClick={() => onSort('firstName')}
@@ -140,7 +139,6 @@ export function UsersTable({
             ))
           )}
         </TableBody>
-      </Table>
-    </div>
+    </ScrollableTable>
   );
 }

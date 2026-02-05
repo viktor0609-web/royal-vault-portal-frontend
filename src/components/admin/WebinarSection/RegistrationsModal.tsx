@@ -7,7 +7,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Loader2, Users, Mail, Phone, Calendar, UserCheck, PlayCircle, Clock, Download, RefreshCw } from "lucide-react";
 import { webinarApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -238,11 +238,10 @@ export function RegistrationsModal({ isOpen, closeDialog, webinar }: Registratio
                             </div>
                         </div>
 
-                        {/* Desktop: table - scrollable body only; header stays visible */}
-                        <div className="hidden md:block border rounded-lg min-w-0 w-full overflow-x-auto overflow-y-auto max-h-[50vh]">
-                            <Table className="table-fixed w-full min-w-0">
+                        {/* Desktop: scrollable table with fixed header */}
+                        <ScrollableTable maxHeight="50vh" tableClassName="table-fixed min-w-0" className="hidden md:block min-w-0 w-full">
                                 <TableHeader>
-                                    <TableRow className="sticky top-0 z-10 bg-muted hover:bg-muted border-b">
+                                    <TableRow className="bg-muted hover:bg-muted border-b">
                                         <TableHead className="w-[18%] bg-muted">Name</TableHead>
                                         <TableHead className="w-[28%] bg-muted">Email</TableHead>
                                         <TableHead className="w-[14%] bg-muted">Phone</TableHead>
@@ -282,8 +281,7 @@ export function RegistrationsModal({ isOpen, closeDialog, webinar }: Registratio
                                         </TableRow>
                                     ))}
                                 </TableBody>
-                            </Table>
-                        </div>
+                        </ScrollableTable>
 
                         {/* Total count */}
                         <div className="text-xs sm:text-sm text-muted-foreground text-center">

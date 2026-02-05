@@ -50,7 +50,7 @@ export function UsersTable({
   onDelete,
 }: UsersTableProps) {
   return (
-    <ScrollableTable className="hidden lg:block">
+    <ScrollableTable maxHeight="100%" className="h-full mb-2 text-sm">
       <TableHeader>
         <TableRow className="bg-gray-50 hover:bg-gray-50 border-b">
             <TableHead

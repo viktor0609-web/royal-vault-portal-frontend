@@ -334,24 +334,26 @@ export function WebinarSection() {
 
     if (loading) {
         return (
-            <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0">
-                <div className="flex gap-2 items-center bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+            <div className="flex-1 p-2 sm:p-4 flex flex-col h-full overflow-hidden min-w-0">
+                <div className="flex gap-2 items-center bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray shadow-sm mb-2 sm:mb-3 flex-shrink-0">
                     <VideoIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray hidden sm:block" />
                     <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">Webinars</h1>
                 </div>
-                <Loading message="Loading webinars..." />
+                <div className="flex-1 min-h-0 flex items-center justify-center">
+                    <Loading message="Loading webinars..." />
+                </div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0">
-                <div className="flex gap-2 items-center bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3">
+            <div className="flex-1 p-2 sm:p-4 flex flex-col h-full overflow-hidden min-w-0">
+                <div className="flex gap-2 items-center bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray shadow-sm mb-2 sm:mb-3 flex-shrink-0">
                     <VideoIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray hidden sm:block" />
                     <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase">Webinars</h1>
                 </div>
-                <div className="flex items-center justify-center h-64">
+                <div className="flex-1 min-h-0 flex items-center justify-center">
                     <div className="text-center">
                         <p className="text-red-500 mb-4">{error}</p>
                         <Button onClick={fetchWebinars}>Retry</Button>
@@ -362,13 +364,16 @@ export function WebinarSection() {
     }
 
     return (
-        <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 items-start sm:items-center justify-between bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3 min-w-0">
+        <div className="flex-1 p-2 sm:p-4 flex flex-col h-full overflow-hidden min-w-0 max-w-full animate-in fade-in duration-100" style={{ width: '100%', maxWidth: '100vw' }}>
+            {/* Header Section - Fixed (same as Deals page) */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-2 bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray shadow-sm min-w-0 mb-2 sm:mb-3 flex-shrink-0">
                 <div className="flex gap-2 items-center min-w-0 flex-1">
-                    <VideoIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray" />
-                    <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase truncate">Webinars</h1>
+                    <div className="flex-shrink-0 p-2 bg-royal-gray/10 rounded-lg">
+                        <VideoIcon className="h-5 w-5 sm:h-6 sm:w-6 text-royal-gray" />
+                    </div>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-royal-dark-gray uppercase truncate">Webinars</h1>
                 </div>
-                <div className="flex gap-1 sm:gap-2 w-full sm:w-auto">
+                <div className="flex gap-1 sm:gap-2 w-full sm:w-auto flex-shrink-0">
                     <Button
                         onClick={fetchWebinars}
                         variant="outline"
@@ -391,8 +396,9 @@ export function WebinarSection() {
                 </div>
             </div>
 
-            {/* Desktop Table View */}
-            <ScrollableTable className="hidden lg:block">
+            {/* Desktop Table View - Scrollable (same as Deals page) */}
+            <div className="hidden lg:block relative flex-1 min-h-0">
+                <ScrollableTable maxHeight="100%" className="h-full mb-2 text-sm">
                     <TableHeader>
                         <TableRow>
                             <TableHead
@@ -587,7 +593,8 @@ export function WebinarSection() {
                             ))
                         )}
                     </TableBody>
-            </ScrollableTable>
+                </ScrollableTable>
+            </div>
 
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden space-y-3 sm:space-y-4 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>

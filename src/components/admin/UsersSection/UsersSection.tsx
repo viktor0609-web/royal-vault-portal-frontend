@@ -224,7 +224,7 @@ export function UsersSection() {
   };
 
   return (
-    <div className="flex-1 p-2 sm:p-4 lg:p-6 flex flex-col h-full overflow-hidden">
+    <div className="flex-1 p-2 sm:p-4 lg:p-4 flex flex-col h-full overflow-hidden">
       {/* Header */}
       <UsersHeader
         isMobile={isMobile}

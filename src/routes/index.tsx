@@ -28,6 +28,7 @@ import { UsersSection as AdminUsers } from "@/components/admin/UsersSection/User
 // Auth Components
 import { SetPassword } from "@/components/auth/SettingPasswordPage";
 import { ReSettingPasswordPage } from "@/components/auth/ReSettingPasswordPage";
+import { ViewAsPage } from "@/components/auth/ViewAsPage";
 
 // Video Meeting Components
 import { VideoMeeting as AdminMeeting } from "@/components/VideoMeeting/Admin/VideoMeeting";
@@ -221,6 +222,7 @@ export function AppRoutes() {
       {/* Auth Routes */}
       <Route path="/verify/:token" element={<SetPassword />} />
       <Route path="/reset-password/:token" element={<ReSettingPasswordPage />} />
+      <Route path="/view-as" element={<ViewAsPage />} />
 
       {/* Video Meeting Routes */}
       <Route path="/royal-tv/:slug/guest" element={<GuestMeeting />} />

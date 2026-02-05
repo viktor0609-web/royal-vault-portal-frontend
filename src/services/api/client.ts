@@ -19,15 +19,23 @@ export const setOnTokensCleared = (callback: () => void) => {
   onTokensCleared = callback;
 };
 
-const getAccessToken = (): string | null => 
+// View-as tab uses sessionStorage (per-tab); normal login uses localStorage.
+// This way the admin tab is never affected when opening "View as User" in a new tab.
+const getAccessToken = (): string | null =>
+  sessionStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN) ??
   localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
 
-const setAccessToken = (token: string) => 
+const setAccessToken = (token: string) =>
   localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
 
-// Helper to clear tokens and notify
+// Clear only the storage this tab is using (so we don't clear admin token from another tab)
 const clearTokens = () => {
-  localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+  if (sessionStorage.getItem(STORAGE_KEYS.VIEW_AS_SESSION)) {
+    sessionStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+    sessionStorage.removeItem(STORAGE_KEYS.VIEW_AS_SESSION);
+  } else {
+    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+  }
   if (onTokensCleared) {
     onTokensCleared();
   }

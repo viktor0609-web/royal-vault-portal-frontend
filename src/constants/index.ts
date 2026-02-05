@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
     FORGOT_PASSWORD: "/api/auth/forgot-password",
     RESET_PASSWORD: "/api/auth/reset-password",
     VERIFY_EMAIL: "/api/auth/verify-email",
+    VIEW_AS_EXCHANGE: "/api/auth/view-as/exchange",
   },
   USERS: {
     BASE: "/api/users",
@@ -59,6 +60,8 @@ export const STORAGE_KEYS = {
   ACCESS_TOKEN: "accessToken",
   REFRESH_TOKEN: "refreshToken",
   USER_PREFERENCES: "userPreferences",
+  /** Set in sessionStorage only in "View as User" tab so admin tab is never affected */
+  VIEW_AS_SESSION: "viewAsSession",
 } as const;
 
 // ==================== User Roles ====================

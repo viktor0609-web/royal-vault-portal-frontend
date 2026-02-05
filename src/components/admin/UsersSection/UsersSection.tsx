@@ -133,6 +133,7 @@ export function UsersSection() {
     handleToggleVerification,
     handleChangeRole,
     handleDelete,
+    handleViewAsUser,
   } = useUserActions({
     onSuccess: () => {
       refetch();
@@ -270,6 +271,7 @@ export function UsersSection() {
           order={filters.order}
           onSort={handleSort}
           onViewOrders={handleViewOrders}
+          onViewAsUser={handleViewAsUser}
           onEdit={handleEditUser}
           onResetPassword={handleResetPassword}
           onToggleVerification={handleToggleVerification}
@@ -284,6 +286,7 @@ export function UsersSection() {
             loading={loadingAllUsers}
             listHeight={listHeight}
             onViewOrders={handleViewOrders}
+            onViewAsUser={handleViewAsUser}
             onEdit={handleEditUser}
             onResetPassword={handleResetPassword}
             onToggleVerification={handleToggleVerification}

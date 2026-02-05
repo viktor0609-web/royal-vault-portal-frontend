@@ -27,5 +27,11 @@ export const authService = {
 
   verifyEmail: (token: string) =>
     api.post(API_ENDPOINTS.AUTH.VERIFY_EMAIL, { token }),
+
+  // Exchange one-time "View as User" code for access token (used by new tab)
+  exchangeViewAsCode: (code: string) =>
+    api.post<{ accessToken: string }>(API_ENDPOINTS.AUTH.VIEW_AS_EXCHANGE, {
+      code,
+    }),
 };
 

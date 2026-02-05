@@ -224,17 +224,19 @@ export function UsersSection() {
   };
 
   return (
-    <div className="flex-1 p-2 sm:p-4 lg:p-4 flex flex-col h-full overflow-hidden">
-      {/* Header */}
-      <UsersHeader
-        isMobile={isMobile}
-        onCreateUser={handleCreateUser}
-        onViewAnalytics={() => setIsStatisticsModalOpen(true)}
-      />
+    <div className="flex-1 p-2 sm:p-4 flex flex-col h-full overflow-hidden min-w-0">
+      {/* Header Section - Fixed (same as Deals page) */}
+      <div className="flex-shrink-0 mb-2 sm:mb-3">
+        <UsersHeader
+          isMobile={isMobile}
+          onCreateUser={handleCreateUser}
+          onViewAnalytics={() => setIsStatisticsModalOpen(true)}
+        />
+      </div>
 
       {/* Mobile Search in Header */}
       {isMobile && (
-        <div className="mt-2">
+        <div className="flex-shrink-0 mb-2">
           <UsersFilters
             isMobile={true}
             filters={filters}
@@ -245,25 +247,26 @@ export function UsersSection() {
         </div>
       )}
 
-      {/* Desktop Filters */}
-      <UsersFilters
-        isMobile={false}
-        filters={filters}
-        onSearchChange={handleSearch}
-        onRoleFilterChange={handleRoleFilterChange}
-        onVerificationFilterChange={handleVerificationFilterChange}
-      />
+      {/* Desktop Filters - Fixed */}
+      <div className="hidden sm:block flex-shrink-0 mb-2 sm:mb-3">
+        <UsersFilters
+          isMobile={false}
+          filters={filters}
+          onSearchChange={handleSearch}
+          onRoleFilterChange={handleRoleFilterChange}
+          onVerificationFilterChange={handleVerificationFilterChange}
+        />
+      </div>
 
-      {/* Error Display */}
+      {/* Error Display - Fixed */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-sm mb-2 sm:mb-3 flex-shrink-0">
           <p className="font-medium text-sm sm:text-base">{error}</p>
         </div>
       )}
 
-      {/* Scrollable Content Area */}
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        {/* Desktop Table View */}
+      {/* Desktop Table View - Scrollable (same as Deals page) */}
+      <div className="hidden lg:block relative flex-1 min-h-0">
         <UsersTable
           users={users}
           loading={loading}
@@ -278,33 +281,35 @@ export function UsersSection() {
           onChangeRole={handleChangeRole}
           onDelete={handleDeleteClick}
         />
-
-        {/* Mobile Card View */}
-        <div ref={listContainerRef} className="lg:hidden">
-          <UsersMobileView
-            users={allUsers}
-            loading={loadingAllUsers}
-            listHeight={listHeight}
-            onViewOrders={handleViewOrders}
-            onViewAsUser={handleViewAsUser}
-            onEdit={handleEditUser}
-            onResetPassword={handleResetPassword}
-            onToggleVerification={handleToggleVerification}
-            onChangeRole={handleChangeRole}
-            onDelete={handleDeleteClick}
-          />
-        </div>
       </div>
 
-      {/* Pagination */}
+      {/* Mobile Card View - Scrollable */}
+      <div ref={listContainerRef} className="lg:hidden flex-1 min-h-0 overflow-y-auto overflow-x-auto">
+        <UsersMobileView
+          users={allUsers}
+          loading={loadingAllUsers}
+          listHeight={listHeight}
+          onViewOrders={handleViewOrders}
+          onViewAsUser={handleViewAsUser}
+          onEdit={handleEditUser}
+          onResetPassword={handleResetPassword}
+          onToggleVerification={handleToggleVerification}
+          onChangeRole={handleChangeRole}
+          onDelete={handleDeleteClick}
+        />
+      </div>
+
+      {/* Pagination - Fixed at bottom */}
       {!isMobile && (
-        <UsersPagination
+        <div className="flex-shrink-0">
+          <UsersPagination
           page={page}
           limit={limit}
           pagination={pagination}
           onPageChange={setPage}
           onLimitChange={handleLimitChange}
         />
+        </div>
       )}
 
       {/* Modals and Dialogs */}

@@ -76,4 +76,34 @@ const TableCaption = React.forwardRef<HTMLTableCaptionElement, React.HTMLAttribu
 );
 TableCaption.displayName = "TableCaption";
 
-export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption };
+/** Scrollable table body with fixed/sticky header. Use with TableHeader + TableBody. */
+interface ScrollableTableProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  /** Max height of the scroll area (e.g. "70vh", "400px", "100%"). Default: min(70vh, 600px) */
+  maxHeight?: string | number;
+  /** Optional class for the inner table (e.g. "table-fixed") */
+  tableClassName?: string;
+}
+
+const ScrollableTable = React.forwardRef<HTMLDivElement, ScrollableTableProps>(
+  ({ children, className, maxHeight = "min(70vh, 600px)", tableClassName, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        "flex flex-col rounded-lg border border-royal-light-gray bg-white shadow-sm overflow-hidden",
+        className
+      )}
+      {...props}
+    >
+      <div
+        className="overflow-auto overflow-x-auto flex-1 min-h-0 [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-10 [&_thead]:bg-white [&_thead]:shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]"
+        style={{ maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight }}
+      >
+        <table className={cn("w-full caption-bottom text-sm border-collapse", tableClassName)}>{children}</table>
+      </div>
+    </div>
+  )
+);
+ScrollableTable.displayName = "ScrollableTable";
+
+export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption, ScrollableTable };

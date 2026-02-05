@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
-import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
+import { ScrollableTable, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/ui/table";
 import { ReceiptRussianRuble, VideoIcon, Users, Eye, Edit, BarChart3, Calendar, UserCheck, Trash2, Loader2, RefreshCw, Menu, MoreVertical, ArrowUp, ArrowDown } from "lucide-react";
 import { WebinarModal } from "./WebinarModal";
 import { RecsModal } from "./RecsModal";
@@ -392,8 +392,7 @@ export function WebinarSection() {
             </div>
 
             {/* Desktop Table View */}
-            <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                <Table className="w-full">
+            <ScrollableTable className="hidden lg:block">
                     <TableHeader>
                         <TableRow>
                             <TableHead
@@ -588,8 +587,7 @@ export function WebinarSection() {
                             ))
                         )}
                     </TableBody>
-                </Table>
-            </div>
+            </ScrollableTable>
 
             {/* Mobile/Tablet Card View */}
             <div className="lg:hidden space-y-3 sm:space-y-4 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>

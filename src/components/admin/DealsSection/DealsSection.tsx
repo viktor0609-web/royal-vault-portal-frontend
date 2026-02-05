@@ -3,7 +3,7 @@ import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loading } from "@/components/ui/Loading";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
     AlertDialog,
@@ -189,11 +189,9 @@ export function DealsSection() {
 
             {/* Desktop Table View - Scrollable */}
             <div className="hidden lg:block relative flex-1 min-h-0">
-                <div className="h-full overflow-y-auto overflow-x-auto mb-2 rounded-lg">
-                    <div className="bg-white rounded-lg border border-royal-light-gray overflow-hidden shadow-sm">
-                        <Table className="w-full text-sm">
-                            <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
-                                <TableRow className="border-b">
+                <ScrollableTable maxHeight="100%" className="h-full mb-2 text-sm">
+                    <TableHeader>
+                        <TableRow className="border-b">
                                     <TableHead className="min-w-[200px] font-semibold text-royal-dark-gray px-2">Deal</TableHead>
                                     <TableHead className="hidden md:table-cell min-w-[120px] font-semibold text-royal-dark-gray py-2 px-2">Sources</TableHead>
                                     <TableHead className="hidden lg:table-cell min-w-[150px] font-semibold text-royal-dark-gray py-2 px-2">Categories</TableHead>
@@ -290,9 +288,7 @@ export function DealsSection() {
                                     ))
                                 )}
                             </TableBody>
-                        </Table>
-                    </div>
-                </div>
+                </ScrollableTable>
             </div>
 
             {/* Mobile/Tablet Card View - Scrollable */}

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
 import { LectureModal } from "./LectureModal";
@@ -245,10 +245,8 @@ export function CourseDetail() {
       )}
 
       {/* Desktop Table View */}
-      <div className="hidden lg:block bg-white rounded-lg border border-royal-light-gray overflow-hidden flex flex-col flex-1 min-h-0 mt-4">
-        <div className="overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 flex-1 min-h-0">
-          <Table className="w-full text-sm">
-            <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
+      <ScrollableTable maxHeight="100%" className="hidden lg:block flex-1 min-h-0 mt-4 text-sm">
+            <TableHeader>
               <TableRow className="border-b">
                 <TableHead className="w-48 min-w-48 py-2 px-2">Title</TableHead>
                 <TableHead className="w-64 min-w-64 hidden xl:table-cell py-2 px-2">Description</TableHead>
@@ -332,9 +330,7 @@ export function CourseDetail() {
                 ))
               )}
             </TableBody>
-          </Table>
-        </div>
-      </div>
+      </ScrollableTable>
 
       {/* Mobile/Tablet Card View */}
       <div className="lg:hidden space-y-3 sm:space-y-4 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>

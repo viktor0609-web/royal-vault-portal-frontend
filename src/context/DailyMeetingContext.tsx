@@ -451,6 +451,12 @@ export const DailyMeetingProvider: React.FC<{ children: React.ReactNode }> = ({ 
             handRaised: raisedHands.has(sessionId), // Add hand raised status
           };
         });
+        // Admin at the bottom of the list everywhere (live webinar participant lists)
+        pList.sort((a, b) => {
+          const aAdmin = a.permissions?.canAdmin ? 1 : 0;
+          const bAdmin = b.permissions?.canAdmin ? 1 : 0;
+          return aAdmin - bAdmin;
+        });
         setParticipants(pList);
 
         const local = pList.find(p => p.local);

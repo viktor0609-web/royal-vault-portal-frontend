@@ -96,16 +96,15 @@ export const PeoplePanel: React.FC<PeoplePanelProps> = ({ onClose }) => {
         {/* Thumbnails Tab */}
         <TabsContent value="thumbnails" className="flex-1 overflow-y-auto p-0 mt-0">
           <div ref={thumbnailContainerRef} className="grid grid-cols-1 gap-0">
-            {/* Render all thumbnail participants in order: Admin, Guest, then speaking Users */}
+            {/* Render all thumbnail participants: Guest and Users first, Admin at the bottom */}
             {thumbnailParticipants
               .sort((a, b) => {
-                // Admin first
-                if (a.permissions?.canAdmin && !b.permissions?.canAdmin) return -1;
-                if (!a.permissions?.canAdmin && b.permissions?.canAdmin) return 1;
-                // Guest second
+                // Admin last (at the bottom of the list)
+                if (a.permissions?.canAdmin && !b.permissions?.canAdmin) return 1;
+                if (!a.permissions?.canAdmin && b.permissions?.canAdmin) return -1;
+                // Guest first, then users
                 if (a.name.includes("Guest") && !b.name.includes("Guest")) return -1;
                 if (!a.name.includes("Guest") && b.name.includes("Guest")) return 1;
-                // Speaking users last
                 return 0;
               })
               .map((participant) => {

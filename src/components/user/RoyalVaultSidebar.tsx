@@ -1,6 +1,8 @@
 import { useLocation, Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuthDialog } from "@/context/AuthDialogContext";
 import { useAuth } from "@/context/AuthContext";
+import { ordersService } from "@/services/api/orders.service";
 import {
   HandIcon,
   MessageSquareIcon,
@@ -39,8 +41,7 @@ const bottomItemsForGuest = [
   // { title: "FAQ", icon: HelpCircleIcon, action: null },
   { title: "Log In", icon: LogInIcon, action: 'login' },
 ];
-const bottomItemsForUser = [
-  // { title: "FAQ", icon: HelpCircleIcon, action: null },
+const bottomItemsForUserBase = [
   { title: "Orders", icon: ReceiptIcon, path: "/orders" },
   { title: "Profile", icon: UserIcon, path: "/profile" },
   { title: "Log Out", icon: LogOutIcon, action: 'logout' },
@@ -52,6 +53,19 @@ export function RoyalVaultSidebar() {
   const { setOpenMobile } = useSidebar();
   const { openDialog } = useAuthDialog();
   const { user, logout } = useAuth();
+
+  const isUserRole = user?.role === "user";
+  const { data: ordersCountData } = useQuery({
+    queryKey: ["orders", "count"],
+    queryFn: () => ordersService.getOrdersCount().then((r) => r.data),
+    enabled: !!isUserRole,
+  });
+  // Only show Orders for non-admin users who have orders; hide for admins and leads.
+  const hasOrders = isUserRole && (ordersCountData?.count ?? 0) > 0;
+
+  const bottomItemsForUser = hasOrders
+    ? bottomItemsForUserBase
+    : bottomItemsForUserBase.filter((item) => item.title !== "Orders");
 
   const isAdminView = location.pathname.startsWith('/admin');
 

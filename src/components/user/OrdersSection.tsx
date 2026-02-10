@@ -127,7 +127,7 @@ export function OrdersSection({ viewAsUserId, viewAsUserName }: OrdersSectionPro
   }
 
   return (
-    <div className="flex flex-col w-full animate-in fade-in duration-100">
+    <div className={`flex flex-col w-full animate-in fade-in duration-100 ${!isAdminView ? "p-2 sm:p-4" : ""}`}>
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
         {/* Main Body - Orders */}
         <div className="flex-1 min-w-0">

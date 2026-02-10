@@ -40,6 +40,10 @@ export const ordersService = {
   getOrders: () =>
     api.get<{ message: string; orders: Order[] }>(API_ENDPOINTS.ORDERS.BASE),
 
+  // Get user's order count (for UI: hide Orders link for leads)
+  getOrdersCount: () =>
+    api.get<{ count: number }>(API_ENDPOINTS.ORDERS.COUNT),
+
   // Get orders for a specific user (Admin only)
   getAdminUserOrders: (userId: string) =>
     api.get<{ message: string; orders: Order[] }>(`${API_ENDPOINTS.ORDERS.BASE}/admin/${userId}`),

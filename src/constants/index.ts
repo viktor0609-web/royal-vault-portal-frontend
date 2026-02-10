@@ -50,6 +50,7 @@ export const API_ENDPOINTS = {
   },
   ORDERS: {
     BASE: "/api/orders",
+    COUNT: "/api/orders/count",
     PAYMENTS: "/api/orders/payments",
     SUBSCRIPTIONS: "/api/orders/subscriptions",
   },

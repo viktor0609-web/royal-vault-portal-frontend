@@ -6,6 +6,7 @@ import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
+import { DragHandle, DISPLAY_ORDER_HEADER } from "./DragHandle";
 import { LectureModal } from "./LectureModal";
 import { VideoPlayerModal } from "./VideoPlayerModal";
 import { useToast } from "@/hooks/use-toast";
@@ -74,6 +75,8 @@ export function CourseDetail() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [lectureToDelete, setLectureToDelete] = useState<string | null>(null);
+  const [draggedLectureIndex, setDraggedLectureIndex] = useState<number | null>(null);
+  const [dragOverLectureIndex, setDragOverLectureIndex] = useState<number | null>(null);
 
   const handleDelete = (lectureId: string) => {
     setLectureToDelete(lectureId);
@@ -130,6 +133,47 @@ export function CourseDetail() {
     setSelectedVideoUrl(videoUrl);
     setSelectedVideoTitle(title);
     setIsVideoModalOpen(true);
+  };
+
+  const handleLectureDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedLectureIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  };
+
+  const handleLectureDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverLectureIndex(index);
+  };
+
+  const handleLectureDragLeave = () => setDragOverLectureIndex(null);
+  const handleLectureDragEnd = () => {
+    setDraggedLectureIndex(null);
+    setDragOverLectureIndex(null);
+  };
+
+  const handleLectureDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    setDragOverLectureIndex(null);
+    setDraggedLectureIndex(null);
+    const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    if (isNaN(dragIndex) || dragIndex === dropIndex || !courseId) return;
+    const reordered = [...lectures];
+    const [removed] = reordered.splice(dragIndex, 1);
+    reordered.splice(dropIndex, 0, removed);
+    setLectures(reordered);
+    try {
+      await courseApi.reorderLecturesInCourse(courseId, reordered.map((l) => l._id));
+      toast({ title: "Order updated", description: "Lesson order saved for public display." });
+    } catch (err: any) {
+      setLectures(lectures);
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Failed to save order",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCloseVideoModal = () => {
@@ -248,6 +292,9 @@ export function CourseDetail() {
       <ScrollableTable maxHeight="100%" className="hidden lg:block flex-1 min-h-0 mt-4 text-sm">
             <TableHeader>
               <TableRow className="border-b">
+                <TableHead className="w-10 min-w-10 py-2 px-2 text-center text-royal-gray font-medium" title="Drag to reorder public display order">
+                  {DISPLAY_ORDER_HEADER}
+                </TableHead>
                 <TableHead className="w-48 min-w-48 py-2 px-2">Title</TableHead>
                 <TableHead className="w-64 min-w-64 hidden xl:table-cell py-2 px-2">Description</TableHead>
                 <TableHead className="w-40 min-w-40 hidden xl:table-cell py-2 px-2">Video</TableHead>
@@ -266,13 +313,25 @@ export function CourseDetail() {
             <TableBody>
               {lectures.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     No lectures found. Create your first lecture!
                   </TableCell>
                 </TableRow>
               ) : (
-                lectures.map((lecture) => (
-                  <TableRow key={lecture._id}>
+                lectures.map((lecture, index) => (
+                  <TableRow
+                    key={lecture._id}
+                    className={`transition-colors select-none ${draggedLectureIndex === index ? "opacity-50 bg-gray-50" : ""} ${dragOverLectureIndex === index ? "ring-1 ring-inset ring-primary/30 bg-primary/5" : ""}`}
+                    onDragOver={(e) => handleLectureDragOver(e, index)}
+                    onDragLeave={handleLectureDragLeave}
+                    onDrop={(e) => handleLectureDrop(e, index)}
+                  >
+                    <TableCell className="py-2 px-2 w-10 align-middle">
+                      <DragHandle
+                        onDragStart={(e) => handleLectureDragStart(e, index)}
+                        onDragEnd={handleLectureDragEnd}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       {lecture.title}
                     </TableCell>

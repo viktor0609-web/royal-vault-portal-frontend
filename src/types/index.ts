@@ -70,6 +70,7 @@ export interface CourseGroup {
   title: string;
   description: string;
   icon: string;
+  sortOrder?: number;
   courses?: Course[];
   createdBy?: { _id: string; name: string; email: string } | string;
   createdAt?: string;
@@ -83,6 +84,7 @@ export interface Course {
   title: string;
   description: string;
   courseGroup: string | CourseGroup;
+  sortOrder?: number;
   lectures?: Lecture[];
   resources?: Array<{
     name: string;

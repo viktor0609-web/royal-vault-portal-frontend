@@ -6,6 +6,7 @@ import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
+import { DragHandle, DISPLAY_ORDER_HEADER } from "./DragHandle";
 import { CourseModal } from "./CourseModal";
 import { useToast } from "@/hooks/use-toast";
 import { courseApi } from "@/lib/api";
@@ -71,6 +72,8 @@ export function CourseGroupDetail() {
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
+    const [draggedCourseIndex, setDraggedCourseIndex] = useState<number | null>(null);
+    const [dragOverCourseIndex, setDragOverCourseIndex] = useState<number | null>(null);
 
     const handleDelete = (e: React.MouseEvent, courseId: string) => {
         e.stopPropagation();
@@ -126,6 +129,51 @@ export function CourseGroupDetail() {
 
     const handleViewCourse = (courseId: string) => {
         navigate(`/admin/courses/groups/${groupId}/courses/${courseId}`);
+    };
+
+    const handleCourseDragStart = (e: React.DragEvent, index: number) => {
+        setDraggedCourseIndex(index);
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", String(index));
+        e.dataTransfer.setData("application/json", JSON.stringify({ index }));
+    };
+
+    const handleCourseDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        setDragOverCourseIndex(index);
+    };
+
+    const handleCourseDragLeave = () => {
+        setDragOverCourseIndex(null);
+    };
+
+    const handleCourseDragEnd = () => {
+        setDraggedCourseIndex(null);
+        setDragOverCourseIndex(null);
+    };
+
+    const handleCourseDrop = async (e: React.DragEvent, dropIndex: number) => {
+        e.preventDefault();
+        setDragOverCourseIndex(null);
+        setDraggedCourseIndex(null);
+        const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        if (isNaN(dragIndex) || dragIndex === dropIndex || !groupId) return;
+        const reordered = [...courses];
+        const [removed] = reordered.splice(dragIndex, 1);
+        reordered.splice(dropIndex, 0, removed);
+        setCourses(reordered);
+        try {
+            await courseApi.reorderCoursesInGroup(groupId, reordered.map((c) => c._id));
+            toast({ title: "Order updated", description: "Course order saved for public display." });
+        } catch (err: any) {
+            setCourses(courses);
+            toast({
+                title: "Error",
+                description: err.response?.data?.message || "Failed to save order",
+                variant: "destructive",
+            });
+        }
     };
 
     const fetchCourseGroup = async () => {
@@ -227,6 +275,9 @@ export function CourseGroupDetail() {
             <ScrollableTable maxHeight="100%" className="hidden lg:block flex-1 min-h-0 mt-4 text-sm">
                         <TableHeader>
                             <TableRow className="border-b">
+                                <TableHead className="w-10 min-w-10 py-2 px-2 text-center text-royal-gray font-medium" title="Drag to reorder public display order">
+                                    {DISPLAY_ORDER_HEADER}
+                                </TableHead>
                                 <TableHead className="w-48 min-w-48 py-2 px-2">Title</TableHead>
                                 <TableHead className="w-64 min-w-64 hidden xl:table-cell py-2 px-2">Description</TableHead>
                                 <TableHead className="w-32 min-w-32 py-2 px-2">Lectures</TableHead>
@@ -245,19 +296,32 @@ export function CourseGroupDetail() {
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8">
+                                    <TableCell colSpan={8} className="text-center py-8">
                                         <Loading message="Loading courses..." size="md" />
                                     </TableCell>
                                 </TableRow>
                             ) : courses.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="text-center py-8">
+                                    <TableCell colSpan={8} className="text-center py-8">
                                         No courses found. Create your first course!
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                courses.map((course) => (
-                                    <TableRow key={course._id} onClick={() => handleViewCourse(course._id)} className="cursor-pointer">
+                                courses.map((course, index) => (
+                                    <TableRow
+                                        key={course._id}
+                                        onClick={() => handleViewCourse(course._id)}
+                                        className={`cursor-pointer transition-colors select-none ${draggedCourseIndex === index ? "opacity-50 bg-gray-50" : ""} ${dragOverCourseIndex === index ? "ring-1 ring-inset ring-primary/30 bg-primary/5" : ""}`}
+                                        onDragOver={(e) => handleCourseDragOver(e, index)}
+                                        onDragLeave={handleCourseDragLeave}
+                                        onDrop={(e) => handleCourseDrop(e, index)}
+                                    >
+                                        <TableCell className="py-2 px-2 w-10 align-middle" onClick={(e) => e.stopPropagation()}>
+                                            <DragHandle
+                                                onDragStart={(e) => handleCourseDragStart(e, index)}
+                                                onDragEnd={handleCourseDragEnd}
+                                            />
+                                        </TableCell>
                                         <TableCell className="font-medium">{course.title}</TableCell>
                                         <TableCell className="max-w-xs truncate hidden xl:table-cell">{course.description}</TableCell>
                                         <TableCell>{course.lectures?.length || 0}</TableCell>

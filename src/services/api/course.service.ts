@@ -42,6 +42,12 @@ export const courseService = {
   updateCourseGroup: (groupId: string, groupData: Partial<CourseGroup>) =>
     api.put<CourseGroup>(`${API_ENDPOINTS.COURSES.GROUPS}/${groupId}`, groupData),
 
+  reorderCourseGroups: (groupIds: string[]) =>
+    api.put<{ message: string }>(`${API_ENDPOINTS.COURSES.GROUPS}/reorder`, { groupIds }),
+
+  reorderCoursesInGroup: (groupId: string, courseIds: string[]) =>
+    api.put<{ message: string }>(`${API_ENDPOINTS.COURSES.GROUPS}/${groupId}/courses/reorder`, { courseIds }),
+
   deleteCourseGroup: (groupId: string) =>
     api.delete<DeleteResponse>(`${API_ENDPOINTS.COURSES.GROUPS}/${groupId}`),
 
@@ -79,6 +85,9 @@ export const courseService = {
 
   updateCourse: (courseId: string, courseData: Partial<Course>) =>
     api.put<Course>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}`, courseData),
+
+  reorderLecturesInCourse: (courseId: string, lectureIds: string[]) =>
+    api.put<{ message: string }>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}/lectures/reorder`, { lectureIds }),
 
   deleteCourse: (courseId: string) =>
     api.delete<DeleteResponse>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}`),

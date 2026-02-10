@@ -6,6 +6,7 @@ import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GraduationCapIcon, Trash2, Edit, PlusIcon } from "lucide-react";
+import { DragHandle, DISPLAY_ORDER_HEADER } from "./DragHandle";
 import { GroupModal } from "./GroupModal";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +41,8 @@ export function CoursesSection() {
   const [editingGroup, setEditingGroup] = useState<CourseGroup | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
+  const [draggedGroupIndex, setDraggedGroupIndex] = useState<number | null>(null);
+  const [dragOverGroupIndex, setDragOverGroupIndex] = useState<number | null>(null);
 
   const handleAddCourseGroup = () => {
     setEditingGroup(null);
@@ -125,6 +128,47 @@ export function CoursesSection() {
     navigate(`/admin/courses/groups/${groupId}`);
   };
 
+  const handleGroupDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedGroupIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  };
+
+  const handleGroupDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverGroupIndex(index);
+  };
+
+  const handleGroupDragLeave = () => setDragOverGroupIndex(null);
+  const handleGroupDragEnd = () => {
+    setDraggedGroupIndex(null);
+    setDragOverGroupIndex(null);
+  };
+
+  const handleGroupDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    setDragOverGroupIndex(null);
+    setDraggedGroupIndex(null);
+    const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    if (isNaN(dragIndex) || dragIndex === dropIndex) return;
+    const reordered = [...courseGroups];
+    const [removed] = reordered.splice(dragIndex, 1);
+    reordered.splice(dropIndex, 0, removed);
+    setCourseGroups(reordered);
+    try {
+      await courseApi.reorderCourseGroups(reordered.map((g) => g._id));
+      toast({ title: "Order updated", description: "Course group order saved for public display." });
+    } catch (err: any) {
+      setCourseGroups(courseGroups);
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Failed to save order",
+        variant: "destructive",
+      });
+    }
+  };
+
   const fetchCourseGroups = async () => {
     try {
       setIsLoading(true);
@@ -171,6 +215,9 @@ export function CoursesSection() {
       <ScrollableTable maxHeight="100%" className="hidden lg:block flex-1 min-h-0 mt-4 text-sm">
             <TableHeader>
               <TableRow className="border-b">
+                <TableHead className="w-10 min-w-10 py-2 px-2 text-center text-royal-gray font-medium" title="Drag to reorder public display order">
+                  {DISPLAY_ORDER_HEADER}
+                </TableHead>
                 <TableHead className="w-48 min-w-48 px-2">Title</TableHead>
                 <TableHead className="w-64 min-w-64 hidden xl:table-cell py-2 px-2">Description</TableHead>
                 <TableHead className="w-24 min-w-24 hidden 2xl:table-cell py-2 px-2">Icon</TableHead>
@@ -190,19 +237,32 @@ export function CoursesSection() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={9} className="text-center py-8">
                     <Loading message="Loading course groups..." size="md" />
                   </TableCell>
                 </TableRow>
               ) : courseGroups.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={9} className="text-center py-8">
                     No course groups found. Create your first course group!
                   </TableCell>
                 </TableRow>
               ) : (
-                courseGroups.map((group) => (
-                  <TableRow key={group._id} onClick={() => handleViewGroup(group._id)} className="cursor-pointer">
+                courseGroups.map((group, index) => (
+                  <TableRow
+                    key={group._id}
+                    onClick={() => handleViewGroup(group._id)}
+                    className={`cursor-pointer transition-colors select-none ${draggedGroupIndex === index ? "opacity-50 bg-gray-50" : ""} ${dragOverGroupIndex === index ? "ring-1 ring-inset ring-primary/30 bg-primary/5" : ""}`}
+                    onDragOver={(e) => handleGroupDragOver(e, index)}
+                    onDragLeave={handleGroupDragLeave}
+                    onDrop={(e) => handleGroupDrop(e, index)}
+                  >
+                    <TableCell className="py-2 px-2 w-10 align-middle" onClick={(e) => e.stopPropagation()}>
+                      <DragHandle
+                        onDragStart={(e) => handleGroupDragStart(e, index)}
+                        onDragEnd={handleGroupDragEnd}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">{group.title}</TableCell>
                     <TableCell className="max-w-xs truncate hidden xl:table-cell">{group.description}</TableCell>
                     <TableCell className="hidden 2xl:table-cell">

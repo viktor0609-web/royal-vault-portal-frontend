@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
-import { DragHandle, DISPLAY_ORDER_HEADER } from "./DragHandle";
+import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { LectureModal } from "./LectureModal";
 import { VideoPlayerModal } from "./VideoPlayerModal";
 import { useToast } from "@/hooks/use-toast";
@@ -76,7 +76,8 @@ export function CourseDetail() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [lectureToDelete, setLectureToDelete] = useState<string | null>(null);
   const [draggedLectureIndex, setDraggedLectureIndex] = useState<number | null>(null);
-  const [dragOverLectureIndex, setDragOverLectureIndex] = useState<number | null>(null);
+  /** Index before which to show the drop line (0..length). null = no indicator. */
+  const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
 
   const handleDelete = (lectureId: string) => {
     setLectureToDelete(lectureId);
@@ -141,27 +142,33 @@ export function CourseDetail() {
     e.dataTransfer.setData("text/plain", String(index));
   };
 
-  const handleLectureDragOver = (e: React.DragEvent, index: number) => {
+  const handleLectureDragOver = (e: React.DragEvent, rowIndex: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
-    setDragOverLectureIndex(index);
+    const row = e.currentTarget;
+    const rect = row.getBoundingClientRect();
+    const mid = rect.top + rect.height / 2;
+    const insertBefore = e.clientY < mid ? rowIndex : rowIndex + 1;
+    setDropIndicatorBeforeIndex(insertBefore);
   };
 
-  const handleLectureDragLeave = () => setDragOverLectureIndex(null);
   const handleLectureDragEnd = () => {
     setDraggedLectureIndex(null);
-    setDragOverLectureIndex(null);
+    setDropIndicatorBeforeIndex(null);
   };
 
-  const handleLectureDrop = async (e: React.DragEvent, dropIndex: number) => {
+  const handleLectureDrop = async (e: React.DragEvent) => {
     e.preventDefault();
-    setDragOverLectureIndex(null);
+    const insertBeforeIndex = dropIndicatorBeforeIndex ?? 0;
+    setDropIndicatorBeforeIndex(null);
     setDraggedLectureIndex(null);
     const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
-    if (isNaN(dragIndex) || dragIndex === dropIndex || !courseId) return;
+    if (isNaN(dragIndex) || dragIndex === insertBeforeIndex || !courseId) return;
     const reordered = [...lectures];
     const [removed] = reordered.splice(dragIndex, 1);
-    reordered.splice(dropIndex, 0, removed);
+    // When dragging down, indices shift after removal: insert at insertBeforeIndex - 1 so the item lands between the two.
+    const insertAt = dragIndex < insertBeforeIndex ? insertBeforeIndex - 1 : insertBeforeIndex;
+    reordered.splice(insertAt, 0, removed);
     setLectures(reordered);
     try {
       await courseApi.reorderLecturesInCourse(courseId, reordered.map((l) => l._id));
@@ -310,7 +317,10 @@ export function CourseDetail() {
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => handleLectureDrop(e)}
+            >
               {lectures.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8">
@@ -318,14 +328,14 @@ export function CourseDetail() {
                   </TableCell>
                 </TableRow>
               ) : (
-                lectures.map((lecture, index) => (
-                  <TableRow
-                    key={lecture._id}
-                    className={`transition-colors select-none ${draggedLectureIndex === index ? "opacity-50 bg-gray-50" : ""} ${dragOverLectureIndex === index ? "ring-1 ring-inset ring-primary/30 bg-primary/5" : ""}`}
-                    onDragOver={(e) => handleLectureDragOver(e, index)}
-                    onDragLeave={handleLectureDragLeave}
-                    onDrop={(e) => handleLectureDrop(e, index)}
-                  >
+                <>
+                  {lectures.map((lecture, index) => (
+                    <React.Fragment key={lecture._id}>
+                      {dropIndicatorBeforeIndex === index && <DropIndicatorRow colSpan={8} />}
+                      <TableRow
+                        className={`transition-colors select-none ${draggedLectureIndex === index ? "opacity-50 bg-gray-50" : ""}`}
+                        onDragOver={(e) => handleLectureDragOver(e, index)}
+                      >
                     <TableCell className="py-2 px-2 w-10 align-middle">
                       <DragHandle
                         onDragStart={(e) => handleLectureDragStart(e, index)}
@@ -386,7 +396,10 @@ export function CourseDetail() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
+                    </React.Fragment>
+                  ))}
+                  {dropIndicatorBeforeIndex === lectures.length && <DropIndicatorRow colSpan={8} />}
+                </>
               )}
             </TableBody>
       </ScrollableTable>

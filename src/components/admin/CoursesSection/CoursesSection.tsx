@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GraduationCapIcon, Trash2, Edit, PlusIcon } from "lucide-react";
-import { DragHandle, DISPLAY_ORDER_HEADER } from "./DragHandle";
+import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { GroupModal } from "./GroupModal";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -42,7 +42,8 @@ export function CoursesSection() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
   const [draggedGroupIndex, setDraggedGroupIndex] = useState<number | null>(null);
-  const [dragOverGroupIndex, setDragOverGroupIndex] = useState<number | null>(null);
+  /** Index before which to show the drop line (0..length). null = no indicator. */
+  const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
 
   const handleAddCourseGroup = () => {
     setEditingGroup(null);
@@ -134,27 +135,33 @@ export function CoursesSection() {
     e.dataTransfer.setData("text/plain", String(index));
   };
 
-  const handleGroupDragOver = (e: React.DragEvent, index: number) => {
+  const handleGroupDragOver = (e: React.DragEvent, rowIndex: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
-    setDragOverGroupIndex(index);
+    const row = e.currentTarget;
+    const rect = row.getBoundingClientRect();
+    const mid = rect.top + rect.height / 2;
+    const insertBefore = e.clientY < mid ? rowIndex : rowIndex + 1;
+    setDropIndicatorBeforeIndex(insertBefore);
   };
 
-  const handleGroupDragLeave = () => setDragOverGroupIndex(null);
   const handleGroupDragEnd = () => {
     setDraggedGroupIndex(null);
-    setDragOverGroupIndex(null);
+    setDropIndicatorBeforeIndex(null);
   };
 
-  const handleGroupDrop = async (e: React.DragEvent, dropIndex: number) => {
+  const handleGroupDrop = async (e: React.DragEvent) => {
     e.preventDefault();
-    setDragOverGroupIndex(null);
+    const insertBeforeIndex = dropIndicatorBeforeIndex ?? 0;
+    setDropIndicatorBeforeIndex(null);
     setDraggedGroupIndex(null);
     const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
-    if (isNaN(dragIndex) || dragIndex === dropIndex) return;
+    if (isNaN(dragIndex) || dragIndex === insertBeforeIndex) return;
     const reordered = [...courseGroups];
     const [removed] = reordered.splice(dragIndex, 1);
-    reordered.splice(dropIndex, 0, removed);
+    // When dragging down, indices shift after removal: insert at insertBeforeIndex - 1 so the item lands between the two.
+    const insertAt = dragIndex < insertBeforeIndex ? insertBeforeIndex - 1 : insertBeforeIndex;
+    reordered.splice(insertAt, 0, removed);
     setCourseGroups(reordered);
     try {
       await courseApi.reorderCourseGroups(reordered.map((g) => g._id));
@@ -234,7 +241,10 @@ export function CoursesSection() {
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => handleGroupDrop(e)}
+            >
               {loading ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8">
@@ -248,15 +258,15 @@ export function CoursesSection() {
                   </TableCell>
                 </TableRow>
               ) : (
-                courseGroups.map((group, index) => (
-                  <TableRow
-                    key={group._id}
-                    onClick={() => handleViewGroup(group._id)}
-                    className={`cursor-pointer transition-colors select-none ${draggedGroupIndex === index ? "opacity-50 bg-gray-50" : ""} ${dragOverGroupIndex === index ? "ring-1 ring-inset ring-primary/30 bg-primary/5" : ""}`}
-                    onDragOver={(e) => handleGroupDragOver(e, index)}
-                    onDragLeave={handleGroupDragLeave}
-                    onDrop={(e) => handleGroupDrop(e, index)}
-                  >
+                <>
+                  {courseGroups.map((group, index) => (
+                    <React.Fragment key={group._id}>
+                      {dropIndicatorBeforeIndex === index && <DropIndicatorRow colSpan={9} />}
+                      <TableRow
+                        onClick={() => handleViewGroup(group._id)}
+                        className={`cursor-pointer transition-colors select-none ${draggedGroupIndex === index ? "opacity-50 bg-gray-50" : ""}`}
+                        onDragOver={(e) => handleGroupDragOver(e, index)}
+                      >
                     <TableCell className="py-2 px-2 w-10 align-middle" onClick={(e) => e.stopPropagation()}>
                       <DragHandle
                         onDragStart={(e) => handleGroupDragStart(e, index)}
@@ -308,7 +318,10 @@ export function CoursesSection() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))
+                    </React.Fragment>
+                  ))}
+                  {dropIndicatorBeforeIndex === courseGroups.length && <DropIndicatorRow colSpan={9} />}
+                </>
               )}
             </TableBody>
       </ScrollableTable>

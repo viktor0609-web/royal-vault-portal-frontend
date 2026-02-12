@@ -1,4 +1,5 @@
 import { GripVertical } from "lucide-react";
+import { TableRow, TableCell } from "@/components/ui/table";
 
 interface DragHandleProps {
   onDragStart: (e: React.DragEvent) => void;
@@ -29,3 +30,20 @@ export function DragHandle({ onDragStart, onDragEnd, className = "" }: DragHandl
 
 /** Header label for the display-order column */
 export const DISPLAY_ORDER_HEADER = "Display order";
+
+/**
+ * Modern drop indicator: a horizontal line showing where the item will be inserted.
+ * Renders as a single full-width table row. Use when dragOver to show exact drop position.
+ */
+export function DropIndicatorRow({ colSpan }: { colSpan: number }) {
+  return (
+    <TableRow className="h-0 border-0 p-0 bg-transparent hover:bg-transparent odd:bg-transparent even:bg-transparent [&>td]:border-0 [&>td]:p-0 [&>td]:align-middle [&>td]:vertical-align-middle">
+      <TableCell colSpan={colSpan} className="h-0 p-0 border-0 align-middle">
+        <div
+          className="h-0.5 min-h-[2px] w-full rounded-full bg-primary shadow-[0_0_0_1px_hsl(var(--primary))]"
+          aria-hidden
+        />
+      </TableCell>
+    </TableRow>
+  );
+}

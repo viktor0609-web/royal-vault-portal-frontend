@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
-import { DragHandle, DISPLAY_ORDER_HEADER } from "./DragHandle";
+import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { CourseModal } from "./CourseModal";
 import { useToast } from "@/hooks/use-toast";
 import { courseApi } from "@/lib/api";
@@ -73,7 +73,8 @@ export function CourseGroupDetail() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
     const [draggedCourseIndex, setDraggedCourseIndex] = useState<number | null>(null);
-    const [dragOverCourseIndex, setDragOverCourseIndex] = useState<number | null>(null);
+    /** Index before which to show the drop line (0..length). null = no indicator. */
+    const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
 
     const handleDelete = (e: React.MouseEvent, courseId: string) => {
         e.stopPropagation();
@@ -138,30 +139,33 @@ export function CourseGroupDetail() {
         e.dataTransfer.setData("application/json", JSON.stringify({ index }));
     };
 
-    const handleCourseDragOver = (e: React.DragEvent, index: number) => {
+    const handleCourseDragOver = (e: React.DragEvent, rowIndex: number) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
-        setDragOverCourseIndex(index);
-    };
-
-    const handleCourseDragLeave = () => {
-        setDragOverCourseIndex(null);
+        const row = e.currentTarget;
+        const rect = row.getBoundingClientRect();
+        const mid = rect.top + rect.height / 2;
+        const insertBefore = e.clientY < mid ? rowIndex : rowIndex + 1;
+        setDropIndicatorBeforeIndex(insertBefore);
     };
 
     const handleCourseDragEnd = () => {
         setDraggedCourseIndex(null);
-        setDragOverCourseIndex(null);
+        setDropIndicatorBeforeIndex(null);
     };
 
-    const handleCourseDrop = async (e: React.DragEvent, dropIndex: number) => {
+    const handleCourseDrop = async (e: React.DragEvent) => {
         e.preventDefault();
-        setDragOverCourseIndex(null);
+        const insertBeforeIndex = dropIndicatorBeforeIndex ?? 0;
+        setDropIndicatorBeforeIndex(null);
         setDraggedCourseIndex(null);
         const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
-        if (isNaN(dragIndex) || dragIndex === dropIndex || !groupId) return;
+        if (isNaN(dragIndex) || dragIndex === insertBeforeIndex || !groupId) return;
         const reordered = [...courses];
         const [removed] = reordered.splice(dragIndex, 1);
-        reordered.splice(dropIndex, 0, removed);
+        // When dragging down, indices shift after removal: insert at insertBeforeIndex - 1 so the item lands between the two.
+        const insertAt = dragIndex < insertBeforeIndex ? insertBeforeIndex - 1 : insertBeforeIndex;
+        reordered.splice(insertAt, 0, removed);
         setCourses(reordered);
         try {
             await courseApi.reorderCoursesInGroup(groupId, reordered.map((c) => c._id));
@@ -293,7 +297,10 @@ export function CourseGroupDetail() {
                                 </TableHead>
                             </TableRow>
                         </TableHeader>
-                        <TableBody>
+                        <TableBody
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => handleCourseDrop(e)}
+                        >
                             {loading ? (
                                 <TableRow>
                                     <TableCell colSpan={8} className="text-center py-8">
@@ -307,15 +314,15 @@ export function CourseGroupDetail() {
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                courses.map((course, index) => (
-                                    <TableRow
-                                        key={course._id}
-                                        onClick={() => handleViewCourse(course._id)}
-                                        className={`cursor-pointer transition-colors select-none ${draggedCourseIndex === index ? "opacity-50 bg-gray-50" : ""} ${dragOverCourseIndex === index ? "ring-1 ring-inset ring-primary/30 bg-primary/5" : ""}`}
-                                        onDragOver={(e) => handleCourseDragOver(e, index)}
-                                        onDragLeave={handleCourseDragLeave}
-                                        onDrop={(e) => handleCourseDrop(e, index)}
-                                    >
+                                <>
+                                    {courses.map((course, index) => (
+                                        <React.Fragment key={course._id}>
+                                            {dropIndicatorBeforeIndex === index && <DropIndicatorRow colSpan={8} />}
+                                            <TableRow
+                                                onClick={() => handleViewCourse(course._id)}
+                                                className={`cursor-pointer transition-colors select-none ${draggedCourseIndex === index ? "opacity-50 bg-gray-50" : ""}`}
+                                                onDragOver={(e) => handleCourseDragOver(e, index)}
+                                            >
                                         <TableCell className="py-2 px-2 w-10 align-middle" onClick={(e) => e.stopPropagation()}>
                                             <DragHandle
                                                 onDragStart={(e) => handleCourseDragStart(e, index)}
@@ -364,7 +371,10 @@ export function CourseGroupDetail() {
                                             </div>
                                         </TableCell>
                                     </TableRow>
-                                ))
+                                        </React.Fragment>
+                                    ))}
+                                    {dropIndicatorBeforeIndex === courses.length && <DropIndicatorRow colSpan={8} />}
+                                </>
                             )}
                         </TableBody>
             </ScrollableTable>

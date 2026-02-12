@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GraduationCapIcon, Trash2, Edit, PlusIcon } from "lucide-react";
+import { GraduationCapIcon, Trash2, Edit, PlusIcon, ChevronUp, ChevronDown } from "lucide-react";
 import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { GroupModal } from "./GroupModal";
 import { courseApi } from "@/lib/api";
@@ -34,7 +34,6 @@ export function CoursesSection() {
     setIsLoading,
     error,
     setError,
-    getCurrentSection
   } = useAdminState<CourseGroup[]>([], 'courseGroups');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,6 +43,7 @@ export function CoursesSection() {
   const [draggedGroupIndex, setDraggedGroupIndex] = useState<number | null>(null);
   /** Index before which to show the drop line (0..length). null = no indicator. */
   const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
+  const dropIndicatorBeforeIndexRef = useRef<number | null>(null);
 
   const handleAddCourseGroup = () => {
     setEditingGroup(null);
@@ -142,19 +142,23 @@ export function CoursesSection() {
     const rect = row.getBoundingClientRect();
     const mid = rect.top + rect.height / 2;
     const insertBefore = e.clientY < mid ? rowIndex : rowIndex + 1;
+    dropIndicatorBeforeIndexRef.current = insertBefore;
     setDropIndicatorBeforeIndex(insertBefore);
   };
 
   const handleGroupDragEnd = () => {
     setDraggedGroupIndex(null);
     setDropIndicatorBeforeIndex(null);
+    dropIndicatorBeforeIndexRef.current = null;
   };
 
   const handleGroupDrop = async (e: React.DragEvent) => {
     e.preventDefault();
-    const insertBeforeIndex = dropIndicatorBeforeIndex ?? 0;
+    const insertBeforeIndex = dropIndicatorBeforeIndexRef.current;
     setDropIndicatorBeforeIndex(null);
+    dropIndicatorBeforeIndexRef.current = null;
     setDraggedGroupIndex(null);
+    if (insertBeforeIndex === null) return;
     const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
     if (isNaN(dragIndex) || dragIndex === insertBeforeIndex) return;
     const reordered = [...courseGroups];
@@ -173,6 +177,34 @@ export function CoursesSection() {
         description: err.response?.data?.message || "Failed to save order",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleMoveGroupUp = async (index: number) => {
+    if (index <= 0) return;
+    const reordered = [...courseGroups];
+    [reordered[index - 1], reordered[index]] = [reordered[index], reordered[index - 1]];
+    setCourseGroups(reordered);
+    try {
+      await courseApi.reorderCourseGroups(reordered.map((g) => g._id));
+      toast({ title: "Order updated", description: "Course group order saved." });
+    } catch (err: any) {
+      setCourseGroups(courseGroups);
+      toast({ title: "Error", description: err.response?.data?.message || "Failed to save order", variant: "destructive" });
+    }
+  };
+
+  const handleMoveGroupDown = async (index: number) => {
+    if (index >= courseGroups.length - 1) return;
+    const reordered = [...courseGroups];
+    [reordered[index], reordered[index + 1]] = [reordered[index + 1], reordered[index]];
+    setCourseGroups(reordered);
+    try {
+      await courseApi.reorderCourseGroups(reordered.map((g) => g._id));
+      toast({ title: "Order updated", description: "Course group order saved." });
+    } catch (err: any) {
+      setCourseGroups(courseGroups);
+      toast({ title: "Error", description: err.response?.data?.message || "Failed to save order", variant: "destructive" });
     }
   };
 
@@ -201,11 +233,13 @@ export function CoursesSection() {
 
   useEffect(() => {
     fetchCourseGroups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch once on mount
   }, []);
 
   return (
     <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 items-start sm:items-center justify-between bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3 min-w-0">
+      {/* Title - desktop only; mobile goes straight to content */}
+      <div className="hidden lg:flex flex-col sm:flex-row gap-2 sm:gap-2 items-start sm:items-center justify-between bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3 min-w-0">
         <div className="flex gap-2 items-center min-w-0 flex-1">
           <GraduationCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray flex-shrink-0" />
           <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase truncate">Course Groups</h1>
@@ -343,7 +377,7 @@ export function CoursesSection() {
             No course groups found. Create your first course group!
           </div>
         ) : (
-          courseGroups.map((group) => (
+          courseGroups.map((group, index) => (
             <div key={group._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm min-w-0">
               <div className="flex items-start justify-between mb-2 cursor-pointer min-w-0" onClick={() => handleViewGroup(group._id)}>
                 <div className="flex-1 min-w-0 mr-2">
@@ -351,6 +385,26 @@ export function CoursesSection() {
                   <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{group.description}</p>
                 </div>
                 <div className="flex gap-1 ml-2 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); handleMoveGroupUp(index); }}
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                    title="Move up"
+                    disabled={index === 0}
+                  >
+                    <ChevronUp className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); handleMoveGroupDown(index); }}
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                    title="Move down"
+                    disabled={index === courseGroups.length - 1}
+                  >
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

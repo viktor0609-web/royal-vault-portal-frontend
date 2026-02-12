@@ -10,8 +10,10 @@ interface VideoPlayerModalProps {
 }
 
 export function VideoPlayerModal({ isOpen, onClose, videoUrl, title }: VideoPlayerModalProps) {
+    const hasUrl = Boolean(videoUrl?.trim());
+
     // Check if the URL is a YouTube video
-    const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
+    const isYouTube = hasUrl && (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be'));
 
     // Extract YouTube video ID for embedding
     const getYouTubeVideoId = (url: string) => {
@@ -33,6 +35,9 @@ export function VideoPlayerModal({ isOpen, onClose, videoUrl, title }: VideoPlay
                     </DialogTitle>
                 </DialogHeader>
                 <div className="mt-4">
+                    {!hasUrl ? (
+                        <p className="text-muted-foreground text-sm py-4">No video URL available.</p>
+                    ) : (
                     <div className="aspect-video bg-black rounded-lg overflow-hidden">
                         {isYouTube && embedUrl ? (
                             // YouTube embed
@@ -56,6 +61,7 @@ export function VideoPlayerModal({ isOpen, onClose, videoUrl, title }: VideoPlay
                             />
                         )}
                     </div>
+                    )}
                 </div>
                 <div className="flex justify-end mt-4">
                     <Button variant="outline" onClick={onClose}>

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon, ChevronUp, ChevronDown } from "lucide-react";
 import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { LectureModal } from "./LectureModal";
 import { VideoPlayerModal } from "./VideoPlayerModal";
@@ -36,7 +36,6 @@ export function CourseDetail() {
     setIsLoading,
     error,
     setError,
-    getUrlParams
   } = useAdminState<Course | null>(null, `course_${courseId}`);
 
   const [lectures, setLectures] = useState<Lecture[]>([]);
@@ -78,6 +77,7 @@ export function CourseDetail() {
   const [draggedLectureIndex, setDraggedLectureIndex] = useState<number | null>(null);
   /** Index before which to show the drop line (0..length). null = no indicator. */
   const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
+  const dropIndicatorBeforeIndexRef = useRef<number | null>(null);
 
   const handleDelete = (lectureId: string) => {
     setLectureToDelete(lectureId);
@@ -149,19 +149,23 @@ export function CourseDetail() {
     const rect = row.getBoundingClientRect();
     const mid = rect.top + rect.height / 2;
     const insertBefore = e.clientY < mid ? rowIndex : rowIndex + 1;
+    dropIndicatorBeforeIndexRef.current = insertBefore;
     setDropIndicatorBeforeIndex(insertBefore);
   };
 
   const handleLectureDragEnd = () => {
     setDraggedLectureIndex(null);
     setDropIndicatorBeforeIndex(null);
+    dropIndicatorBeforeIndexRef.current = null;
   };
 
   const handleLectureDrop = async (e: React.DragEvent) => {
     e.preventDefault();
-    const insertBeforeIndex = dropIndicatorBeforeIndex ?? 0;
+    const insertBeforeIndex = dropIndicatorBeforeIndexRef.current;
     setDropIndicatorBeforeIndex(null);
+    dropIndicatorBeforeIndexRef.current = null;
     setDraggedLectureIndex(null);
+    if (insertBeforeIndex === null) return;
     const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
     if (isNaN(dragIndex) || dragIndex === insertBeforeIndex || !courseId) return;
     const reordered = [...lectures];
@@ -189,6 +193,34 @@ export function CourseDetail() {
     setSelectedVideoTitle("");
   };
 
+  const handleMoveLectureUp = async (index: number) => {
+    if (index <= 0 || !courseId) return;
+    const reordered = [...lectures];
+    [reordered[index - 1], reordered[index]] = [reordered[index], reordered[index - 1]];
+    setLectures(reordered);
+    try {
+      await courseApi.reorderLecturesInCourse(courseId, reordered.map((l) => l._id));
+      toast({ title: "Order updated", description: "Lesson order saved." });
+    } catch (err: any) {
+      setLectures(lectures);
+      toast({ title: "Error", description: err.response?.data?.message || "Failed to save order", variant: "destructive" });
+    }
+  };
+
+  const handleMoveLectureDown = async (index: number) => {
+    if (index >= lectures.length - 1 || !courseId) return;
+    const reordered = [...lectures];
+    [reordered[index], reordered[index + 1]] = [reordered[index + 1], reordered[index]];
+    setLectures(reordered);
+    try {
+      await courseApi.reorderLecturesInCourse(courseId, reordered.map((l) => l._id));
+      toast({ title: "Order updated", description: "Lesson order saved." });
+    } catch (err: any) {
+      setLectures(lectures);
+      toast({ title: "Error", description: err.response?.data?.message || "Failed to save order", variant: "destructive" });
+    }
+  };
+
   const fetchCourse = async () => {
     if (!courseId) return;
 
@@ -213,25 +245,12 @@ export function CourseDetail() {
 
   useEffect(() => {
     fetchCourse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch only when courseId changes
   }, [courseId]);
 
   if (loading) {
     return (
-      <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
-        <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6">
-          <div className="text-2xl sm:text-4xl">📚</div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">Course</h1>
-            <p className="text-xs sm:text-base text-royal-gray">Loading course details...</p>
-          </div>
-          <div
-            className="cursor-pointer p-1.5 sm:p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-75 hover:scale-102 flex-shrink-0"
-            onClick={() => navigate(`/admin/courses/groups/${groupId}`)}
-            title="Back to Course Group"
-          >
-            <ArrowLeftIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray hover:text-royal-blue transition-colors duration-75" />
-          </div>
-        </div>
+      <div className="flex-1 p-2 sm:p-4 flex flex-col min-w-0">
         <Loading message="Loading lectures..." />
       </div>
     );
@@ -266,7 +285,8 @@ export function CourseDetail() {
 
   return (
     <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-      <div className="sticky top-[41px] z-30 bg-white rounded-lg border border-royal-light-gray shadow-sm mb-3 sm:mb-6 min-w-0">
+      {/* Header with title - desktop only; back is in breadcrumb (right side) */}
+      <div className="hidden lg:block sticky top-[41px] z-30 bg-white rounded-lg border border-royal-light-gray shadow-sm mb-3 sm:mb-6 min-w-0">
         <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-royal-light-gray">
           <div className="flex items-center gap-2 sm:gap-3">
             <button
@@ -274,8 +294,7 @@ export function CourseDetail() {
               className="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded transition-all duration-200 group text-xs sm:text-sm flex-shrink-0"
             >
               <ArrowLeftIcon className="h-3 w-3 sm:h-4 sm:w-4 group-hover:-translate-x-0.5 transition-transform" />
-              <span className="font-medium hidden sm:inline">Back to Course Group</span>
-              <span className="font-medium sm:hidden">Back</span>
+              <span className="font-medium">Back to Course Group</span>
             </button>
           </div>
         </div>
@@ -419,7 +438,7 @@ export function CourseDetail() {
             No lectures found. Create your first lecture!
           </div>
         ) : (
-          lectures.map((lecture) => (
+          lectures.map((lecture, index) => (
             <div key={lecture._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm min-w-0">
               <div className="flex items-start justify-between mb-2 min-w-0">
                 <div className="flex-1 min-w-0 mr-2">
@@ -429,6 +448,26 @@ export function CourseDetail() {
                   <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{lecture.description}</p>
                 </div>
                 <div className="flex gap-1 ml-2 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleMoveLectureUp(index)}
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                    title="Move up"
+                    disabled={index === 0}
+                  >
+                    <ChevronUp className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleMoveLectureDown(index)}
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                    title="Move down"
+                    disabled={index === lectures.length - 1}
+                  >
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

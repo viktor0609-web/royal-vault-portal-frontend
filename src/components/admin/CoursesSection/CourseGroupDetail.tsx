@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon, ChevronUp, ChevronDown } from "lucide-react";
 import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { CourseModal } from "./CourseModal";
 import { useToast } from "@/hooks/use-toast";
@@ -35,7 +35,6 @@ export function CourseGroupDetail() {
         setIsLoading,
         error,
         setError,
-        getUrlParams
     } = useAdminState<CourseGroup | null>(null, `courseGroup_${groupId}`);
 
     const [courses, setCourses] = useState<Course[]>([]);
@@ -75,6 +74,7 @@ export function CourseGroupDetail() {
     const [draggedCourseIndex, setDraggedCourseIndex] = useState<number | null>(null);
     /** Index before which to show the drop line (0..length). null = no indicator. */
     const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
+    const dropIndicatorBeforeIndexRef = useRef<number | null>(null);
 
     const handleDelete = (e: React.MouseEvent, courseId: string) => {
         e.stopPropagation();
@@ -146,19 +146,23 @@ export function CourseGroupDetail() {
         const rect = row.getBoundingClientRect();
         const mid = rect.top + rect.height / 2;
         const insertBefore = e.clientY < mid ? rowIndex : rowIndex + 1;
+        dropIndicatorBeforeIndexRef.current = insertBefore;
         setDropIndicatorBeforeIndex(insertBefore);
     };
 
     const handleCourseDragEnd = () => {
         setDraggedCourseIndex(null);
         setDropIndicatorBeforeIndex(null);
+        dropIndicatorBeforeIndexRef.current = null;
     };
 
     const handleCourseDrop = async (e: React.DragEvent) => {
         e.preventDefault();
-        const insertBeforeIndex = dropIndicatorBeforeIndex ?? 0;
+        const insertBeforeIndex = dropIndicatorBeforeIndexRef.current;
         setDropIndicatorBeforeIndex(null);
+        dropIndicatorBeforeIndexRef.current = null;
         setDraggedCourseIndex(null);
+        if (insertBeforeIndex === null) return;
         const dragIndex = parseInt(e.dataTransfer.getData("text/plain"), 10);
         if (isNaN(dragIndex) || dragIndex === insertBeforeIndex || !groupId) return;
         const reordered = [...courses];
@@ -177,6 +181,34 @@ export function CourseGroupDetail() {
                 description: err.response?.data?.message || "Failed to save order",
                 variant: "destructive",
             });
+        }
+    };
+
+    const handleMoveCourseUp = async (index: number) => {
+        if (index <= 0 || !groupId) return;
+        const reordered = [...courses];
+        [reordered[index - 1], reordered[index]] = [reordered[index], reordered[index - 1]];
+        setCourses(reordered);
+        try {
+            await courseApi.reorderCoursesInGroup(groupId, reordered.map((c) => c._id));
+            toast({ title: "Order updated", description: "Course order saved." });
+        } catch (err: any) {
+            setCourses(courses);
+            toast({ title: "Error", description: err.response?.data?.message || "Failed to save order", variant: "destructive" });
+        }
+    };
+
+    const handleMoveCourseDown = async (index: number) => {
+        if (index >= courses.length - 1 || !groupId) return;
+        const reordered = [...courses];
+        [reordered[index], reordered[index + 1]] = [reordered[index + 1], reordered[index]];
+        setCourses(reordered);
+        try {
+            await courseApi.reorderCoursesInGroup(groupId, reordered.map((c) => c._id));
+            toast({ title: "Order updated", description: "Course order saved." });
+        } catch (err: any) {
+            setCourses(courses);
+            toast({ title: "Error", description: err.response?.data?.message || "Failed to save order", variant: "destructive" });
         }
     };
 
@@ -205,25 +237,12 @@ export function CourseGroupDetail() {
 
     useEffect(() => {
         fetchCourseGroup();
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch only when groupId changes
     }, [groupId]);
 
     if (loading) {
         return (
-            <div className="flex-1 p-1 sm:p-2 lg:p-4 flex flex-col">
-                <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6">
-                    <div className="text-2xl sm:text-4xl">🎓</div>
-                    <div className="flex-1 min-w-0">
-                        <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">Course Group</h1>
-                        <p className="text-xs sm:text-base text-royal-gray">Loading course group details...</p>
-                    </div>
-                    <div
-                        className="cursor-pointer p-1.5 sm:p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-75 hover:scale-102 flex-shrink-0"
-                        onClick={() => navigate('/admin/courses')}
-                        title="Back to Courses"
-                    >
-                        <ArrowLeftIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray hover:text-royal-blue transition-colors duration-75" />
-                    </div>
-                </div>
+            <div className="flex-1 p-2 sm:p-4 flex flex-col min-w-0">
                 <Loading message="Loading courses..." />
             </div>
         );
@@ -253,8 +272,8 @@ export function CourseGroupDetail() {
 
     return (
         <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-            {/* Header - Sticky */}
-            <div className="sticky top-[41px] z-30 flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6 shadow-sm min-w-0">
+            {/* Header with title - desktop only; back is in breadcrumb (right side) */}
+            <div className="hidden lg:flex sticky top-[41px] z-30 items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6 shadow-sm min-w-0">
                 <div className="text-2xl sm:text-4xl flex-shrink-0">🎓</div>
                 <div className="flex-1 min-w-0">
                     <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2 truncate">{courseGroup.title}</h1>
@@ -396,7 +415,7 @@ export function CourseGroupDetail() {
                         No courses found. Create your first course!
                     </div>
                 ) : (
-                    courses.map((course) => (
+                    courses.map((course, index) => (
                         <div key={course._id} className="bg-white rounded-lg border border-royal-light-gray p-3 shadow-sm min-w-0">
                             <div className="flex items-start justify-between mb-2 cursor-pointer min-w-0" onClick={() => handleViewCourse(course._id)}>
                                 <div className="flex-1 min-w-0 mr-2">
@@ -404,6 +423,26 @@ export function CourseGroupDetail() {
                                     <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{course.description}</p>
                                 </div>
                                 <div className="flex gap-1 ml-2 flex-shrink-0">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={(e) => { e.stopPropagation(); handleMoveCourseUp(index); }}
+                                        className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                                        title="Move up"
+                                        disabled={index === 0}
+                                    >
+                                        <ChevronUp className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={(e) => { e.stopPropagation(); handleMoveCourseDown(index); }}
+                                        className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                                        title="Move down"
+                                        disabled={index === courses.length - 1}
+                                    >
+                                        <ChevronDown className="h-3 w-3" />
+                                    </Button>
                                     <Button
                                         variant="outline"
                                         size="sm"

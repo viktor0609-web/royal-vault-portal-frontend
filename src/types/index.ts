@@ -78,7 +78,6 @@ export interface CourseGroup {
   _id: string;
   title: string;
   description: string;
-  icon: string;
   sortOrder?: number;
   category?: string | CourseCategory | null;
   courses?: Course[];

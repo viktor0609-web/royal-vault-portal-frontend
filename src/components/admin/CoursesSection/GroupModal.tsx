@@ -20,7 +20,6 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        icon: "",
         category: "" as string,
         displayOnPublicPage: true,
         audienceType: "all" as "all" | "hubspotLists",
@@ -139,7 +138,6 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
             setFormData({
                 title: editingGroup.title || "",
                 description: editingGroup.description || "",
-                icon: editingGroup.icon || "",
                 category: catId || "",
                 displayOnPublicPage: editingData.displayOnPublicPage !== false,
                 audienceType: audienceType,
@@ -149,7 +147,6 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
             setFormData({
                 title: "",
                 description: "",
-                icon: "",
                 category: "",
                 displayOnPublicPage: true,
                 audienceType: "all",
@@ -168,7 +165,6 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
             const submitData: any = {
                 title: formData.title,
                 description: formData.description,
-                icon: formData.icon,
                 category: formData.category || null,
                 displayOnPublicPage: formData.displayOnPublicPage,
             };
@@ -244,20 +240,6 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
                             onChange={(e) => handleInputChange("description", e.target.value)}
                             className="mt-1"
                             rows={3}
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="icon" className="text-royal-dark-gray font-medium">
-                            Icon (Iconify class)
-                        </Label>
-                        <Input
-                            id="icon"
-                            value={formData.icon}
-                            onChange={(e) => handleInputChange("icon", e.target.value)}
-                            className="mt-1"
-                            placeholder="e.g., material-symbols:school"
                             required
                         />
                     </div>

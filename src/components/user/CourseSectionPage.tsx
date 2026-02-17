@@ -3,30 +3,9 @@ import { Link, useParams } from "react-router-dom";
 import { Loading } from "@/components/ui/Loading";
 import { BackButton } from "@/components/ui/BackButton";
 import { PageHeader } from "@/components/ui/PageHeader";
-import {
-  EyeOffIcon,
-  NetworkIcon,
-  RefreshCwIcon,
-  KeyIcon,
-  TruckIcon,
-  GraduationCapIcon,
-  ClockIcon,
-} from "lucide-react";
+import { GraduationCapIcon } from "lucide-react";
 import { courseApi } from "@/lib/api";
 import type { CourseGroup, CourseCategory } from "@/types";
-
-const getIconForGroup = (iconName: string) => {
-  const iconMap: { [key: string]: any } = {
-    'eye-off': EyeOffIcon,
-    'network': NetworkIcon,
-    'refresh-cw': RefreshCwIcon,
-    'key': KeyIcon,
-    'truck': TruckIcon,
-    'graduation-cap': GraduationCapIcon,
-    'clock': ClockIcon,
-  };
-  return iconMap[iconName] || GraduationCapIcon;
-};
 
 export function CourseSectionPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -91,16 +70,14 @@ export function CourseSectionPage() {
         <p className="text-royal-gray">No courses in this section.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-          {groups.map((group) => {
-            const Icon = getIconForGroup(group.icon);
-            return (
+          {groups.map((group) => (
               <Link
                 key={group._id}
                 to={`/course-groups/${group._id}`}
                 className="text-center p-3 sm:p-6 bg-card rounded-lg border border-royal-light-gray hover:shadow-sm transition-shadow duration-75 cursor-pointer block"
               >
                 <div className="flex justify-center mb-3 sm:mb-4">
-                  <Icon className="h-12 w-12 sm:h-16 sm:w-16 text-royal-gray" />
+                  <GraduationCapIcon className="h-12 w-12 sm:h-16 sm:w-16 text-royal-gray" />
                 </div>
                 <h3 className="text-sm sm:text-lg font-bold text-royal-dark-gray mb-2 line-clamp-2">
                   {group.title}
@@ -109,8 +86,7 @@ export function CourseSectionPage() {
                   {group.description}
                 </p>
               </Link>
-            );
-          })}
+          ))}
         </div>
       )}
     </div>

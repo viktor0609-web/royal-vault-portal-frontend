@@ -8,19 +8,7 @@ import { courseApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import type { CourseGroup, Course, Lecture } from "@/types";
 
-// Icon mapping for course groups
-const getIconForGroup = (iconName: string) => {
-    const iconMap: { [key: string]: any } = {
-        'eye-off': '👁️‍🗨️',
-        'network': '🌐',
-        'refresh-cw': '🔄',
-        'key': '🔑',
-        'truck': '🚛',
-        'graduation-cap': '🎓',
-        'clock': '⏰',
-    };
-    return iconMap[iconName] || '📚';
-};
+const DEFAULT_GROUP_ICON = '📚';
 
 export function CourseGroupDetailSection() {
     const { groupId } = useParams<{ groupId: string }>();
@@ -58,7 +46,7 @@ export function CourseGroupDetailSection() {
         return (
             <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
                 <PageHeader
-                    icon={<span className="text-2xl sm:text-4xl">{getIconForGroup('graduation-cap')}</span>}
+                    icon={<span className="text-2xl sm:text-4xl">{DEFAULT_GROUP_ICON}</span>}
                     title="Course Group"
                     description="Loading course group details..."
                 />
@@ -71,7 +59,7 @@ export function CourseGroupDetailSection() {
         return (
             <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
                 <PageHeader
-                    icon={<span className="text-2xl sm:text-4xl">{getIconForGroup('graduation-cap')}</span>}
+                    icon={<span className="text-2xl sm:text-4xl">{DEFAULT_GROUP_ICON}</span>}
                     title="Error"
                     description="Failed to load course group."
                 />
@@ -96,7 +84,7 @@ export function CourseGroupDetailSection() {
         <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-300">
             <div className="mb-4 sm:mb-6">
                 <PageHeader
-                    icon={<span className="text-2xl sm:text-4xl">{getIconForGroup(courseGroup.icon)}</span>}
+                    icon={<span className="text-2xl sm:text-4xl">{DEFAULT_GROUP_ICON}</span>}
                     title={courseGroup.title}
                     description={courseGroup.description}
                     right={<BackButton to="/courses" iconOnly title="Back to Courses" />}

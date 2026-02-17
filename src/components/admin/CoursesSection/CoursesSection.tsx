@@ -315,7 +315,6 @@ export function CoursesSection() {
                 </TableHead>
                 <TableHead className="w-48 min-w-48 px-2">Title</TableHead>
                 <TableHead className="w-64 min-w-64 hidden xl:table-cell py-2 px-2">Description</TableHead>
-                <TableHead className="w-24 min-w-24 hidden 2xl:table-cell py-2 px-2">Icon</TableHead>
                 <TableHead className="w-32 min-w-32 py-2 px-2">Courses</TableHead>
                 <TableHead className="w-32 min-w-32 py-2 px-2">Display</TableHead>
                 <TableHead className="w-32 min-w-32 hidden xl:table-cell py-2 px-2">Created By</TableHead>
@@ -335,13 +334,13 @@ export function CoursesSection() {
             >
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     <Loading message="Loading course groups..." size="md" />
                   </TableCell>
                 </TableRow>
               ) : courseGroups.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     No course groups found. Create your first course group!
                   </TableCell>
                 </TableRow>
@@ -349,7 +348,7 @@ export function CoursesSection() {
                 <>
                   {courseGroups.map((group, index) => (
                     <React.Fragment key={group._id}>
-                      {dropIndicatorBeforeIndex === index && <DropIndicatorRow colSpan={9} />}
+                      {dropIndicatorBeforeIndex === index && <DropIndicatorRow colSpan={8} />}
                       <TableRow
                         onClick={() => handleViewGroup(group._id)}
                         className={`cursor-pointer transition-colors select-none ${draggedGroupIndex === index ? "opacity-50 bg-gray-50" : ""}`}
@@ -363,9 +362,6 @@ export function CoursesSection() {
                     </TableCell>
                     <TableCell className="font-medium">{group.title}</TableCell>
                     <TableCell className="max-w-xs truncate hidden xl:table-cell">{group.description}</TableCell>
-                    <TableCell className="hidden 2xl:table-cell">
-                      <span className="text-sm text-gray-500">{group.icon}</span>
-                    </TableCell>
                     <TableCell>{group.courses?.length || 0}</TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
@@ -408,7 +404,7 @@ export function CoursesSection() {
                   </TableRow>
                     </React.Fragment>
                   ))}
-                  {dropIndicatorBeforeIndex === courseGroups.length && <DropIndicatorRow colSpan={9} />}
+                  {dropIndicatorBeforeIndex === courseGroups.length && <DropIndicatorRow colSpan={8} />}
                 </>
               )}
             </TableBody>

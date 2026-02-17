@@ -110,6 +110,9 @@ export const courseService = {
   updateCourse: (courseId: string, courseData: Partial<Course>) =>
     api.put<Course>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}`, courseData),
 
+  moveCourseToGroup: (courseId: string, targetGroupId: string) =>
+    api.post<Course>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}/move`, { targetGroupId }),
+
   reorderLecturesInCourse: (courseId: string, lectureIds: string[]) =>
     api.put<{ message: string }>(`${API_ENDPOINTS.COURSES.COURSES}/${courseId}/lectures/reorder`, { lectureIds }),
 

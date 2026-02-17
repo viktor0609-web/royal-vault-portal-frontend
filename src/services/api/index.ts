@@ -41,6 +41,7 @@ export const courseApi = {
   createCourse: courseService.createCourse,
   getCourseById: courseService.getCourseById,
   updateCourse: courseService.updateCourse,
+  moveCourseToGroup: courseService.moveCourseToGroup,
   reorderLecturesInCourse: courseService.reorderLecturesInCourse,
   deleteCourse: courseService.deleteCourse,
   getAllLectures: courseService.getAllLectures,

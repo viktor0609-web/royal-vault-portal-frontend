@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
@@ -12,6 +12,7 @@ import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle
 import { LectureModal } from "./LectureModal";
 import { VideoPlayerModal } from "./VideoPlayerModal";
 import { MoveLectureDialog } from "./MoveLectureDialog";
+import { MoveCourseDialog } from "./MoveCourseDialog";
 import { useToast } from "@/hooks/use-toast";
 import { courseApi } from "@/lib/api";
 import {
@@ -28,6 +29,7 @@ import type { Course, Lecture, CourseResource } from "@/types";
 
 export function CourseDetail() {
   const { groupId, courseId } = useParams<{ groupId: string; courseId: string }>();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   // Use admin state management
@@ -78,6 +80,7 @@ export function CourseDetail() {
   const [lectureToDelete, setLectureToDelete] = useState<string | null>(null);
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [lectureToMove, setLectureToMove] = useState<Lecture | null>(null);
+  const [moveCourseDialogOpen, setMoveCourseDialogOpen] = useState(false);
   const [draggedLectureIndex, setDraggedLectureIndex] = useState<number | null>(null);
   /** Index before which to show the drop line (0..length). null = no indicator. */
   const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
@@ -283,11 +286,22 @@ export function CourseDetail() {
           title={course.title}
           description={course.description}
           right={
-            <BackButton
-              to={groupId ? `/admin/courses/groups/${groupId}` : "/admin/courses"}
-              iconOnly
-              title="Back to Course Group"
-            />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setMoveCourseDialogOpen(true)}
+                title="Move course to another group"
+              >
+                <ArrowRightLeft className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Move course</span>
+              </Button>
+              <BackButton
+                to={groupId ? `/admin/courses/groups/${groupId}` : "/admin/courses"}
+                iconOnly
+                title="Back to Course Group"
+              />
+            </div>
           }
         />
       </div>
@@ -551,6 +565,22 @@ export function CourseDetail() {
         lecture={lectureToMove}
         currentCourseId={courseId}
         onMoved={fetchCourse}
+      />
+
+      <MoveCourseDialog
+        isOpen={moveCourseDialogOpen}
+        onClose={() => setMoveCourseDialogOpen(false)}
+        course={course}
+        currentGroupId={groupId}
+        onMoved={(updatedCourse) => {
+          if (updatedCourse?.courseGroup) {
+            const newGroupId = typeof updatedCourse.courseGroup === "object"
+              ? updatedCourse.courseGroup._id
+              : updatedCourse.courseGroup;
+            navigate(`/admin/courses/groups/${newGroupId}`);
+          }
+          setMoveCourseDialogOpen(false);
+        }}
       />
 
       <VideoPlayerModal

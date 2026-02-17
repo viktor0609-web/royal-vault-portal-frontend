@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PlusIcon, Edit, Trash2, PlayIcon, ChevronUp, ChevronDown } from "lucide-react";
+import { PlusIcon, Edit, Trash2, PlayIcon, ChevronUp, ChevronDown, ArrowRightLeft } from "lucide-react";
 import { BackButton } from "@/components/ui/BackButton";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { CourseModal } from "./CourseModal";
+import { MoveCourseDialog } from "./MoveCourseDialog";
 import { useToast } from "@/hooks/use-toast";
 import { courseApi } from "@/lib/api";
 import {
@@ -73,6 +74,8 @@ export function CourseGroupDetail() {
 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
+    const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+    const [courseToMove, setCourseToMove] = useState<Course | null>(null);
     const [draggedCourseIndex, setDraggedCourseIndex] = useState<number | null>(null);
     /** Index before which to show the drop line (0..length). null = no indicator. */
     const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
@@ -82,6 +85,18 @@ export function CourseGroupDetail() {
         e.stopPropagation();
         setCourseToDelete(courseId);
         setDeleteDialogOpen(true);
+    };
+
+    const handleMove = (e: React.MouseEvent, course: Course) => {
+        e.stopPropagation();
+        setCourseToMove(course);
+        setMoveDialogOpen(true);
+    };
+
+    const handleCourseMoved = () => {
+        setCourseToMove(null);
+        setMoveDialogOpen(false);
+        fetchCourseGroup();
     };
 
     const confirmDelete = async () => {
@@ -359,6 +374,14 @@ export function CourseGroupDetail() {
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
+                                                    onClick={(e) => handleMove(e, course)}
+                                                    title="Move to another group"
+                                                >
+                                                    <ArrowRightLeft className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
                                                     onClick={(e) => handleEdit(e, course)}
                                                     title="Edit"
                                                 >
@@ -431,6 +454,15 @@ export function CourseGroupDetail() {
                                     <Button
                                         variant="outline"
                                         size="sm"
+                                        onClick={(e) => { e.stopPropagation(); handleMove(e, course); }}
+                                        className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                                        title="Move to another group"
+                                    >
+                                        <ArrowRightLeft className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
                                         onClick={(e) => handleEdit(e, course)}
                                         className="h-6 w-6 sm:h-7 sm:w-7 p-0"
                                         title="Edit"
@@ -482,6 +514,14 @@ export function CourseGroupDetail() {
                 editingCourse={editingCourse}
                 onCourseSaved={handleCourseSaved}
                 courseGroupId={groupId}
+            />
+
+            <MoveCourseDialog
+                isOpen={moveDialogOpen}
+                onClose={() => { setMoveDialogOpen(false); setCourseToMove(null); }}
+                course={courseToMove}
+                currentGroupId={groupId}
+                onMoved={handleCourseMoved}
             />
 
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

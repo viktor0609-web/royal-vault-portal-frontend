@@ -48,10 +48,17 @@ export const courseApi = {
   getLectureById: courseService.getLectureById,
   updateLecture: courseService.updateLecture,
   deleteLecture: courseService.deleteLecture,
+  moveLectureToCourse: courseService.moveLectureToCourse,
   completeLecture: courseService.completeLecture,
   uploadImage: uploadService.uploadImage,
   uploadFile: uploadService.uploadFile,
   saveYouTubeVideo: courseService.saveYouTubeVideo,
+  getAllCategories: courseService.getAllCategories,
+  getCourseGroupsByCategory: courseService.getCourseGroupsByCategory,
+  createCategory: courseService.createCategory,
+  updateCategory: courseService.updateCategory,
+  deleteCategory: courseService.deleteCategory,
+  reorderCategories: courseService.reorderCategories,
 };
 
 export const webinarApi = {

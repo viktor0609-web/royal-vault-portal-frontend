@@ -27,6 +27,7 @@ export const API_ENDPOINTS = {
     GROUPS: "/api/courses/groups",
     COURSES: "/api/courses/courses",
     LECTURES: "/api/courses/lectures",
+    CATEGORIES: "/api/courses/categories",
   },
   WEBINARS: {
     ADMIN: "/api/webinars/admin",

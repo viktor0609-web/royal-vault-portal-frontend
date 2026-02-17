@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon, ChevronUp, ChevronDown } from "lucide-react";
+import { PlusIcon, Edit, Trash2, PlayIcon, ChevronUp, ChevronDown } from "lucide-react";
+import { BackButton } from "@/components/ui/BackButton";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { CourseModal } from "./CourseModal";
 import { useToast } from "@/hooks/use-toast";
@@ -251,41 +253,24 @@ export function CourseGroupDetail() {
     if (error || !courseGroup) {
         return (
             <div className="flex-1 p-4">
-                <div className="flex items-center gap-4 bg-white p-6 rounded-lg border border-royal-light-gray mb-3">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate('/admin/courses')}
-                        className="flex items-center gap-2"
-                    >
-                        <ArrowLeftIcon className="h-4 w-4" />
-                        Back
-                    </Button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-royal-dark-gray">Error</h1>
-                    </div>
-                </div>
-                <div className="text-center py-8 text-red-500">{error || 'Course group not found'}</div>
+                <PageHeader
+                    back={{ to: '/admin/courses', label: 'Back to Courses' }}
+                    title="Error"
+                />
+                <div className="text-center py-8 text-red-500 mt-4">{error || 'Course group not found'}</div>
             </div>
         );
     }
 
     return (
         <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-            {/* Header with title - desktop only; back is in breadcrumb (right side) */}
-            <div className="hidden lg:flex sticky top-[41px] z-30 items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6 shadow-sm min-w-0">
-                <div className="text-2xl sm:text-4xl flex-shrink-0">🎓</div>
-                <div className="flex-1 min-w-0">
-                    <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2 truncate">{courseGroup.title}</h1>
-                    <p className="text-xs sm:text-base text-royal-gray line-clamp-2">{courseGroup.description}</p>
-                </div>
-                <div
-                    className="cursor-pointer p-1.5 sm:p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-75 hover:scale-102 flex-shrink-0"
-                    onClick={() => navigate('/admin/courses')}
-                    title="Back to Courses"
-                >
-                    <ArrowLeftIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray hover:text-royal-blue transition-colors duration-75" />
-                </div>
+            <div className="sticky top-[41px] z-30 mb-4 sm:mb-6 min-w-0">
+                <PageHeader
+                    icon={<span className="text-2xl sm:text-4xl">🎓</span>}
+                    title={courseGroup.title}
+                    description={courseGroup.description}
+                    right={<BackButton to="/admin/courses" iconOnly title="Back to Courses" />}
+                />
             </div>
 
             {error && (
@@ -383,7 +368,7 @@ export function CourseGroupDetail() {
                                                     size="sm"
                                                     variant="destructive"
                                                     onClick={(e) => handleDelete(e, course._id)}
-                                                    title="Delete"
+                                                    title="Remove"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -457,7 +442,7 @@ export function CourseGroupDetail() {
                                         size="sm"
                                         onClick={(e) => handleDelete(e, course._id)}
                                         className="h-6 w-6 sm:h-7 sm:w-7 p-0 text-red-600 hover:text-red-700"
-                                        title="Delete"
+                                        title="Remove"
                                     >
                                         <Trash2 className="h-3 w-3" />
                                     </Button>
@@ -502,24 +487,24 @@ export function CourseGroupDetail() {
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Course</AlertDialogTitle>
+<AlertDialogTitle>Remove course</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete this course? This will also delete all associated lectures. This action cannot be undone.
+                            Remove this course? This will also remove all associated lectures. This action cannot be undone.
                         </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => {
-                            setDeleteDialogOpen(false);
-                            setCourseToDelete(null);
-                        }}>
-                            Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={confirmDelete}
-                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
-                        >
-                            Delete
-                        </AlertDialogAction>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeleteDialogOpen(false);
+              setCourseToDelete(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Remove
+            </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

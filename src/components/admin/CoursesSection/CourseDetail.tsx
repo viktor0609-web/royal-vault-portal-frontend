@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAdminState } from "@/hooks/useAdminState";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeftIcon, PlusIcon, Edit, Trash2, PlayIcon, ChevronUp, ChevronDown } from "lucide-react";
+import { PlusIcon, Edit, Trash2, PlayIcon, ChevronUp, ChevronDown, ArrowRightLeft } from "lucide-react";
+import { BackButton } from "@/components/ui/BackButton";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { LectureModal } from "./LectureModal";
 import { VideoPlayerModal } from "./VideoPlayerModal";
+import { MoveLectureDialog } from "./MoveLectureDialog";
 import { useToast } from "@/hooks/use-toast";
 import { courseApi } from "@/lib/api";
 import {
@@ -25,7 +28,6 @@ import type { Course, Lecture, CourseResource } from "@/types";
 
 export function CourseDetail() {
   const { groupId, courseId } = useParams<{ groupId: string; courseId: string }>();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   // Use admin state management
@@ -74,6 +76,8 @@ export function CourseDetail() {
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [lectureToDelete, setLectureToDelete] = useState<string | null>(null);
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+  const [lectureToMove, setLectureToMove] = useState<Lecture | null>(null);
   const [draggedLectureIndex, setDraggedLectureIndex] = useState<number | null>(null);
   /** Index before which to show the drop line (0..length). null = no indicator. */
   const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
@@ -259,23 +263,11 @@ export function CourseDetail() {
   if (error || !course) {
     return (
       <div className="flex-1 p-4">
-        <div className="bg-white rounded-lg border border-royal-light-gray shadow-sm mb-6">
-          <div className="px-6 py-4 border-b border-royal-light-gray">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => navigate(`/admin/courses/groups/${groupId}`)}
-                className="flex items-center gap-2 px-3 py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded-md transition-all duration-200 group"
-              >
-                <ArrowLeftIcon className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
-                <span className="text-sm font-medium">Back to Course Group</span>
-              </button>
-            </div>
-          </div>
-          <div className="px-6 py-4">
-            <h1 className="text-2xl font-bold text-royal-dark-gray">Error</h1>
-          </div>
-        </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+        <PageHeader
+          back={groupId ? { to: `/admin/courses/groups/${groupId}`, label: "Back to Course Group" } : undefined}
+          title="Error"
+        />
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 mt-4">
           <h3 className="text-red-800 font-medium mb-2">Error Loading Course</h3>
           <p className="text-red-600">{error || 'Course not found'}</p>
         </div>
@@ -285,27 +277,19 @@ export function CourseDetail() {
 
   return (
     <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-      {/* Header with title - desktop only; back is in breadcrumb (right side) */}
-      <div className="hidden lg:block sticky top-[41px] z-30 bg-white rounded-lg border border-royal-light-gray shadow-sm mb-3 sm:mb-6 min-w-0">
-        <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-royal-light-gray">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              onClick={() => navigate(`/admin/courses/groups/${groupId}`)}
-              className="flex items-center gap-1 px-2 py-1 sm:px-3 sm:py-2 text-royal-gray hover:text-royal-blue hover:bg-royal-light-gray rounded transition-all duration-200 group text-xs sm:text-sm flex-shrink-0"
-            >
-              <ArrowLeftIcon className="h-3 w-3 sm:h-4 sm:w-4 group-hover:-translate-x-0.5 transition-transform" />
-              <span className="font-medium">Back to Course Group</span>
-            </button>
-          </div>
-        </div>
-        <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
-          <div className="flex items-start justify-between min-w-0">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray mb-2 truncate">{course.title}</h1>
-              <p className="text-royal-gray mb-3 text-xs sm:text-sm lg:text-base line-clamp-2">{course.description}</p>
-            </div>
-          </div>
-        </div>
+      <div className="sticky top-[41px] z-30 mb-3 sm:mb-6 min-w-0">
+        <PageHeader
+          icon={<span className="text-2xl sm:text-4xl">📚</span>}
+          title={course.title}
+          description={course.description}
+          right={
+            <BackButton
+              to={groupId ? `/admin/courses/groups/${groupId}` : "/admin/courses"}
+              iconOnly
+              title="Back to Course Group"
+            />
+          }
+        />
       </div>
 
       {error && (
@@ -399,6 +383,17 @@ export function CourseDetail() {
                         <Button
                           size="sm"
                           variant="outline"
+                          onClick={() => {
+                            setLectureToMove(lecture);
+                            setMoveDialogOpen(true);
+                          }}
+                          title="Move to another course"
+                        >
+                          <ArrowRightLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={() => handleEdit(lecture)}
                           title="Edit"
                         >
@@ -408,7 +403,7 @@ export function CourseDetail() {
                           size="sm"
                           variant="destructive"
                           onClick={() => handleDelete(lecture._id)}
-                          title="Delete"
+                          title="Remove"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -471,6 +466,18 @@ export function CourseDetail() {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => {
+                      setLectureToMove(lecture);
+                      setMoveDialogOpen(true);
+                    }}
+                    className="h-6 w-6 sm:h-7 sm:w-7 p-0"
+                    title="Move to another course"
+                  >
+                    <ArrowRightLeft className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleEdit(lecture)}
                     className="h-6 w-6 sm:h-7 sm:w-7 p-0"
                     title="Edit"
@@ -482,7 +489,7 @@ export function CourseDetail() {
                     size="sm"
                     onClick={() => handleDelete(lecture._id)}
                     className="h-6 w-6 sm:h-7 sm:w-7 p-0 text-red-600 hover:text-red-700"
-                    title="Delete"
+                    title="Remove"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -535,6 +542,17 @@ export function CourseDetail() {
         courseId={courseId}
       />
 
+      <MoveLectureDialog
+        isOpen={moveDialogOpen}
+        onClose={() => {
+          setMoveDialogOpen(false);
+          setLectureToMove(null);
+        }}
+        lecture={lectureToMove}
+        currentCourseId={courseId}
+        onMoved={fetchCourse}
+      />
+
       <VideoPlayerModal
         isOpen={isVideoModalOpen}
         onClose={handleCloseVideoModal}
@@ -545,9 +563,9 @@ export function CourseDetail() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Lecture</AlertDialogTitle>
+            <AlertDialogTitle>Remove lesson</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this lecture? This action cannot be undone.
+              Remove this lesson? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -561,7 +579,7 @@ export function CourseDetail() {
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
             >
-              Delete
+              Remove
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

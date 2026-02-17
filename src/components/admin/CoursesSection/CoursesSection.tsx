@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GraduationCapIcon, Trash2, Edit, PlusIcon, ChevronUp, ChevronDown } from "lucide-react";
+import { GraduationCapIcon, Trash2, Edit, PlusIcon, ChevronUp, ChevronDown, LayoutList } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { GroupModal } from "./GroupModal";
+import { CategoryModal } from "./CategoryModal";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -20,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { CourseGroup } from "@/types";
+import type { CourseGroup, CourseCategory } from "@/types";
 
 export function CoursesSection() {
   const navigate = useNavigate();
@@ -40,6 +42,11 @@ export function CoursesSection() {
   const [editingGroup, setEditingGroup] = useState<CourseGroup | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
+  const [categories, setCategories] = useState<CourseCategory[]>([]);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<CourseCategory | null>(null);
+  const [categoryDeleteDialogOpen, setCategoryDeleteDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
   const [draggedGroupIndex, setDraggedGroupIndex] = useState<number | null>(null);
   /** Index before which to show the drop line (0..length). null = no indicator. */
   const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
@@ -231,19 +238,28 @@ export function CoursesSection() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const res = await courseApi.getAllCategories();
+      setCategories(res.data.data || []);
+    } catch {
+      setCategories([]);
+    }
+  };
+
   useEffect(() => {
     fetchCourseGroups();
+    fetchCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch once on mount
   }, []);
 
   return (
     <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-      {/* Title - desktop only; mobile goes straight to content */}
-      <div className="hidden lg:flex flex-col sm:flex-row gap-2 sm:gap-2 items-start sm:items-center justify-between bg-white p-3 sm:p-4 lg:p-6 rounded-lg border border-royal-light-gray mb-2 sm:mb-3 min-w-0">
-        <div className="flex gap-2 items-center min-w-0 flex-1">
-          <GraduationCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray flex-shrink-0" />
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-royal-dark-gray uppercase truncate">Course Groups</h1>
-        </div>
+      <div className="mb-2 sm:mb-3 min-w-0">
+        <PageHeader
+          icon={<GraduationCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray" />}
+          title="Course Groups"
+        />
       </div>
 
       {error && (
@@ -251,6 +267,44 @@ export function CoursesSection() {
           {error}
         </div>
       )}
+
+      {/* Course sections (categories) */}
+      <div className="bg-white rounded-lg border border-royal-light-gray p-3 sm:p-4 mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <LayoutList className="h-5 w-5 text-royal-gray" />
+            <h2 className="text-sm font-semibold text-royal-dark-gray">Course sections (categories)</h2>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => { setEditingCategory(null); setCategoryModalOpen(true); }}
+          >
+            <PlusIcon className="h-3 w-3 mr-1" />
+            Add section
+          </Button>
+        </div>
+        <p className="text-xs text-royal-gray mb-2">Sections group course groups on the main Courses page. Assign a section when editing a course group.</p>
+        {categories.length === 0 ? (
+          <p className="text-sm text-royal-gray">No sections yet. Add one to organize course groups on the public page.</p>
+        ) : (
+          <ul className="space-y-1">
+            {categories.map((cat) => (
+              <li key={cat._id} className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-royal-light-gray/30">
+                <span className="text-sm font-medium text-royal-dark-gray">{cat.title}</span>
+                <div className="flex gap-1">
+                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => { setEditingCategory(cat); setCategoryModalOpen(true); }} title="Edit">
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-600" onClick={() => { setCategoryToDelete(cat._id); setCategoryDeleteDialogOpen(true); }} title="Remove">
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* Desktop Table View */}
       <ScrollableTable maxHeight="100%" className="hidden lg:block flex-1 min-h-0 mt-4 text-sm">
@@ -345,7 +399,7 @@ export function CoursesSection() {
                           size="sm"
                           variant="destructive"
                           onClick={(e) => handleDelete(e, group._id)}
-                          title="Delete"
+                          title="Remove"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -419,7 +473,7 @@ export function CoursesSection() {
                     size="sm"
                     onClick={(e) => handleDelete(e, group._id)}
                     className="h-6 w-6 sm:h-7 sm:w-7 p-0 text-red-600 hover:text-red-700"
-                    title="Delete"
+                    title="Remove"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -460,12 +514,50 @@ export function CoursesSection() {
         onGroupSaved={handleGroupSaved}
       />
 
+      <CategoryModal
+        isOpen={categoryModalOpen}
+        onClose={() => { setCategoryModalOpen(false); setEditingCategory(null); }}
+        editingCategory={editingCategory}
+        onSaved={fetchCategories}
+      />
+
+      <AlertDialog open={categoryDeleteDialogOpen} onOpenChange={setCategoryDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove section</AlertDialogTitle>
+            <AlertDialogDescription>
+              Remove this section? Course groups in it will no longer be grouped under a section.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => { setCategoryDeleteDialogOpen(false); setCategoryToDelete(null); }}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={async () => {
+                if (!categoryToDelete) return;
+                try {
+                  await courseApi.deleteCategory(categoryToDelete);
+                  toast({ title: "Success", description: "Section removed." });
+                  fetchCategories();
+                } catch (err: any) {
+                  toast({ title: "Error", description: err.response?.data?.message || "Failed to remove", variant: "destructive" });
+                }
+                setCategoryDeleteDialogOpen(false);
+                setCategoryToDelete(null);
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Course Group</AlertDialogTitle>
+            <AlertDialogTitle>Remove course group</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this course group? This will also delete all associated courses and lectures. This action cannot be undone.
+              Remove this course group? This will also remove all associated courses and lectures. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -479,7 +571,7 @@ export function CoursesSection() {
               onClick={confirmDelete}
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
             >
-              Delete
+              Remove
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

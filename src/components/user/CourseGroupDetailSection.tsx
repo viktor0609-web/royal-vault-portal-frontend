@@ -1,14 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
-import {
-    ArrowLeftIcon,
-    GraduationCapIcon,
-    ClockIcon,
-    PlayIcon,
-    CheckCircleIcon,
-} from "lucide-react";
+import { ArrowLeftIcon, ClockIcon, PlayIcon } from "lucide-react";
+import { BackButton } from "@/components/ui/BackButton";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { courseApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import type { CourseGroup, Course, Lecture } from "@/types";
@@ -62,14 +57,12 @@ export function CourseGroupDetailSection() {
     if (loading) {
         return (
             <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
-                <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6">
-                    <div className="text-2xl sm:text-4xl">{getIconForGroup('graduation-cap')}</div>
-                    <div>
-                        <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">Course Group</h1>
-                        <p className="text-sm sm:text-base text-royal-gray">Loading course group details...</p>
-                    </div>
-                </div>
-                <Loading message="Loading courses..." />
+                <PageHeader
+                    icon={<span className="text-2xl sm:text-4xl">{getIconForGroup('graduation-cap')}</span>}
+                    title="Course Group"
+                    description="Loading course group details..."
+                />
+                <Loading message="Loading courses..." className="mt-4" />
             </div>
         );
     }
@@ -77,14 +70,12 @@ export function CourseGroupDetailSection() {
     if (error) {
         return (
             <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
-                <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6">
-                    <div className="text-2xl sm:text-4xl">{getIconForGroup('graduation-cap')}</div>
-                    <div>
-                        <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2">Error</h1>
-                        <p className="text-sm sm:text-base text-royal-gray">Failed to load course group.</p>
-                    </div>
-                </div>
-                <div className="text-center py-4 sm:py-8 text-sm sm:text-base text-red-500">{error}</div>
+                <PageHeader
+                    icon={<span className="text-2xl sm:text-4xl">{getIconForGroup('graduation-cap')}</span>}
+                    title="Error"
+                    description="Failed to load course group."
+                />
+                <div className="text-center py-4 sm:py-8 text-sm sm:text-base text-red-500 mt-4">{error}</div>
             </div>
         );
     }
@@ -95,9 +86,7 @@ export function CourseGroupDetailSection() {
                 <div className="text-center py-4 sm:py-8">
                     <h2 className="text-lg sm:text-xl font-semibold text-royal-dark-gray mb-2">Course Group Not Found</h2>
                     <p className="text-sm sm:text-base text-royal-gray mb-3 sm:mb-4">The requested course group could not be found.</p>
-                    <Button onClick={() => navigate('/courses')} variant="outline" className="text-xs sm:text-sm">
-                        Back to Courses
-                    </Button>
+                    <BackButton to="/courses">Back to Courses</BackButton>
                 </div>
             </div>
         );
@@ -105,20 +94,13 @@ export function CourseGroupDetailSection() {
 
     return (
         <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-300">
-            {/* Header */}
-            <div className="flex items-center gap-2 sm:gap-4 bg-white p-3 sm:p-6 rounded-lg border border-royal-light-gray mb-4 sm:mb-6 shadow-sm">
-                <div className="text-2xl sm:text-4xl">{getIconForGroup(courseGroup.icon)}</div>
-                <div className="flex-1 min-w-0">
-                    <h1 className="text-lg sm:text-2xl font-bold text-royal-dark-gray mb-1 sm:mb-2 truncate">{courseGroup.title}</h1>
-                    <p className="text-xs sm:text-base text-royal-gray line-clamp-2">{courseGroup.description}</p>
-                </div>
-                <div
-                    className="cursor-pointer p-1.5 sm:p-2 rounded-lg hover:bg-royal-blue/5 transition-all duration-75 hover:scale-102 flex-shrink-0"
-                    onClick={() => navigate('/courses')}
-                    title="Back to Courses"
-                >
-                    <ArrowLeftIcon className="h-4 w-4 sm:h-6 sm:w-6 text-royal-gray hover:text-royal-blue transition-colors duration-75" />
-                </div>
+            <div className="mb-4 sm:mb-6">
+                <PageHeader
+                    icon={<span className="text-2xl sm:text-4xl">{getIconForGroup(courseGroup.icon)}</span>}
+                    title={courseGroup.title}
+                    description={courseGroup.description}
+                    right={<BackButton to="/courses" iconOnly title="Back to Courses" />}
+                />
             </div>
 
             {/* Courses Grid */}

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { ArrowLeftIcon, EyeOffIcon, CheckCircleIcon, PlayIcon, ClockIcon, DownloadIcon, FileIcon, ExternalLinkIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { BackButton } from "@/components/ui/BackButton";
 import { courseApi } from "@/lib/api";
 import { sanitizeHtml } from "@/lib/htmlSanitizer";
 import { useAuth } from "@/context/AuthContext";
@@ -237,9 +238,7 @@ export function CourseDetailSection() {
       <div className="flex-1 p-2 sm:p-4 animate-in fade-in duration-100">
         <div className="text-center py-4 sm:py-8">
           <p className="text-red-500 mb-4">{error}</p>
-          <Button onClick={() => navigate('/courses')} variant="outline">
-            Back to Courses
-          </Button>
+          <BackButton to="/courses">Back to Courses</BackButton>
         </div>
       </div>
     );
@@ -251,9 +250,7 @@ export function CourseDetailSection() {
         <div className="text-center py-4 sm:py-8">
           <h2 className="text-lg sm:text-xl font-semibold text-royal-dark-gray mb-2">Course Not Found</h2>
           <p className="text-sm sm:text-base text-royal-gray mb-3 sm:mb-4">The requested course could not be found.</p>
-          <Button onClick={() => navigate('/courses')} variant="outline" className="text-xs sm:text-sm">
-            Back to Courses
-          </Button>
+          <BackButton to="/courses">Back to Courses</BackButton>
         </div>
       </div>
     );
@@ -268,9 +265,9 @@ export function CourseDetailSection() {
           <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📚</div>
           <h3 className="text-lg sm:text-xl font-semibold text-royal-dark-gray mb-2">No Lectures Available</h3>
           <p className="text-sm sm:text-base text-royal-gray mb-3 sm:mb-4">This course doesn't have any lectures yet.</p>
-          <Button onClick={() => navigate(`/course-groups/${typeof course.courseGroup === 'object' ? course.courseGroup._id : course.courseGroup}`)} variant="outline" className="text-xs sm:text-sm">
+          <BackButton to={`/course-groups/${typeof course.courseGroup === 'object' ? course.courseGroup._id : course.courseGroup}`}>
             Back to Course Group
-          </Button>
+          </BackButton>
         </div>
       </div>
     );
@@ -499,13 +496,11 @@ export function CourseDetailSection() {
                 </p>
               </div>
             </div>
-            <div
-              className="cursor-pointer p-2 sm:p-2.5 rounded-lg hover:bg-gray-100 transition-all duration-200 hover:scale-105 flex-shrink-0 group"
+            <BackButton
               onClick={() => navigate(`/course-groups/${typeof course.courseGroup === 'object' ? course.courseGroup._id : course.courseGroup}`)}
+              iconOnly
               title="Back to Course Group"
-            >
-              <ArrowLeftIcon className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600 group-hover:text-primary transition-colors duration-200" />
-            </div>
+            />
           </div>
         </div>
         <div className="flex-1 flex min-h-0">
@@ -516,13 +511,7 @@ export function CourseDetailSection() {
               <div ref={mobileContentScrollRef} className="flex-1 flex flex-col w-full overflow-y-auto">
                 {/* Back Button and Mobile Fullscreen - Integrated */}
                 <div className="mb-6 flex justify-between items-center">
-                  <div
-                    className="inline-flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:text-primary cursor-pointer transition-all duration-200 hover:bg-gray-100 rounded-lg font-medium"
-                    onClick={handleBackToList}
-                  >
-                    <ArrowLeftIcon className="h-4 w-4" />
-                    <span className="text-sm font-medium">Back to List</span>
-                  </div>
+                  <BackButton onClick={handleBackToList}>Back to List</BackButton>
                 </div>
 
                 {/* Content Area - Unified Panel */}
@@ -639,13 +628,9 @@ export function CourseDetailSection() {
               <div className="w-full">
                 {/* Back Button */}
                 <div className="mb-6">
-                  <div
-                    className="inline-flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:text-primary cursor-pointer transition-all duration-200 hover:bg-gray-100 rounded-lg font-medium"
-                    onClick={() => navigate('/courses', { state: { fromDetail: true } })}
-                  >
-                    <ArrowLeftIcon className="h-4 w-4" />
-                    <span className="text-sm font-medium">Back to Courses</span>
-                  </div>
+                  <BackButton onClick={() => navigate('/courses', { state: { fromDetail: true } })}>
+                    Back to Courses
+                  </BackButton>
                 </div>
 
                 <div className="mb-6">

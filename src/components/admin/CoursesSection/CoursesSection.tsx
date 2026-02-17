@@ -255,7 +255,7 @@ export function CoursesSection() {
 
   return (
     <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-      <div className="mb-2 sm:mb-3 min-w-0">
+      <div className="hidden lg:block mb-2 sm:mb-3 min-w-0">
         <PageHeader
           icon={<GraduationCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray" />}
           title="Course Groups"

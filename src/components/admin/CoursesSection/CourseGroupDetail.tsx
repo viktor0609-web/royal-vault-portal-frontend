@@ -268,10 +268,12 @@ export function CourseGroupDetail() {
     if (error || !courseGroup) {
         return (
             <div className="flex-1 p-4">
-                <PageHeader
-                    back={{ to: '/admin/courses', label: 'Back to Courses' }}
-                    title="Error"
-                />
+                <div className="hidden lg:block">
+                    <PageHeader
+                        back={{ to: '/admin/courses', label: 'Back to Courses' }}
+                        title="Error"
+                    />
+                </div>
                 <div className="text-center py-8 text-red-500 mt-4">{error || 'Course group not found'}</div>
             </div>
         );
@@ -279,7 +281,7 @@ export function CourseGroupDetail() {
 
     return (
         <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-            <div className="sticky top-[41px] z-30 mb-4 sm:mb-6 min-w-0">
+            <div className="hidden lg:block sticky top-[41px] z-30 mb-4 sm:mb-6 min-w-0">
                 <PageHeader
                     icon={<span className="text-2xl sm:text-4xl">🎓</span>}
                     title={courseGroup.title}

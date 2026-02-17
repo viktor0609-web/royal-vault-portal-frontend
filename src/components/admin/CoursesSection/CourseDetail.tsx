@@ -266,10 +266,12 @@ export function CourseDetail() {
   if (error || !course) {
     return (
       <div className="flex-1 p-4">
-        <PageHeader
-          back={groupId ? { to: `/admin/courses/groups/${groupId}`, label: "Back to Course Group" } : undefined}
-          title="Error"
-        />
+        <div className="hidden lg:block">
+          <PageHeader
+            back={groupId ? { to: `/admin/courses/groups/${groupId}`, label: "Back to Course Group" } : undefined}
+            title="Error"
+          />
+        </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 mt-4">
           <h3 className="text-red-800 font-medium mb-2">Error Loading Course</h3>
           <p className="text-red-600">{error || 'Course not found'}</p>
@@ -280,7 +282,7 @@ export function CourseDetail() {
 
   return (
     <div className="flex-1 p-2 sm:p-4 flex flex-col animate-in fade-in duration-100 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-      <div className="sticky top-[41px] z-30 mb-3 sm:mb-6 min-w-0">
+      <div className="hidden lg:block sticky top-[41px] z-30 mb-3 sm:mb-6 min-w-0">
         <PageHeader
           icon={<span className="text-2xl sm:text-4xl">📚</span>}
           title={course.title}

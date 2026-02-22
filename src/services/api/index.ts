@@ -54,12 +54,6 @@ export const courseApi = {
   uploadImage: uploadService.uploadImage,
   uploadFile: uploadService.uploadFile,
   saveYouTubeVideo: courseService.saveYouTubeVideo,
-  getAllCategories: courseService.getAllCategories,
-  getCourseGroupsByCategory: courseService.getCourseGroupsByCategory,
-  createCategory: courseService.createCategory,
-  updateCategory: courseService.updateCategory,
-  deleteCategory: courseService.deleteCategory,
-  reorderCategories: courseService.reorderCategories,
 };
 
 export const webinarApi = {

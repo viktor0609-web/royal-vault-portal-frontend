@@ -20,12 +20,10 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
     const [formData, setFormData] = useState({
         title: "",
         description: "",
-        category: "" as string,
         displayOnPublicPage: true,
         audienceType: "all" as "all" | "hubspotLists",
         hubSpotListIds: [] as string[]
     });
-    const [categories, setCategories] = useState<{ _id: string; title: string }[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [hubSpotLists, setHubSpotLists] = useState<any[]>([]);
@@ -36,13 +34,10 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
     const { toast } = useToast();
     const searchRef = useRef<HTMLDivElement>(null);
 
-    // Fetch HubSpot lists and categories when modal opens
+    // Fetch HubSpot lists when modal opens
     useEffect(() => {
         if (isOpen) {
             fetchHubSpotLists();
-            courseApi.getAllCategories().then((res) => {
-                setCategories(res.data.data || []);
-            }).catch(() => setCategories([]));
         }
     }, [isOpen]);
 
@@ -134,11 +129,9 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
                 ? "hubspotLists"
                 : "all";
 
-            const catId = editingData.category?._id ?? editingData.category ?? "";
             setFormData({
                 title: editingGroup.title || "",
                 description: editingGroup.description || "",
-                category: catId || "",
                 displayOnPublicPage: editingData.displayOnPublicPage !== false,
                 audienceType: audienceType,
                 hubSpotListIds: editingData.hubSpotListIds || []
@@ -147,7 +140,6 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
             setFormData({
                 title: "",
                 description: "",
-                category: "",
                 displayOnPublicPage: true,
                 audienceType: "all",
                 hubSpotListIds: []
@@ -165,7 +157,6 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
             const submitData: any = {
                 title: formData.title,
                 description: formData.description,
-                category: formData.category || null,
                 displayOnPublicPage: formData.displayOnPublicPage,
             };
 
@@ -242,27 +233,6 @@ export function GroupModal({ isOpen, closeDialog, editingGroup, onGroupSaved }: 
                             rows={3}
                             required
                         />
-                    </div>
-
-                    <div>
-                        <Label htmlFor="category" className="text-royal-dark-gray font-medium">
-                            Section (category)
-                        </Label>
-                        <Select
-                            value={formData.category || "none"}
-                            onValueChange={(v) => setFormData(prev => ({ ...prev, category: v === "none" ? "" : v }))}
-                        >
-                            <SelectTrigger id="category" className="mt-1">
-                                <SelectValue placeholder="No section" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="none">No section</SelectItem>
-                                {categories.map((c) => (
-                                    <SelectItem key={c._id} value={c._id}>{c.title}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <p className="text-xs text-royal-gray mt-1">Group this course under a section on the main Courses page.</p>
                     </div>
 
                     {/* Display on Public Pages */}

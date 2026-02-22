@@ -10,7 +10,6 @@ import { CoursesSection } from "@/components/user/CoursesSection";
 import { DealsSection } from "@/components/user/DealsSection";
 import { CourseDetailSection } from "@/components/user/CourseDetailSection";
 import { CourseGroupDetailSection } from "@/components/user/CourseGroupDetailSection";
-import { CourseSectionPage } from "@/components/user/CourseSectionPage";
 import { ProfileSection } from "@/components/user/ProfileSection";
 import { OrdersSection } from "@/components/user/OrdersSection";
 import { WebinarRegistrationPage } from "@/components/user/WebinarRegistrationPage";
@@ -85,14 +84,6 @@ export function AppRoutes() {
         element={
           <RoyalVaultLayout>
             <CoursesSection />
-          </RoyalVaultLayout>
-        }
-      />
-      <Route
-        path="/courses/section/:categoryId"
-        element={
-          <RoyalVaultLayout>
-            <CourseSectionPage />
           </RoyalVaultLayout>
         }
       />

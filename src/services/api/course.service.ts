@@ -1,7 +1,7 @@
 // Course API service
 import api from "./client";
 import { API_ENDPOINTS } from "@/constants";
-import type { CourseGroup, Course, Lecture, CourseCategory, FieldSelection, PaginationResponse, DeleteResponse } from "@/types";
+import type { CourseGroup, Course, Lecture, FieldSelection, PaginationResponse, DeleteResponse } from "@/types";
 
 export const courseService = {
   // Course Groups with field selection, pagination, and filtering
@@ -50,30 +50,6 @@ export const courseService = {
 
   deleteCourseGroup: (groupId: string) =>
     api.delete<DeleteResponse>(`${API_ENDPOINTS.COURSES.GROUPS}/${groupId}`),
-
-  // Course categories (sections on main course page)
-  getAllCategories: () =>
-    api.get<{ data: CourseCategory[] }>(API_ENDPOINTS.COURSES.CATEGORIES),
-
-  getCourseGroupsByCategory: (categoryId: string, publicOnly = true) => {
-    const params = new URLSearchParams();
-    if (publicOnly) params.append("publicOnly", "true");
-    return api.get<{ data: CourseGroup[] }>(
-      `${API_ENDPOINTS.COURSES.CATEGORIES}/${categoryId}/groups?${params.toString()}`
-    );
-  },
-
-  createCategory: (data: Partial<CourseCategory>) =>
-    api.post<CourseCategory>(API_ENDPOINTS.COURSES.CATEGORIES, data),
-
-  updateCategory: (categoryId: string, data: Partial<CourseCategory>) =>
-    api.put<CourseCategory>(`${API_ENDPOINTS.COURSES.CATEGORIES}/${categoryId}`, data),
-
-  deleteCategory: (categoryId: string) =>
-    api.delete<DeleteResponse>(`${API_ENDPOINTS.COURSES.CATEGORIES}/${categoryId}`),
-
-  reorderCategories: (categoryIds: string[]) =>
-    api.put<{ message: string }>(`${API_ENDPOINTS.COURSES.CATEGORIES}/reorder`, { categoryIds }),
 
   // Courses with field selection, pagination, and filtering
   getAllCourses: (options?: {

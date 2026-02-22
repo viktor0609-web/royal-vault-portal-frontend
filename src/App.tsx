@@ -10,6 +10,7 @@ import { ResetPassword } from "@/components/auth/ResetPasswordModal";
 import { AuthDialogProvider } from "@/context/AuthDialogContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { DailyMeetingProvider } from "@/context/DailyMeetingContext";
+
 import { AppRoutes } from "@/routes";
 
 const queryClient = new QueryClient();

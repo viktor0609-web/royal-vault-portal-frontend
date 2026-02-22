@@ -65,11 +65,21 @@ export type VerificationStatus = "verified" | "unverified";
 export type DisplayOnPublicPage = boolean;
 
 // ==================== Course Types ====================
+export interface CourseCategory {
+  _id: string;
+  title: string;
+  description?: string;
+  sortOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface CourseGroup {
   _id: string;
   title: string;
   description: string;
   sortOrder?: number;
+  category?: string | CourseCategory | null;
   courses?: Course[];
   createdBy?: { _id: string; name: string; email: string } | string;
   createdAt?: string;

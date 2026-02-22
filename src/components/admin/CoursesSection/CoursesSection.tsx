@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { ScrollableTable, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GraduationCapIcon, Trash2, Edit, PlusIcon, ChevronUp, ChevronDown } from "lucide-react";
+import { GraduationCapIcon, Trash2, Edit, PlusIcon, ChevronUp, ChevronDown, FolderTree } from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { DragHandle, DISPLAY_ORDER_HEADER, DropIndicatorRow } from "./DragHandle";
 import { GroupModal } from "./GroupModal";
+import { CategoryModal } from "./CategoryModal";
 import { courseApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -41,6 +42,7 @@ export function CoursesSection() {
   const [editingGroup, setEditingGroup] = useState<CourseGroup | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
+  const [categoriesModalOpen, setCategoriesModalOpen] = useState(false);
   const [draggedGroupIndex, setDraggedGroupIndex] = useState<number | null>(null);
   /** Index before which to show the drop line (0..length). null = no indicator. */
   const [dropIndicatorBeforeIndex, setDropIndicatorBeforeIndex] = useState<number | null>(null);
@@ -243,6 +245,17 @@ export function CoursesSection() {
         <PageHeader
           icon={<GraduationCapIcon className="h-6 w-6 sm:h-8 sm:w-8 text-royal-gray" />}
           title="Course Groups"
+          right={
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCategoriesModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <FolderTree className="h-4 w-4" />
+              Categories
+            </Button>
+          }
         />
       </div>
 
@@ -261,9 +274,9 @@ export function CoursesSection() {
                 </TableHead>
                 <TableHead className="w-48 min-w-48 px-2">Title</TableHead>
                 <TableHead className="w-64 min-w-64 hidden xl:table-cell py-2 px-2">Description</TableHead>
+                <TableHead className="w-28 min-w-28 hidden xl:table-cell py-2 px-2">Category</TableHead>
                 <TableHead className="w-32 min-w-32 py-2 px-2">Courses</TableHead>
                 <TableHead className="w-32 min-w-32 py-2 px-2">Display</TableHead>
-                <TableHead className="w-32 min-w-32 hidden xl:table-cell py-2 px-2">Created By</TableHead>
                 <TableHead className="w-32 min-w-32 hidden 2xl:table-cell py-2 px-2">Created At</TableHead>
                 <TableHead className="w-32 min-w-32 text-right py-2 px-2">
                   <Button className="w-20 sm:w-24 text-xs sm:text-sm" onClick={handleAddCourseGroup}>
@@ -308,6 +321,9 @@ export function CoursesSection() {
                     </TableCell>
                     <TableCell className="font-medium">{group.title}</TableCell>
                     <TableCell className="max-w-xs truncate hidden xl:table-cell">{group.description}</TableCell>
+                    <TableCell className="hidden xl:table-cell text-royal-gray">
+                      {group.category && typeof group.category === "object" ? group.category.title : "—"}
+                    </TableCell>
                     <TableCell>{group.courses?.length || 0}</TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2" onClick={(e) => e.stopPropagation()}>
@@ -320,9 +336,6 @@ export function CoursesSection() {
                           {group.displayOnPublicPage ? 'Public' : 'Private'}
                         </span>
                       </div>
-                    </TableCell>
-                    <TableCell className="hidden xl:table-cell">
-                      {typeof group.createdBy === 'object' && group.createdBy ? group.createdBy.name : 'N/A'}
                     </TableCell>
                     <TableCell className="hidden 2xl:table-cell">
                       {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}
@@ -358,8 +371,17 @@ export function CoursesSection() {
 
       {/* Mobile/Tablet Card View */}
       <div className="lg:hidden space-y-3 sm:space-y-4 min-w-0 max-w-full overflow-hidden" style={{ width: '100%', maxWidth: '100vw' }}>
-        {/* Add Button for Mobile */}
-        <div className="flex justify-end">
+        {/* Actions for Mobile */}
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCategoriesModalOpen(true)}
+            className="flex items-center gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+          >
+            <FolderTree className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span>Categories</span>
+          </Button>
           <Button onClick={handleAddCourseGroup} className="flex items-center gap-2 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
             <PlusIcon className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>Create</span>
@@ -379,6 +401,11 @@ export function CoursesSection() {
                 <div className="flex-1 min-w-0 mr-2">
                   <h3 className="font-semibold text-royal-dark-gray text-sm sm:text-base mb-1 line-clamp-2">{group.title}</h3>
                   <p className="text-royal-gray text-xs sm:text-sm line-clamp-2">{group.description}</p>
+                  {group.category && typeof group.category === "object" && group.category.title && (
+                    <span className="inline-block mt-1 text-xs text-royal-gray bg-royal-light-gray/50 px-2 py-0.5 rounded">
+                      {group.category.title}
+                    </span>
+                  )}
                 </div>
                 <div className="flex gap-1 ml-2 flex-shrink-0">
                   <Button
@@ -438,9 +465,6 @@ export function CoursesSection() {
                       {group.displayOnPublicPage ? 'Public' : 'Private'}
                     </span>
                   </div>
-                  <span className="hidden sm:inline truncate">
-                    {typeof group.createdBy === 'object' && group.createdBy ? group.createdBy.name : 'N/A'}
-                  </span>
                 </div>
                 <span className="text-xs flex-shrink-0">{group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}</span>
               </div>
@@ -454,6 +478,12 @@ export function CoursesSection() {
         closeDialog={handleCloseModal}
         editingGroup={editingGroup}
         onGroupSaved={handleGroupSaved}
+      />
+
+      <CategoryModal
+        isOpen={categoriesModalOpen}
+        onClose={() => setCategoriesModalOpen(false)}
+        onSaved={fetchCourseGroups}
       />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

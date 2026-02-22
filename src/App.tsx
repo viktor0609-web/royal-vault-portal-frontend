@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
-
 import { Login } from "@/components/auth/LoginModal";
 import { SignUp } from "@/components/auth/SignUpModal";
 import { ResetPassword } from "@/components/auth/ResetPasswordModal";
